@@ -63,18 +63,19 @@ canvas{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); dis
   .btn.fire{width:80px}
 }
 
-.overlay{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px)); background:rgba(246,247,251,.86); z-index:5}
+.overlay{position:fixed; top:0; right:0; bottom:0; left:0; inset:0; display:flex; align-items:center; justify-content:center; padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px)); background:rgba(246,247,251,.86); z-index:5}
 [hidden]{display:none!important}
+@supports not (inset:0){ .hud .stats>*+*{margin-left:10px} .pad>*+*{margin-left:10px} .side>*{margin:4px 6px} .row>*{margin:4px} .mapwrap>*+*{margin-top:10px} .save>*+*{margin-left:8px} .levels>*{margin-bottom:8px} .styleSw{display:flex} }
 .card{background:#fff; border:3px solid var(--pencil); border-radius:16px 22px 14px 20px; padding:16px 20px; width:min(620px,100%); max-height:100%; overflow:auto; box-sizing:border-box; text-align:center; box-shadow:5px 6px 0 rgba(45,48,64,.18)}
 .card h2{margin:0 0 2px; font-size:34px; line-height:1.05; text-wrap:balance}
 .card p{margin:4px 0; font-size:18px; line-height:1.25}
 .mapcard{width:min(1040px,100%); padding:12px 16px}
 .maptitle{font-size:30px!important; margin:0 0 6px!important}
 .mapwrap{display:flex; flex-direction:column; gap:10px; align-items:center}
-.map{position:relative; width:min(100%, calc((100dvh - 230px) * 1.79)); min-width:min(100%,300px); aspect-ratio:1400/782; flex:none}
+.map{position:relative; width:min(100%, calc((100vh - 230px) * 1.79)); width:min(100%, calc((100dvh - 230px) * 1.79)); min-width:min(100%,300px); aspect-ratio:1400/782; flex:none}
 .map img{display:block; width:100%; height:100%; border:2.5px solid var(--pencil); border-radius:6px 9px 5px 8px; box-sizing:border-box; background:#fbfaf4}
-.map svg{position:absolute; inset:0; width:100%; height:100%; pointer-events:none}
-.node{position:absolute; transform:translate(-50%,-50%); width:clamp(30px,4vw,44px); height:clamp(30px,4vw,44px); border-radius:50%; border:2.5px solid var(--pencil); background:#fff; color:var(--pencil); font:700 clamp(16px,2.2vw,22px)/1 var(--hand); display:grid; place-items:center; cursor:pointer; padding:0; box-shadow:2px 3px 0 rgba(45,48,64,.2)}
+.map svg{position:absolute; top:0; left:0; inset:0; width:100%; height:100%; pointer-events:none}
+.node{position:absolute; transform:translate(-50%,-50%); width:36px; height:36px; font:700 18px/1 var(--hand); width:clamp(30px,4vw,44px); height:clamp(30px,4vw,44px); border-radius:50%; border:2.5px solid var(--pencil); background:#fff; color:var(--pencil); font:700 clamp(16px,2.2vw,22px)/1 var(--hand); display:grid; place-items:center; cursor:pointer; padding:0; box-shadow:2px 3px 0 rgba(45,48,64,.2)}
 .node.done{background:var(--green); color:#fff}
 .node.open{background:var(--yellow); animation:pulse 1.4s ease-in-out infinite}
 .node.locked{background:#e8e9ef; color:#9aa0b5; border-color:#9aa0b5; box-shadow:none}
@@ -102,7 +103,7 @@ canvas{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); dis
   .maptitle{display:none}
   .mapcard{padding:8px 12px}
   .mapwrap{flex-direction:row; align-items:flex-start}
-  .map{width:min(calc(100% - 230px), calc((100dvh - 40px) * 1.79))}
+  .map{width:min(calc(100% - 230px), calc((100vh - 40px) * 1.79)); width:min(calc(100% - 230px), calc((100dvh - 40px) * 1.79))}
   .side{flex-direction:column; flex-wrap:nowrap; width:220px; flex:none}
   .side .cont,.mapinfo,.side > #openBoard{flex:none}
   .mapinfo{grid-template-columns:auto 1fr; grid-template-areas:"step name" "sub sub" "state state" "btn btn"}
@@ -641,9 +642,10 @@ function burst(x,y,c,n){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=1+Math
 const keys={left:false,right:false,jump:false,fire:false}; let prevJ=false;
 function bindBtn(id,k){
   const b=$(id);
-  const on=e=>{e.preventDefault(); keys[k]=true; b.classList.add('on'); try{b.setPointerCapture(e.pointerId)}catch(_){}};
+  const on=e=>{ if(e.cancelable) e.preventDefault(); keys[k]=true; b.classList.add('on'); if(e.pointerId!=null){ try{b.setPointerCapture(e.pointerId)}catch(_){} } };
   const off=()=>{keys[k]=false; b.classList.remove('on');};
-  b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off); b.addEventListener('pointercancel',off); b.addEventListener('lostpointercapture',off);
+  if(window.PointerEvent){ b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off); b.addEventListener('pointercancel',off); b.addEventListener('lostpointercapture',off); }
+  else { b.addEventListener('touchstart',on,{passive:false}); b.addEventListener('touchend',off); b.addEventListener('touchcancel',off); b.addEventListener('mousedown',on); b.addEventListener('mouseup',off); b.addEventListener('mouseleave',off); }
   b.addEventListener('contextmenu',e=>e.preventDefault());
 }
 bindBtn('bL','left'); bindBtn('bR','right'); bindBtn('bJ','jump'); bindBtn('bF','fire');
@@ -920,7 +922,7 @@ function showMap(anim){
   $('menu').hidden=false;
   if(anim!=null&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
     const seg=$('seg'+(anim+1)), tom=$('mapTom'); const gl=document.querySelector(`.glow[data-k="${anim}"]`);
-    if(gl){ gl.animate([{opacity:0},{opacity:1},{opacity:.6},{opacity:1}],{duration:1400}); }
+    if(gl&&gl.animate){ gl.animate([{opacity:0},{opacity:1},{opacity:.6},{opacity:1}],{duration:1400}); }
     if(seg&&tom){ const L=seg.getTotalLength(), t0=performance.now(), end=tom.getAttribute('transform');
       const stepA=t=>{ const u=Math.min(1,(t-t0)/1600), pt=seg.getPointAtLength(L*u); tom.setAttribute('transform',`translate(${pt.x-30} ${pt.y+10})`); if(u<1) requestAnimationFrame(stepA); else tom.setAttribute('transform',end); };
       requestAnimationFrame(stepA); }
