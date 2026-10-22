@@ -1004,7 +1004,7 @@ body.blocks .go{font-size:19px} body.blocks .styleSw button{font-size:15px} body
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
-    <p class="note">Versione 8</p>
+    <p class="note">Versione 9</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
@@ -2612,11 +2612,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             k = _step4$value[1];
           var r = $(id).getBoundingClientRect();
           if (!r.width) continue;
-          if (t.clientY < r.top - 90 || t.clientY > r.bottom + 90) continue;
+          if (t.clientY < r.top - 90 || t.clientY > r.bottom + 200) continue;
           if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
           var cx = (r.left + r.right) / 2,
             cy = (r.top + r.bottom) / 2,
-            dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .5;
+            dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .3;
           if (dd < bd) {
             bd = dd;
             best = k;
