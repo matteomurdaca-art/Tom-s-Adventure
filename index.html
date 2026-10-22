@@ -857,6 +857,8 @@ canvas{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); dis
 
 .overlay{position:fixed; top:0; right:0; bottom:0; left:0; inset:0; display:flex; align-items:center; justify-content:center; padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px)); background:rgba(246,247,251,.86); z-index:5}
 [hidden]{display:none!important}
+/* tablet in orizzontale: pulsanti sollevati dal bordo basso, dove iOS riserva i gesti di sistema */
+@media (orientation:landscape) and (min-height:561px){ .app{padding-bottom:64px} }
 @supports not (inset:0){ .hud .stats>*+*{margin-left:10px} .pad>*+*{margin-left:10px} .side>*{margin:4px 6px} .row>*{margin:4px} .mapwrap>*+*{margin-top:10px} .save>*+*{margin-left:8px} .levels>*{margin-bottom:8px} .styleSw{display:flex} }
 .card{background:#fff; border:3px solid var(--pencil); border-radius:16px 22px 14px 20px; padding:16px 20px; width:min(620px,100%); max-height:100%; overflow:auto; box-sizing:border-box; text-align:center; box-shadow:5px 6px 0 rgba(45,48,64,.18)}
 .card h2{margin:0 0 2px; font-size:34px; line-height:1.05; text-wrap:balance}
@@ -1004,7 +1006,7 @@ body.blocks .go{font-size:19px} body.blocks .styleSw button{font-size:15px} body
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
-    <p class="note">Versione 9</p>
+    <p class="note">Versione 10</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
@@ -2612,7 +2614,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             k = _step4$value[1];
           var r = $(id).getBoundingClientRect();
           if (!r.width) continue;
-          if (t.clientY < r.top - 90 || t.clientY > r.bottom + 200) continue;
+          if (t.clientY < r.top - 45 || t.clientY > r.bottom + 200) continue;
           if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
           var cx = (r.left + r.right) / 2,
             cy = (r.top + r.bottom) / 2,
