@@ -799,7 +799,7 @@ try {
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-180.png">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}html,body{overscroll-behavior:none}body{margin:0;font:14px system-ui,sans-serif;touch-action:manipulation}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}html,body{overscroll-behavior:none;position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden}body{box-sizing:border-box}body{margin:0;font:14px system-ui,sans-serif;touch-action:manipulation}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
 <title>L'avventura di Tom</title>
@@ -1004,7 +1004,7 @@ body.blocks .go{font-size:19px} body.blocks .styleSw button{font-size:15px} body
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
-    <p class="note">Versione 6</p>
+    <p class="note">Versione 7</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
@@ -1097,8 +1097,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   } catch (e) {}
   addEventListener('resize', resize);
   addEventListener('orientationchange', function () {
-    setTimeout(resize, 150);
-    setTimeout(resize, 500);
+    window.scrollTo(0, 0);
+    setTimeout(function () {
+      window.scrollTo(0, 0);
+      resize();
+    }, 150);
+    setTimeout(function () {
+      window.scrollTo(0, 0);
+      resize();
+    }, 500);
   });
   if (document.fonts) document.fonts.ready.then(resize);
   function mkPat(draw) {
@@ -2633,7 +2640,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (e.type === 'touchstart') for (var _i2 = 0; _i2 < e.changedTouches.length; _i2++) {
       var _t = e.changedTouches[_i2];
       tdot(_t.clientX, _t.clientY, hit, playing);
+      tinfo(_t);
     }
+  }
+  function tinfo(t) {
+    try {
+      var b = document.getElementById('tinfo');
+      if (!b) {
+        b = document.createElement('div');
+        b.id = 'tinfo';
+        b.style.cssText = 'position:fixed;z-index:99;pointer-events:none;left:50%;top:4px;transform:translateX(-50%);background:rgba(29,31,43,.8);color:#fff;font:12px monospace;padding:2px 8px;border-radius:4px';
+        document.body.appendChild(b);
+      }
+      var r = $('bR').getBoundingClientRect();
+      b.textContent = 'tocco ' + Math.round(t.clientX) + ',' + Math.round(t.clientY) + ' | pag ' + Math.round(t.pageX) + ',' + Math.round(t.pageY) + ' | scroll ' + Math.round(window.pageXOffset) + ',' + Math.round(window.pageYOffset) + ' | schermo ' + innerWidth + 'x' + innerHeight + ' | ▶ ' + Math.round(r.left) + ',' + Math.round(r.top);
+    } catch (_) {}
   }
   function tdot(x, y, ok, playing) {
     try {
@@ -7763,6 +7784,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var lastSW = -1,
     lastSH = -1;
   function loop(t) {
+    if (window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
     var sw0 = stage.clientWidth,
       sh0 = stage.clientHeight;
     if (sw0 !== lastSW || sh0 !== lastSH) {
