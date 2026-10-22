@@ -833,7 +833,8 @@ body{
 .small{font:700 16px var(--hand); background:#fff; border:2px solid var(--pencil); border-radius:10px 12px 9px 11px; padding:0 9px; color:var(--pencil); cursor:pointer; line-height:1.5}
 .stage{grid-area:stage; position:relative; min-height:0; min-width:0}
 canvas{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:block; background:var(--paper); box-shadow:0 0 0 2.5px var(--pencil); border-radius:4px; touch-action:none}
-.pad{display:flex; gap:10px; align-items:flex-end}
+.pad{display:flex; gap:10px; align-items:flex-end; position:relative; z-index:3}
+.stage{overflow:hidden}
 .padL{grid-area:left} .padR{grid-area:right; justify-self:end}
 .btn{width:70px; height:60px; font:700 30px var(--hand); line-height:1; border:3px solid var(--pencil); border-radius:14px 18px 12px 16px; background:#fff; color:var(--pencil); touch-action:none; -webkit-tap-highlight-color:transparent; cursor:pointer; padding:0}
 .btn.jump{width:104px; background:#e4efff; font-size:24px}
@@ -1094,6 +1095,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     new ResizeObserver(resize).observe(stage);
   } catch (e) {}
   addEventListener('resize', resize);
+  addEventListener('orientationchange', function () {
+    setTimeout(resize, 150);
+    setTimeout(resize, 500);
+  });
   if (document.fonts) document.fonts.ready.then(resize);
   function mkPat(draw) {
     var c = document.createElement('canvas');
@@ -7691,7 +7696,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
   }
   var last = 0;
+  var lastSW = -1,
+    lastSH = -1;
   function loop(t) {
+    var sw0 = stage.clientWidth,
+      sh0 = stage.clientHeight;
+    if (sw0 !== lastSW || sh0 !== lastSH) {
+      lastSW = sw0;
+      lastSH = sh0;
+      resize();
+    }
     var dt = last ? t - last : 16.67;
     last = t;
     var f = Math.min(dt / 16.67, 2.5);
