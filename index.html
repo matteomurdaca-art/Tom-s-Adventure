@@ -1004,6 +1004,7 @@ body.blocks .go{font-size:19px} body.blocks .styleSw button{font-size:15px} body
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
+    <p class="note">Versione 6</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
@@ -2629,6 +2630,20 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _iterator5.f();
     }
     if (hit && e.cancelable) e.preventDefault();
+    if (e.type === 'touchstart') for (var _i2 = 0; _i2 < e.changedTouches.length; _i2++) {
+      var _t = e.changedTouches[_i2];
+      tdot(_t.clientX, _t.clientY, hit, playing);
+    }
+  }
+  function tdot(x, y, ok, playing) {
+    try {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;z-index:99;pointer-events:none;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid #fff;left:' + x + 'px;top:' + y + 'px;background:' + (ok ? '#4aa35a' : playing ? '#e0373f' : '#9aa0b5');
+      document.body.appendChild(d);
+      setTimeout(function () {
+        if (d.parentNode) d.parentNode.removeChild(d);
+      }, 600);
+    } catch (_) {}
   }
   ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (ev) {
     return document.addEventListener(ev, touchKeys, {
@@ -3235,8 +3250,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             a = Math.atan2(dy, dx),
             sp = LV.boss.sp,
             spr = LV.boss.spread;
-          for (var _i2 = 0, _arr = [-spr / 2, spr / 2]; _i2 < _arr.length; _i2++) {
-            var da = _arr[_i2];
+          for (var _i3 = 0, _arr = [-spr / 2, spr / 2]; _i3 < _arr.length; _i3++) {
+            var da = _arr[_i3];
             W.shots.push({
               kind: b.kind,
               x: b.x,
@@ -3815,7 +3830,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _saveScore() {
     _saveScore = _asyncToGenerator(_regenerator().m(function _callee2(entry) {
-      var db, ref, a, _t, _t2;
+      var db, ref, a, _t2, _t3;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.p = _context2.n) {
           case 0:
@@ -3839,7 +3854,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             });
           case 4:
             _context2.p = 4;
-            _t = _context2.v;
+            _t2 = _context2.v;
           case 5:
             _context2.p = 5;
             a = localScores();
@@ -3853,7 +3868,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             });
           case 6:
             _context2.p = 6;
-            _t2 = _context2.v;
+            _t3 = _context2.v;
             return _context2.a(2, {
               ok: false
             });
@@ -3867,7 +3882,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _topScores() {
     _topScores = _asyncToGenerator(_regenerator().m(function _callee3(level) {
-      var db, q, _t3;
+      var db, q, _t4;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
@@ -3891,7 +3906,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }));
           case 4:
             _context3.p = 4;
-            _t3 = _context3.v;
+            _t4 = _context3.v;
           case 5:
             return _context3.a(2, localScores().filter(function (e) {
               return e.level === level;
@@ -3993,7 +4008,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _showBoard() {
     _showBoard = _asyncToGenerator(_regenerator().m(function _callee4(t) {
-      var lbl, _t4, _t5;
+      var lbl, _t5, _t6;
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.n) {
           case 0:
@@ -4004,12 +4019,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               return b.setAttribute('aria-selected', String(+b.dataset.t === t));
             });
             $('board').innerHTML = '<li class="empty">Carico...</li>';
-            _t4 = renderBoard;
-            _t5 = $('board');
+            _t5 = renderBoard;
+            _t6 = $('board');
             _context4.n = 1;
             return topScores(t);
           case 1:
-            _t4(_t5, _context4.v, null);
+            _t5(_t6, _context4.v, null);
           case 2:
             return _context4.a(2);
         }
@@ -4251,9 +4266,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     ctx.beginPath();
     ctx.moveTo(h.x, h.y + h.h);
     var n = Math.round(h.w / 12);
-    for (var _i3 = 0; _i3 < n; _i3++) {
-      ctx.lineTo(h.x + _i3 * 12 + 6, h.y - 2);
-      ctx.lineTo(h.x + _i3 * 12 + 12, h.y + h.h);
+    for (var _i4 = 0; _i4 < n; _i4++) {
+      ctx.lineTo(h.x + _i4 * 12 + 6, h.y - 2);
+      ctx.lineTo(h.x + _i4 * 12 + 12, h.y + h.h);
     }
     ctx.closePath();
     ctx.fill();
@@ -4418,8 +4433,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         ctx.moveTo(-15, -15);
         ctx.lineTo(15, -15);
         ctx.stroke();
-        for (var _i4 = 0, _arr2 = [-9, 9]; _i4 < _arr2.length; _i4++) {
-          var wx = _arr2[_i4];
+        for (var _i5 = 0, _arr2 = [-9, 9]; _i5 < _arr2.length; _i5++) {
+          var wx = _arr2[_i5];
           circle(wx, -4, 4.5, '#3b3f4f', 1.8);
           pen(1.2, '#c9ccd8');
           ctx.beginPath();
@@ -4454,8 +4469,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.moveTo(11, -31);
       ctx.lineTo(21, -29);
       ctx.stroke();
-      for (var _i5 = 0, _arr3 = [-12, 13]; _i5 < _arr3.length; _i5++) {
-        var _wx = _arr3[_i5];
+      for (var _i6 = 0, _arr3 = [-12, 13]; _i6 < _arr3.length; _i6++) {
+        var _wx = _arr3[_i6];
         circle(_wx, -3, 4, '#fff', 2);
         pen(1.4);
         ctx.beginPath();
@@ -4554,9 +4569,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     pen(1.8);
     ctx.beginPath();
-    for (var _i6 = -6; _i6 <= 6; _i6 += 3) {
-      ctx.moveTo(cx + _i6, top + 2);
-      ctx.lineTo(cx + _i6 * 1.3, top - 3 - Math.abs(_i6) % 2 * 2);
+    for (var _i7 = -6; _i7 <= 6; _i7 += 3) {
+      ctx.moveTo(cx + _i7, top + 2);
+      ctx.lineTo(cx + _i7 * 1.3, top - 3 - Math.abs(_i7) % 2 * 2);
     }
     ctx.stroke();
     ctx.fillStyle = PEN;
@@ -4604,11 +4619,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } else if (s.kind === 'crab') {
       pen(1.6, '#b82a31');
       ctx.beginPath();
-      for (var _i7 = -1; _i7 <= 1; _i7 += 2) for (var k = 0; k < 3; k++) {
+      for (var _i8 = -1; _i8 <= 1; _i8 += 2) for (var k = 0; k < 3; k++) {
         var w = Math.sin(tick * .4 + k) * 2;
-        ctx.moveTo(s.x + _i7 * 6, g - 6);
-        ctx.lineTo(s.x + _i7 * (12 + k * 3), g - 3 + w);
-        ctx.lineTo(s.x + _i7 * (14 + k * 3), g);
+        ctx.moveTo(s.x + _i8 * 6, g - 6);
+        ctx.lineTo(s.x + _i8 * (12 + k * 3), g - 3 + w);
+        ctx.lineTo(s.x + _i8 * (14 + k * 3), g);
       }
       ctx.stroke();
       ctx.fillStyle = RED;
@@ -4671,11 +4686,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } else {
       pen(1.6);
       ctx.beginPath();
-      for (var _i8 = -1; _i8 <= 1; _i8 += 2) for (var _k2 = 0; _k2 < 3; _k2++) {
+      for (var _i9 = -1; _i9 <= 1; _i9 += 2) for (var _k2 = 0; _k2 < 3; _k2++) {
         var _w = Math.sin(tick * .4 + _k2) * 2;
         ctx.moveTo(s.x, g - 6);
-        ctx.lineTo(s.x + _i8 * (8 + _k2 * 2), g - 11 + _k2 * 2 + _w);
-        ctx.lineTo(s.x + _i8 * (12 + _k2 * 2), g);
+        ctx.lineTo(s.x + _i9 * (8 + _k2 * 2), g - 11 + _k2 * 2 + _w);
+        ctx.lineTo(s.x + _i9 * (12 + _k2 * 2), g);
       }
       ctx.stroke();
       circle(s.x, g - 6, 6.5, PEN, 1.4);
@@ -4904,9 +4919,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       pen(1.3);
       ctx.beginPath();
       ctx.moveTo(8, 3);
-      for (var _i9 = 0; _i9 < 4; _i9++) {
-        ctx.lineTo(10 + _i9 * 2, 6);
-        ctx.lineTo(11 + _i9 * 2, 3);
+      for (var _i0 = 0; _i0 < 4; _i0++) {
+        ctx.lineTo(10 + _i0 * 2, 6);
+        ctx.lineTo(11 + _i0 * 2, 3);
       }
       ctx.stroke();
       ctx.fillStyle = PEN;
@@ -5100,7 +5115,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       pen(2);
       ctx.beginPath();
       ctx.moveTo(b.x - 12, b.y + 10);
-      for (var _i0 = 0; _i0 < 6; _i0++) ctx.lineTo(b.x - 10 + _i0 * 4, b.y + 14 + (_i0 % 2 ? -3 : 3));
+      for (var _i1 = 0; _i1 < 6; _i1++) ctx.lineTo(b.x - 10 + _i1 * 4, b.y + 14 + (_i1 % 2 ? -3 : 3));
       ctx.lineTo(b.x + 12, b.y + 10);
       ctx.stroke();
     } else if (b.kind === 'ufo') {
@@ -5129,14 +5144,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.fill();
       pen(2.6);
       ctx.stroke();
-      for (var _i1 = -2; _i1 <= 2; _i1++) circle(b.x + _i1 * 12, b.y + 5, 2.6, (Math.floor(tick / 10) + _i1) % 2 ? YELLOW : RED, 1.2);
+      for (var _i10 = -2; _i10 <= 2; _i10++) circle(b.x + _i10 * 12, b.y + 5, 2.6, (Math.floor(tick / 10) + _i10) % 2 ? YELLOW : RED, 1.2);
     } else if (b.kind === 'polpo') {
       pen(5, '#8a5cc7');
-      for (var _i10 = 0; _i10 < 6; _i10++) {
+      for (var _i11 = 0; _i11 < 6; _i11++) {
         ctx.beginPath();
-        var bx = b.x - 17 + _i10 * 7;
+        var bx = b.x - 17 + _i11 * 7;
         ctx.moveTo(bx, b.y + 14);
-        for (var k = 0; k <= 34; k += 4) ctx.lineTo(bx + Math.sin(k * .18 + tick * .12 + _i10) * 6, b.y + 14 + k);
+        for (var k = 0; k <= 34; k += 4) ctx.lineTo(bx + Math.sin(k * .18 + tick * .12 + _i11) * 6, b.y + 14 + k);
         ctx.stroke();
       }
       circle(b.x, b.y, 27, '#b48ee0', 2.6);
@@ -5189,8 +5204,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } else if (b.kind === 'talpa') {
       pen(2.4);
       ctx.fillStyle = '#fff';
-      for (var _i11 = 0, _arr4 = [-1, 1]; _i11 < _arr4.length; _i11++) {
-        var sd = _arr4[_i11];
+      for (var _i12 = 0, _arr4 = [-1, 1]; _i12 < _arr4.length; _i12++) {
+        var sd = _arr4[_i12];
         ctx.beginPath();
         ctx.moveTo(b.x + sd * 24, b.y + 8);
         for (var _k3 = 0; _k3 < 3; _k3++) {
@@ -5395,11 +5410,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.stroke();
       pen(3);
       ctx.beginPath();
-      for (var _i12 = -1; _i12 <= 1; _i12 += 2) for (var _k4 = 0; _k4 < 4; _k4++) {
+      for (var _i13 = -1; _i13 <= 1; _i13 += 2) for (var _k4 = 0; _k4 < 4; _k4++) {
         var w = Math.sin(tick * .12 + _k4) * 3;
         ctx.moveTo(b.x, b.y);
-        ctx.lineTo(b.x + _i12 * (26 + _k4 * 3), b.y - 18 + _k4 * 10 + w);
-        ctx.lineTo(b.x + _i12 * (36 + _k4 * 3), b.y + 8 + _k4 * 8);
+        ctx.lineTo(b.x + _i13 * (26 + _k4 * 3), b.y - 18 + _k4 * 10 + w);
+        ctx.lineTo(b.x + _i13 * (36 + _k4 * 3), b.y + 8 + _k4 * 8);
       }
       ctx.stroke();
       circle(b.x, b.y, 24, '#3b3f4f', 2.6);
@@ -5416,7 +5431,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      for (var _i13 = 0; _i13 < 4; _i13++) circle(b.x - 9 + _i13 * 6, b.y - 4 + (_i13 % 3 === 0 ? 2 : 0), 2.6, RED, .8);
+      for (var _i14 = 0; _i14 < 4; _i14++) circle(b.x - 9 + _i14 * 6, b.y - 4 + (_i14 % 3 === 0 ? 2 : 0), 2.6, RED, .8);
       pen(2, '#fff');
       ctx.beginPath();
       ctx.moveTo(b.x - 5, b.y + 10);
@@ -5427,7 +5442,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     ctx.globalAlpha = 1;
     var n = b.hp;
-    for (var _i14 = 0; _i14 < n; _i14++) drawHeart(b.x - (n - 1) * 7 + _i14 * 14, b.y - 48, 5, RED);
+    for (var _i15 = 0; _i15 < n; _i15++) drawHeart(b.x - (n - 1) * 7 + _i15 * 14, b.y - 48, 5, RED);
   }
   function drawShot(q) {
     if (q.kind === 'gassata') {
@@ -5678,10 +5693,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.fillRect(x - 30, y - 170, 60, 170);
       pen(2.4);
       ctx.strokeRect(x - 30, y - 170, 60, 170);
-      for (var _i15 = 0; _i15 < 3; _i15++) {
+      for (var _i16 = 0; _i16 < 3; _i16++) {
         ctx.fillStyle = '#fff';
-        ctx.fillRect(x - 30 + _i15 * 22, y - 184, 16, 14);
-        ctx.strokeRect(x - 30 + _i15 * 22, y - 184, 16, 14);
+        ctx.fillRect(x - 30 + _i16 * 22, y - 184, 16, 14);
+        ctx.strokeRect(x - 30 + _i16 * 22, y - 184, 16, 14);
       }
       ctx.fillStyle = PEN;
       ctx.beginPath();
@@ -5762,10 +5777,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.closePath();
       ctx.fill();
       pen(1.6, 'rgba(107,113,134,.4)');
-      for (var _i16 = 0; _i16 < 3; _i16++) {
-        var yy = y - h - 14 - (tick * .4 + _i16 * 20) % 60;
+      for (var _i17 = 0; _i17 < 3; _i17++) {
+        var yy = y - h - 14 - (tick * .4 + _i17 * 20) % 60;
         ctx.beginPath();
-        ctx.arc(x + Math.sin(yy * .05) * 8, yy, 6 + _i16 * 2, 0, 6.28);
+        ctx.arc(x + Math.sin(yy * .05) * 8, yy, 6 + _i17 * 2, 0, 6.28);
         ctx.stroke();
       }
     } else if (d.kind === 'seaweed') {
@@ -5827,8 +5842,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       pen(1.2, 'rgba(63,134,212,.45)');
       var _yy2 = (y + tick * .3 * s) % 300;
       ctx.beginPath();
-      for (var _i17 = 0; _i17 < 3; _i17++) {
-        var _a = _i17 * Math.PI / 3;
+      for (var _i18 = 0; _i18 < 3; _i18++) {
+        var _a = _i18 * Math.PI / 3;
         ctx.moveTo(x - Math.cos(_a) * 5 * s, _yy2 - Math.sin(_a) * 5 * s);
         ctx.lineTo(x + Math.cos(_a) * 5 * s, _yy2 + Math.sin(_a) * 5 * s);
       }
@@ -6215,8 +6230,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       bRect(-20, -24, 3, 18, '#5d6273');
       bRect(17, -24, 3, 18, '#5d6273');
       var wr = Math.floor(p.walk * 2) % 2;
-      for (var _i18 = 0, _arr5 = [-12, 12]; _i18 < _arr5.length; _i18++) {
-        var wx = _arr5[_i18];
+      for (var _i19 = 0, _arr5 = [-12, 12]; _i19 < _arr5.length; _i19++) {
+        var wx = _arr5[_i19];
         bRect(wx - 5, -7, 10, 7, '#1d1f2b');
         bRect(wx - 2 + (wr ? 1 : -1), -5, 3, 3, '#c7ccd8');
       }
@@ -6230,8 +6245,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       bRect(-18, -9, 36, 4, '#9aa0b5');
       bRect(-18, -9, 36, 1, '#c7ccd8');
       var _wr = Math.floor(p.walk) % 2;
-      for (var _i19 = 0, _arr6 = [-13, 14]; _i19 < _arr6.length; _i19++) {
-        var _wx2 = _arr6[_i19];
+      for (var _i20 = 0, _arr6 = [-13, 14]; _i20 < _arr6.length; _i20++) {
+        var _wx2 = _arr6[_i20];
         bRect(_wx2 - 4, -6, 8, 6, '#1d1f2b');
         bRect(_wx2 - 1, -4, 2, 2, _wr ? '#c7ccd8' : '#5d6273');
       }
@@ -6577,7 +6592,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#c9ccd8', -9, -2, 18, 3);
       B('#e8ecf4', -9, -2, 18, 1);
       B('#9aa0b5', -6, 1, 12, 2);
-      for (var _i20 = 0; _i20 < 6; _i20++) B((_i20 + t) % 2 ? '#f2c230' : '#e0373f', -8 + _i20 * 3, -1, 1, 1);
+      for (var _i21 = 0; _i21 < 6; _i21++) B((_i21 + t) % 2 ? '#f2c230' : '#e0373f', -8 + _i21 * 3, -1, 1, 1);
     } else if (b.kind === 'ragno') {
       B('#8d93a6', 0, -30, 0.25, 23);
       for (var k = 0; k < 4; k++) {
@@ -6594,7 +6609,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#f2c230', -1, -12, 2, 2);
       B('#f2c230', 3, -12, 1, 2);
       B('#e0373f', -1, -9, 2, 1);
-      for (var _i21 = 0; _i21 < 4; _i21++) B('#e0373f', -4 + _i21 * 2 + (_i21 > 1 ? 1 : 0), -3, 1, 1);
+      for (var _i22 = 0; _i22 < 4; _i22++) B('#e0373f', -4 + _i22 * 2 + (_i22 > 1 ? 1 : 0), -3, 1, 1);
       B('#ffffff', -2, 2, 1, 2);
       B('#ffffff', 1, 2, 1, 2);
     } else if (b.kind === 'drago') {
@@ -6618,9 +6633,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         B('#f2c230', d > 0 ? 10 : -13, -4, 2, 1);
       }
     } else if (b.kind === 'polpo') {
-      for (var _i22 = 0; _i22 < 6; _i22++) {
-        var _w2 = Math.round(Math.sin(tick * .12 + _i22));
-        B('#8a5cc7', -6 + _i22 * 2 + _w2, 3, 2, 7 + _i22 % 2);
+      for (var _i23 = 0; _i23 < 6; _i23++) {
+        var _w2 = Math.round(Math.sin(tick * .12 + _i23));
+        B('#8a5cc7', -6 + _i23 * 2 + _w2, 3, 2, 7 + _i23 % 2);
       }
       B('#b48ee0', -7, -8, 14, 11);
       B('#b48ee0', -6, -9, 12, 1);
@@ -6680,7 +6695,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#ffffff', -3, 1, 1, 1);
       B('#ffffff', 2, 1, 1, 1);
     } else if (b.kind === 'serpentone') {
-      for (var _i23 = 0; _i23 < 6; _i23++) B(_i23 % 2 ? '#6fae4a' : '#7cc242', -12 - _i23 * 3, 6 + _i23 * 3, 4, 4);
+      for (var _i24 = 0; _i24 < 6; _i24++) B(_i24 % 2 ? '#6fae4a' : '#7cc242', -12 - _i24 * 3, 6 + _i24 * 3, 4, 4);
       B('#7cc242', -7, -6, 14, 11);
       B('#3d7a1f', -7, 4, 14, 1);
       B('#a7e26b', -5, -5, 4, 1);
@@ -6698,7 +6713,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     ctx.restore();
     var n = b.hp;
-    for (var _i24 = 0; _i24 < n; _i24++) bDraw(SP.heart(), b.x - (n - 1) * 8 + _i24 * 16, b.y - 46, 1.5);
+    for (var _i25 = 0; _i25 < n; _i25++) bDraw(SP.heart(), b.x - (n - 1) * 8 + _i25 * 16, b.y - 46, 1.5);
   }
   function bDeco(d) {
     var x = d.x,
@@ -6859,9 +6874,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     }
     if (th === 1 || th === 6 || th === 8) {
-      for (var _i25 = 0; _i25 < 6; _i25++) {
-        var cx = ((_i25 * 260 - camX * .15) % (vw + 300) + vw + 300) % (vw + 300) - 150;
-        blockCloud(cx, 25 + _i25 * 37 % 70, th === 6 ? 1.3 : 1);
+      for (var _i26 = 0; _i26 < 6; _i26++) {
+        var cx = ((_i26 * 260 - camX * .15) % (vw + 300) + vw + 300) % (vw + 300) - 150;
+        blockCloud(cx, 25 + _i26 * 37 % 70, th === 6 ? 1.3 : 1);
       }
     }
     var HC = {
@@ -6879,18 +6894,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       base = Math.floor(ox / 24);
     ctx.save();
     ctx.globalAlpha = th === 2 || th === 4 || th === 7 ? .7 : .42;
-    for (var _i26 = -1; _i26 < vw / 24 + 2; _i26++) {
-      var gx = base + _i26;
+    for (var _i27 = -1; _i27 < vw / 24 + 2; _i27++) {
+      var gx = base + _i27;
       var hgt = void 0;
       if (th === 8) hgt = Math.abs((gx % 14 + 14) % 14 - 7) * 12 + 24;else if (th === 3) hgt = ((gx % 9 + 9) % 9 < 2 ? 120 : 48) + (gx % 2 ? 0 : 12);else if (th === 7) hgt = 72 + Math.round(Math.sin(gx * .7) * 2) * 12;else hgt = Math.round(Math.sin(gx * .35) * 2 + Math.sin(gx * .13) * 3 + 5) * 12;
       if (th === 6) hgt = Math.max(12, hgt - 36);
-      bRect(_i26 * 24 - off, H - hgt - 40, 24, hgt + 40, HC);
+      bRect(_i27 * 24 - off, H - hgt - 40, 24, hgt + 40, HC);
       if (th === 9 && (gx % 5 + 5) % 5 === 0) {
-        bRect(_i26 * 24 - off + 6, H - hgt - 88, 12, 48, '#6b4a2e');
-        bRect(_i26 * 24 - off - 12, H - hgt - 112, 48, 36, '#256b37');
+        bRect(_i27 * 24 - off + 6, H - hgt - 88, 12, 48, '#6b4a2e');
+        bRect(_i27 * 24 - off - 12, H - hgt - 112, 48, 36, '#256b37');
       }
       if (th === 7) {
-        bRect(_i26 * 24 - off, 0, 24, 36 + Math.round(Math.sin(gx * .9) * 2) * 12 + 24, HC);
+        bRect(_i27 * 24 - off, 0, 24, 36 + Math.round(Math.sin(gx * .9) * 2) * 12 + 24, HC);
       }
     }
     ctx.restore();
@@ -7206,8 +7221,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       gold: ['#f6d76a', '#f2c230', '#ffe48a']
     };
     var region = function region(mx, my) {
-      for (var _i27 = 0, _R = R; _i27 < _R.length; _i27++) {
-        var r = _R[_i27];
+      for (var _i28 = 0, _R = R; _i28 < _R.length; _i28++) {
+        var r = _R[_i28];
         if (dE(mx, my, r[1], r[2], r[3], r[4]) < 1) return r[0];
       }
       return 'grass';
@@ -7227,19 +7242,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     NODES.forEach(function (n, k) {
       if (!done[ORDER[k]]) return;
-      for (var _j = 0; _j < rows; _j++) for (var _i28 = 0; _i28 < cols; _i28++) {
-        var e = dE((_i28 + .5) * 28, (_j + .5) * 28, n.x, n.y, n.rx * 1.35 + 20, n.ry * 1.35 + 20);
+      for (var _j = 0; _j < rows; _j++) for (var _i29 = 0; _i29 < cols; _i29++) {
+        var e = dE((_i29 + .5) * 28, (_j + .5) * 28, n.x, n.y, n.rx * 1.35 + 20, n.ry * 1.35 + 20);
         if (e < 1) {
           x.fillStyle = e > .72 ? 'rgba(90,240,110,.85)' : 'rgba(120,255,140,.33)';
-          x.fillRect(_i28 * T, _j * T, T, T);
+          x.fillRect(_i29 * T, _j * T, T, T);
         }
       }
     });
-    if (all) for (var _j2 = 0; _j2 < rows; _j2++) for (var _i29 = 0; _i29 < cols; _i29++) {
-      var e = dE((_i29 + .5) * 28, (_j2 + .5) * 28, GOAL.x, GOAL.y, GOAL.rx * 1.6, GOAL.ry * 1.6);
+    if (all) for (var _j2 = 0; _j2 < rows; _j2++) for (var _i30 = 0; _i30 < cols; _i30++) {
+      var e = dE((_i30 + .5) * 28, (_j2 + .5) * 28, GOAL.x, GOAL.y, GOAL.rx * 1.6, GOAL.ry * 1.6);
       if (e < 1) {
         x.fillStyle = e > .72 ? 'rgba(255,215,64,.9)' : 'rgba(255,230,120,.35)';
-        x.fillRect(_i29 * T, _j2 * T, T, T);
+        x.fillRect(_i30 * T, _j2 * T, T, T);
       }
     }
     var st = segTiles(),
@@ -7269,21 +7284,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         return dE(mx, my, n.x, n.y, n.rx + 60, n.ry + 60) < 1;
       }) || dE(mx, my, 360, 140, 140, 120) < 1 || dE(mx, my, GOAL.x, GOAL.y, 150, 120) < 1;
     };
-    for (var _j3 = 1; _j3 < rows - 1; _j3++) for (var _i30 = 0; _i30 < cols; _i30++) {
-      var mx = (_i30 + .5) * 28,
+    for (var _j3 = 1; _j3 < rows - 1; _j3++) for (var _i31 = 0; _i31 < cols; _i31++) {
+      var mx = (_i31 + .5) * 28,
         my = (_j3 + .5) * 28;
-      if (regs[_j3][_i30] !== 'grass' || painted.has(_i30 + ',' + _j3) || near(mx, my)) continue;
-      var _r2 = brnd(_i30, _j3, 9);
-      if (_r2 > .93 && !painted.has(_i30 + ',' + (_j3 + 1)) && !painted.has(_i30 + ',' + (_j3 - 1))) {
+      if (regs[_j3][_i31] !== 'grass' || painted.has(_i31 + ',' + _j3) || near(mx, my)) continue;
+      var _r2 = brnd(_i31, _j3, 9);
+      if (_r2 > .93 && !painted.has(_i31 + ',' + (_j3 + 1)) && !painted.has(_i31 + ',' + (_j3 - 1))) {
         x.fillStyle = '#6b4a2e';
-        x.fillRect(_i30 * T + 5, _j3 * T + 4, 4, 10);
+        x.fillRect(_i31 * T + 5, _j3 * T + 4, 4, 10);
         x.fillStyle = '#2f7d2e';
-        x.fillRect(_i30 * T - 1, _j3 * T - 9, 16, 13);
+        x.fillRect(_i31 * T - 1, _j3 * T - 9, 16, 13);
         x.fillStyle = '#3f9a3a';
-        x.fillRect(_i30 * T + 2, _j3 * T - 11, 10, 5);
+        x.fillRect(_i31 * T + 2, _j3 * T - 11, 10, 5);
       } else if (_r2 > .88) {
-        x.fillStyle = ['#e0373f', '#f2c230', '#ffffff', '#8a5cc7'][Math.floor(brnd(_i30, _j3, 10) * 4)];
-        x.fillRect(_i30 * T + 5, _j3 * T + 5, 4, 4);
+        x.fillStyle = ['#e0373f', '#f2c230', '#ffffff', '#8a5cc7'][Math.floor(brnd(_i31, _j3, 10) * 4)];
+        x.fillRect(_i31 * T + 5, _j3 * T + 5, 4, 4);
       }
     }
     var q = function q(cx, cy) {
@@ -7320,8 +7335,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L = q(265, 284);
     L(-10, -8, 20, 14, '#8d8f99');
     L(-10, -8, 20, 1, '#a9abb5');
-    for (var _i31 = 0, _arr7 = [-10, -4, 2, 7]; _i31 < _arr7.length; _i31++) {
-      var cx2 = _arr7[_i31];
+    for (var _i32 = 0, _arr7 = [-10, -4, 2, 7]; _i32 < _arr7.length; _i32++) {
+      var cx2 = _arr7[_i32];
       L(cx2, -10, 3, 2, '#8d8f99');
     }
     L(-4, -16, 8, 8, '#9b9da7');
@@ -7338,8 +7353,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(4, -5, 4, 1, '#9fd3f0');
     L(6, 4, 5, 1, '#9fd3f0');
     L = q(542, 296);
-    for (var _i32 = 0, _arr8 = [[-12, -2], [8, -6]]; _i32 < _arr8.length; _i32++) {
-      var _arr8$_i = _slicedToArray(_arr8[_i32], 2),
+    for (var _i33 = 0, _arr8 = [[-12, -2], [8, -6]]; _i33 < _arr8.length; _i33++) {
+      var _arr8$_i = _slicedToArray(_arr8[_i33], 2),
         _tx = _arr8$_i[0],
         ty = _arr8$_i[1];
       L(_tx, ty, 2, 6, '#6b4a2e');
@@ -7353,8 +7368,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(3, 3, 2, 5, '#3b3f4f');
     L(-1, 0, 1, 1, '#1d1f2b');
     L = q(628, 269);
-    for (var _i33 = 0, _arr9 = [-9, 0, 9]; _i33 < _arr9.length; _i33++) {
-      var pk = _arr9[_i33];
+    for (var _i34 = 0, _arr9 = [-9, 0, 9]; _i34 < _arr9.length; _i34++) {
+      var pk = _arr9[_i34];
       for (var _k10 = 0; _k10 < 5; _k10++) L(pk - 4 + _k10 * .8, 4 - _k10 * 2, 8 - _k10 * 1.6, 2, _k10 > 2 ? '#ffffff' : '#bfe4f6');
     }
     L = q(655, 165);
@@ -7379,8 +7394,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(8, -19, 2, 3, '#f07a2a');
     L(8, -16, 2, 1, '#c25a14');
     L = q(435, 48);
-    for (var _i34 = 0, _arr0 = [[-14, -2], [6, -6]]; _i34 < _arr0.length; _i34++) {
-      var _arr0$_i = _slicedToArray(_arr0[_i34], 2),
+    for (var _i35 = 0, _arr0 = [[-14, -2], [6, -6]]; _i35 < _arr0.length; _i35++) {
+      var _arr0$_i = _slicedToArray(_arr0[_i35], 2),
         _cx = _arr0$_i[0],
         cy2 = _arr0$_i[1];
       L(_cx, cy2, 14, 4, '#ffffff');
@@ -7769,7 +7784,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _getSaveRef() {
     _getSaveRef = _asyncToGenerator(_regenerator().m(function _callee5() {
-      var db, user, id, _t6, _t7;
+      var db, user, id, _t7, _t8;
       return _regenerator().w(function (_context5) {
         while (1) switch (_context5.p = _context5.n) {
           case 0:
@@ -7792,13 +7807,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             _context5.n = 4;
             return window.claude.use('user');
           case 4:
-            _t6 = _context5.v;
+            _t7 = _context5.v;
             _context5.n = 6;
             break;
           case 5:
-            _t6 = null;
+            _t7 = null;
           case 6:
-            user = _t6;
+            user = _t7;
             if (!(db && user)) {
               _context5.n = 8;
               break;
@@ -7813,7 +7828,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             break;
           case 9:
             _context5.p = 9;
-            _t7 = _context5.v;
+            _t8 = _context5.v;
           case 10:
             return _context5.a(2, saveRef);
         }
@@ -7858,7 +7873,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _saveGame() {
     _saveGame = _asyncToGenerator(_regenerator().m(function _callee6() {
-      var snap, ref, _t8;
+      var snap, ref, _t9;
       return _regenerator().w(function (_context6) {
         while (1) switch (_context6.p = _context6.n) {
           case 0:
@@ -7890,7 +7905,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             break;
           case 5:
             _context6.p = 5;
-            _t8 = _context6.v;
+            _t9 = _context6.v;
           case 6:
             saving = false;
             showContinue(snap);
@@ -7906,7 +7921,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _clearSave() {
     _clearSave = _asyncToGenerator(_regenerator().m(function _callee7() {
-      var ref, _t9;
+      var ref, _t0;
       return _regenerator().w(function (_context7) {
         while (1) switch (_context7.p = _context7.n) {
           case 0:
@@ -7929,7 +7944,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             break;
           case 4:
             _context7.p = 4;
-            _t9 = _context7.v;
+            _t0 = _context7.v;
           case 5:
             showContinue(null);
           case 6:
@@ -7944,7 +7959,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _loadSave() {
     _loadSave = _asyncToGenerator(_regenerator().m(function _callee8() {
-      var a, b, ref, _d8, pick, _t0;
+      var a, b, ref, _d8, pick, _t1;
       return _regenerator().w(function (_context8) {
         while (1) switch (_context8.p = _context8.n) {
           case 0:
@@ -7968,7 +7983,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             break;
           case 5:
             _context8.p = 5;
-            _t0 = _context8.v;
+            _t1 = _context8.v;
           case 6:
             try {
               b = JSON.parse(localStorage.getItem('tom-save') || 'null');
