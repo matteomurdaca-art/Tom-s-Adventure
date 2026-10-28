@@ -925,6 +925,29 @@ body.blocks .hud h1{font-size:19px} body.blocks .hud .sec{font-size:15px} body.b
 body.blocks .btn{font-size:24px} body.blocks .btn.jump{font-size:17px}
 body.blocks .card h2{font-size:27px} body.blocks .mi-name{font-size:18px} body.blocks .mi-sub,body.blocks .mi-state,body.blocks .help,body.blocks .note{font-size:13px}
 body.blocks .go{font-size:19px} body.blocks .styleSw button{font-size:15px} body.blocks .board{font-size:15px} body.blocks .score{font-size:16px}
+.bar2,.mini{display:none}
+.mini{align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; font-size:16px; min-width:0; font-variant-numeric:tabular-nums}
+.who{font-weight:700}
+.who1{color:var(--blue)} .who2{color:var(--red)}
+body.duo .app{max-width:none; grid-template-columns:auto minmax(0,1fr) auto; grid-template-rows:auto minmax(0,1fr) auto; grid-template-areas:"p2 p2 p2" "stage stage stage" "left mid right"; padding-top:30px; padding-bottom:40px; gap:6px 10px}
+body.duo .hud{display:none}
+body.duo .bar2{grid-area:p2; display:flex; justify-content:space-between; align-items:center; gap:10px; transform:rotate(180deg)}
+body.duo #hud1{grid-area:mid; display:flex}
+body.duo .bar2 .mini{display:flex}
+body.duo .padL,body.duo .padR{align-self:center} body.duo .padR{flex-direction:row; justify-self:end}
+@supports not (inset:0){ body.duo .bar2>*+*,body.duo .mini>*+*{margin-left:8px} }
+.modes{display:flex; justify-content:center; flex-wrap:wrap; gap:6px; margin:10px 0 2px}
+.modes button{font:700 18px var(--hand); padding:3px 12px; background:#fff; color:var(--pencil); border:2.5px solid var(--pencil); border-radius:10px 13px 9px 12px; cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--yellow)}
+.pick{margin-top:10px; text-align:left}
+.plab{display:block; font-size:18px; margin-bottom:4px}
+.plab small{font-weight:400; color:var(--soft); font-size:14px}
+.chars{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px}
+.char{display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 2px; background:#fff; color:var(--pencil); border:2.5px solid var(--pencil); border-radius:10px 13px 9px 12px; font:700 15px var(--hand); cursor:pointer; min-width:0}
+.char canvas{position:static; transform:none; box-shadow:none; border-radius:0; background:transparent; width:36px; height:48px; image-rendering:pixelated}
+.char[aria-pressed="true"]{background:var(--yellow)}
+.char:focus-visible,.modes button:focus-visible{outline:3px dashed var(--blue); outline-offset:2px}
+body.blocks .char,body.blocks .modes button{border-radius:0}
 .levels{display:grid; gap:8px; margin:12px 0; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
 .lvl{display:flex; align-items:center; gap:12px; text-align:left; font:700 21px var(--hand); color:var(--pencil); background:#fff; border:2.5px solid var(--pencil); border-radius:12px 16px 11px 15px; padding:6px 12px; cursor:pointer}
 .lvl .n{flex:none; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-size:22px; border:2.5px solid var(--pencil)}
@@ -961,16 +984,22 @@ body.blocks .go{font-size:19px} body.blocks .styleSw button{font-size:15px} body
 </style>
 
 <div class="app">
+  <div class="bar2" id="bar2">
+    <div class="pad"><button class="btn" id="b2L" type="button" aria-label="Sinistra">◀</button><button class="btn" id="b2R" type="button" aria-label="Destra">▶</button></div>
+    <div class="mini"><span class="who who2" id="who2"></span><span id="stat2"></span><button class="small" id="pause2" type="button">⏸</button><button class="small" id="back2" type="button">◀ Esci</button></div>
+    <div class="pad"><button class="btn fire locked" id="b2F" type="button" aria-label="Fulmine">⚡</button><button class="btn jump" id="b2J" type="button">SALTA</button></div>
+  </div>
   <div class="hud">
     <h1 id="lvlName">L'avventura di Tom</h1>
     <span class="sec" id="sec">VIA</span>
-    <div class="stats"><span id="candy">🍬 0</span><span id="falls">Cadute 0</span><span id="clock">0:00</span><button class="small" id="mute" type="button">Suono sì</button><button class="small" id="pauseBtn" type="button" aria-label="Pausa">⏸ Pausa</button></div>
+    <div class="stats"><span id="candy">🍬 0</span><span id="falls">Cadute 0</span><span id="clock">0:00</span><button class="small" id="mute" type="button">Suono sì</button><button class="small" id="backBtn" type="button">◀ Indietro</button><button class="small" id="pauseBtn" type="button" aria-label="Pausa">⏸ Pausa</button></div>
   </div>
   <div class="stage" id="stage"><canvas id="game" aria-label="Gioco di Tom"></canvas></div>
   <div class="pad padL">
     <button class="btn" id="bL" type="button" aria-label="Sinistra">◀</button>
     <button class="btn" id="bR" type="button" aria-label="Destra">▶</button>
   </div>
+  <div class="mini" id="hud1"><span class="who who1" id="who1"></span><span id="stat1"></span><button class="small" id="pause1" type="button">⏸</button><button class="small" id="back1" type="button">◀ Esci</button></div>
   <div class="pad padR">
     <button class="btn fire locked" id="bF" type="button" aria-label="Fulmine">⚡</button>
     <button class="btn jump" id="bJ" type="button">SALTA</button>
@@ -1006,13 +1035,24 @@ body.blocks .go{font-size:19px} body.blocks .styleSw button{font-size:15px} body
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
-    <p class="note">Versione 10</p>
+    <p class="note">Versione 11</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
       <div class="styleSw" role="group" aria-label="Stile grafico"><button type="button" data-s="matita" aria-pressed="true">✏️ Matita</button><button type="button" data-s="blocchi" aria-pressed="false">🧱 Blocchi</button></div>
-      <button class="go alt" id="pauseMenu" type="button">Mappa</button>
+      <button class="go alt" id="pauseMenu" type="button">◀ Indietro</button>
     </div>
+  </div>
+</div>
+<div class="overlay" id="setup" hidden>
+  <div class="card">
+    <h2>Chi gioca?</h2>
+    <p class="note" id="setupLvl"></p>
+    <div class="modes" role="group" aria-label="Modalità"><button type="button" data-m="solo">1 giocatore</button><button type="button" data-m="gara">2 · Gara</button><button type="button" data-m="squadra">2 · Squadra</button></div>
+    <p class="note" id="modeHelp"></p>
+    <div class="pick"><b class="plab who1">Giocatore 1</b><div class="chars" id="chars1"></div></div>
+    <div class="pick" id="pick2"><b class="plab who2">Giocatore 2 <small>· dall'altro lato del tablet</small></b><div class="chars" id="chars2"></div></div>
+    <div class="row"><button class="go" id="goBtn" type="button">Via! ▶</button><button class="go alt" id="setupBack" type="button">◀ Indietro</button></div>
   </div>
 </div>
 <div class="overlay" id="boardOv" hidden>
@@ -1027,7 +1067,7 @@ body.blocks .go{font-size:19px} body.blocks .styleSw button{font-size:15px} body
 </div>
 <div class="overlay" id="win" hidden>
   <div class="card">
-    <h2>TOM ARRIVO! ♥</h2>
+    <h2 id="winTitle">TOM ARRIVO! ♥</h2>
     <p id="winText">Ce l'hai fatta!</p>
     <div class="score" id="scoreBox"></div>
     <form class="save" id="saveForm">
@@ -1077,7 +1117,23 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     viewW = 600,
     dpr = 1,
     camX = 0,
-    camY = 0;
+    camY = 0,
+    cssW = 600,
+    cssH = 360;
+  var VIEW = {
+    x: 0,
+    y: 0,
+    w: 600,
+    h: 360,
+    rot: false
+  };
+  function vSet(a, d, e, f) {
+    var r = VIEW.rot,
+      A = r ? -dpr : dpr,
+      E = (r ? VIEW.x + VIEW.w : VIEW.x) * dpr,
+      F = (r ? VIEW.y + VIEW.h : VIEW.y) * dpr;
+    ctx.setTransform(A * a, 0, 0, A * d, A * e + E, A * f + F);
+  }
   var $ = function $(id) {
     return document.getElementById(id);
   };
@@ -1085,13 +1141,20 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function resize() {
     var w = Math.max(160, stage.clientWidth),
       sh = Math.max(120, stage.clientHeight);
-    var h = Math.max(120, Math.min(sh, w * 0.75));
+    var two = false;
+    try {
+      two = MODE !== 'solo';
+    } catch (e) {}
+    var h = two ? sh : Math.max(120, Math.min(sh, w * 0.75));
     cvs.style.width = w + 'px';
     cvs.style.height = h + 'px';
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     cvs.width = Math.round(w * dpr);
     cvs.height = Math.round(h * dpr);
-    scale = h / H;
+    cssW = w;
+    cssH = h;
+    var vh = two ? (h - 6) / 2 : h;
+    scale = vh / H;
     viewW = w / scale;
   }
   try {
@@ -2462,38 +2525,105 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     LV.build();
     if (LV.auto) autoCandies();
   }
-  var p = {
-    x: 60,
-    y: 264,
-    w: 20,
-    h: 36,
-    vx: 0,
-    vy: 0,
-    on: false,
-    face: 1,
-    climb: false,
-    inv: 0,
-    walk: 0,
-    coyote: 0,
-    jbuf: 0,
-    ground: null,
-    jumping: false,
-    dead: 0,
-    cp: 0,
-    fireCd: 0
+  var CHARS = {
+    tommy: {
+      name: 'Tommy'
+    },
+    milly: {
+      name: 'Milly'
+    },
+    carotino: {
+      name: 'Carotino'
+    },
+    papone: {
+      name: 'Papone'
+    }
   };
+  var CHAR_ORDER = ['tommy', 'milly', 'carotino', 'papone'];
+  var MODE = 'solo',
+    PICK = ['tommy', 'milly'];
+  try {
+    var st = JSON.parse(localStorage.getItem('tom-setup') || 'null');
+    if (st) {
+      if (['solo', 'gara', 'squadra'].indexOf(st.mode) >= 0) MODE = st.mode;
+      if (Array.isArray(st.pick)) st.pick.forEach(function (c, i) {
+        if (CHARS[c] && i < 2) PICK[i] = c;
+      });
+    }
+  } catch (e) {}
+  var duo = function duo() {
+    return MODE !== 'solo';
+  };
+  function mkPlayer(idx, ch) {
+    return {
+      x: 60,
+      y: 264,
+      w: 20,
+      h: 36,
+      vx: 0,
+      vy: 0,
+      on: false,
+      face: 1,
+      climb: false,
+      inv: 0,
+      walk: 0,
+      coyote: 0,
+      jbuf: 0,
+      ground: null,
+      jumping: false,
+      dead: 0,
+      cp: 0,
+      fireCd: 0,
+      idx: idx,
+      char: ch,
+      keys: {
+        left: false,
+        right: false,
+        jump: false,
+        fire: false
+      },
+      prevJ: false,
+      camX: 0,
+      camY: 0,
+      candies: 0,
+      falls: 0,
+      guitar: false,
+      arrived: false,
+      arrT: 0
+    };
+  }
+  var PLY = [mkPlayer(0, PICK[0])];
+  var p = PLY[0];
   var candies = 0,
     falls = 0,
     time = 0,
     running = false,
     won = false,
     tick = 0;
+  var keys = p.keys,
+    prevJ = false;
+  function use(q) {
+    p = q;
+    keys = q.keys;
+    prevJ = q.prevJ;
+    camX = q.camX;
+    camY = q.camY;
+    candies = q.candies;
+    falls = q.falls;
+  }
+  function store() {
+    p.prevJ = prevJ;
+    p.camX = camX;
+    p.camY = camY;
+    p.candies = candies;
+    p.falls = falls;
+  }
   var camTargetY = function camTargetY() {
     return Math.max(LV.top, Math.min(0, p.y + p.h / 2 - H * 0.6));
   };
   function respawn() {
     var c = LV.cps[p.cp];
-    p.x = c.x;
+    p.x = c.x + (p.idx === 1 ? 28 : 0);
     p.y = c.y - p.h;
     p.vx = p.vy = 0;
     p.lastRamp = null;
@@ -2501,38 +2631,40 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     p.dead = 0;
     p.inv = 60;
     p.ground = null;
-    W.shots = [];
-    var _iterator3 = _createForOfIteratorHelper(W.solids),
-      _step3;
-    try {
-      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-        var s = _step3.value;
-        if (s.k === 'crumble') {
-          s.y = s.oy;
-          s.t = -1;
-          s.gone = false;
-          s.vy = 0;
+    if (!duo()) {
+      W.shots = [];
+      var _iterator3 = _createForOfIteratorHelper(W.solids),
+        _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var s = _step3.value;
+          if (s.k === 'crumble') {
+            s.y = s.oy;
+            s.t = -1;
+            s.gone = false;
+            s.vy = 0;
+          }
         }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
       }
-    } catch (err) {
-      _iterator3.e(err);
-    } finally {
-      _iterator3.f();
-    }
-    var b = W.boss;
-    if (b && !b.dead) {
-      b.hp = LV.boss.hp;
-      b.inv = 0;
-      b.shoot = 70;
+      var b = W.boss;
+      if (b && !b.dead) {
+        b.hp = LV.boss.hp;
+        b.inv = 0;
+        b.shoot = 70;
+      }
     }
     camX = Math.max(0, Math.min(LV.END - viewW, p.x - viewW * 0.35));
     camY = camTargetY();
   }
   function die() {
-    if (p.dead || p.inv > 0 || won) return;
+    if (p.dead || p.inv > 0 || won || p.arrived) return;
     p.dead = 1;
     falls++;
-    $('falls').textContent = 'Cadute ' + falls;
+    if (!duo()) $('falls').textContent = 'Cadute ' + falls;
     beep(300, .35, 'sawtooth', .06, -220);
     burst(p.x + 10, p.y + 18, PEN, 10);
   }
@@ -2550,18 +2682,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       });
     }
   }
-  var keys = {
-    left: false,
-    right: false,
-    jump: false,
-    fire: false
-  };
-  var prevJ = false;
-  function bindBtn(id, k) {
+  function bindBtn(id, k, pi) {
     var b = $(id);
     var on = function on(e) {
       if (e.cancelable) e.preventDefault();
-      keys[k] = true;
+      if (PLY[pi]) PLY[pi].keys[k] = true;
       b.classList.add('on');
       if (e.pointerId != null) {
         try {
@@ -2570,7 +2695,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     };
     var off = function off() {
-      keys[k] = false;
+      if (PLY[pi]) PLY[pi].keys[k] = false;
       b.classList.remove('on');
     };
     if (window.PointerEvent) {
@@ -2587,19 +2712,23 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return e.preventDefault();
     });
   }
-  bindBtn('bL', 'left');
-  bindBtn('bR', 'right');
-  bindBtn('bJ', 'jump');
-  bindBtn('bF', 'fire');
-  var TBTN = [['bL', 'left'], ['bR', 'right'], ['bJ', 'jump'], ['bF', 'fire']];
+  var TBTN = [['bL', 'left', 0, 'b'], ['bR', 'right', 0, 'b'], ['bJ', 'jump', 0, 'b'], ['bF', 'fire', 0, 'b'], ['b2L', 'left', 1, 't'], ['b2R', 'right', 1, 't'], ['b2J', 'jump', 1, 't'], ['b2F', 'fire', 1, 't']];
+  TBTN.forEach(function (t) {
+    return bindBtn(t[0], t[1], t[2]);
+  });
   function touchKeys(e) {
     var playing = running && $('pause').hidden;
-    var st = {
+    var sts = [{
       left: false,
       right: false,
       jump: false,
       fire: false
-    };
+    }, {
+      left: false,
+      right: false,
+      jump: false,
+      fire: false
+    }];
     var hit = false;
     if (playing) for (var i = 0; i < e.touches.length; i++) {
       var t = e.touches[i];
@@ -2609,19 +2738,24 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-          var _step4$value = _slicedToArray(_step4.value, 2),
+          var _step4$value = _slicedToArray(_step4.value, 4),
             id = _step4$value[0],
-            k = _step4$value[1];
+            k = _step4$value[1],
+            pi = _step4$value[2],
+            edge = _step4$value[3];
+          if (!PLY[pi]) continue;
           var r = $(id).getBoundingClientRect();
           if (!r.width) continue;
-          if (t.clientY < r.top - 45 || t.clientY > r.bottom + 200) continue;
+          var up = edge === 'b' ? 45 : 200,
+            down = edge === 'b' ? 200 : 45;
+          if (t.clientY < r.top - up || t.clientY > r.bottom + down) continue;
           if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
           var cx = (r.left + r.right) / 2,
             cy = (r.top + r.bottom) / 2,
             dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .3;
           if (dd < bd) {
             bd = dd;
-            best = k;
+            best = [pi, k];
           }
         }
       } catch (err) {
@@ -2630,7 +2764,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         _iterator4.f();
       }
       if (best) {
-        st[best] = true;
+        sts[best[0]][best[1]] = true;
         hit = true;
       }
     }
@@ -2638,11 +2772,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _step5;
     try {
       for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-        var _step5$value = _slicedToArray(_step5.value, 2),
+        var _step5$value = _slicedToArray(_step5.value, 3),
           _id = _step5$value[0],
-          _k = _step5$value[1];
-        keys[_k] = st[_k];
-        $(_id).classList.toggle('on', st[_k]);
+          _k = _step5$value[1],
+          _pi = _step5$value[2];
+        if (PLY[_pi]) PLY[_pi].keys[_k] = sts[_pi][_k];
+        $(_id).classList.toggle('on', sts[_pi][_k]);
       }
     } catch (err) {
       _iterator5.e(err);
@@ -2656,27 +2791,40 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       passive: false
     });
   });
-  var KM = {
+  var KM1 = {
     ArrowLeft: 'left',
-    KeyA: 'left',
     ArrowRight: 'right',
-    KeyD: 'right',
     ArrowUp: 'jump',
-    KeyW: 'jump',
     Space: 'jump',
-    KeyX: 'fire',
-    KeyK: 'fire'
+    KeyK: 'fire',
+    KeyL: 'fire',
+    Enter: 'fire'
   };
+  var KM2 = {
+    KeyA: 'left',
+    KeyD: 'right',
+    KeyW: 'jump',
+    KeyF: 'fire',
+    KeyX: 'fire'
+  };
+  function keyMap(e) {
+    if (duo()) {
+      if (KM2[e.code] && PLY[1]) return [1, KM2[e.code]];
+      return KM1[e.code] ? [0, KM1[e.code]] : null;
+    }
+    var k = KM1[e.code] || KM2[e.code];
+    return k ? [0, k] : null;
+  }
   addEventListener('keydown', function (e) {
-    var k = KM[e.code];
-    if (k) {
-      keys[k] = true;
+    var m = keyMap(e);
+    if (m && PLY[m[0]]) {
+      PLY[m[0]].keys[m[1]] = true;
       if (running) e.preventDefault();
     }
   });
   addEventListener('keyup', function (e) {
-    var k = KM[e.code];
-    if (k) keys[k] = false;
+    var m = keyMap(e);
+    if (m && PLY[m[0]]) PLY[m[0]].keys[m[1]] = false;
   });
   var ov = function ov(a, b) {
     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -2711,7 +2859,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return (tick + m.off) % m.per * m.sp - 40;
   };
   var onScreen = function onScreen(x) {
-    return x > camX - 60 && x < camX + viewW + 120;
+    return PLY.some(function (q) {
+      return x > q.camX - 60 && x < q.camX + viewW + 120;
+    });
   };
   function update(f) {
     tick += f;
@@ -2747,9 +2897,20 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
         m.dx = o.x - ox;
         m.dy = o.y - oy;
-        if (p.ground === o) {
-          p.x += m.dx;
-          p.y += m.dy;
+        var _iterator9 = _createForOfIteratorHelper(PLY),
+          _step9;
+        try {
+          for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+            var q = _step9.value;
+            if (q.ground === o) {
+              q.x += m.dx;
+              q.y += m.dy;
+            }
+          }
+        } catch (err) {
+          _iterator9.e(err);
+        } finally {
+          _iterator9.f();
         }
       }
     } catch (err) {
@@ -2760,37 +2921,80 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var _iterator7 = _createForOfIteratorHelper(W.solids),
       _step7;
     try {
-      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+      var _loop = function _loop() {
         var s = _step7.value;
         if (s.k === 'crumble') {
           if (!s.gone) {
-            if (p.ground === s && s.t < 0) {
+            if (s.t < 0 && PLY.some(function (q) {
+              return q.ground === s;
+            })) {
               s.t = 0;
               beep(150, .08, 'triangle', .04);
             }
             if (s.t >= 0) {
               s.t += f;
-              if (s.t > LV.crumble) s.gone = true;
+              if (s.t > LV.crumble) {
+                s.gone = true;
+                s.gt = 0;
+              }
             }
-          } else if (s.y < s.oy + 500) {
-            s.vy += .4 * f;
-            s.y += s.vy * f;
+          } else {
+            if (s.y < s.oy + 500) {
+              s.vy += .4 * f;
+              s.y += s.vy * f;
+            }
+            if (duo()) {
+              s.gt = (s.gt || 0) + f;
+              if (s.gt > 240 && !PLY.some(function (q) {
+                return !q.dead && Math.abs(q.x - s.x) < 160;
+              })) {
+                s.y = s.oy;
+                s.t = -1;
+                s.gone = false;
+                s.vy = 0;
+                s.gt = 0;
+              }
+            }
           }
         } else if (s.k === 'spring' && s.sq > 0) s.sq -= f;
+      };
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        _loop();
       }
     } catch (err) {
       _iterator7.e(err);
     } finally {
       _iterator7.f();
     }
+    time += f / 60;
+    if (time - lastSaveAt > 10) saveGame();
+    worldStep(f);
+    var _iterator8 = _createForOfIteratorHelper(PLY),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var _q = _step8.value;
+        use(_q);
+        if (!won) playerStep(f);
+        store();
+      }
+    } catch (err) {
+      _iterator8.e(err);
+    } finally {
+      _iterator8.f();
+    }
+    use(PLY[0]);
+  }
+  function playerStep(f) {
+    if (p.arrived) {
+      p.walk += f * .2;
+      return;
+    }
     if (p.dead) {
       p.dead += f;
       if (p.dead > 45) respawn();
-      updateThings(f);
       return;
     }
-    time += f / 60;
-    if (time - lastSaveAt > 10 && !p.dead) saveGame();
     if (p.inv > 0) p.inv -= f;
     var L = keys.left,
       R = keys.right,
@@ -2809,17 +3013,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     if (J && !prevJ) p.jbuf = 8;else p.jbuf -= f;
     var lad = null;
-    var _iterator8 = _createForOfIteratorHelper(W.ladders),
-      _step8;
+    var _iterator0 = _createForOfIteratorHelper(W.ladders),
+      _step0;
     try {
-      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
-        var l = _step8.value;
+      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+        var l = _step0.value;
         if (p.x + p.w / 2 > l.x && p.x + p.w / 2 < l.x + l.w && p.y + p.h > l.y && p.y < l.y + l.h) lad = l;
       }
     } catch (err) {
-      _iterator8.e(err);
+      _iterator0.e(err);
     } finally {
-      _iterator8.f();
+      _iterator0.f();
     }
     if (lad && J && (!p.on || p.y > lad.y)) p.climb = true;
     if (!lad) p.climb = false;
@@ -2861,76 +3065,76 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     prevJ = J;
     var wind = 0;
-    var _iterator9 = _createForOfIteratorHelper(W.winds),
-      _step9;
+    var _iterator1 = _createForOfIteratorHelper(W.winds),
+      _step1;
     try {
-      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
-        var w = _step9.value;
+      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+        var w = _step1.value;
         if (p.x + 10 > w.x1 && p.x + 10 < w.x2) wind += w.f;
       }
     } catch (err) {
-      _iterator9.e(err);
+      _iterator1.e(err);
     } finally {
-      _iterator9.f();
+      _iterator1.f();
     }
     p.x += (p.vx + wind) * f;
-    var _iterator0 = _createForOfIteratorHelper(W.solids),
-      _step0;
+    var _iterator10 = _createForOfIteratorHelper(W.solids),
+      _step10;
     try {
-      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
-        var _s = _step0.value;
-        if (oneway(_s) || _s.gone) continue;
-        if (ov(p, _s)) {
-          if (p.vx > 0) p.x = _s.x - p.w;else if (p.vx < 0) p.x = _s.x + _s.w;else p.x = p.x + p.w / 2 < _s.x + _s.w / 2 ? _s.x - p.w : _s.x + _s.w;
+      for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+        var s = _step10.value;
+        if (oneway(s) || s.gone) continue;
+        if (ov(p, s)) {
+          if (p.vx > 0) p.x = s.x - p.w;else if (p.vx < 0) p.x = s.x + s.w;else p.x = p.x + p.w / 2 < s.x + s.w / 2 ? s.x - p.w : s.x + s.w;
           p.vx = 0;
         }
       }
     } catch (err) {
-      _iterator0.e(err);
+      _iterator10.e(err);
     } finally {
-      _iterator0.f();
+      _iterator10.f();
     }
     p.x = Math.max(0, Math.min(LV.END - p.w, p.x));
     var prevBottom = p.y + p.h;
     p.y += p.vy * f;
     p.on = false;
     p.ground = null;
-    var _iterator1 = _createForOfIteratorHelper(W.solids),
-      _step1;
+    var _iterator11 = _createForOfIteratorHelper(W.solids),
+      _step11;
     try {
-      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
-        var _s2 = _step1.value;
-        if (_s2.gone || !ov(p, _s2)) continue;
-        if (oneway(_s2)) {
-          if (p.vy >= 0 && prevBottom <= _s2.y + 6) {
-            p.y = _s2.y - p.h;
-            if (_s2.k === 'spring') {
+      for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+        var _s = _step11.value;
+        if (_s.gone || !ov(p, _s)) continue;
+        if (oneway(_s)) {
+          if (p.vy >= 0 && prevBottom <= _s.y + 6) {
+            p.y = _s.y - p.h;
+            if (_s.k === 'spring') {
               p.vy = LV.spring || -14;
               p.jumping = false;
-              _s2.sq = 12;
+              _s.sq = 12;
               beep(300, .2, 'sine', .06, 600);
             } else {
               p.vy = 0;
               p.on = true;
-              p.ground = _s2;
+              p.ground = _s;
             }
           }
           continue;
         }
         if (p.vy > 0) {
-          p.y = _s2.y - p.h;
+          p.y = _s.y - p.h;
           p.vy = 0;
           p.on = true;
-          p.ground = _s2;
+          p.ground = _s;
         } else if (p.vy < 0) {
-          p.y = _s2.y + _s2.h;
+          p.y = _s.y + _s.h;
           p.vy = 0;
         }
       }
     } catch (err) {
-      _iterator1.e(err);
+      _iterator11.e(err);
     } finally {
-      _iterator1.f();
+      _iterator11.f();
     }
     if (p.on) {
       p.coyote = 6;
@@ -2939,11 +3143,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     p.ramp = null;
     if (!p.on && !p.climb) {
       var cx = p.x + p.w / 2;
-      var _iterator10 = _createForOfIteratorHelper(W.ramps),
-        _step10;
+      var _iterator12 = _createForOfIteratorHelper(W.ramps),
+        _step12;
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
-          var r = _step10.value;
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+          var r = _step12.value;
           if (cx < r.x1 || cx > r.x2) continue;
           var sl = (r.y2 - r.y1) / (r.x2 - r.x1),
             sy = r.y1 + (cx - r.x1) * sl,
@@ -2960,9 +3164,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           }
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator10.f();
+        _iterator12.f();
       }
     }
     if (!p.on && p.lastRamp && !p.jumping) {
@@ -2986,11 +3190,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     }
     var pb = pbox();
-    var _iterator11 = _createForOfIteratorHelper(W.hazards),
-      _step11;
+    var _iterator13 = _createForOfIteratorHelper(W.hazards),
+      _step13;
     try {
-      for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
-        var h = _step11.value;
+      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+        var h = _step13.value;
         if (h.k === 'spike') {
           if (ov(pb, {
             x: h.x + 3,
@@ -3011,14 +3215,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator11.e(err);
+      _iterator13.e(err);
     } finally {
-      _iterator11.f();
+      _iterator13.f();
     }
     if (p.y > 400) die();
     p.fireCd -= f;
     var g = W.guitar;
-    if (keys.fire && g.got && p.fireCd <= 0) {
+    if (keys.fire && p.guitar && p.fireCd <= 0) {
       W.bolts.push({
         x: p.x + p.w / 2 + p.face * 10,
         y: p.y + 16,
@@ -3028,9 +3232,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       p.fireCd = 24;
       beep(900, .1, 'sawtooth', .035, -500);
     }
-    if (!g.got && circHit(g.x, g.y, 18, pb)) {
-      g.got = true;
-      $('bF').classList.remove('locked');
+    if (!p.guitar && circHit(g.x, g.y, 18, pb)) {
+      p.guitar = true;
+      $(p.idx ? 'b2F' : 'bF').classList.remove('locked');
       burst(g.x, g.y, YELLOW, 20);
       [523, 659, 784].forEach(function (n, i) {
         return setTimeout(function () {
@@ -3038,11 +3242,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }, i * 90);
       });
     }
-    var _iterator12 = _createForOfIteratorHelper(W.candies),
-      _step12;
+    var _iterator14 = _createForOfIteratorHelper(W.candies),
+      _step14;
     try {
-      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
-        var _c = _step12.value;
+      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+        var _c = _step14.value;
         if (!_c.got && Math.abs(_c.x - (p.x + 10)) < 22 && Math.abs(_c.y - (p.y + 18)) < 28) {
           _c.got = true;
           candies++;
@@ -3051,12 +3255,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator12.e(err);
+      _iterator14.e(err);
     } finally {
-      _iterator12.f();
+      _iterator14.f();
     }
-    if (circHit(W.heart.x, W.heart.y, 22, pb)) win();
-    updateThings(f);
+    if (circHit(W.heart.x, W.heart.y, 34, pb)) reachHeart();
+    collide(f);
     var tx = Math.max(0, Math.min(LV.END - viewW, p.x - viewW * (LV.scooter ? 0.28 : 0.38)));
     camX += (tx - camX) * Math.min(1, .15 * f);
     camY += (camTargetY() - camY) * Math.min(1, .12 * f);
@@ -3069,15 +3273,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       beep(220, .15, 'square', .06, 400);
     } else die();
   }
-  function updateThings(f) {
-    var pb = pbox(),
-      alive = !p.dead;
-    var _iterator13 = _createForOfIteratorHelper(W.walkers),
-      _step13;
+  function worldStep(f) {
+    var _iterator15 = _createForOfIteratorHelper(W.walkers),
+      _step15;
     try {
-      var _loop = function _loop() {
-        var s = _step13.value;
-        if (!s.alive) return 1;
+      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+        var s = _step15.value;
+        if (!s.alive) continue;
         s.x += s.sp * s.d * f;
         if (s.x > s.b) {
           s.x = s.b;
@@ -3087,106 +3289,53 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           s.x = s.a;
           s.d = 1;
         }
-        var hh = WH[s.kind],
-          top = s.gy - hh;
-        if (alive && ov(pb, {
-          x: s.x - 20,
-          y: top,
-          w: 40,
-          h: hh
-        })) stompOrDie(top, function () {
-          s.alive = false;
-          burst(s.x, top + 6, s.kind === 'alien' ? PURPLE : s.kind === 'spider' ? PEN : GREEN, 14);
-        }, f);
-      };
-      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
-        if (_loop()) continue;
-      }
-    } catch (err) {
-      _iterator13.e(err);
-    } finally {
-      _iterator13.f();
-    }
-    var _iterator14 = _createForOfIteratorHelper(W.flyers),
-      _step14;
-    try {
-      var _loop2 = function _loop2() {
-        var s = _step14.value;
-        if (!s.alive) {
-          s.down -= f;
-          if (s.down <= 0) s.alive = true;
-          return 1;
-        }
-        var t = (tick + s.off) * .03;
-        s.x = s.cx + Math.sin(t) * s.ax;
-        s.y = s.cy + Math.sin(t * 1.7) * s.ay;
-        if (alive && ov(pb, {
-          x: s.x - 16,
-          y: s.y - 10,
-          w: 32,
-          h: 20
-        })) stompOrDie(s.y - 10, function () {
-          s.alive = false;
-          s.down = 200;
-          burst(s.x, s.y, PURPLE, 14);
-        }, f);
-      };
-      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
-        if (_loop2()) continue;
-      }
-    } catch (err) {
-      _iterator14.e(err);
-    } finally {
-      _iterator14.f();
-    }
-    var _iterator15 = _createForOfIteratorHelper(W.jumpers),
-      _step15;
-    try {
-      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
-        var s = _step15.value;
-        if (!s.alive) {
-          s.down -= f;
-          if (s.down <= 0) {
-            s.alive = true;
-            s.y = 345;
-            s.vy = 0;
-          }
-          continue;
-        }
-        var ph = (tick + s.off) % s.per;
-        if (s.y >= 345 && ph < f * 1.5 && s.vy === 0) s.vy = s.v;
-        s.y += s.vy * f;
-        if (s.vy !== 0) s.vy += .3 * f;
-        if (s.y >= 345 && s.vy > 0) {
-          s.y = 345;
-          s.vy = 0;
-        }
-        if (alive && s.y < 330 && circHit(s.x, s.y, s.kind === 'shark' ? 13 : 11, pb)) die();
       }
     } catch (err) {
       _iterator15.e(err);
     } finally {
       _iterator15.f();
     }
-    var _iterator16 = _createForOfIteratorHelper(W.fallers),
+    var _iterator16 = _createForOfIteratorHelper(W.flyers),
       _step16;
     try {
       for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
-        var m = _step16.value;
-        var y = fallY(m);
-        if (alive && y > -10 && y < H && circHit(m.x, y, 10, pb)) die();
+        var _s2 = _step16.value;
+        if (!_s2.alive) {
+          _s2.down -= f;
+          if (_s2.down <= 0) _s2.alive = true;
+          continue;
+        }
+        var t = (tick + _s2.off) * .03;
+        _s2.x = _s2.cx + Math.sin(t) * _s2.ax;
+        _s2.y = _s2.cy + Math.sin(t * 1.7) * _s2.ay;
       }
     } catch (err) {
       _iterator16.e(err);
     } finally {
       _iterator16.f();
     }
-    var _iterator17 = _createForOfIteratorHelper(W.droppers),
+    var _iterator17 = _createForOfIteratorHelper(W.jumpers),
       _step17;
     try {
       for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
-        var d = _step17.value;
-        if (alive && d.alive && circHit(d.x, dropY(d), 10, pb)) die();
+        var _s3 = _step17.value;
+        if (!_s3.alive) {
+          _s3.down -= f;
+          if (_s3.down <= 0) {
+            _s3.alive = true;
+            _s3.y = 345;
+            _s3.vy = 0;
+          }
+          continue;
+        }
+        var ph = (tick + _s3.off) % _s3.per;
+        if (_s3.y >= 345 && ph < f * 1.5 && _s3.vy === 0) _s3.vy = _s3.v;
+        _s3.y += _s3.vy * f;
+        if (_s3.vy !== 0) _s3.vy += .3 * f;
+        if (_s3.y >= 345 && _s3.vy > 0) {
+          _s3.y = 345;
+          _s3.vy = 0;
+        }
       }
     } catch (err) {
       _iterator17.e(err);
@@ -3197,19 +3346,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _step18;
     try {
       for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
-        var _s3 = _step18.value;
-        if (!_s3.alive) continue;
-        _s3.x += _s3.sp * _s3.d * f;
-        _s3.rot += _s3.sp * _s3.d * f / 11;
-        if (_s3.x > _s3.b) {
-          _s3.x = _s3.b;
-          _s3.d = -1;
+        var _s4 = _step18.value;
+        if (!_s4.alive) continue;
+        _s4.x += _s4.sp * _s4.d * f;
+        _s4.rot += _s4.sp * _s4.d * f / 11;
+        if (_s4.x > _s4.b) {
+          _s4.x = _s4.b;
+          _s4.d = -1;
         }
-        if (_s3.x < _s3.a) {
-          _s3.x = _s3.a;
-          _s3.d = 1;
+        if (_s4.x < _s4.a) {
+          _s4.x = _s4.a;
+          _s4.d = 1;
         }
-        if (alive && circHit(_s3.x, _s3.y, 11, pb)) die();
       }
     } catch (err) {
       _iterator18.e(err);
@@ -3248,11 +3396,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       b.inv -= f;
       b.y = b.by + Math.sin(b.t * .045) * b.ay;
       b.x = b.cx + Math.sin(b.t * .017) * b.ax;
-      if (p.x > b.trig && alive) {
+      var tg = PLY.filter(function (q) {
+        return !q.dead && !q.arrived && q.x > b.trig;
+      }).sort(function (a, c) {
+        return Math.abs(a.x - b.x) - Math.abs(c.x - b.x);
+      })[0];
+      if (tg) {
         b.shoot -= f;
         if (b.shoot <= 0) {
-          var dx = p.x + 10 - b.x,
-            dy = p.y + 18 - b.y,
+          var dx = tg.x + 10 - b.x,
+            dy = tg.y + 18 - b.y,
             a = Math.atan2(dy, dx),
             sp = LV.boss.sp,
             spr = LV.boss.spread;
@@ -3274,13 +3427,6 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           }, 90);
         }
       }
-      if (alive && circHit(b.x, b.y, b.r, pb)) {
-        if (p.vy > 0 && p.y + p.h < b.y - 6) {
-          p.vy = LV.JV * .95;
-          p.jumping = false;
-          hurtBoss();
-        } else die();
-      }
     }
     var _iterator20 = _createForOfIteratorHelper(W.shots),
       _step20;
@@ -3290,17 +3436,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         q.x += q.vx * f;
         q.y += q.vy * f;
         q.l -= f;
-        if (alive && circHit(q.x, q.y, 7, pb)) {
-          q.l = 0;
-          die();
-        }
         if (q.kind === 'ball' || q.kind === 'coco') {
           var _iterator23 = _createForOfIteratorHelper(W.solids),
             _step23;
           try {
             for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
-              var _s4 = _step23.value;
-              if (!oneway(_s4) && q.x > _s4.x && q.x < _s4.x + _s4.w && q.y > _s4.y && q.y < _s4.y + _s4.h) q.l = 0;
+              var _s5 = _step23.value;
+              if (!oneway(_s5) && q.x > _s5.x && q.x < _s5.x + _s5.w && q.y > _s5.y && q.y < _s5.y + _s5.h) q.l = 0;
             }
           } catch (err) {
             _iterator23.e(err);
@@ -3320,7 +3462,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var _iterator21 = _createForOfIteratorHelper(W.bolts),
       _step21;
     try {
-      var _loop3 = function _loop3() {
+      var _loop2 = function _loop2() {
         var bo = _step21.value;
         bo.x += 7 * bo.d * f;
         bo.l -= f;
@@ -3331,11 +3473,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           _step24;
         try {
           for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
-            var _s5 = _step24.value;
-            if (_s5.alive && hit(_s5.x, _s5.gy - WH[_s5.kind] / 2, 24)) {
-              _s5.alive = false;
+            var _s6 = _step24.value;
+            if (_s6.alive && hit(_s6.x, _s6.gy - WH[_s6.kind] / 2, 24)) {
+              _s6.alive = false;
               bo.l = 0;
-              burst(_s5.x, _s5.gy - 6, GREEN, 12);
+              burst(_s6.x, _s6.gy - 6, GREEN, 12);
               beep(220, .15, 'square', .05, 400);
             }
           }
@@ -3348,12 +3490,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           _step25;
         try {
           for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
-            var _s6 = _step25.value;
-            if (_s6.alive && hit(_s6.x, _s6.y, 18)) {
-              _s6.alive = false;
-              _s6.down = 200;
+            var _s7 = _step25.value;
+            if (_s7.alive && hit(_s7.x, _s7.y, 18)) {
+              _s7.alive = false;
+              _s7.down = 200;
               bo.l = 0;
-              burst(_s6.x, _s6.y, PURPLE, 12);
+              burst(_s7.x, _s7.y, PURPLE, 12);
             }
           }
         } catch (err) {
@@ -3365,12 +3507,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           _step26;
         try {
           for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
-            var _s7 = _step26.value;
-            if (_s7.alive && _s7.y < 330 && hit(_s7.x, _s7.y, 16)) {
-              _s7.alive = false;
-              _s7.down = 240;
+            var _s8 = _step26.value;
+            if (_s8.alive && _s8.y < 330 && hit(_s8.x, _s8.y, 16)) {
+              _s8.alive = false;
+              _s8.down = 240;
               bo.l = 0;
-              burst(_s7.x, _s7.y, '#8fa1b3', 12);
+              burst(_s8.x, _s8.y, '#8fa1b3', 12);
             }
           }
         } catch (err) {
@@ -3382,11 +3524,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           _step27;
         try {
           for (_iterator27.s(); !(_step27 = _iterator27.n()).done;) {
-            var _s8 = _step27.value;
-            if (_s8.alive && hit(_s8.x, _s8.y, 14)) {
-              _s8.alive = false;
+            var _s9 = _step27.value;
+            if (_s9.alive && hit(_s9.x, _s9.y, 14)) {
+              _s9.alive = false;
               bo.l = 0;
-              burst(_s8.x, _s8.y, '#a99f92', 14);
+              burst(_s9.x, _s9.y, '#a99f92', 14);
             }
           }
         } catch (err) {
@@ -3398,11 +3540,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           _step28;
         try {
           for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
-            var _d = _step28.value;
-            if (_d.alive && hit(_d.x, dropY(_d), 14)) {
-              _d.alive = false;
+            var d = _step28.value;
+            if (d.alive && hit(d.x, dropY(d), 14)) {
+              d.alive = false;
               bo.l = 0;
-              burst(_d.x, dropY(_d), PEN, 12);
+              burst(d.x, dropY(d), PEN, 12);
             }
           }
         } catch (err) {
@@ -3414,9 +3556,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           _step29;
         try {
           for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
-            var _q = _step29.value;
-            if (hit(_q.x, _q.y, 10)) {
-              _q.l = 0;
+            var _q2 = _step29.value;
+            if (hit(_q2.x, _q2.y, 10)) {
+              _q2.l = 0;
               bo.l = 0;
             }
           }
@@ -3433,8 +3575,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           _step30;
         try {
           for (_iterator30.s(); !(_step30 = _iterator30.n()).done;) {
-            var _s9 = _step30.value;
-            if (!oneway(_s9) && _s9.k !== 'barrier' && bo.x > _s9.x && bo.x < _s9.x + _s9.w && bo.y > _s9.y && bo.y < _s9.y + _s9.h) bo.l = 0;
+            var _s0 = _step30.value;
+            if (!oneway(_s0) && _s0.k !== 'barrier' && bo.x > _s0.x && bo.x < _s0.x + _s0.w && bo.y > _s0.y && bo.y < _s0.y + _s0.h) bo.l = 0;
           }
         } catch (err) {
           _iterator30.e(err);
@@ -3443,7 +3585,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       };
       for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
-        _loop3();
+        _loop2();
       }
     } catch (err) {
       _iterator21.e(err);
@@ -3457,11 +3599,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _step22;
     try {
       for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
-        var _q2 = _step22.value;
-        _q2.x += _q2.vx * f;
-        _q2.y += _q2.vy * f;
-        _q2.vy += .15 * f;
-        _q2.l -= f;
+        var _q3 = _step22.value;
+        _q3.x += _q3.vx * f;
+        _q3.y += _q3.vy * f;
+        _q3.vy += .15 * f;
+        _q3.l -= f;
       }
     } catch (err) {
       _iterator22.e(err);
@@ -3471,6 +3613,156 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     W.parts = W.parts.filter(function (q) {
       return q.l > 0;
     });
+  }
+  function collide(f) {
+    if (p.dead || p.arrived) return;
+    var pb = pbox();
+    var _iterator31 = _createForOfIteratorHelper(W.walkers),
+      _step31;
+    try {
+      var _loop3 = function _loop3() {
+        var s = _step31.value;
+        if (!s.alive || p.dead) return 1;
+        var hh = WH[s.kind],
+          top = s.gy - hh;
+        if (ov(pb, {
+          x: s.x - 20,
+          y: top,
+          w: 40,
+          h: hh
+        })) stompOrDie(top, function () {
+          s.alive = false;
+          burst(s.x, top + 6, s.kind === 'alien' ? PURPLE : s.kind === 'spider' ? PEN : GREEN, 14);
+        }, f);
+      };
+      for (_iterator31.s(); !(_step31 = _iterator31.n()).done;) {
+        if (_loop3()) continue;
+      }
+    } catch (err) {
+      _iterator31.e(err);
+    } finally {
+      _iterator31.f();
+    }
+    var _iterator32 = _createForOfIteratorHelper(W.flyers),
+      _step32;
+    try {
+      var _loop4 = function _loop4() {
+        var s = _step32.value;
+        if (!s.alive || p.dead) return 1;
+        if (ov(pb, {
+          x: s.x - 16,
+          y: s.y - 10,
+          w: 32,
+          h: 20
+        })) stompOrDie(s.y - 10, function () {
+          s.alive = false;
+          s.down = 200;
+          burst(s.x, s.y, PURPLE, 14);
+        }, f);
+      };
+      for (_iterator32.s(); !(_step32 = _iterator32.n()).done;) {
+        if (_loop4()) continue;
+      }
+    } catch (err) {
+      _iterator32.e(err);
+    } finally {
+      _iterator32.f();
+    }
+    var _iterator33 = _createForOfIteratorHelper(W.jumpers),
+      _step33;
+    try {
+      for (_iterator33.s(); !(_step33 = _iterator33.n()).done;) {
+        var s = _step33.value;
+        if (s.alive && s.y < 330 && circHit(s.x, s.y, s.kind === 'shark' ? 13 : 11, pb)) die();
+      }
+    } catch (err) {
+      _iterator33.e(err);
+    } finally {
+      _iterator33.f();
+    }
+    var _iterator34 = _createForOfIteratorHelper(W.fallers),
+      _step34;
+    try {
+      for (_iterator34.s(); !(_step34 = _iterator34.n()).done;) {
+        var m = _step34.value;
+        var y = fallY(m);
+        if (y > -10 && y < H && circHit(m.x, y, 10, pb)) die();
+      }
+    } catch (err) {
+      _iterator34.e(err);
+    } finally {
+      _iterator34.f();
+    }
+    var _iterator35 = _createForOfIteratorHelper(W.droppers),
+      _step35;
+    try {
+      for (_iterator35.s(); !(_step35 = _iterator35.n()).done;) {
+        var d = _step35.value;
+        if (d.alive && circHit(d.x, dropY(d), 10, pb)) die();
+      }
+    } catch (err) {
+      _iterator35.e(err);
+    } finally {
+      _iterator35.f();
+    }
+    var _iterator36 = _createForOfIteratorHelper(W.rollers),
+      _step36;
+    try {
+      for (_iterator36.s(); !(_step36 = _iterator36.n()).done;) {
+        var _s1 = _step36.value;
+        if (_s1.alive && circHit(_s1.x, _s1.y, 11, pb)) die();
+      }
+    } catch (err) {
+      _iterator36.e(err);
+    } finally {
+      _iterator36.f();
+    }
+    var b = W.boss;
+    if (b && !b.dead && !p.dead && circHit(b.x, b.y, b.r, pb)) {
+      if (p.vy > 0 && p.y + p.h < b.y - 6) {
+        p.vy = LV.JV * .95;
+        p.jumping = false;
+        hurtBoss();
+      } else die();
+    }
+    var _iterator37 = _createForOfIteratorHelper(W.shots),
+      _step37;
+    try {
+      for (_iterator37.s(); !(_step37 = _iterator37.n()).done;) {
+        var q = _step37.value;
+        if (q.l > 0 && !p.dead && circHit(q.x, q.y, 7, pb)) {
+          q.l = 0;
+          die();
+        }
+      }
+    } catch (err) {
+      _iterator37.e(err);
+    } finally {
+      _iterator37.f();
+    }
+  }
+  function reachHeart() {
+    if (!duo()) {
+      win();
+      return;
+    }
+    if (p.arrived || won) return;
+    p.arrived = true;
+    p.arrT = time;
+    p.vx = 0;
+    p.vy = 0;
+    p.inv = 0;
+    burst(W.heart.x, W.heart.y, RED, 20);
+    beep(784, .2, 'triangle', .07);
+    if (MODE === 'gara') {
+      store();
+      finishDuo(p.idx);
+    } else if (PLY.every(function (q) {
+      return q.arrived;
+    })) {
+      store();
+      finishDuo(-1);
+    }
   }
   function hurtBoss() {
     var b = W.boss;
@@ -3648,7 +3940,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       mimg.src = blockMapURL();
       h = SEGS.map(function (d, k) {
         return "<path id=\"seg".concat(k, "\" d=\"").concat(d, "\" fill=\"none\" stroke=\"none\"/>");
-      }).join('') + "<g transform=\"translate(".concat(tp.x, " ").concat(tp.y, ")\" id=\"mapTom\"><image href=\"").concat(tomURL(), "\" x=\"-20\" y=\"-48\" width=\"40\" height=\"48\" style=\"image-rendering:pixelated\"/></g>");
+      }).join('') + "<g transform=\"translate(".concat(tp.x, " ").concat(tp.y, ")\" id=\"mapTom\"><image href=\"").concat(tomURL(), "\" x=\"-20\" y=\"-48\" width=\"40\" height=\"48\" preserveAspectRatio=\"xMidYMax meet\" style=\"image-rendering:pixelated\"/></g>");
     } else if (mimg.getAttribute('src') !== MAP_SRC) mimg.src = MAP_SRC;
     $('mapSvg').innerHTML = h;
     var map = $('map');
@@ -3668,7 +3960,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       if (st === 'locked') b.innerHTML = LOCK;else b.textContent = String(k + 1);
       b.onclick = function () {
         if (mapSel === k && st !== 'locked') {
-          startLevel(li);
+          openSetup(li);
           return;
         }
         mapSel = k;
@@ -3698,7 +3990,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     $('playBtn').textContent = done[li] ? 'Rigioca ▶' : 'Gioca ▶';
   }
   $('playBtn').onclick = function () {
-    if (unlockedStep(mapSel)) startLevel(ORDER[mapSel]);
+    if (unlockedStep(mapSel)) openSetup(ORDER[mapSel]);
   };
   function showMap(anim) {
     var ns = nextStep();
@@ -3785,6 +4077,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       points: pts,
       falls
     };
+    $('winTitle').textContent = CHARS[p.char].name.toUpperCase() + ' ARRIVO! ♥';
+    $('pname').hidden = false;
     $('winText').textContent = LV.name;
     $('scoreBox').innerHTML = '';
     var rows = [["Caramelle ".concat(candies, "/").concat(W.candies.length, " \xD7 50"), cPts], ["Tempo ".concat(fmt(sec), " (bonus sotto ").concat(fmt(LV.par), ")"), tPts], ['Punti', pts]];
@@ -3815,6 +4109,93 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }, i * 130);
     });
   }
+  function finishDuo(w) {
+    if (won) return;
+    won = true;
+    running = false;
+    clearSave();
+    var wasDone = done[lvIdx];
+    justDone = wasDone ? null : STEP(lvIdx) - 1;
+    done[lvIdx] = true;
+    try {
+      localStorage.setItem('tom-done', JSON.stringify(done));
+    } catch (e) {}
+    showStars();
+    var sec = Math.round(time),
+      tb = Math.max(0, LV.par - sec) * 10,
+      tot = W.candies.length,
+      nm = function nm(q) {
+        return CHARS[q.char].name;
+      };
+    var box = $('scoreBox');
+    box.innerHTML = '';
+    var row = function row(a, b, cls) {
+      var x = document.createElement('span'),
+        y = document.createElement('b');
+      x.textContent = a;
+      y.textContent = b;
+      if (cls) {
+        x.className = cls;
+        y.className = cls;
+      }
+      box.append(x, y);
+    };
+    if (MODE === 'gara') {
+      var wq = PLY[w];
+      $('winTitle').textContent = 'VINCE ' + nm(wq).toUpperCase() + '! ♥';
+      lastResult = PLY.map(function (q) {
+        return {
+          level: lvIdx,
+          candies: q.candies,
+          total: tot,
+          sec: q.idx === w ? sec : 0,
+          points: q.candies * 50 + (q.idx === w ? tb : 0),
+          falls: q.falls,
+          name: nm(q),
+          mode: 'gara'
+        };
+      });
+      PLY.forEach(function (q) {
+        return row("".concat(nm(q), " \xB7 \uD83C\uDF6C ").concat(q.candies, " \xD7 50").concat(q.idx === w ? ' + tempo ' + fmt(sec) : ''), lastResult[q.idx].points, q.idx === w ? 'tot' : '');
+      });
+    } else {
+      var c = PLY.reduce(function (a, q) {
+        return a + q.candies;
+      }, 0);
+      $('winTitle').textContent = 'SQUADRA ARRIVATA! ♥';
+      lastResult = [{
+        level: lvIdx,
+        candies: c,
+        total: tot,
+        sec,
+        points: c * 50 + tb,
+        falls: PLY.reduce(function (a, q) {
+          return a + q.falls;
+        }, 0),
+        name: PLY.map(nm).join(' + '),
+        mode: 'squadra'
+      }];
+      PLY.forEach(function (q) {
+        return row("".concat(nm(q), " \xB7 \uD83C\uDF6C ").concat(q.candies), q.candies * 50);
+      });
+      row("Tempo ".concat(fmt(sec), " (bonus sotto ").concat(fmt(LV.par), ")"), tb);
+      row('Punti della squadra', lastResult[0].points, 'tot');
+    }
+    $('winText').textContent = LV.name;
+    $('pname').hidden = true;
+    $('saveForm').hidden = false;
+    $('saveBtn').disabled = false;
+    $('saveNote').textContent = '';
+    $('winBoard').hidden = true;
+    var nk = STEP(lvIdx);
+    $('next').hidden = nk >= ORDER.length;
+    $('win').hidden = false;
+    [523, 659, 784, 1046].forEach(function (n, i) {
+      return setTimeout(function () {
+        return beep(n, .2, 'triangle', .07);
+      }, i * 130);
+    });
+  }
   var dbP = null;
   function getDb() {
     if (!dbP) dbP = window.claude && window.claude.use ? window.claude.use('db').catch(function () {
@@ -3836,7 +4217,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _saveScore() {
     _saveScore = _asyncToGenerator(_regenerator().m(function _callee2(entry) {
-      var db, ref, a, _t, _t2;
+      var db, ref, a, _t2, _t3;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.p = _context2.n) {
           case 0:
@@ -3860,7 +4241,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             });
           case 4:
             _context2.p = 4;
-            _t = _context2.v;
+            _t2 = _context2.v;
           case 5:
             _context2.p = 5;
             a = localScores();
@@ -3874,7 +4255,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             });
           case 6:
             _context2.p = 6;
-            _t2 = _context2.v;
+            _t3 = _context2.v;
             return _context2.a(2, {
               ok: false
             });
@@ -3888,7 +4269,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _topScores() {
     _topScores = _asyncToGenerator(_regenerator().m(function _callee3(level) {
-      var db, q, _t3;
+      var db, q, _t4;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
@@ -3912,7 +4293,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }));
           case 4:
             _context3.p = 4;
-            _t3 = _context3.v;
+            _t4 = _context3.v;
           case 5:
             return _context3.a(2, localScores().filter(function (e) {
               return e.level === level;
@@ -3954,9 +4335,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   $('saveForm').addEventListener('submit', function () {
     var _ref = _asyncToGenerator(_regenerator().m(function _callee(ev) {
-      var name, entry, r, list, pos;
+      var many, name, entries, r, _iterator38, _step38, en, rr, list, pos, _t;
       return _regenerator().w(function (_context) {
-        while (1) switch (_context.n) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
             ev.preventDefault();
             if (lastResult) {
@@ -3965,44 +4346,75 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }
             return _context.a(2);
           case 1:
-            name = ($('pname').value || '').trim().slice(0, 14) || 'Tom';
-            try {
+            many = Array.isArray(lastResult);
+            name = ($('pname').value || '').trim().slice(0, 14) || CHARS[PLY[0].char].name;
+            if (!many) try {
               localStorage.setItem('tom-name', name);
             } catch (e) {}
             $('saveBtn').disabled = true;
             $('saveNote').textContent = 'Salvo...';
-            entry = Object.assign({
+            entries = many ? lastResult.map(function (e) {
+              return Object.assign({
+                at: Date.now()
+              }, e);
+            }) : [Object.assign({
               name,
               at: Date.now()
-            }, lastResult);
-            _context.n = 2;
-            return saveScore(entry);
-          case 2:
-            r = _context.v;
-            if (r.ok) {
-              _context.n = 3;
+            }, lastResult)];
+            r = null;
+            _iterator38 = _createForOfIteratorHelper(entries);
+            _context.p = 2;
+            _iterator38.s();
+          case 3:
+            if ((_step38 = _iterator38.n()).done) {
+              _context.n = 7;
+              break;
+            }
+            en = _step38.value;
+            _context.n = 4;
+            return saveScore(en);
+          case 4:
+            rr = _context.v;
+            if (rr.ok) {
+              _context.n = 5;
               break;
             }
             $('saveNote').textContent = 'Non sono riuscito a salvare il punteggio. Riprova.';
             $('saveBtn').disabled = false;
             return _context.a(2);
-          case 3:
+          case 5:
+            if (!r) r = rr;
+          case 6:
+            _context.n = 3;
+            break;
+          case 7:
+            _context.n = 9;
+            break;
+          case 8:
+            _context.p = 8;
+            _t = _context.v;
+            _iterator38.e(_t);
+          case 9:
+            _context.p = 9;
+            _iterator38.f();
+            return _context.f(9);
+          case 10:
             $('saveForm').hidden = true;
             $('saveNote').textContent = r.shared ? 'Salvato in classifica!' : 'Salvato su questo telefono.';
-            _context.n = 4;
-            return topScores(lastResult.level);
-          case 4:
+            _context.n = 11;
+            return topScores(entries[0].level);
+          case 11:
             list = _context.v;
             renderBoard($('winBoard'), list, r.id);
             $('winBoard').hidden = false;
             pos = list.findIndex(function (e) {
               return e.id === r.id;
             });
-            if (pos >= 0) $('saveNote').textContent += " Sei ".concat(pos + 1, "\xB0 nel livello ").concat(STEP(lastResult.level), ".");
-          case 5:
+            if (pos >= 0) $('saveNote').textContent += " ".concat(many ? 'Primo salvato: ' : 'Sei ').concat(pos + 1, "\xB0 nel livello ").concat(STEP(entries[0].level), ".");
+          case 12:
             return _context.a(2);
         }
-      }, _callee);
+      }, _callee, null, [[2, 8, 9, 10]]);
     }));
     return function (_x7) {
       return _ref.apply(this, arguments);
@@ -4014,7 +4426,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _showBoard() {
     _showBoard = _asyncToGenerator(_regenerator().m(function _callee4(t) {
-      var lbl, _t4, _t5;
+      var lbl, _t5, _t6;
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.n) {
           case 0:
@@ -4025,12 +4437,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               return b.setAttribute('aria-selected', String(+b.dataset.t === t));
             });
             $('board').innerHTML = '<li class="empty">Carico...</li>';
-            _t4 = renderBoard;
-            _t5 = $('board');
+            _t5 = renderBoard;
+            _t6 = $('board');
             _context4.n = 1;
             return topScores(t);
           case 1:
-            _t4(_t5, _context4.v, null);
+            _t5(_t6, _context4.v, null);
           case 2:
             return _context4.a(2);
         }
@@ -4381,15 +4793,110 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     ctx.stroke();
   }
+  function pHead(cx, top, f, ch) {
+    if (ch === 'milly') {
+      ctx.fillStyle = '#c8642a';
+      pen(1.8, '#8c3f17');
+      ctx.beginPath();
+      ctx.ellipse(cx - f * 2, top + 10, 9, 11, 0, 0, 6.283);
+      ctx.fill();
+      ctx.stroke();
+    }
+    circle(cx, top + 7, ch === 'papone' ? 7.6 : 7, '#fff', 2.6);
+    if (ch === 'tommy') {
+      pen(1.8);
+      ctx.beginPath();
+      for (var i = -6; i <= 6; i += 3) {
+        ctx.moveTo(cx + i, top + 2);
+        ctx.lineTo(cx + i * 1.3, top - 3 - Math.abs(i) % 2 * 2);
+      }
+      ctx.stroke();
+    }
+    if (ch === 'milly') {
+      ctx.fillStyle = '#c8642a';
+      pen(1.6, '#8c3f17');
+      ctx.beginPath();
+      ctx.arc(cx, top + 6.5, 7.6, Math.PI * 1.02, Math.PI * 1.98);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    if (ch === 'papone') {
+      pen(1.6, '#9aa0b5');
+      ctx.beginPath();
+      ctx.arc(cx - f * 2, top + 4, 3.4, Math.PI * 1.1, Math.PI * 1.6);
+      ctx.stroke();
+      pen(1.6);
+      ctx.beginPath();
+      ctx.arc(cx - f * 7.6, top + 8, 2, 0, 6.283);
+      ctx.stroke();
+    }
+    ctx.fillStyle = PEN;
+    ctx.beginPath();
+    ctx.arc(cx + f * 3, top + 6, 1.3, 0, 6.28);
+    ctx.fill();
+    pen(1.3);
+    ctx.beginPath();
+    ctx.arc(cx + f * 2, top + 8, 2.6, .2, 2.6);
+    ctx.stroke();
+  }
+  function pBunny(cx, foot, f, hop) {
+    var y = foot - hop,
+      bx = cx - f * 3;
+    ctx.fillStyle = '#ffffff';
+    pen(1.8);
+    ctx.beginPath();
+    ctx.arc(bx - f * 12, y - 11, 3.6, 0, 6.283);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#e8d2a6';
+    pen(2.2);
+    ctx.beginPath();
+    ctx.ellipse(bx, y - 10, 13, 9, 0, 0, 6.283);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(bx + f * 6, y - 1.5, 4.5, 2.2, 0, 0, 6.283);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(bx + f * 12, y - 18, 7.5, 0, 6.283);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#d4b483';
+    pen(1.8);
+    ctx.beginPath();
+    ctx.ellipse(bx + f * 8, y - 12, 3.6, 8.5, f * 0.35, 0, 6.283);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = PEN;
+    ctx.beginPath();
+    ctx.arc(bx + f * 15, y - 20, 1.5, 0, 6.283);
+    ctx.fill();
+    ctx.fillStyle = '#e096d2';
+    ctx.beginPath();
+    ctx.arc(bx + f * 19.3, y - 17, 1.6, 0, 6.283);
+    ctx.fill();
+  }
   function drawTom() {
     if (p.inv > 0 && Math.floor(p.inv / 4) % 2) return;
+    var ch = p.char || 'tommy';
     var cx = p.x + p.w / 2,
-      top = p.y,
+      foot = p.y + p.h,
       f = p.face,
       sw = Math.sin(p.walk) * (p.on || p.climb ? 7 : 3);
     ctx.save();
     if (p.dead) ctx.globalAlpha = Math.max(0, 1 - p.dead / 45);
-    if (W.guitar.got) {
+    var sc = ch === 'papone' ? 1.14 : ch === 'milly' ? .9 : 1;
+    ctx.translate(cx, foot);
+    ctx.scale(sc, sc);
+    ctx.translate(-cx, -foot);
+    var top = foot - 36;
+    if (p.arrived) {
+      var j = Math.abs(Math.sin(p.walk * 2)) * 8;
+      ctx.translate(0, -j);
+    }
+    if (p.guitar && ch !== 'carotino') {
       ctx.save();
       ctx.translate(cx - f * 7, top + 22);
       ctx.rotate(f * .5);
@@ -4405,16 +4912,87 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.stroke();
       ctx.restore();
     }
+    if (ch === 'carotino') {
+      var hop = p.on && Math.abs(p.vx) > .4 && !LV.scooter ? Math.abs(Math.sin(p.walk * 1.4)) * 5 : 0;
+      if (LV.scooter === 'cart') {
+        pBunny(cx, foot - 8, f, 0);
+        var wr = p.walk % 6.283;
+        ctx.fillStyle = '#9aa0b5';
+        pen(2.4);
+        ctx.beginPath();
+        ctx.moveTo(cx - 17, foot - 22);
+        ctx.lineTo(cx + 17, foot - 22);
+        ctx.lineTo(cx + 13, foot - 6);
+        ctx.lineTo(cx - 13, foot - 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        for (var _i4 = 0, _arr2 = [-9, 9]; _i4 < _arr2.length; _i4++) {
+          var wx = _arr2[_i4];
+          circle(cx + wx, foot - 4, 4.5, '#3b3f4f', 1.8);
+          pen(1.2, '#c9ccd8');
+          ctx.beginPath();
+          ctx.moveTo(cx + wx + Math.cos(wr) * 3.5, foot - 4 + Math.sin(wr) * 3.5);
+          ctx.lineTo(cx + wx - Math.cos(wr) * 3.5, foot - 4 - Math.sin(wr) * 3.5);
+          ctx.stroke();
+        }
+      } else if (LV.scooter) {
+        var ang = 0;
+        if (p.ramp) ang = Math.atan2(p.ramp.y2 - p.ramp.y1, p.ramp.x2 - p.ramp.x1);
+        ctx.save();
+        ctx.translate(cx, foot);
+        ctx.rotate(ang);
+        var _wr = p.walk % 6.283;
+        pen(3, PEN);
+        ctx.beginPath();
+        ctx.moveTo(-15, -5);
+        ctx.lineTo(13, -5);
+        ctx.lineTo(16, -30);
+        ctx.moveTo(11, -31);
+        ctx.lineTo(21, -29);
+        ctx.stroke();
+        for (var _i5 = 0, _arr3 = [-12, 13]; _i5 < _arr3.length; _i5++) {
+          var _wx = _arr3[_i5];
+          circle(_wx, -3, 4, '#fff', 2);
+          pen(1.4);
+          ctx.beginPath();
+          ctx.moveTo(_wx + Math.cos(_wr) * 4, -3 + Math.sin(_wr) * 4);
+          ctx.lineTo(_wx - Math.cos(_wr) * 4, -3 - Math.sin(_wr) * 4);
+          ctx.stroke();
+        }
+        pBunny(-3, -6, 1, 0);
+        ctx.restore();
+      } else pBunny(cx, foot, f, hop);
+      if (LV.theme === 8) {
+        var hx = cx - f * 3 + f * 12;
+        ctx.fillStyle = RED;
+        pen(1.6);
+        ctx.beginPath();
+        ctx.moveTo(hx - 6, foot - 24);
+        ctx.lineTo(hx, foot - 34);
+        ctx.lineTo(hx + 6, foot - 24);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        circle(hx, foot - 35, 2.4, '#fff', 1.2);
+      }
+      if (LV.theme === 2) {
+        circle(cx - f * 3 + f * 12, foot - 18, 11, 'rgba(200,230,255,.35)', 1.6, BLUE);
+      }
+      ctx.restore();
+      if (p.dead) label('Ops!', cx - 16, top - 10 - p.dead * .4, 20, RED);
+      return;
+    }
     if (LV.scooter) {
-      var by = top + p.h,
-        wr = p.walk % 6.283;
-      var ang = 0;
+      var by = foot,
+        _wr2 = p.walk % 6.283;
+      var _ang = 0;
       if (p.ramp) {
-        ang = Math.atan2(p.ramp.y2 - p.ramp.y1, p.ramp.x2 - p.ramp.x1);
+        _ang = Math.atan2(p.ramp.y2 - p.ramp.y1, p.ramp.x2 - p.ramp.x1);
       }
       ctx.save();
       ctx.translate(cx, by);
-      ctx.rotate(ang);
+      ctx.rotate(_ang);
       if (LV.scooter === 'cart') {
         pen(2.6);
         ctx.beginPath();
@@ -4439,30 +5017,26 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         ctx.moveTo(-15, -15);
         ctx.lineTo(15, -15);
         ctx.stroke();
-        for (var _i4 = 0, _arr2 = [-9, 9]; _i4 < _arr2.length; _i4++) {
-          var wx = _arr2[_i4];
-          circle(wx, -4, 4.5, '#3b3f4f', 1.8);
+        for (var _i6 = 0, _arr4 = [-9, 9]; _i6 < _arr4.length; _i6++) {
+          var _wx2 = _arr4[_i6];
+          circle(_wx2, -4, 4.5, '#3b3f4f', 1.8);
           pen(1.2, '#c9ccd8');
           ctx.beginPath();
-          ctx.moveTo(wx + Math.cos(wr) * 3.5, -4 + Math.sin(wr) * 3.5);
-          ctx.lineTo(wx - Math.cos(wr) * 3.5, -4 - Math.sin(wr) * 3.5);
+          ctx.moveTo(_wx2 + Math.cos(_wr2) * 3.5, -4 + Math.sin(_wr2) * 3.5);
+          ctx.lineTo(_wx2 - Math.cos(_wr2) * 3.5, -4 - Math.sin(_wr2) * 3.5);
           ctx.stroke();
         }
         ctx.restore();
-        var _ht = top + 3;
-        circle(cx, _ht + 4, 7, '#fff', 2.6);
+        var ht = top + 3;
+        pHead(cx, ht - 3, 1, ch);
         ctx.fillStyle = YELLOW;
         pen(1.6);
         ctx.beginPath();
-        ctx.arc(cx, _ht + 1, 8, Math.PI, 0);
+        ctx.arc(cx, ht + 1, 8, Math.PI, 0);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        circle(cx + 5, _ht - 3, 2.4, '#fff', 1.2);
-        ctx.fillStyle = PEN;
-        ctx.beginPath();
-        ctx.arc(cx + 3, _ht + 4, 1.3, 0, 6.28);
-        ctx.fill();
+        circle(cx + 5, ht - 3, 2.4, '#fff', 1.2);
         ctx.restore();
         if (p.dead) label('Ops!', cx - 16, top - 10 - p.dead * .4, 20, RED);
         return;
@@ -4475,13 +5049,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.moveTo(11, -31);
       ctx.lineTo(21, -29);
       ctx.stroke();
-      for (var _i5 = 0, _arr3 = [-12, 13]; _i5 < _arr3.length; _i5++) {
-        var _wx = _arr3[_i5];
-        circle(_wx, -3, 4, '#fff', 2);
+      for (var _i7 = 0, _arr5 = [-12, 13]; _i7 < _arr5.length; _i7++) {
+        var _wx3 = _arr5[_i7];
+        circle(_wx3, -3, 4, '#fff', 2);
         pen(1.4);
         ctx.beginPath();
-        ctx.moveTo(_wx + Math.cos(wr) * 4, -3 + Math.sin(wr) * 4);
-        ctx.lineTo(_wx - Math.cos(wr) * 4, -3 - Math.sin(wr) * 4);
+        ctx.moveTo(_wx3 + Math.cos(_wr2) * 4, -3 + Math.sin(_wr2) * 4);
+        ctx.lineTo(_wx3 - Math.cos(_wr2) * 4, -3 - Math.sin(_wr2) * 4);
         ctx.stroke();
       }
       pen(2.6);
@@ -4497,24 +5071,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.moveTo(0, -30);
       ctx.lineTo(15, -28);
       ctx.stroke();
-      ctx.restore();
-      var ht = top + 3;
-      circle(cx, ht + 4, 7, '#fff', 2.6);
-      pen(1.8);
-      ctx.beginPath();
-      for (var i = -6; i <= 6; i += 3) {
-        ctx.moveTo(cx + i, ht - 1);
-        ctx.lineTo(cx + i * 1.3 - 3, ht - 6 - Math.abs(i) % 2 * 2);
+      if (ch === 'milly') {
+        ctx.fillStyle = '#8a5cc7';
+        pen(2);
+        ctx.beginPath();
+        ctx.moveTo(0, -30);
+        ctx.lineTo(-7, -14);
+        ctx.lineTo(7, -14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
       }
-      ctx.stroke();
-      ctx.fillStyle = PEN;
-      ctx.beginPath();
-      ctx.arc(cx + 3, ht + 3, 1.3, 0, 6.28);
-      ctx.fill();
-      pen(1.3);
-      ctx.beginPath();
-      ctx.arc(cx + 2, ht + 5, 2.6, .2, 2.6);
-      ctx.stroke();
+      ctx.restore();
+      pHead(cx, top, 1, ch);
       ctx.restore();
       if (p.dead) label('Ops!', cx - 16, top - 10 - p.dead * .4, 20, RED);
       return;
@@ -4532,7 +5101,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.lineTo(cx - 6, top + 8 + sw * .4);
       ctx.moveTo(cx, top + 17);
       ctx.lineTo(cx + 6, top + 8 - sw * .4);
-    } else if (!p.on) {
+    } else if (!p.on || p.arrived) {
       ctx.moveTo(cx, top + 17);
       ctx.lineTo(cx - 8, top + 10);
       ctx.moveTo(cx, top + 17);
@@ -4544,6 +5113,25 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.lineTo(cx + sw * .6, top + 24);
     }
     ctx.stroke();
+    if (ch === 'milly') {
+      ctx.fillStyle = '#8a5cc7';
+      pen(2);
+      ctx.beginPath();
+      ctx.moveTo(cx, top + 14);
+      ctx.lineTo(cx - 8, top + 29);
+      ctx.lineTo(cx + 8, top + 29);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    if (ch === 'papone') {
+      ctx.fillStyle = '#3f86d4';
+      pen(2);
+      ctx.beginPath();
+      ctx.rect(cx - 4, top + 14, 8, 12);
+      ctx.fill();
+      ctx.stroke();
+    }
     if (LV.theme === 2) {
       circle(cx, top + 7, 11, 'rgba(200,230,255,.35)', 1.6, BLUE);
     }
@@ -4559,7 +5147,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.stroke();
       circle(cx - f * 2, top - 10, 2.6, '#fff', 1.2);
     }
-    circle(cx, top + 7, 7, '#fff', 2.6);
+    pHead(cx, top, f, ch);
     if (LV.swim) {
       ctx.fillStyle = 'rgba(159,211,240,.7)';
       pen(1.6, BLUE);
@@ -4573,23 +5161,29 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.lineTo(cx - f * 8, top - 6);
       ctx.stroke();
     }
-    pen(1.8);
-    ctx.beginPath();
-    for (var _i6 = -6; _i6 <= 6; _i6 += 3) {
-      ctx.moveTo(cx + _i6, top + 2);
-      ctx.lineTo(cx + _i6 * 1.3, top - 3 - Math.abs(_i6) % 2 * 2);
-    }
-    ctx.stroke();
-    ctx.fillStyle = PEN;
-    ctx.beginPath();
-    ctx.arc(cx + f * 3, top + 6, 1.3, 0, 6.28);
-    ctx.fill();
-    pen(1.3);
-    ctx.beginPath();
-    ctx.arc(cx + f * 2, top + 8, 2.6, .2, 2.6);
-    ctx.stroke();
     ctx.restore();
     if (p.dead) label('Ops!', cx - 16, top - 10 - p.dead * .4, 20, RED);
+  }
+  function drawPlayers() {
+    var keep = p;
+    var _iterator39 = _createForOfIteratorHelper(PLY),
+      _step39;
+    try {
+      for (_iterator39.s(); !(_step39 = _iterator39.n()).done;) {
+        var q = _step39.value;
+        p = q;
+        drawTom();
+        if (duo() && !q.dead) {
+          var nm = CHARS[q.char].name;
+          label(nm, q.x + 10 - nm.length * 4, q.y - (q.char === 'papone' ? 24 : 16), 16, q.idx ? RED : BLUE);
+        }
+      }
+    } catch (err) {
+      _iterator39.e(err);
+    } finally {
+      _iterator39.f();
+    }
+    p = keep;
   }
   function drawWalker(s) {
     if (!s.alive) return;
@@ -4625,11 +5219,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } else if (s.kind === 'crab') {
       pen(1.6, '#b82a31');
       ctx.beginPath();
-      for (var _i7 = -1; _i7 <= 1; _i7 += 2) for (var k = 0; k < 3; k++) {
+      for (var _i8 = -1; _i8 <= 1; _i8 += 2) for (var k = 0; k < 3; k++) {
         var w = Math.sin(tick * .4 + k) * 2;
-        ctx.moveTo(s.x + _i7 * 6, g - 6);
-        ctx.lineTo(s.x + _i7 * (12 + k * 3), g - 3 + w);
-        ctx.lineTo(s.x + _i7 * (14 + k * 3), g);
+        ctx.moveTo(s.x + _i8 * 6, g - 6);
+        ctx.lineTo(s.x + _i8 * (12 + k * 3), g - 3 + w);
+        ctx.lineTo(s.x + _i8 * (14 + k * 3), g);
       }
       ctx.stroke();
       ctx.fillStyle = RED;
@@ -4692,11 +5286,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } else {
       pen(1.6);
       ctx.beginPath();
-      for (var _i8 = -1; _i8 <= 1; _i8 += 2) for (var _k2 = 0; _k2 < 3; _k2++) {
+      for (var _i9 = -1; _i9 <= 1; _i9 += 2) for (var _k2 = 0; _k2 < 3; _k2++) {
         var _w = Math.sin(tick * .4 + _k2) * 2;
         ctx.moveTo(s.x, g - 6);
-        ctx.lineTo(s.x + _i8 * (8 + _k2 * 2), g - 11 + _k2 * 2 + _w);
-        ctx.lineTo(s.x + _i8 * (12 + _k2 * 2), g);
+        ctx.lineTo(s.x + _i9 * (8 + _k2 * 2), g - 11 + _k2 * 2 + _w);
+        ctx.lineTo(s.x + _i9 * (12 + _k2 * 2), g);
       }
       ctx.stroke();
       circle(s.x, g - 6, 6.5, PEN, 1.4);
@@ -4925,9 +5519,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       pen(1.3);
       ctx.beginPath();
       ctx.moveTo(8, 3);
-      for (var _i9 = 0; _i9 < 4; _i9++) {
-        ctx.lineTo(10 + _i9 * 2, 6);
-        ctx.lineTo(11 + _i9 * 2, 3);
+      for (var _i0 = 0; _i0 < 4; _i0++) {
+        ctx.lineTo(10 + _i0 * 2, 6);
+        ctx.lineTo(11 + _i0 * 2, 3);
       }
       ctx.stroke();
       ctx.fillStyle = PEN;
@@ -5038,7 +5632,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (c.kind === 'coco') {
       var _x13 = c.x,
         _g = c.gy,
-        _d2 = c.dir,
+        _d = c.dir,
         th = c.t < 10 ? -6 : 0;
       pen(3, '#8a5a32');
       ctx.beginPath();
@@ -5054,18 +5648,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       circle(_x13, _g - 30, 9, '#9b7653', 2);
       ctx.fillStyle = '#e8cfa8';
       ctx.beginPath();
-      ctx.ellipse(_x13 + _d2 * 2, _g - 28, 6, 5, 0, 0, 6.28);
+      ctx.ellipse(_x13 + _d * 2, _g - 28, 6, 5, 0, 0, 6.28);
       ctx.fill();
-      circle(_x13 - _d2 * 8, _g - 32, 3, '#9b7653', 1.4);
+      circle(_x13 - _d * 8, _g - 32, 3, '#9b7653', 1.4);
       ctx.fillStyle = PEN;
       ctx.beginPath();
-      ctx.arc(_x13 + _d2 * 1, _g - 31, 1.3, 0, 6.28);
-      ctx.arc(_x13 + _d2 * 5, _g - 31, 1.3, 0, 6.28);
+      ctx.arc(_x13 + _d * 1, _g - 31, 1.3, 0, 6.28);
+      ctx.arc(_x13 + _d * 5, _g - 31, 1.3, 0, 6.28);
       ctx.fill();
       pen(2.4);
       ctx.beginPath();
-      ctx.moveTo(_x13 + _d2 * 6, _g - 18);
-      ctx.lineTo(_x13 + _d2 * 14, _g - 24 + th);
+      ctx.moveTo(_x13 + _d * 6, _g - 18);
+      ctx.lineTo(_x13 + _d * 14, _g - 24 + th);
       ctx.stroke();
       return;
     }
@@ -5121,7 +5715,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       pen(2);
       ctx.beginPath();
       ctx.moveTo(b.x - 12, b.y + 10);
-      for (var _i0 = 0; _i0 < 6; _i0++) ctx.lineTo(b.x - 10 + _i0 * 4, b.y + 14 + (_i0 % 2 ? -3 : 3));
+      for (var _i1 = 0; _i1 < 6; _i1++) ctx.lineTo(b.x - 10 + _i1 * 4, b.y + 14 + (_i1 % 2 ? -3 : 3));
       ctx.lineTo(b.x + 12, b.y + 10);
       ctx.stroke();
     } else if (b.kind === 'ufo') {
@@ -5150,14 +5744,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.fill();
       pen(2.6);
       ctx.stroke();
-      for (var _i1 = -2; _i1 <= 2; _i1++) circle(b.x + _i1 * 12, b.y + 5, 2.6, (Math.floor(tick / 10) + _i1) % 2 ? YELLOW : RED, 1.2);
+      for (var _i10 = -2; _i10 <= 2; _i10++) circle(b.x + _i10 * 12, b.y + 5, 2.6, (Math.floor(tick / 10) + _i10) % 2 ? YELLOW : RED, 1.2);
     } else if (b.kind === 'polpo') {
       pen(5, '#8a5cc7');
-      for (var _i10 = 0; _i10 < 6; _i10++) {
+      for (var _i11 = 0; _i11 < 6; _i11++) {
         ctx.beginPath();
-        var bx = b.x - 17 + _i10 * 7;
+        var bx = b.x - 17 + _i11 * 7;
         ctx.moveTo(bx, b.y + 14);
-        for (var k = 0; k <= 34; k += 4) ctx.lineTo(bx + Math.sin(k * .18 + tick * .12 + _i10) * 6, b.y + 14 + k);
+        for (var k = 0; k <= 34; k += 4) ctx.lineTo(bx + Math.sin(k * .18 + tick * .12 + _i11) * 6, b.y + 14 + k);
         ctx.stroke();
       }
       circle(b.x, b.y, 27, '#b48ee0', 2.6);
@@ -5210,8 +5804,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } else if (b.kind === 'talpa') {
       pen(2.4);
       ctx.fillStyle = '#fff';
-      for (var _i11 = 0, _arr4 = [-1, 1]; _i11 < _arr4.length; _i11++) {
-        var sd = _arr4[_i11];
+      for (var _i12 = 0, _arr6 = [-1, 1]; _i12 < _arr6.length; _i12++) {
+        var sd = _arr6[_i12];
         ctx.beginPath();
         ctx.moveTo(b.x + sd * 24, b.y + 8);
         for (var _k3 = 0; _k3 < 3; _k3++) {
@@ -5348,7 +5942,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     } else if (b.kind === 'drago') {
       var fl = Math.sin(tick * .15) * 10,
-        _d3 = p.x + 10 < b.x ? -1 : 1;
+        _d2 = p.x + 10 < b.x ? -1 : 1;
       ctx.fillStyle = '#f6a46b';
       pen(2.4);
       ctx.beginPath();
@@ -5369,42 +5963,42 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.stroke();
       pen(3, RED);
       ctx.beginPath();
-      ctx.moveTo(b.x - _d3 * 18, b.y + 12);
-      ctx.quadraticCurveTo(b.x - _d3 * 34, b.y + 30, b.x - _d3 * 42, b.y + 18);
+      ctx.moveTo(b.x - _d2 * 18, b.y + 12);
+      ctx.quadraticCurveTo(b.x - _d2 * 34, b.y + 30, b.x - _d2 * 42, b.y + 18);
       ctx.stroke();
       circle(b.x, b.y + 6, 20, RED, 2.6);
       ctx.fillStyle = YELLOW;
       ctx.beginPath();
       ctx.ellipse(b.x, b.y + 12, 10, 7, 0, 0, 6.28);
       ctx.fill();
-      circle(b.x + _d3 * 12, b.y - 12, 13, RED, 2.4);
+      circle(b.x + _d2 * 12, b.y - 12, 13, RED, 2.4);
       ctx.fillStyle = YELLOW;
       pen(1.6);
       ctx.beginPath();
-      ctx.moveTo(b.x + _d3 * 6, b.y - 22);
-      ctx.lineTo(b.x + _d3 * 2, b.y - 34);
-      ctx.lineTo(b.x + _d3 * 12, b.y - 24);
-      ctx.moveTo(b.x + _d3 * 16, b.y - 24);
-      ctx.lineTo(b.x + _d3 * 20, b.y - 36);
-      ctx.lineTo(b.x + _d3 * 22, b.y - 21);
+      ctx.moveTo(b.x + _d2 * 6, b.y - 22);
+      ctx.lineTo(b.x + _d2 * 2, b.y - 34);
+      ctx.lineTo(b.x + _d2 * 12, b.y - 24);
+      ctx.moveTo(b.x + _d2 * 16, b.y - 24);
+      ctx.lineTo(b.x + _d2 * 20, b.y - 36);
+      ctx.lineTo(b.x + _d2 * 22, b.y - 21);
       ctx.fill();
       ctx.stroke();
-      circle(b.x + _d3 * 16, b.y - 14, 3.4, '#fff', 1.2);
+      circle(b.x + _d2 * 16, b.y - 14, 3.4, '#fff', 1.2);
       ctx.fillStyle = PEN;
       ctx.beginPath();
-      ctx.arc(b.x + _d3 * 17, b.y - 14, 1.6, 0, 6.28);
+      ctx.arc(b.x + _d2 * 17, b.y - 14, 1.6, 0, 6.28);
       ctx.fill();
       pen(2);
       ctx.beginPath();
-      ctx.moveTo(b.x + _d3 * 9, b.y - 20);
-      ctx.lineTo(b.x + _d3 * 20, b.y - 18);
+      ctx.moveTo(b.x + _d2 * 9, b.y - 20);
+      ctx.lineTo(b.x + _d2 * 20, b.y - 18);
       ctx.stroke();
       if (b.shoot < 20) {
         ctx.fillStyle = ORANGE;
         ctx.beginPath();
-        ctx.moveTo(b.x + _d3 * 24, b.y - 8);
-        ctx.lineTo(b.x + _d3 * 36, b.y - 14);
-        ctx.lineTo(b.x + _d3 * 34, b.y - 2);
+        ctx.moveTo(b.x + _d2 * 24, b.y - 8);
+        ctx.lineTo(b.x + _d2 * 36, b.y - 14);
+        ctx.lineTo(b.x + _d2 * 34, b.y - 2);
         ctx.closePath();
         ctx.fill();
       }
@@ -5416,11 +6010,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.stroke();
       pen(3);
       ctx.beginPath();
-      for (var _i12 = -1; _i12 <= 1; _i12 += 2) for (var _k4 = 0; _k4 < 4; _k4++) {
+      for (var _i13 = -1; _i13 <= 1; _i13 += 2) for (var _k4 = 0; _k4 < 4; _k4++) {
         var w = Math.sin(tick * .12 + _k4) * 3;
         ctx.moveTo(b.x, b.y);
-        ctx.lineTo(b.x + _i12 * (26 + _k4 * 3), b.y - 18 + _k4 * 10 + w);
-        ctx.lineTo(b.x + _i12 * (36 + _k4 * 3), b.y + 8 + _k4 * 8);
+        ctx.lineTo(b.x + _i13 * (26 + _k4 * 3), b.y - 18 + _k4 * 10 + w);
+        ctx.lineTo(b.x + _i13 * (36 + _k4 * 3), b.y + 8 + _k4 * 8);
       }
       ctx.stroke();
       circle(b.x, b.y, 24, '#3b3f4f', 2.6);
@@ -5437,7 +6031,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      for (var _i13 = 0; _i13 < 4; _i13++) circle(b.x - 9 + _i13 * 6, b.y - 4 + (_i13 % 3 === 0 ? 2 : 0), 2.6, RED, .8);
+      for (var _i14 = 0; _i14 < 4; _i14++) circle(b.x - 9 + _i14 * 6, b.y - 4 + (_i14 % 3 === 0 ? 2 : 0), 2.6, RED, .8);
       pen(2, '#fff');
       ctx.beginPath();
       ctx.moveTo(b.x - 5, b.y + 10);
@@ -5448,7 +6042,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     ctx.globalAlpha = 1;
     var n = b.hp;
-    for (var _i14 = 0; _i14 < n; _i14++) drawHeart(b.x - (n - 1) * 7 + _i14 * 14, b.y - 48, 5, RED);
+    for (var _i15 = 0; _i15 < n; _i15++) drawHeart(b.x - (n - 1) * 7 + _i15 * 14, b.y - 48, 5, RED);
   }
   function drawShot(q) {
     if (q.kind === 'gassata') {
@@ -5561,7 +6155,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function drawGuitar() {
     var g = W.guitar;
-    if (g.got) return;
+    if (PLY.every(function (q) {
+      return q.guitar;
+    })) return;
     var x = g.x,
       y = g.y + Math.sin(tick * .06) * 4;
     ctx.save();
@@ -5699,10 +6295,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.fillRect(x - 30, y - 170, 60, 170);
       pen(2.4);
       ctx.strokeRect(x - 30, y - 170, 60, 170);
-      for (var _i15 = 0; _i15 < 3; _i15++) {
+      for (var _i16 = 0; _i16 < 3; _i16++) {
         ctx.fillStyle = '#fff';
-        ctx.fillRect(x - 30 + _i15 * 22, y - 184, 16, 14);
-        ctx.strokeRect(x - 30 + _i15 * 22, y - 184, 16, 14);
+        ctx.fillRect(x - 30 + _i16 * 22, y - 184, 16, 14);
+        ctx.strokeRect(x - 30 + _i16 * 22, y - 184, 16, 14);
       }
       ctx.fillStyle = PEN;
       ctx.beginPath();
@@ -5783,10 +6379,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.closePath();
       ctx.fill();
       pen(1.6, 'rgba(107,113,134,.4)');
-      for (var _i16 = 0; _i16 < 3; _i16++) {
-        var yy = y - h - 14 - (tick * .4 + _i16 * 20) % 60;
+      for (var _i17 = 0; _i17 < 3; _i17++) {
+        var yy = y - h - 14 - (tick * .4 + _i17 * 20) % 60;
         ctx.beginPath();
-        ctx.arc(x + Math.sin(yy * .05) * 8, yy, 6 + _i16 * 2, 0, 6.28);
+        ctx.arc(x + Math.sin(yy * .05) * 8, yy, 6 + _i17 * 2, 0, 6.28);
         ctx.stroke();
       }
     } else if (d.kind === 'seaweed') {
@@ -5848,8 +6444,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       pen(1.2, 'rgba(63,134,212,.45)');
       var _yy2 = (y + tick * .3 * s) % 300;
       ctx.beginPath();
-      for (var _i17 = 0; _i17 < 3; _i17++) {
-        var _a = _i17 * Math.PI / 3;
+      for (var _i18 = 0; _i18 < 3; _i18++) {
+        var _a = _i18 * Math.PI / 3;
         ctx.moveTo(x - Math.cos(_a) * 5 * s, _yy2 - Math.sin(_a) * 5 * s);
         ctx.lineTo(x + Math.cos(_a) * 5 * s, _yy2 + Math.sin(_a) * 5 * s);
       }
@@ -6114,6 +6710,36 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var tomS = function tomS(f) {
     return bSprite('tom_' + f, TOMHEAD.concat(TOMBODY[f]));
   };
+  var MILLYHEAD = ["..CCCCC...", ".CCCCCCC..", ".CCssssss.", ".CCsswkss.", ".CCssssss.", ".CC.ssks.."];
+  var MILLYBODY = {
+    stand: ["...pppp...", "..sppppps.", ".pppppppp.", "...s..s...", "..kk..kk.."],
+    walkA: ["...pppp...", "..sppppps.", ".pppppppp.", "..s....s..", ".kk....kk."],
+    walkB: ["...pppp...", "..sppppps.", ".pppppppp.", "....ss....", "....kk...."],
+    jump: ["s..pppp..s", ".sppppppps", ".pppppppp.", "..s....s..", ".kk....kk."]
+  };
+  var PAPHEAD = ["...ssss...", "..sWssss..", ".sssssss..", ".Sssswks..", ".ssssssss.", "..sssskss."];
+  var PAPTOP = ["...bbbb...", "..bbbbbb..", "..bbbbbb..", "..sbbbbs..", "...dddd..."];
+  var PAPLEGS = {
+    stand: ["...d..d...", "...d..d...", "..kk..kk.."],
+    walkA: ["..d....d..", "..d....d..", ".kk....kk."],
+    walkB: ["....dd....", "....dd....", "....kk...."],
+    jump: ["..d....d..", "..d....d..", ".kk....kk."]
+  };
+  var BUNNY = {
+    stand: ["............", ".......EEEE.", "......EEEEEE", "..ww..EEkEEq", ".wEEEEDEEEE.", ".EEEEEEDEE..", ".EEEEEEDE...", "..EEEEEE....", "..EE..EE...."],
+    jump: ["............", ".......EEEE.", "......EEEEEE", "..ww..EEkEEq", ".wEEEEDEEEE.", ".EEEEEEDEE..", ".EEEEEEDE...", "..EEEEEE....", ".EE....EE..."]
+  };
+  function charS(ch, f) {
+    if (ch === 'milly') return bSprite('milly_' + f, MILLYHEAD.concat(MILLYBODY[f]), {
+      C: '#c8642a'
+    });
+    if (ch === 'papone') return bSprite('pap_' + f, PAPHEAD.concat(f === 'jump' ? ["s..bbbb..s", ".sbbbbbbs.", "..bbbbbb..", "..bbbbbb..", "...dddd..."] : PAPTOP, PAPLEGS[f]));
+    if (ch === 'carotino') return bSprite('bun_' + (f === 'jump' || f === 'walkA' ? 'jump' : 'stand'), BUNNY[f === 'jump' || f === 'walkA' ? 'jump' : 'stand'], {
+      E: '#e8d2a6',
+      D: '#c9a978'
+    });
+    return tomS(f);
+  }
   var SP = {
     snake: function snake() {
       return bSprite('snake', ["..........lll.", ".........llkll", "llll....llllllr", "lLllll.lllLl..r", ".LllllllllL....", "...LLLLLL......"]);
@@ -6183,8 +6809,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
   };
   function bTomSprite(x, bot, fr, flip) {
-    bDraw(tomS(fr), x, bot, 3, flip);
-    var top = bot - 36,
+    var ch = p.char || 'tommy',
+      c = charS(ch, fr);
+    bDraw(c, x, bot, 3, flip);
+    if (ch === 'carotino') return;
+    var top = bot - c.height * 3,
       th = LV.theme;
     ctx.save();
     ctx.translate(Math.round(x), 0);
@@ -6214,14 +6843,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function bTom() {
     if (p.inv > 0 && Math.floor(p.inv / 4) % 2) return;
     var cx = p.x + p.w / 2,
-      bot = p.y + p.h,
+      bot = p.y + p.h - (p.arrived ? Math.round(Math.abs(Math.sin(p.walk * 2)) * 3) * 3 : 0),
       flip = p.face < 0;
     var fr = 'stand';
-    if (p.climb || !p.on && !LV.scooter) fr = 'jump';else if (Math.abs(p.vx) > .4 && !LV.scooter) fr = Math.floor(p.walk * 1.3) % 2 ? 'walkA' : 'walkB';
-    if (LV.swim) fr = p.on ? Math.abs(p.vx) > .4 ? Math.floor(p.walk) % 2 ? 'walkA' : 'walkB' : 'stand' : Math.floor(tick / 10) % 2 ? 'walkA' : 'jump';
+    if (p.climb || !p.on && !LV.scooter || p.arrived) fr = 'jump';else if (Math.abs(p.vx) > .4 && !LV.scooter) fr = Math.floor(p.walk * 1.3) % 2 ? 'walkA' : 'walkB';
+    if (LV.swim && !p.arrived) fr = p.on ? Math.abs(p.vx) > .4 ? Math.floor(p.walk) % 2 ? 'walkA' : 'walkB' : 'stand' : Math.floor(tick / 10) % 2 ? 'walkA' : 'jump';
     ctx.save();
     if (p.dead) ctx.globalAlpha = Math.max(0, 1 - p.dead / 45);
-    if (W.guitar.got && !LV.scooter) {
+    if (p.guitar && !LV.scooter && p.char !== 'carotino') {
       bRect(cx + (flip ? 6 : -12), p.y + 18, 6, 12, BPAL.y);
       bRect(cx + (flip ? 8 : -10), p.y + 8, 3, 10, BPAL.Y);
     }
@@ -6236,32 +6865,53 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       bRect(-20, -24, 3, 18, '#5d6273');
       bRect(17, -24, 3, 18, '#5d6273');
       var wr = Math.floor(p.walk * 2) % 2;
-      for (var _i18 = 0, _arr5 = [-12, 12]; _i18 < _arr5.length; _i18++) {
-        var wx = _arr5[_i18];
+      for (var _i19 = 0, _arr7 = [-12, 12]; _i19 < _arr7.length; _i19++) {
+        var wx = _arr7[_i19];
         bRect(wx - 5, -7, 10, 7, '#1d1f2b');
         bRect(wx - 2 + (wr ? 1 : -1), -5, 3, 3, '#c7ccd8');
       }
     } else if (LV.scooter) {
-      var _ang = p.ramp ? Math.atan2(p.ramp.y2 - p.ramp.y1, p.ramp.x2 - p.ramp.x1) : 0;
+      var _ang2 = p.ramp ? Math.atan2(p.ramp.y2 - p.ramp.y1, p.ramp.x2 - p.ramp.x1) : 0;
       ctx.translate(cx, bot);
-      ctx.rotate(_ang);
+      ctx.rotate(_ang2);
       bRect(12, -36, 4, 30, '#5d6273');
       bRect(8, -38, 12, 4, '#1d1f2b');
       bTomSprite(-2, -6, 'stand', false);
       bRect(-18, -9, 36, 4, '#9aa0b5');
       bRect(-18, -9, 36, 1, '#c7ccd8');
-      var _wr = Math.floor(p.walk) % 2;
-      for (var _i19 = 0, _arr6 = [-13, 14]; _i19 < _arr6.length; _i19++) {
-        var _wx2 = _arr6[_i19];
-        bRect(_wx2 - 4, -6, 8, 6, '#1d1f2b');
-        bRect(_wx2 - 1, -4, 2, 2, _wr ? '#c7ccd8' : '#5d6273');
+      var _wr3 = Math.floor(p.walk) % 2;
+      for (var _i20 = 0, _arr8 = [-13, 14]; _i20 < _arr8.length; _i20++) {
+        var _wx4 = _arr8[_i20];
+        bRect(_wx4 - 4, -6, 8, 6, '#1d1f2b');
+        bRect(_wx4 - 1, -4, 2, 2, _wr3 ? '#c7ccd8' : '#5d6273');
       }
-      if (W.guitar.got) {
+      if (p.guitar) {
         bRect(-16, -30, 5, 10, BPAL.y);
       }
     } else bTomSprite(cx, bot, fr, flip);
     ctx.restore();
     if (p.dead) bText('Ops!', cx - 18, p.y - 10 - p.dead * .4, 22, '#e0373f');
+  }
+  function bPlayers() {
+    var keep = p;
+    var _iterator40 = _createForOfIteratorHelper(PLY),
+      _step40;
+    try {
+      for (_iterator40.s(); !(_step40 = _iterator40.n()).done;) {
+        var q = _step40.value;
+        p = q;
+        bTom();
+        if (duo() && !q.dead) {
+          var nm = CHARS[q.char].name;
+          bText(nm, q.x + 10 - nm.length * 4.5, q.y - (q.char === 'papone' ? 26 : 16), 17, q.idx ? '#ff8a8a' : '#9fd3f0');
+        }
+      }
+    } catch (err) {
+      _iterator40.e(err);
+    } finally {
+      _iterator40.f();
+    }
+    p = keep;
   }
   function bGround(s) {
     var th = LV.theme;
@@ -6598,7 +7248,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#c9ccd8', -9, -2, 18, 3);
       B('#e8ecf4', -9, -2, 18, 1);
       B('#9aa0b5', -6, 1, 12, 2);
-      for (var _i20 = 0; _i20 < 6; _i20++) B((_i20 + t) % 2 ? '#f2c230' : '#e0373f', -8 + _i20 * 3, -1, 1, 1);
+      for (var _i21 = 0; _i21 < 6; _i21++) B((_i21 + t) % 2 ? '#f2c230' : '#e0373f', -8 + _i21 * 3, -1, 1, 1);
     } else if (b.kind === 'ragno') {
       B('#8d93a6', 0, -30, 0.25, 23);
       for (var k = 0; k < 4; k++) {
@@ -6615,7 +7265,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#f2c230', -1, -12, 2, 2);
       B('#f2c230', 3, -12, 1, 2);
       B('#e0373f', -1, -9, 2, 1);
-      for (var _i21 = 0; _i21 < 4; _i21++) B('#e0373f', -4 + _i21 * 2 + (_i21 > 1 ? 1 : 0), -3, 1, 1);
+      for (var _i22 = 0; _i22 < 4; _i22++) B('#e0373f', -4 + _i22 * 2 + (_i22 > 1 ? 1 : 0), -3, 1, 1);
       B('#ffffff', -2, 2, 1, 2);
       B('#ffffff', 1, 2, 1, 2);
     } else if (b.kind === 'drago') {
@@ -6639,9 +7289,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         B('#f2c230', d > 0 ? 10 : -13, -4, 2, 1);
       }
     } else if (b.kind === 'polpo') {
-      for (var _i22 = 0; _i22 < 6; _i22++) {
-        var _w2 = Math.round(Math.sin(tick * .12 + _i22));
-        B('#8a5cc7', -6 + _i22 * 2 + _w2, 3, 2, 7 + _i22 % 2);
+      for (var _i23 = 0; _i23 < 6; _i23++) {
+        var _w2 = Math.round(Math.sin(tick * .12 + _i23));
+        B('#8a5cc7', -6 + _i23 * 2 + _w2, 3, 2, 7 + _i23 % 2);
       }
       B('#b48ee0', -7, -8, 14, 11);
       B('#b48ee0', -6, -9, 12, 1);
@@ -6701,7 +7351,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#ffffff', -3, 1, 1, 1);
       B('#ffffff', 2, 1, 1, 1);
     } else if (b.kind === 'serpentone') {
-      for (var _i23 = 0; _i23 < 6; _i23++) B(_i23 % 2 ? '#6fae4a' : '#7cc242', -12 - _i23 * 3, 6 + _i23 * 3, 4, 4);
+      for (var _i24 = 0; _i24 < 6; _i24++) B(_i24 % 2 ? '#6fae4a' : '#7cc242', -12 - _i24 * 3, 6 + _i24 * 3, 4, 4);
       B('#7cc242', -7, -6, 14, 11);
       B('#3d7a1f', -7, 4, 14, 1);
       B('#a7e26b', -5, -5, 4, 1);
@@ -6719,7 +7369,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     ctx.restore();
     var n = b.hp;
-    for (var _i24 = 0; _i24 < n; _i24++) bDraw(SP.heart(), b.x - (n - 1) * 8 + _i24 * 16, b.y - 46, 1.5);
+    for (var _i25 = 0; _i25 < n; _i25++) bDraw(SP.heart(), b.x - (n - 1) * 8 + _i25 * 16, b.y - 46, 1.5);
   }
   function bDeco(d) {
     var x = d.x,
@@ -6880,9 +7530,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     }
     if (th === 1 || th === 6 || th === 8) {
-      for (var _i25 = 0; _i25 < 6; _i25++) {
-        var cx = ((_i25 * 260 - camX * .15) % (vw + 300) + vw + 300) % (vw + 300) - 150;
-        blockCloud(cx, 25 + _i25 * 37 % 70, th === 6 ? 1.3 : 1);
+      for (var _i26 = 0; _i26 < 6; _i26++) {
+        var cx = ((_i26 * 260 - camX * .15) % (vw + 300) + vw + 300) % (vw + 300) - 150;
+        blockCloud(cx, 25 + _i26 * 37 % 70, th === 6 ? 1.3 : 1);
       }
     }
     var HC = {
@@ -6900,33 +7550,32 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       base = Math.floor(ox / 24);
     ctx.save();
     ctx.globalAlpha = th === 2 || th === 4 || th === 7 ? .7 : .42;
-    for (var _i26 = -1; _i26 < vw / 24 + 2; _i26++) {
-      var gx = base + _i26;
+    for (var _i27 = -1; _i27 < vw / 24 + 2; _i27++) {
+      var gx = base + _i27;
       var hgt = void 0;
       if (th === 8) hgt = Math.abs((gx % 14 + 14) % 14 - 7) * 12 + 24;else if (th === 3) hgt = ((gx % 9 + 9) % 9 < 2 ? 120 : 48) + (gx % 2 ? 0 : 12);else if (th === 7) hgt = 72 + Math.round(Math.sin(gx * .7) * 2) * 12;else hgt = Math.round(Math.sin(gx * .35) * 2 + Math.sin(gx * .13) * 3 + 5) * 12;
       if (th === 6) hgt = Math.max(12, hgt - 36);
-      bRect(_i26 * 24 - off, H - hgt - 40, 24, hgt + 40, HC);
+      bRect(_i27 * 24 - off, H - hgt - 40, 24, hgt + 40, HC);
       if (th === 9 && (gx % 5 + 5) % 5 === 0) {
-        bRect(_i26 * 24 - off + 6, H - hgt - 88, 12, 48, '#6b4a2e');
-        bRect(_i26 * 24 - off - 12, H - hgt - 112, 48, 36, '#256b37');
+        bRect(_i27 * 24 - off + 6, H - hgt - 88, 12, 48, '#6b4a2e');
+        bRect(_i27 * 24 - off - 12, H - hgt - 112, 48, 36, '#256b37');
       }
       if (th === 7) {
-        bRect(_i26 * 24 - off, 0, 24, 36 + Math.round(Math.sin(gx * .9) * 2) * 12 + 24, HC);
+        bRect(_i27 * 24 - off, 0, 24, 36 + Math.round(Math.sin(gx * .9) * 2) * 12 + 24, HC);
       }
     }
     ctx.restore();
   }
   function drawBlocks() {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    vSet(1, 1, 0, 0);
     ctx.imageSmoothingEnabled = false;
     var th = LV.theme;
     ctx.fillStyle = SKY[th];
-    ctx.fillRect(0, 0, cvs.width / dpr, cvs.height / dpr);
-    var k = scale * dpr;
-    ctx.setTransform(k, 0, 0, k, 0, 0);
+    ctx.fillRect(0, 0, VIEW.w, VIEW.h);
+    vSet(scale, scale, 0, 0);
     ctx.imageSmoothingEnabled = false;
     bBackdrop(th);
-    ctx.setTransform(k, 0, 0, k, -camX * k, -camY * k);
+    vSet(scale, scale, -camX * scale, -camY * scale);
     ctx.imageSmoothingEnabled = false;
     var x0 = camX,
       x1 = camX + viewW,
@@ -6936,238 +7585,240 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         var w = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 80;
         return a > x0 - w && a < x1 + w;
       };
-    var _iterator31 = _createForOfIteratorHelper(W.deco),
-      _step31;
-    try {
-      for (_iterator31.s(); !(_step31 = _iterator31.n()).done;) {
-        var _d4 = _step31.value;
-        if (vis(_d4.x, _d4.w || 120) || _d4.w && _d4.x < x1 && _d4.x + _d4.w > x0) bDeco(_d4);
-      }
-    } catch (err) {
-      _iterator31.e(err);
-    } finally {
-      _iterator31.f();
-    }
-    var _iterator32 = _createForOfIteratorHelper(LV.labels),
-      _step32;
-    try {
-      for (_iterator32.s(); !(_step32 = _iterator32.n()).done;) {
-        var l = _step32.value;
-        if (l.x < x1 + 50 && l.x + 340 > x0) bText(l.t, l.x, l.y, l.s || 26);
-      }
-    } catch (err) {
-      _iterator32.e(err);
-    } finally {
-      _iterator32.f();
-    }
-    var _iterator33 = _createForOfIteratorHelper(W.hazards),
-      _step33;
-    try {
-      for (_iterator33.s(); !(_step33 = _iterator33.n()).done;) {
-        var h = _step33.value;
-        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) bLiquid(h);
-      }
-    } catch (err) {
-      _iterator33.e(err);
-    } finally {
-      _iterator33.f();
-    }
-    var _iterator34 = _createForOfIteratorHelper(W.jumpers),
-      _step34;
-    try {
-      for (_iterator34.s(); !(_step34 = _iterator34.n()).done;) {
-        var s = _step34.value;
-        if (vis(s.x)) bJumper(s);
-      }
-    } catch (err) {
-      _iterator34.e(err);
-    } finally {
-      _iterator34.f();
-    }
-    var _iterator35 = _createForOfIteratorHelper(W.solids),
-      _step35;
-    try {
-      for (_iterator35.s(); !(_step35 = _iterator35.n()).done;) {
-        var _s0 = _step35.value;
-        if (_s0.x > x1 || _s0.x + _s0.w < x0 || _s0.y > y1 + 10 || _s0.y + _s0.h < y0) continue;
-        if (oneway(_s0)) bPlat(_s0);else if (_s0.k === 'barrier') bBarrier(_s0);else bGround(_s0);
-      }
-    } catch (err) {
-      _iterator35.e(err);
-    } finally {
-      _iterator35.f();
-    }
-    var _iterator36 = _createForOfIteratorHelper(W.hazards),
-      _step36;
-    try {
-      for (_iterator36.s(); !(_step36 = _iterator36.n()).done;) {
-        var _h = _step36.value;
-        if ((_h.k === 'spike' || _h.k === 'spikeD') && _h.x < x1 && _h.x + _h.w > x0) bSpikes(_h);
-      }
-    } catch (err) {
-      _iterator36.e(err);
-    } finally {
-      _iterator36.f();
-    }
-    var _iterator37 = _createForOfIteratorHelper(W.ramps),
-      _step37;
-    try {
-      for (_iterator37.s(); !(_step37 = _iterator37.n()).done;) {
-        var r = _step37.value;
-        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) bRamp(r);
-      }
-    } catch (err) {
-      _iterator37.e(err);
-    } finally {
-      _iterator37.f();
-    }
-    var _iterator38 = _createForOfIteratorHelper(W.ladders),
-      _step38;
-    try {
-      for (_iterator38.s(); !(_step38 = _iterator38.n()).done;) {
-        var _l = _step38.value;
-        if (vis(_l.x)) bLadder(_l);
-      }
-    } catch (err) {
-      _iterator38.e(err);
-    } finally {
-      _iterator38.f();
-    }
-    LV.cps.forEach(function (c, i) {
-      if (i > 0 && vis(c.x)) bFlag(c, i);
-    });
-    var _iterator39 = _createForOfIteratorHelper(W.candies),
-      _step39;
-    try {
-      for (_iterator39.s(); !(_step39 = _iterator39.n()).done;) {
-        var c = _step39.value;
-        if (!c.got && vis(c.x)) bDraw(SP.candy(c.c), c.x, c.y + 8 + Math.round(Math.sin(tick * .08 + c.x)) * 2, 3);
-      }
-    } catch (err) {
-      _iterator39.e(err);
-    } finally {
-      _iterator39.f();
-    }
-    if (!W.guitar.got) {
-      var g = W.guitar;
-      bDraw(SP.guitar(), g.x, g.y + 18 + Math.round(Math.sin(tick * .06) * 1.5) * 2, 3);
-      bDraw(SP.bolt(), g.x + 18, g.y, 2.5);
-    }
-    bDraw(SP.heart(), W.heart.x, W.heart.y + 18 + (Math.floor(tick / 20) % 2 ? 2 : 0), 4.5);
-    var _iterator40 = _createForOfIteratorHelper(W.walkers),
-      _step40;
-    try {
-      for (_iterator40.s(); !(_step40 = _iterator40.n()).done;) {
-        var _s1 = _step40.value;
-        if (vis(_s1.x)) bWalker(_s1);
-      }
-    } catch (err) {
-      _iterator40.e(err);
-    } finally {
-      _iterator40.f();
-    }
-    var _iterator41 = _createForOfIteratorHelper(W.flyers),
+    var _iterator41 = _createForOfIteratorHelper(W.deco),
       _step41;
     try {
       for (_iterator41.s(); !(_step41 = _iterator41.n()).done;) {
-        var _s10 = _step41.value;
-        if (vis(_s10.x)) bFlyer(_s10);
+        var _d3 = _step41.value;
+        if (vis(_d3.x, _d3.w || 120) || _d3.w && _d3.x < x1 && _d3.x + _d3.w > x0) bDeco(_d3);
       }
     } catch (err) {
       _iterator41.e(err);
     } finally {
       _iterator41.f();
     }
-    var _iterator42 = _createForOfIteratorHelper(W.rollers),
+    var _iterator42 = _createForOfIteratorHelper(LV.labels),
       _step42;
     try {
       for (_iterator42.s(); !(_step42 = _iterator42.n()).done;) {
-        var _s11 = _step42.value;
-        if (vis(_s11.x)) bRoller(_s11);
+        var l = _step42.value;
+        if (l.x < x1 + 50 && l.x + 340 > x0) bText(l.t, l.x, l.y, l.s || 26);
       }
     } catch (err) {
       _iterator42.e(err);
     } finally {
       _iterator42.f();
     }
-    var _iterator43 = _createForOfIteratorHelper(W.cannons),
+    var _iterator43 = _createForOfIteratorHelper(W.hazards),
       _step43;
     try {
       for (_iterator43.s(); !(_step43 = _iterator43.n()).done;) {
-        var _c2 = _step43.value;
-        if (vis(_c2.x)) bCannon(_c2);
+        var h = _step43.value;
+        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) bLiquid(h);
       }
     } catch (err) {
       _iterator43.e(err);
     } finally {
       _iterator43.f();
     }
-    var _iterator44 = _createForOfIteratorHelper(W.droppers),
+    var _iterator44 = _createForOfIteratorHelper(W.jumpers),
       _step44;
     try {
       for (_iterator44.s(); !(_step44 = _iterator44.n()).done;) {
-        var _d5 = _step44.value;
-        if (vis(_d5.x)) bDropper(_d5);
+        var s = _step44.value;
+        if (vis(s.x)) bJumper(s);
       }
     } catch (err) {
       _iterator44.e(err);
     } finally {
       _iterator44.f();
     }
-    var _iterator45 = _createForOfIteratorHelper(W.fallers),
+    var _iterator45 = _createForOfIteratorHelper(W.solids),
       _step45;
     try {
       for (_iterator45.s(); !(_step45 = _iterator45.n()).done;) {
-        var m = _step45.value;
-        if (vis(m.x)) bFaller(m);
+        var _s10 = _step45.value;
+        if (_s10.x > x1 || _s10.x + _s10.w < x0 || _s10.y > y1 + 10 || _s10.y + _s10.h < y0) continue;
+        if (oneway(_s10)) bPlat(_s10);else if (_s10.k === 'barrier') bBarrier(_s10);else bGround(_s10);
       }
     } catch (err) {
       _iterator45.e(err);
     } finally {
       _iterator45.f();
     }
-    bBoss();
-    var _iterator46 = _createForOfIteratorHelper(W.shots),
+    var _iterator46 = _createForOfIteratorHelper(W.hazards),
       _step46;
     try {
       for (_iterator46.s(); !(_step46 = _iterator46.n()).done;) {
-        var q = _step46.value;
-        bShot(q);
+        var _h = _step46.value;
+        if ((_h.k === 'spike' || _h.k === 'spikeD') && _h.x < x1 && _h.x + _h.w > x0) bSpikes(_h);
       }
     } catch (err) {
       _iterator46.e(err);
     } finally {
       _iterator46.f();
     }
-    var _iterator47 = _createForOfIteratorHelper(W.bolts),
+    var _iterator47 = _createForOfIteratorHelper(W.ramps),
       _step47;
     try {
       for (_iterator47.s(); !(_step47 = _iterator47.n()).done;) {
-        var b = _step47.value;
-        bDraw(SP.bolt(), b.x, b.y + 9, 3, b.d < 0);
+        var r = _step47.value;
+        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) bRamp(r);
       }
     } catch (err) {
       _iterator47.e(err);
     } finally {
       _iterator47.f();
     }
-    bTom();
-    if (th === 5) {
-      ctx.fillStyle = 'rgba(31,95,163,.12)';
-      ctx.fillRect(x0, y0, viewW, H);
-    }
-    var _iterator48 = _createForOfIteratorHelper(W.parts),
+    var _iterator48 = _createForOfIteratorHelper(W.ladders),
       _step48;
     try {
       for (_iterator48.s(); !(_step48 = _iterator48.n()).done;) {
-        var _q3 = _step48.value;
-        ctx.globalAlpha = Math.max(0, _q3.l / 50);
-        bRect(_q3.x - 2, _q3.y - 2, 4, 4, _q3.c);
+        var _l = _step48.value;
+        if (vis(_l.x)) bLadder(_l);
       }
     } catch (err) {
       _iterator48.e(err);
     } finally {
       _iterator48.f();
+    }
+    LV.cps.forEach(function (c, i) {
+      if (i > 0 && vis(c.x)) bFlag(c, i);
+    });
+    var _iterator49 = _createForOfIteratorHelper(W.candies),
+      _step49;
+    try {
+      for (_iterator49.s(); !(_step49 = _iterator49.n()).done;) {
+        var c = _step49.value;
+        if (!c.got && vis(c.x)) bDraw(SP.candy(c.c), c.x, c.y + 8 + Math.round(Math.sin(tick * .08 + c.x)) * 2, 3);
+      }
+    } catch (err) {
+      _iterator49.e(err);
+    } finally {
+      _iterator49.f();
+    }
+    if (!PLY.every(function (q) {
+      return q.guitar;
+    })) {
+      var g = W.guitar;
+      bDraw(SP.guitar(), g.x, g.y + 18 + Math.round(Math.sin(tick * .06) * 1.5) * 2, 3);
+      bDraw(SP.bolt(), g.x + 18, g.y, 2.5);
+    }
+    bDraw(SP.heart(), W.heart.x, W.heart.y + 18 + (Math.floor(tick / 20) % 2 ? 2 : 0), 4.5);
+    var _iterator50 = _createForOfIteratorHelper(W.walkers),
+      _step50;
+    try {
+      for (_iterator50.s(); !(_step50 = _iterator50.n()).done;) {
+        var _s11 = _step50.value;
+        if (vis(_s11.x)) bWalker(_s11);
+      }
+    } catch (err) {
+      _iterator50.e(err);
+    } finally {
+      _iterator50.f();
+    }
+    var _iterator51 = _createForOfIteratorHelper(W.flyers),
+      _step51;
+    try {
+      for (_iterator51.s(); !(_step51 = _iterator51.n()).done;) {
+        var _s12 = _step51.value;
+        if (vis(_s12.x)) bFlyer(_s12);
+      }
+    } catch (err) {
+      _iterator51.e(err);
+    } finally {
+      _iterator51.f();
+    }
+    var _iterator52 = _createForOfIteratorHelper(W.rollers),
+      _step52;
+    try {
+      for (_iterator52.s(); !(_step52 = _iterator52.n()).done;) {
+        var _s13 = _step52.value;
+        if (vis(_s13.x)) bRoller(_s13);
+      }
+    } catch (err) {
+      _iterator52.e(err);
+    } finally {
+      _iterator52.f();
+    }
+    var _iterator53 = _createForOfIteratorHelper(W.cannons),
+      _step53;
+    try {
+      for (_iterator53.s(); !(_step53 = _iterator53.n()).done;) {
+        var _c2 = _step53.value;
+        if (vis(_c2.x)) bCannon(_c2);
+      }
+    } catch (err) {
+      _iterator53.e(err);
+    } finally {
+      _iterator53.f();
+    }
+    var _iterator54 = _createForOfIteratorHelper(W.droppers),
+      _step54;
+    try {
+      for (_iterator54.s(); !(_step54 = _iterator54.n()).done;) {
+        var _d4 = _step54.value;
+        if (vis(_d4.x)) bDropper(_d4);
+      }
+    } catch (err) {
+      _iterator54.e(err);
+    } finally {
+      _iterator54.f();
+    }
+    var _iterator55 = _createForOfIteratorHelper(W.fallers),
+      _step55;
+    try {
+      for (_iterator55.s(); !(_step55 = _iterator55.n()).done;) {
+        var m = _step55.value;
+        if (vis(m.x)) bFaller(m);
+      }
+    } catch (err) {
+      _iterator55.e(err);
+    } finally {
+      _iterator55.f();
+    }
+    bBoss();
+    var _iterator56 = _createForOfIteratorHelper(W.shots),
+      _step56;
+    try {
+      for (_iterator56.s(); !(_step56 = _iterator56.n()).done;) {
+        var q = _step56.value;
+        bShot(q);
+      }
+    } catch (err) {
+      _iterator56.e(err);
+    } finally {
+      _iterator56.f();
+    }
+    var _iterator57 = _createForOfIteratorHelper(W.bolts),
+      _step57;
+    try {
+      for (_iterator57.s(); !(_step57 = _iterator57.n()).done;) {
+        var b = _step57.value;
+        bDraw(SP.bolt(), b.x, b.y + 9, 3, b.d < 0);
+      }
+    } catch (err) {
+      _iterator57.e(err);
+    } finally {
+      _iterator57.f();
+    }
+    bPlayers();
+    if (th === 5) {
+      ctx.fillStyle = 'rgba(31,95,163,.12)';
+      ctx.fillRect(x0, y0, viewW, H);
+    }
+    var _iterator58 = _createForOfIteratorHelper(W.parts),
+      _step58;
+    try {
+      for (_iterator58.s(); !(_step58 = _iterator58.n()).done;) {
+        var _q4 = _step58.value;
+        ctx.globalAlpha = Math.max(0, _q4.l / 50);
+        bRect(_q4.x - 2, _q4.y - 2, 4, 4, _q4.c);
+      }
+    } catch (err) {
+      _iterator58.e(err);
+    } finally {
+      _iterator58.f();
     }
     ctx.globalAlpha = 1;
   }
@@ -7193,10 +7844,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     svg.remove();
     return SEG_TILES;
   }
-  var TOM_URL = null;
+  var TOM_URLS = {};
   function tomURL() {
-    if (!TOM_URL) TOM_URL = tomS('stand').toDataURL();
-    return TOM_URL;
+    var ch = PLY[0] && PLY[0].char || PICK[0];
+    if (!TOM_URLS[ch]) TOM_URLS[ch] = charS(ch, 'stand').toDataURL();
+    return TOM_URLS[ch];
   }
   function blockMapURL() {
     var c = document.createElement('canvas');
@@ -7227,8 +7879,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       gold: ['#f6d76a', '#f2c230', '#ffe48a']
     };
     var region = function region(mx, my) {
-      for (var _i27 = 0, _R = R; _i27 < _R.length; _i27++) {
-        var r = _R[_i27];
+      for (var _i28 = 0, _R = R; _i28 < _R.length; _i28++) {
+        var r = _R[_i28];
         if (dE(mx, my, r[1], r[2], r[3], r[4]) < 1) return r[0];
       }
       return 'grass';
@@ -7248,19 +7900,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     NODES.forEach(function (n, k) {
       if (!done[ORDER[k]]) return;
-      for (var _j = 0; _j < rows; _j++) for (var _i28 = 0; _i28 < cols; _i28++) {
-        var e = dE((_i28 + .5) * 28, (_j + .5) * 28, n.x, n.y, n.rx * 1.35 + 20, n.ry * 1.35 + 20);
+      for (var _j = 0; _j < rows; _j++) for (var _i29 = 0; _i29 < cols; _i29++) {
+        var e = dE((_i29 + .5) * 28, (_j + .5) * 28, n.x, n.y, n.rx * 1.35 + 20, n.ry * 1.35 + 20);
         if (e < 1) {
           x.fillStyle = e > .72 ? 'rgba(90,240,110,.85)' : 'rgba(120,255,140,.33)';
-          x.fillRect(_i28 * T, _j * T, T, T);
+          x.fillRect(_i29 * T, _j * T, T, T);
         }
       }
     });
-    if (all) for (var _j2 = 0; _j2 < rows; _j2++) for (var _i29 = 0; _i29 < cols; _i29++) {
-      var e = dE((_i29 + .5) * 28, (_j2 + .5) * 28, GOAL.x, GOAL.y, GOAL.rx * 1.6, GOAL.ry * 1.6);
+    if (all) for (var _j2 = 0; _j2 < rows; _j2++) for (var _i30 = 0; _i30 < cols; _i30++) {
+      var e = dE((_i30 + .5) * 28, (_j2 + .5) * 28, GOAL.x, GOAL.y, GOAL.rx * 1.6, GOAL.ry * 1.6);
       if (e < 1) {
         x.fillStyle = e > .72 ? 'rgba(255,215,64,.9)' : 'rgba(255,230,120,.35)';
-        x.fillRect(_i29 * T, _j2 * T, T, T);
+        x.fillRect(_i30 * T, _j2 * T, T, T);
       }
     }
     var st = segTiles(),
@@ -7290,21 +7942,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         return dE(mx, my, n.x, n.y, n.rx + 60, n.ry + 60) < 1;
       }) || dE(mx, my, 360, 140, 140, 120) < 1 || dE(mx, my, GOAL.x, GOAL.y, 150, 120) < 1;
     };
-    for (var _j3 = 1; _j3 < rows - 1; _j3++) for (var _i30 = 0; _i30 < cols; _i30++) {
-      var mx = (_i30 + .5) * 28,
+    for (var _j3 = 1; _j3 < rows - 1; _j3++) for (var _i31 = 0; _i31 < cols; _i31++) {
+      var mx = (_i31 + .5) * 28,
         my = (_j3 + .5) * 28;
-      if (regs[_j3][_i30] !== 'grass' || painted.has(_i30 + ',' + _j3) || near(mx, my)) continue;
-      var _r2 = brnd(_i30, _j3, 9);
-      if (_r2 > .93 && !painted.has(_i30 + ',' + (_j3 + 1)) && !painted.has(_i30 + ',' + (_j3 - 1))) {
+      if (regs[_j3][_i31] !== 'grass' || painted.has(_i31 + ',' + _j3) || near(mx, my)) continue;
+      var _r2 = brnd(_i31, _j3, 9);
+      if (_r2 > .93 && !painted.has(_i31 + ',' + (_j3 + 1)) && !painted.has(_i31 + ',' + (_j3 - 1))) {
         x.fillStyle = '#6b4a2e';
-        x.fillRect(_i30 * T + 5, _j3 * T + 4, 4, 10);
+        x.fillRect(_i31 * T + 5, _j3 * T + 4, 4, 10);
         x.fillStyle = '#2f7d2e';
-        x.fillRect(_i30 * T - 1, _j3 * T - 9, 16, 13);
+        x.fillRect(_i31 * T - 1, _j3 * T - 9, 16, 13);
         x.fillStyle = '#3f9a3a';
-        x.fillRect(_i30 * T + 2, _j3 * T - 11, 10, 5);
+        x.fillRect(_i31 * T + 2, _j3 * T - 11, 10, 5);
       } else if (_r2 > .88) {
-        x.fillStyle = ['#e0373f', '#f2c230', '#ffffff', '#8a5cc7'][Math.floor(brnd(_i30, _j3, 10) * 4)];
-        x.fillRect(_i30 * T + 5, _j3 * T + 5, 4, 4);
+        x.fillStyle = ['#e0373f', '#f2c230', '#ffffff', '#8a5cc7'][Math.floor(brnd(_i31, _j3, 10) * 4)];
+        x.fillRect(_i31 * T + 5, _j3 * T + 5, 4, 4);
       }
     }
     var q = function q(cx, cy) {
@@ -7341,8 +7993,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L = q(265, 284);
     L(-10, -8, 20, 14, '#8d8f99');
     L(-10, -8, 20, 1, '#a9abb5');
-    for (var _i31 = 0, _arr7 = [-10, -4, 2, 7]; _i31 < _arr7.length; _i31++) {
-      var cx2 = _arr7[_i31];
+    for (var _i32 = 0, _arr9 = [-10, -4, 2, 7]; _i32 < _arr9.length; _i32++) {
+      var cx2 = _arr9[_i32];
       L(cx2, -10, 3, 2, '#8d8f99');
     }
     L(-4, -16, 8, 8, '#9b9da7');
@@ -7359,10 +8011,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(4, -5, 4, 1, '#9fd3f0');
     L(6, 4, 5, 1, '#9fd3f0');
     L = q(542, 296);
-    for (var _i32 = 0, _arr8 = [[-12, -2], [8, -6]]; _i32 < _arr8.length; _i32++) {
-      var _arr8$_i = _slicedToArray(_arr8[_i32], 2),
-        _tx = _arr8$_i[0],
-        ty = _arr8$_i[1];
+    for (var _i33 = 0, _arr0 = [[-12, -2], [8, -6]]; _i33 < _arr0.length; _i33++) {
+      var _arr0$_i = _slicedToArray(_arr0[_i33], 2),
+        _tx = _arr0$_i[0],
+        ty = _arr0$_i[1];
       L(_tx, ty, 2, 6, '#6b4a2e');
       L(_tx - 3, ty - 6, 8, 6, '#256b37');
       L(_tx - 2, ty - 7, 6, 1, '#3f9a3a');
@@ -7374,8 +8026,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(3, 3, 2, 5, '#3b3f4f');
     L(-1, 0, 1, 1, '#1d1f2b');
     L = q(628, 269);
-    for (var _i33 = 0, _arr9 = [-9, 0, 9]; _i33 < _arr9.length; _i33++) {
-      var pk = _arr9[_i33];
+    for (var _i34 = 0, _arr1 = [-9, 0, 9]; _i34 < _arr1.length; _i34++) {
+      var pk = _arr1[_i34];
       for (var _k10 = 0; _k10 < 5; _k10++) L(pk - 4 + _k10 * .8, 4 - _k10 * 2, 8 - _k10 * 1.6, 2, _k10 > 2 ? '#ffffff' : '#bfe4f6');
     }
     L = q(655, 165);
@@ -7400,10 +8052,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(8, -19, 2, 3, '#f07a2a');
     L(8, -16, 2, 1, '#c25a14');
     L = q(435, 48);
-    for (var _i34 = 0, _arr0 = [[-14, -2], [6, -6]]; _i34 < _arr0.length; _i34++) {
-      var _arr0$_i = _slicedToArray(_arr0[_i34], 2),
-        _cx = _arr0$_i[0],
-        cy2 = _arr0$_i[1];
+    for (var _i35 = 0, _arr10 = [[-14, -2], [6, -6]]; _i35 < _arr10.length; _i35++) {
+      var _arr10$_i = _slicedToArray(_arr10[_i35], 2),
+        _cx = _arr10$_i[0],
+        cy2 = _arr10$_i[1];
       L(_cx, cy2, 14, 4, '#ffffff');
       L(_cx + 3, cy2 - 3, 7, 3, '#ffffff');
       L(_cx + 1, cy2 + 4, 12, 1, '#c9d6e6');
@@ -7460,11 +8112,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return;
     }
     ctx.imageSmoothingEnabled = true;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    vSet(1, 1, 0, 0);
     ctx.fillStyle = PAPER;
-    ctx.fillRect(0, 0, cvs.width / dpr, cvs.height / dpr);
-    var k = scale * dpr;
-    ctx.setTransform(k, 0, 0, k, -camX * k, -camY * k);
+    ctx.fillRect(0, 0, VIEW.w, VIEW.h);
+    vSet(scale, scale, -camX * scale, -camY * scale);
     var x0 = camX,
       x1 = camX + viewW,
       y0 = camY,
@@ -7485,218 +8136,218 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       var w = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 80;
       return a > x0 - w && a < x1 + w;
     };
-    var _iterator49 = _createForOfIteratorHelper(W.deco),
-      _step49;
-    try {
-      for (_iterator49.s(); !(_step49 = _iterator49.n()).done;) {
-        var _d6 = _step49.value;
-        if (vis(_d6.x, _d6.w || 120) || _d6.w && _d6.x < x1 && _d6.x + _d6.w > x0) drawDeco(_d6);
-      }
-    } catch (err) {
-      _iterator49.e(err);
-    } finally {
-      _iterator49.f();
-    }
-    var _iterator50 = _createForOfIteratorHelper(LV.labels),
-      _step50;
-    try {
-      for (_iterator50.s(); !(_step50 = _iterator50.n()).done;) {
-        var l = _step50.value;
-        if (l.x < x1 + 50 && l.x + 340 > x0) label(l.t, l.x, l.y, l.s || 26);
-      }
-    } catch (err) {
-      _iterator50.e(err);
-    } finally {
-      _iterator50.f();
-    }
-    var _iterator51 = _createForOfIteratorHelper(W.hazards),
-      _step51;
-    try {
-      for (_iterator51.s(); !(_step51 = _iterator51.n()).done;) {
-        var h = _step51.value;
-        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) drawLiquid(h);
-      }
-    } catch (err) {
-      _iterator51.e(err);
-    } finally {
-      _iterator51.f();
-    }
-    var _iterator52 = _createForOfIteratorHelper(W.jumpers),
-      _step52;
-    try {
-      for (_iterator52.s(); !(_step52 = _iterator52.n()).done;) {
-        var s = _step52.value;
-        if (vis(s.x)) drawJumper(s);
-      }
-    } catch (err) {
-      _iterator52.e(err);
-    } finally {
-      _iterator52.f();
-    }
-    var _iterator53 = _createForOfIteratorHelper(W.solids),
-      _step53;
-    try {
-      for (_iterator53.s(); !(_step53 = _iterator53.n()).done;) {
-        var _s12 = _step53.value;
-        if (_s12.x > x1 || _s12.x + _s12.w < x0 || _s12.y > y1 + 10 || _s12.y + _s12.h < y0) continue;
-        if (oneway(_s12)) drawPlat(_s12);else if (_s12.k === 'barrier') drawBarrier(_s12);else drawGround(_s12);
-      }
-    } catch (err) {
-      _iterator53.e(err);
-    } finally {
-      _iterator53.f();
-    }
-    var _iterator54 = _createForOfIteratorHelper(W.hazards),
-      _step54;
-    try {
-      for (_iterator54.s(); !(_step54 = _iterator54.n()).done;) {
-        var _h2 = _step54.value;
-        if ((_h2.k === 'spike' || _h2.k === 'spikeD') && _h2.x < x1 && _h2.x + _h2.w > x0) drawSpikes(_h2);
-      }
-    } catch (err) {
-      _iterator54.e(err);
-    } finally {
-      _iterator54.f();
-    }
-    var _iterator55 = _createForOfIteratorHelper(W.ramps),
-      _step55;
-    try {
-      for (_iterator55.s(); !(_step55 = _iterator55.n()).done;) {
-        var r = _step55.value;
-        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) drawRamp(r);
-      }
-    } catch (err) {
-      _iterator55.e(err);
-    } finally {
-      _iterator55.f();
-    }
-    var _iterator56 = _createForOfIteratorHelper(W.ladders),
-      _step56;
-    try {
-      for (_iterator56.s(); !(_step56 = _iterator56.n()).done;) {
-        var _l2 = _step56.value;
-        if (vis(_l2.x)) drawLadder(_l2);
-      }
-    } catch (err) {
-      _iterator56.e(err);
-    } finally {
-      _iterator56.f();
-    }
-    LV.cps.forEach(function (c, i) {
-      if (i > 0 && vis(c.x)) drawFlag(c, i);
-    });
-    var _iterator57 = _createForOfIteratorHelper(W.candies),
-      _step57;
-    try {
-      for (_iterator57.s(); !(_step57 = _iterator57.n()).done;) {
-        var c = _step57.value;
-        if (!c.got && vis(c.x)) drawCandy(c);
-      }
-    } catch (err) {
-      _iterator57.e(err);
-    } finally {
-      _iterator57.f();
-    }
-    drawGuitar();
-    drawHeart(W.heart.x, W.heart.y, 16 * (1 + Math.sin(tick * .08) * .08), RED);
-    var _iterator58 = _createForOfIteratorHelper(W.walkers),
-      _step58;
-    try {
-      for (_iterator58.s(); !(_step58 = _iterator58.n()).done;) {
-        var _s13 = _step58.value;
-        if (vis(_s13.x)) drawWalker(_s13);
-      }
-    } catch (err) {
-      _iterator58.e(err);
-    } finally {
-      _iterator58.f();
-    }
-    var _iterator59 = _createForOfIteratorHelper(W.flyers),
+    var _iterator59 = _createForOfIteratorHelper(W.deco),
       _step59;
     try {
       for (_iterator59.s(); !(_step59 = _iterator59.n()).done;) {
-        var _s14 = _step59.value;
-        if (vis(_s14.x)) drawFlyer(_s14);
+        var _d5 = _step59.value;
+        if (vis(_d5.x, _d5.w || 120) || _d5.w && _d5.x < x1 && _d5.x + _d5.w > x0) drawDeco(_d5);
       }
     } catch (err) {
       _iterator59.e(err);
     } finally {
       _iterator59.f();
     }
-    var _iterator60 = _createForOfIteratorHelper(W.rollers),
+    var _iterator60 = _createForOfIteratorHelper(LV.labels),
       _step60;
     try {
       for (_iterator60.s(); !(_step60 = _iterator60.n()).done;) {
-        var _s15 = _step60.value;
-        if (vis(_s15.x)) drawRoller(_s15);
+        var l = _step60.value;
+        if (l.x < x1 + 50 && l.x + 340 > x0) label(l.t, l.x, l.y, l.s || 26);
       }
     } catch (err) {
       _iterator60.e(err);
     } finally {
       _iterator60.f();
     }
-    var _iterator61 = _createForOfIteratorHelper(W.cannons),
+    var _iterator61 = _createForOfIteratorHelper(W.hazards),
       _step61;
     try {
       for (_iterator61.s(); !(_step61 = _iterator61.n()).done;) {
-        var _c3 = _step61.value;
-        if (vis(_c3.x)) drawCannon(_c3);
+        var h = _step61.value;
+        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) drawLiquid(h);
       }
     } catch (err) {
       _iterator61.e(err);
     } finally {
       _iterator61.f();
     }
-    var _iterator62 = _createForOfIteratorHelper(W.droppers),
+    var _iterator62 = _createForOfIteratorHelper(W.jumpers),
       _step62;
     try {
       for (_iterator62.s(); !(_step62 = _iterator62.n()).done;) {
-        var _d7 = _step62.value;
-        if (vis(_d7.x)) drawDropper(_d7);
+        var s = _step62.value;
+        if (vis(s.x)) drawJumper(s);
       }
     } catch (err) {
       _iterator62.e(err);
     } finally {
       _iterator62.f();
     }
-    var _iterator63 = _createForOfIteratorHelper(W.fallers),
+    var _iterator63 = _createForOfIteratorHelper(W.solids),
       _step63;
     try {
       for (_iterator63.s(); !(_step63 = _iterator63.n()).done;) {
-        var m = _step63.value;
-        if (vis(m.x)) drawFaller(m);
+        var _s14 = _step63.value;
+        if (_s14.x > x1 || _s14.x + _s14.w < x0 || _s14.y > y1 + 10 || _s14.y + _s14.h < y0) continue;
+        if (oneway(_s14)) drawPlat(_s14);else if (_s14.k === 'barrier') drawBarrier(_s14);else drawGround(_s14);
       }
     } catch (err) {
       _iterator63.e(err);
     } finally {
       _iterator63.f();
     }
-    drawBoss();
-    var _iterator64 = _createForOfIteratorHelper(W.shots),
+    var _iterator64 = _createForOfIteratorHelper(W.hazards),
       _step64;
     try {
       for (_iterator64.s(); !(_step64 = _iterator64.n()).done;) {
-        var q = _step64.value;
-        drawShot(q);
+        var _h2 = _step64.value;
+        if ((_h2.k === 'spike' || _h2.k === 'spikeD') && _h2.x < x1 && _h2.x + _h2.w > x0) drawSpikes(_h2);
       }
     } catch (err) {
       _iterator64.e(err);
     } finally {
       _iterator64.f();
     }
-    var _iterator65 = _createForOfIteratorHelper(W.bolts),
+    var _iterator65 = _createForOfIteratorHelper(W.ramps),
       _step65;
     try {
       for (_iterator65.s(); !(_step65 = _iterator65.n()).done;) {
-        var b = _step65.value;
-        drawBolt(b.x, b.y, b.d, 1);
+        var r = _step65.value;
+        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) drawRamp(r);
       }
     } catch (err) {
       _iterator65.e(err);
     } finally {
       _iterator65.f();
     }
-    drawTom();
+    var _iterator66 = _createForOfIteratorHelper(W.ladders),
+      _step66;
+    try {
+      for (_iterator66.s(); !(_step66 = _iterator66.n()).done;) {
+        var _l2 = _step66.value;
+        if (vis(_l2.x)) drawLadder(_l2);
+      }
+    } catch (err) {
+      _iterator66.e(err);
+    } finally {
+      _iterator66.f();
+    }
+    LV.cps.forEach(function (c, i) {
+      if (i > 0 && vis(c.x)) drawFlag(c, i);
+    });
+    var _iterator67 = _createForOfIteratorHelper(W.candies),
+      _step67;
+    try {
+      for (_iterator67.s(); !(_step67 = _iterator67.n()).done;) {
+        var c = _step67.value;
+        if (!c.got && vis(c.x)) drawCandy(c);
+      }
+    } catch (err) {
+      _iterator67.e(err);
+    } finally {
+      _iterator67.f();
+    }
+    drawGuitar();
+    drawHeart(W.heart.x, W.heart.y, 16 * (1 + Math.sin(tick * .08) * .08), RED);
+    var _iterator68 = _createForOfIteratorHelper(W.walkers),
+      _step68;
+    try {
+      for (_iterator68.s(); !(_step68 = _iterator68.n()).done;) {
+        var _s15 = _step68.value;
+        if (vis(_s15.x)) drawWalker(_s15);
+      }
+    } catch (err) {
+      _iterator68.e(err);
+    } finally {
+      _iterator68.f();
+    }
+    var _iterator69 = _createForOfIteratorHelper(W.flyers),
+      _step69;
+    try {
+      for (_iterator69.s(); !(_step69 = _iterator69.n()).done;) {
+        var _s16 = _step69.value;
+        if (vis(_s16.x)) drawFlyer(_s16);
+      }
+    } catch (err) {
+      _iterator69.e(err);
+    } finally {
+      _iterator69.f();
+    }
+    var _iterator70 = _createForOfIteratorHelper(W.rollers),
+      _step70;
+    try {
+      for (_iterator70.s(); !(_step70 = _iterator70.n()).done;) {
+        var _s17 = _step70.value;
+        if (vis(_s17.x)) drawRoller(_s17);
+      }
+    } catch (err) {
+      _iterator70.e(err);
+    } finally {
+      _iterator70.f();
+    }
+    var _iterator71 = _createForOfIteratorHelper(W.cannons),
+      _step71;
+    try {
+      for (_iterator71.s(); !(_step71 = _iterator71.n()).done;) {
+        var _c3 = _step71.value;
+        if (vis(_c3.x)) drawCannon(_c3);
+      }
+    } catch (err) {
+      _iterator71.e(err);
+    } finally {
+      _iterator71.f();
+    }
+    var _iterator72 = _createForOfIteratorHelper(W.droppers),
+      _step72;
+    try {
+      for (_iterator72.s(); !(_step72 = _iterator72.n()).done;) {
+        var _d6 = _step72.value;
+        if (vis(_d6.x)) drawDropper(_d6);
+      }
+    } catch (err) {
+      _iterator72.e(err);
+    } finally {
+      _iterator72.f();
+    }
+    var _iterator73 = _createForOfIteratorHelper(W.fallers),
+      _step73;
+    try {
+      for (_iterator73.s(); !(_step73 = _iterator73.n()).done;) {
+        var m = _step73.value;
+        if (vis(m.x)) drawFaller(m);
+      }
+    } catch (err) {
+      _iterator73.e(err);
+    } finally {
+      _iterator73.f();
+    }
+    drawBoss();
+    var _iterator74 = _createForOfIteratorHelper(W.shots),
+      _step74;
+    try {
+      for (_iterator74.s(); !(_step74 = _iterator74.n()).done;) {
+        var q = _step74.value;
+        drawShot(q);
+      }
+    } catch (err) {
+      _iterator74.e(err);
+    } finally {
+      _iterator74.f();
+    }
+    var _iterator75 = _createForOfIteratorHelper(W.bolts),
+      _step75;
+    try {
+      for (_iterator75.s(); !(_step75 = _iterator75.n()).done;) {
+        var b = _step75.value;
+        drawBolt(b.x, b.y, b.d, 1);
+      }
+    } catch (err) {
+      _iterator75.e(err);
+    } finally {
+      _iterator75.f();
+    }
+    drawPlayers();
     if (LV.theme === 5) {
       ctx.fillStyle = 'rgba(63,134,212,.09)';
       ctx.fillRect(x0, y0, viewW, H);
@@ -7713,48 +8364,59 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.fillStyle = 'rgba(45,48,64,.06)';
       ctx.fillRect(x0, y0, viewW, H);
     }
-    var _iterator66 = _createForOfIteratorHelper(W.parts),
-      _step66;
+    var _iterator76 = _createForOfIteratorHelper(W.parts),
+      _step76;
     try {
-      for (_iterator66.s(); !(_step66 = _iterator66.n()).done;) {
-        var _q4 = _step66.value;
-        ctx.globalAlpha = Math.max(0, _q4.l / 50);
-        ctx.fillStyle = _q4.c;
+      for (_iterator76.s(); !(_step76 = _iterator76.n()).done;) {
+        var _q5 = _step76.value;
+        ctx.globalAlpha = Math.max(0, _q5.l / 50);
+        ctx.fillStyle = _q5.c;
         ctx.beginPath();
-        ctx.arc(_q4.x, _q4.y, 2.2, 0, 6.28);
+        ctx.arc(_q5.x, _q5.y, 2.2, 0, 6.28);
         ctx.fill();
       }
     } catch (err) {
-      _iterator66.e(err);
+      _iterator76.e(err);
     } finally {
-      _iterator66.f();
+      _iterator76.f();
     }
     ctx.globalAlpha = 1;
   }
   var lastSec = '',
     lastClock = '',
-    lastCandy = '';
+    lastCandy = '',
+    lastDuo = ['', ''];
   function hud() {
+    var c = Math.floor(time / 60) + ':' + String(Math.floor(time % 60)).padStart(2, '0');
+    if (duo()) {
+      PLY.forEach(function (q, i) {
+        var t = q.arrived ? '♥ arrivato! · ' + c : "\uD83C\uDF6C ".concat(q.candies, " \xB7 cadute ").concat(q.falls, " \xB7 ").concat(c);
+        if (t !== lastDuo[i]) {
+          $(i ? 'stat2' : 'stat1').textContent = t;
+          lastDuo[i] = t;
+        }
+      });
+      return;
+    }
     var s = '';
-    var _iterator67 = _createForOfIteratorHelper(LV.sections),
-      _step67;
+    var _iterator77 = _createForOfIteratorHelper(LV.sections),
+      _step77;
     try {
-      for (_iterator67.s(); !(_step67 = _iterator67.n()).done;) {
-        var _step67$value = _slicedToArray(_step67.value, 2),
-          x = _step67$value[0],
-          n = _step67$value[1];
+      for (_iterator77.s(); !(_step77 = _iterator77.n()).done;) {
+        var _step77$value = _slicedToArray(_step77.value, 2),
+          x = _step77$value[0],
+          n = _step77$value[1];
         if (p.x >= x) s = n;
       }
     } catch (err) {
-      _iterator67.e(err);
+      _iterator77.e(err);
     } finally {
-      _iterator67.f();
+      _iterator77.f();
     }
     if (s !== lastSec) {
       $('sec').textContent = s;
       lastSec = s;
     }
-    var c = Math.floor(time / 60) + ':' + String(Math.floor(time % 60)).padStart(2, '0');
     var cc = '🍬 ' + candies + '/' + W.candies.length;
     if (cc !== lastCandy) {
       $('candy').textContent = cc;
@@ -7764,6 +8426,57 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       $('clock').textContent = c;
       lastClock = c;
     }
+  }
+  function render() {
+    if (!duo()) {
+      VIEW = {
+        x: 0,
+        y: 0,
+        w: cssW,
+        h: cssH,
+        rot: false
+      };
+      draw();
+      return;
+    }
+    var half = (cssH - 6) / 2;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#2d3040';
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    var views = [{
+      x: 0,
+      y: cssH - half,
+      w: cssW,
+      h: half,
+      rot: false,
+      pl: 0
+    }, {
+      x: 0,
+      y: 0,
+      w: cssW,
+      h: half,
+      rot: true,
+      pl: 1
+    }];
+    var sx = camX,
+      sy = camY;
+    for (var _i36 = 0, _views = views; _i36 < _views.length; _i36++) {
+      var v = _views[_i36];
+      var q = PLY[v.pl];
+      if (!q) continue;
+      VIEW = v;
+      camX = q.camX;
+      camY = q.camY;
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.beginPath();
+      ctx.rect(v.x * dpr, v.y * dpr, v.w * dpr, v.h * dpr);
+      ctx.clip();
+      draw();
+      ctx.restore();
+    }
+    camX = sx;
+    camY = sy;
   }
   var last = 0;
   var lastSW = -1,
@@ -7781,7 +8494,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     last = t;
     var f = Math.min(dt / 16.67, 2.5);
     if (running) update(f);else tick += f * .3;
-    draw();
+    render();
     hud();
     requestAnimationFrame(loop);
   }
@@ -7791,7 +8504,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _getSaveRef() {
     _getSaveRef = _asyncToGenerator(_regenerator().m(function _callee5() {
-      var db, user, id, _t6, _t7;
+      var db, user, id, _t7, _t8;
       return _regenerator().w(function (_context5) {
         while (1) switch (_context5.p = _context5.n) {
           case 0:
@@ -7814,13 +8527,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             _context5.n = 4;
             return window.claude.use('user');
           case 4:
-            _t6 = _context5.v;
+            _t7 = _context5.v;
             _context5.n = 6;
             break;
           case 5:
-            _t6 = null;
+            _t7 = null;
           case 6:
-            user = _t6;
+            user = _t7;
             if (!(db && user)) {
               _context5.n = 8;
               break;
@@ -7835,7 +8548,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             break;
           case 9:
             _context5.p = 9;
-            _t7 = _context5.v;
+            _t8 = _context5.v;
           case 10:
             return _context5.a(2, saveRef);
         }
@@ -7843,32 +8556,53 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }));
     return _getSaveRef.apply(this, arguments);
   }
-  function snapshot() {
+  function snapPos(q) {
     var pos = null;
-    if (p.on && !p.dead && p.ground && (p.ground.k === 'ground' || p.ground.k === 'plat') && !W.plats.some(function (m) {
-      return m.o === p.ground;
+    if (q.on && !q.dead && q.ground && (q.ground.k === 'ground' || q.ground.k === 'plat') && !W.plats.some(function (m) {
+      return m.o === q.ground;
     })) pos = {
-      x: Math.round(p.x),
-      y: Math.round(p.y)
+      x: Math.round(q.x),
+      y: Math.round(q.y)
     };
-    if (p.on && p.ramp) pos = {
-      x: Math.round(p.x),
-      y: Math.round(p.y)
+    if (q.on && q.ramp) pos = {
+      x: Math.round(q.x),
+      y: Math.round(q.y)
     };
+    return pos;
+  }
+  function snapshot() {
+    if (p === PLY[0] || PLY.indexOf(p) >= 0) store();
+    var P0 = PLY[0];
     return {
-      v: 1,
+      v: 2,
       level: lvIdx,
-      cp: p.cp,
-      pos,
-      candies,
+      mode: MODE,
+      pick: PLY.map(function (q) {
+        return q.char;
+      }),
+      players: PLY.map(function (q) {
+        return {
+          cp: q.cp,
+          pos: snapPos(q),
+          candies: q.candies,
+          falls: q.falls,
+          guitar: q.guitar,
+          arrived: q.arrived
+        };
+      }),
+      cp: P0.cp,
+      pos: snapPos(P0),
+      candies: PLY.reduce(function (a, q) {
+        return a + q.candies;
+      }, 0),
+      falls: P0.falls,
       got: W.candies.map(function (c, i) {
         return c.got ? i : -1;
       }).filter(function (i) {
         return i >= 0;
       }),
-      falls,
       time: Math.round(time * 10) / 10,
-      guitar: !!W.guitar.got,
+      guitar: !!P0.guitar,
       boss: !!(W.boss && W.boss.dead),
       at: Date.now()
     };
@@ -7880,7 +8614,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _saveGame() {
     _saveGame = _asyncToGenerator(_regenerator().m(function _callee6() {
-      var snap, ref, _t8;
+      var snap, ref, _t9;
       return _regenerator().w(function (_context6) {
         while (1) switch (_context6.p = _context6.n) {
           case 0:
@@ -7912,7 +8646,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             break;
           case 5:
             _context6.p = 5;
-            _t8 = _context6.v;
+            _t9 = _context6.v;
           case 6:
             saving = false;
             showContinue(snap);
@@ -7928,7 +8662,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _clearSave() {
     _clearSave = _asyncToGenerator(_regenerator().m(function _callee7() {
-      var ref, _t9;
+      var ref, _t0;
       return _regenerator().w(function (_context7) {
         while (1) switch (_context7.p = _context7.n) {
           case 0:
@@ -7951,7 +8685,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             break;
           case 4:
             _context7.p = 4;
-            _t9 = _context7.v;
+            _t0 = _context7.v;
           case 5:
             showContinue(null);
           case 6:
@@ -7966,7 +8700,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _loadSave() {
     _loadSave = _asyncToGenerator(_regenerator().m(function _callee8() {
-      var a, b, ref, _d8, pick, _t0;
+      var a, b, ref, _d7, pick, _t1;
       return _regenerator().w(function (_context8) {
         while (1) switch (_context8.p = _context8.n) {
           case 0:
@@ -7983,14 +8717,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             _context8.n = 3;
             return ref.get();
           case 3:
-            _d8 = _context8.v;
-            if (_d8.exists) a = _d8.data();
+            _d7 = _context8.v;
+            if (_d7.exists) a = _d7.data();
           case 4:
             _context8.n = 6;
             break;
           case 5:
             _context8.p = 5;
-            _t0 = _context8.v;
+            _t1 = _context8.v;
           case 6:
             try {
               b = JSON.parse(localStorage.getItem('tom-save') || 'null');
@@ -8016,31 +8750,46 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     b.textContent = '▶ Continua la partita';
     var sm = document.createElement('small');
-    sm.textContent = "Livello ".concat(STEP(sv.level), " \xB7 ").concat(LEVELS[sv.level].name, " \xB7 ").concat(fmt(sv.time || 0), " \xB7 \uD83C\uDF6C ").concat(sv.candies || 0);
+    sm.textContent = "Livello ".concat(STEP(sv.level), " \xB7 ").concat(LEVELS[sv.level].name, " \xB7 ").concat(fmt(sv.time || 0), " \xB7 \uD83C\uDF6C ").concat(sv.candies || 0) + (sv.mode && sv.mode !== 'solo' ? " \xB7 2 giocatori (".concat(sv.mode, ")") : '');
     b.append(sm);
     b.hidden = false;
   }
   function startLevel(i, sv) {
+    if (sv) {
+      if (sv.mode && CHARS[(sv.pick || [])[0]]) {
+        MODE = sv.mode;
+        PICK = sv.pick.slice(0, 2);
+        if (PICK.length < 2) PICK.push(PICK[0] === 'milly' ? 'tommy' : 'milly');
+      } else MODE = 'solo';
+    }
+    document.body.classList.toggle('duo', duo());
     build(i);
-    p.cp = 0;
-    falls = 0;
-    candies = 0;
     time = 0;
     won = false;
-    $('bF').classList.add('locked');
+    PLY = duo() ? [mkPlayer(0, PICK[0]), mkPlayer(1, PICK[1])] : [mkPlayer(0, PICK[0])];
+    resize();
+    ['bF', 'b2F'].forEach(function (id) {
+      return $(id).classList.add('locked');
+    });
+    document.querySelectorAll('.btn.on').forEach(function (b) {
+      return b.classList.remove('on');
+    });
     $('lvlName').textContent = LV.name;
+    $('who1').textContent = CHARS[PLY[0].char].name;
+    if (PLY[1]) $('who2').textContent = CHARS[PLY[1].char].name;
+    lastDuo = ['', ''];
+    var sp = sv ? sv.players || [{
+      cp: sv.cp,
+      pos: sv.pos,
+      candies: sv.candies,
+      falls: sv.falls,
+      guitar: sv.guitar
+    }] : [];
     if (sv) {
-      p.cp = Math.min(sv.cp | 0, LV.cps.length - 1);
-      falls = sv.falls | 0;
       time = +sv.time || 0;
-      candies = sv.candies | 0;
       (sv.got || []).forEach(function (k) {
         if (W.candies[k]) W.candies[k].got = true;
       });
-      if (sv.guitar) {
-        W.guitar.got = true;
-        $('bF').classList.remove('locked');
-      }
       if (sv.boss && W.boss) {
         W.boss.dead = true;
         W.solids = W.solids.filter(function (o) {
@@ -8048,31 +8797,52 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         });
       }
     }
-    $('falls').textContent = 'Cadute ' + falls;
-    respawn();
-    p.inv = sv ? 60 : 0;
-    camX = Math.max(0, Math.min(LV.END - viewW, p.x - viewW * 0.35));
-    if (sv && sv.pos) {
-      p.x = sv.pos.x;
-      p.y = sv.pos.y;
-      camX = Math.max(0, Math.min(LV.END - viewW, p.x - viewW * 0.35));
-      camY = camTargetY();
+    for (var _i37 = 0, _PLY = PLY; _i37 < _PLY.length; _i37++) {
+      var q = _PLY[_i37];
+      var s = sp[q.idx] || null;
+      if (s) {
+        q.cp = Math.min(s.cp | 0, LV.cps.length - 1);
+        q.candies = s.candies | 0;
+        q.falls = s.falls | 0;
+        q.guitar = !!s.guitar;
+        q.arrived = !!s.arrived;
+        if (q.guitar) $(q.idx ? 'b2F' : 'bF').classList.remove('locked');
+      }
+      use(q);
+      respawn();
+      p.inv = sv ? 60 : 0;
+      if (s && s.pos) {
+        p.x = s.pos.x;
+        p.y = s.pos.y;
+        camX = Math.max(0, Math.min(LV.END - viewW, p.x - viewW * 0.35));
+        camY = camTargetY();
+      }
+      store();
     }
+    use(PLY[0]);
+    $('falls').textContent = 'Cadute ' + falls;
     lastSaveAt = time;
     $('menu').hidden = true;
     $('win').hidden = true;
     $('pause').hidden = true;
+    $('setup').hidden = true;
     running = true;
+    last = 0;
     beep(660, .1, 'triangle', .05);
   }
   function pauseGame() {
     if (!running || won) return;
     running = false;
-    for (var k in keys) keys[k] = false;
+    for (var _i38 = 0, _PLY2 = PLY; _i38 < _PLY2.length; _i38++) {
+      var q = _PLY2[_i38];
+      for (var k in q.keys) q.keys[k] = false;
+    }
     document.querySelectorAll('.btn.on').forEach(function (b) {
       return b.classList.remove('on');
     });
-    $('pauseInfo').textContent = "".concat(LV.name, " \xB7 ").concat(fmt(time), " \xB7 \uD83C\uDF6C ").concat(candies, "/").concat(W.candies.length);
+    $('pauseInfo').textContent = "".concat(LV.name, " \xB7 ").concat(fmt(time), " \xB7 \uD83C\uDF6C ").concat(PLY.reduce(function (a, q) {
+      return a + q.candies;
+    }, 0), "/").concat(W.candies.length);
     $('pause').hidden = false;
     saveGame();
   }
@@ -8081,11 +8851,121 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     running = true;
     last = 0;
   }
-  document.querySelectorAll('.lvl').forEach(function (b) {
-    return b.onclick = function () {
-      return startLevel(+b.dataset.l);
+  function goBack() {
+    if (won) {
+      $('win').hidden = true;
+      showMap();
+      return;
+    }
+    if (running || !$('pause').hidden) {
+      store();
+      saveGame();
+    }
+    running = false;
+    var _iterator78 = _createForOfIteratorHelper(PLY),
+      _step78;
+    try {
+      for (_iterator78.s(); !(_step78 = _iterator78.n()).done;) {
+        var q = _step78.value;
+        for (var k in q.keys) q.keys[k] = false;
+      }
+    } catch (err) {
+      _iterator78.e(err);
+    } finally {
+      _iterator78.f();
+    }
+    document.querySelectorAll('.btn.on').forEach(function (b) {
+      return b.classList.remove('on');
+    });
+    $('pause').hidden = true;
+    showMap();
+  }
+  ['backBtn', 'back1', 'back2'].forEach(function (id) {
+    return $(id).onclick = goBack;
+  });
+  ['pause1', 'pause2'].forEach(function (id) {
+    return $(id).onclick = function () {
+      if (running) pauseGame();else if (!$('pause').hidden) resumeGame();
     };
   });
+  var setupLevel = 0;
+  function saveSetup() {
+    try {
+      localStorage.setItem('tom-setup', JSON.stringify({
+        mode: MODE,
+        pick: PICK
+      }));
+    } catch (e) {}
+  }
+  function portrait(ch) {
+    var c = document.createElement('canvas'),
+      s = charS(ch, 'stand');
+    c.width = 12;
+    c.height = 16;
+    var x = c.getContext('2d');
+    x.imageSmoothingEnabled = false;
+    x.drawImage(s, Math.round((12 - s.width) / 2), 16 - s.height);
+    return c;
+  }
+  function renderSetup() {
+    document.querySelectorAll('.modes button').forEach(function (b) {
+      return b.setAttribute('aria-pressed', String(b.dataset.m === MODE));
+    });
+    $('pick2').hidden = !duo();
+    $('modeHelp').textContent = MODE === 'solo' ? 'Giochi da solo.' : MODE === 'gara' ? 'Uno di fronte all\'altro: vince chi arriva per primo al cuore.' : 'Uno di fronte all\'altro: arrivate tutti e due al cuore, i punti si sommano.';
+    [0, 1].forEach(function (i) {
+      var box = $(i ? 'chars2' : 'chars1');
+      box.innerHTML = '';
+      CHAR_ORDER.forEach(function (ch) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'char';
+        b.setAttribute('aria-pressed', String(PICK[i] === ch));
+        b.append(portrait(ch));
+        var n = document.createElement('span');
+        n.textContent = CHARS[ch].name;
+        b.append(n);
+        b.onclick = function () {
+          PICK[i] = ch;
+          if (duo() && PICK[0] === PICK[1]) {
+            var o = 1 - i;
+            PICK[o] = CHAR_ORDER.find(function (c) {
+              return c !== ch;
+            });
+          }
+          renderSetup();
+        };
+        box.append(b);
+      });
+    });
+  }
+  function openSetup(li) {
+    setupLevel = li;
+    $('setupLvl').textContent = 'Livello ' + STEP(li) + ' · ' + LEVELS[li].name;
+    if (duo() && PICK[0] === PICK[1]) PICK[1] = CHAR_ORDER.find(function (c) {
+      return c !== PICK[0];
+    });
+    renderSetup();
+    $('menu').hidden = true;
+    $('setup').hidden = false;
+  }
+  document.querySelectorAll('.modes button').forEach(function (b) {
+    return b.onclick = function () {
+      MODE = b.dataset.m;
+      if (duo() && PICK[0] === PICK[1]) PICK[1] = CHAR_ORDER.find(function (c) {
+        return c !== PICK[0];
+      });
+      renderSetup();
+    };
+  });
+  $('goBtn').onclick = function () {
+    saveSetup();
+    startLevel(setupLevel);
+  };
+  $('setupBack').onclick = function () {
+    $('setup').hidden = true;
+    showMap();
+  };
   $('contBtn').onclick = function () {
     if (pendingSave) startLevel(pendingSave.level, pendingSave);
   };
@@ -8096,10 +8976,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   $('restartBtn').onclick = function () {
     return startLevel(lvIdx);
   };
-  $('pauseMenu').onclick = function () {
-    $('pause').hidden = true;
-    showMap();
-  };
+  $('pauseMenu').onclick = goBack;
   $('next').onclick = function () {
     var nk = STEP(lvIdx);
     if (nk < ORDER.length) startLevel(ORDER[nk]);
