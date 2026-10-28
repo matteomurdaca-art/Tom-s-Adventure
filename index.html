@@ -1035,7 +1035,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
-    <p class="note">Versione 11</p>
+    <p class="note">Versione 12</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
@@ -2593,6 +2593,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     };
   }
   var PLY = [mkPlayer(0, PICK[0])];
+  var WS = null;
+  var pendingFinish = null;
+  var gara = function gara() {
+    return MODE === 'gara';
+  };
   var p = PLY[0];
   var candies = 0,
     falls = 0,
@@ -2865,11 +2870,60 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   };
   function update(f) {
     tick += f;
-    var _iterator6 = _createForOfIteratorHelper(W.plats),
-      _step6;
+    time += f / 60;
+    if (time - lastSaveAt > 10) saveGame();
+    if (gara() && WS) {
+      var all = PLY;
+      var _iterator6 = _createForOfIteratorHelper(all),
+        _step6;
+      try {
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+          var q = _step6.value;
+          W = WS[q.idx];
+          PLY = [q];
+          worldTick(f);
+          use(q);
+          if (!won) playerStep(f);
+          store();
+        }
+      } catch (err) {
+        _iterator6.e(err);
+      } finally {
+        _iterator6.f();
+      }
+      PLY = all;
+      W = WS[0];
+      use(PLY[0]);
+      if (pendingFinish != null) {
+        var w = pendingFinish;
+        pendingFinish = null;
+        finishDuo(w);
+      }
+      return;
+    }
+    worldTick(f);
+    var _iterator7 = _createForOfIteratorHelper(PLY),
+      _step7;
     try {
-      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
-        var m = _step6.value;
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        var _q = _step7.value;
+        use(_q);
+        if (!won) playerStep(f);
+        store();
+      }
+    } catch (err) {
+      _iterator7.e(err);
+    } finally {
+      _iterator7.f();
+    }
+    use(PLY[0]);
+  }
+  function worldTick(f) {
+    var _iterator8 = _createForOfIteratorHelper(W.plats),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var m = _step8.value;
         var o = m.o,
           v = m.sp * m.d * f,
           ox = o.x,
@@ -2897,32 +2951,32 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
         m.dx = o.x - ox;
         m.dy = o.y - oy;
-        var _iterator9 = _createForOfIteratorHelper(PLY),
-          _step9;
+        var _iterator0 = _createForOfIteratorHelper(PLY),
+          _step0;
         try {
-          for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
-            var q = _step9.value;
+          for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+            var q = _step0.value;
             if (q.ground === o) {
               q.x += m.dx;
               q.y += m.dy;
             }
           }
         } catch (err) {
-          _iterator9.e(err);
+          _iterator0.e(err);
         } finally {
-          _iterator9.f();
+          _iterator0.f();
         }
       }
     } catch (err) {
-      _iterator6.e(err);
+      _iterator8.e(err);
     } finally {
-      _iterator6.f();
+      _iterator8.f();
     }
-    var _iterator7 = _createForOfIteratorHelper(W.solids),
-      _step7;
+    var _iterator9 = _createForOfIteratorHelper(W.solids),
+      _step9;
     try {
       var _loop = function _loop() {
-        var s = _step7.value;
+        var s = _step9.value;
         if (s.k === 'crumble') {
           if (!s.gone) {
             if (s.t < 0 && PLY.some(function (q) {
@@ -2958,32 +3012,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           }
         } else if (s.k === 'spring' && s.sq > 0) s.sq -= f;
       };
-      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
         _loop();
       }
     } catch (err) {
-      _iterator7.e(err);
+      _iterator9.e(err);
     } finally {
-      _iterator7.f();
+      _iterator9.f();
     }
-    time += f / 60;
-    if (time - lastSaveAt > 10) saveGame();
     worldStep(f);
-    var _iterator8 = _createForOfIteratorHelper(PLY),
-      _step8;
-    try {
-      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
-        var _q = _step8.value;
-        use(_q);
-        if (!won) playerStep(f);
-        store();
-      }
-    } catch (err) {
-      _iterator8.e(err);
-    } finally {
-      _iterator8.f();
-    }
-    use(PLY[0]);
   }
   function playerStep(f) {
     if (p.arrived) {
@@ -3013,17 +3050,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     if (J && !prevJ) p.jbuf = 8;else p.jbuf -= f;
     var lad = null;
-    var _iterator0 = _createForOfIteratorHelper(W.ladders),
-      _step0;
+    var _iterator1 = _createForOfIteratorHelper(W.ladders),
+      _step1;
     try {
-      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
-        var l = _step0.value;
+      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+        var l = _step1.value;
         if (p.x + p.w / 2 > l.x && p.x + p.w / 2 < l.x + l.w && p.y + p.h > l.y && p.y < l.y + l.h) lad = l;
       }
     } catch (err) {
-      _iterator0.e(err);
+      _iterator1.e(err);
     } finally {
-      _iterator0.f();
+      _iterator1.f();
     }
     if (lad && J && (!p.on || p.y > lad.y)) p.climb = true;
     if (!lad) p.climb = false;
@@ -3065,24 +3102,24 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     prevJ = J;
     var wind = 0;
-    var _iterator1 = _createForOfIteratorHelper(W.winds),
-      _step1;
-    try {
-      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
-        var w = _step1.value;
-        if (p.x + 10 > w.x1 && p.x + 10 < w.x2) wind += w.f;
-      }
-    } catch (err) {
-      _iterator1.e(err);
-    } finally {
-      _iterator1.f();
-    }
-    p.x += (p.vx + wind) * f;
-    var _iterator10 = _createForOfIteratorHelper(W.solids),
+    var _iterator10 = _createForOfIteratorHelper(W.winds),
       _step10;
     try {
       for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
-        var s = _step10.value;
+        var w = _step10.value;
+        if (p.x + 10 > w.x1 && p.x + 10 < w.x2) wind += w.f;
+      }
+    } catch (err) {
+      _iterator10.e(err);
+    } finally {
+      _iterator10.f();
+    }
+    p.x += (p.vx + wind) * f;
+    var _iterator11 = _createForOfIteratorHelper(W.solids),
+      _step11;
+    try {
+      for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+        var s = _step11.value;
         if (oneway(s) || s.gone) continue;
         if (ov(p, s)) {
           if (p.vx > 0) p.x = s.x - p.w;else if (p.vx < 0) p.x = s.x + s.w;else p.x = p.x + p.w / 2 < s.x + s.w / 2 ? s.x - p.w : s.x + s.w;
@@ -3090,20 +3127,20 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator10.e(err);
+      _iterator11.e(err);
     } finally {
-      _iterator10.f();
+      _iterator11.f();
     }
     p.x = Math.max(0, Math.min(LV.END - p.w, p.x));
     var prevBottom = p.y + p.h;
     p.y += p.vy * f;
     p.on = false;
     p.ground = null;
-    var _iterator11 = _createForOfIteratorHelper(W.solids),
-      _step11;
+    var _iterator12 = _createForOfIteratorHelper(W.solids),
+      _step12;
     try {
-      for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
-        var _s = _step11.value;
+      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+        var _s = _step12.value;
         if (_s.gone || !ov(p, _s)) continue;
         if (oneway(_s)) {
           if (p.vy >= 0 && prevBottom <= _s.y + 6) {
@@ -3132,9 +3169,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator11.e(err);
+      _iterator12.e(err);
     } finally {
-      _iterator11.f();
+      _iterator12.f();
     }
     if (p.on) {
       p.coyote = 6;
@@ -3143,11 +3180,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     p.ramp = null;
     if (!p.on && !p.climb) {
       var cx = p.x + p.w / 2;
-      var _iterator12 = _createForOfIteratorHelper(W.ramps),
-        _step12;
+      var _iterator13 = _createForOfIteratorHelper(W.ramps),
+        _step13;
       try {
-        for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
-          var r = _step12.value;
+        for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+          var r = _step13.value;
           if (cx < r.x1 || cx > r.x2) continue;
           var sl = (r.y2 - r.y1) / (r.x2 - r.x1),
             sy = r.y1 + (cx - r.x1) * sl,
@@ -3164,9 +3201,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           }
         }
       } catch (err) {
-        _iterator12.e(err);
+        _iterator13.e(err);
       } finally {
-        _iterator12.f();
+        _iterator13.f();
       }
     }
     if (!p.on && p.lastRamp && !p.jumping) {
@@ -3190,11 +3227,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     }
     var pb = pbox();
-    var _iterator13 = _createForOfIteratorHelper(W.hazards),
-      _step13;
+    var _iterator14 = _createForOfIteratorHelper(W.hazards),
+      _step14;
     try {
-      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
-        var h = _step13.value;
+      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+        var h = _step14.value;
         if (h.k === 'spike') {
           if (ov(pb, {
             x: h.x + 3,
@@ -3215,9 +3252,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator13.e(err);
+      _iterator14.e(err);
     } finally {
-      _iterator13.f();
+      _iterator14.f();
     }
     if (p.y > 400) die();
     p.fireCd -= f;
@@ -3242,11 +3279,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }, i * 90);
       });
     }
-    var _iterator14 = _createForOfIteratorHelper(W.candies),
-      _step14;
+    var _iterator15 = _createForOfIteratorHelper(W.candies),
+      _step15;
     try {
-      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
-        var _c = _step14.value;
+      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+        var _c = _step15.value;
         if (!_c.got && Math.abs(_c.x - (p.x + 10)) < 22 && Math.abs(_c.y - (p.y + 18)) < 28) {
           _c.got = true;
           candies++;
@@ -3255,9 +3292,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator14.e(err);
+      _iterator15.e(err);
     } finally {
-      _iterator14.f();
+      _iterator15.f();
     }
     if (circHit(W.heart.x, W.heart.y, 34, pb)) reachHeart();
     collide(f);
@@ -3274,11 +3311,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } else die();
   }
   function worldStep(f) {
-    var _iterator15 = _createForOfIteratorHelper(W.walkers),
-      _step15;
+    var _iterator16 = _createForOfIteratorHelper(W.walkers),
+      _step16;
     try {
-      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
-        var s = _step15.value;
+      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+        var s = _step16.value;
         if (!s.alive) continue;
         s.x += s.sp * s.d * f;
         if (s.x > s.b) {
@@ -3291,15 +3328,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator15.e(err);
+      _iterator16.e(err);
     } finally {
-      _iterator15.f();
+      _iterator16.f();
     }
-    var _iterator16 = _createForOfIteratorHelper(W.flyers),
-      _step16;
+    var _iterator17 = _createForOfIteratorHelper(W.flyers),
+      _step17;
     try {
-      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
-        var _s2 = _step16.value;
+      for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+        var _s2 = _step17.value;
         if (!_s2.alive) {
           _s2.down -= f;
           if (_s2.down <= 0) _s2.alive = true;
@@ -3310,15 +3347,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         _s2.y = _s2.cy + Math.sin(t * 1.7) * _s2.ay;
       }
     } catch (err) {
-      _iterator16.e(err);
+      _iterator17.e(err);
     } finally {
-      _iterator16.f();
+      _iterator17.f();
     }
-    var _iterator17 = _createForOfIteratorHelper(W.jumpers),
-      _step17;
+    var _iterator18 = _createForOfIteratorHelper(W.jumpers),
+      _step18;
     try {
-      for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
-        var _s3 = _step17.value;
+      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+        var _s3 = _step18.value;
         if (!_s3.alive) {
           _s3.down -= f;
           if (_s3.down <= 0) {
@@ -3338,15 +3375,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator17.e(err);
+      _iterator18.e(err);
     } finally {
-      _iterator17.f();
+      _iterator18.f();
     }
-    var _iterator18 = _createForOfIteratorHelper(W.rollers),
-      _step18;
+    var _iterator19 = _createForOfIteratorHelper(W.rollers),
+      _step19;
     try {
-      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
-        var _s4 = _step18.value;
+      for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
+        var _s4 = _step19.value;
         if (!_s4.alive) continue;
         _s4.x += _s4.sp * _s4.d * f;
         _s4.rot += _s4.sp * _s4.d * f / 11;
@@ -3360,15 +3397,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator18.e(err);
+      _iterator19.e(err);
     } finally {
-      _iterator18.f();
+      _iterator19.f();
     }
-    var _iterator19 = _createForOfIteratorHelper(W.cannons),
-      _step19;
+    var _iterator20 = _createForOfIteratorHelper(W.cannons),
+      _step20;
     try {
-      for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
-        var c = _step19.value;
+      for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
+        var c = _step20.value;
         c.t += f;
         if (c.t >= c.per + c.off) {
           c.t = c.off * 0;
@@ -3386,9 +3423,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator19.e(err);
+      _iterator20.e(err);
     } finally {
-      _iterator19.f();
+      _iterator20.f();
     }
     var b = W.boss;
     if (b && !b.dead) {
@@ -3428,52 +3465,52 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     }
-    var _iterator20 = _createForOfIteratorHelper(W.shots),
-      _step20;
+    var _iterator21 = _createForOfIteratorHelper(W.shots),
+      _step21;
     try {
-      for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
-        var q = _step20.value;
+      for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
+        var q = _step21.value;
         q.x += q.vx * f;
         q.y += q.vy * f;
         q.l -= f;
         if (q.kind === 'ball' || q.kind === 'coco') {
-          var _iterator23 = _createForOfIteratorHelper(W.solids),
-            _step23;
+          var _iterator24 = _createForOfIteratorHelper(W.solids),
+            _step24;
           try {
-            for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
-              var _s5 = _step23.value;
+            for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
+              var _s5 = _step24.value;
               if (!oneway(_s5) && q.x > _s5.x && q.x < _s5.x + _s5.w && q.y > _s5.y && q.y < _s5.y + _s5.h) q.l = 0;
             }
           } catch (err) {
-            _iterator23.e(err);
+            _iterator24.e(err);
           } finally {
-            _iterator23.f();
+            _iterator24.f();
           }
         }
       }
     } catch (err) {
-      _iterator20.e(err);
+      _iterator21.e(err);
     } finally {
-      _iterator20.f();
+      _iterator21.f();
     }
     W.shots = W.shots.filter(function (q) {
       return q.l > 0;
     });
-    var _iterator21 = _createForOfIteratorHelper(W.bolts),
-      _step21;
+    var _iterator22 = _createForOfIteratorHelper(W.bolts),
+      _step22;
     try {
       var _loop2 = function _loop2() {
-        var bo = _step21.value;
+        var bo = _step22.value;
         bo.x += 7 * bo.d * f;
         bo.l -= f;
         var hit = function hit(x, y, r) {
           return Math.abs(bo.x - x) < r && Math.abs(bo.y - y) < r + 6;
         };
-        var _iterator24 = _createForOfIteratorHelper(W.walkers),
-          _step24;
+        var _iterator25 = _createForOfIteratorHelper(W.walkers),
+          _step25;
         try {
-          for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
-            var _s6 = _step24.value;
+          for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
+            var _s6 = _step25.value;
             if (_s6.alive && hit(_s6.x, _s6.gy - WH[_s6.kind] / 2, 24)) {
               _s6.alive = false;
               bo.l = 0;
@@ -3482,15 +3519,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }
           }
         } catch (err) {
-          _iterator24.e(err);
+          _iterator25.e(err);
         } finally {
-          _iterator24.f();
+          _iterator25.f();
         }
-        var _iterator25 = _createForOfIteratorHelper(W.flyers),
-          _step25;
+        var _iterator26 = _createForOfIteratorHelper(W.flyers),
+          _step26;
         try {
-          for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
-            var _s7 = _step25.value;
+          for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
+            var _s7 = _step26.value;
             if (_s7.alive && hit(_s7.x, _s7.y, 18)) {
               _s7.alive = false;
               _s7.down = 200;
@@ -3499,15 +3536,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }
           }
         } catch (err) {
-          _iterator25.e(err);
+          _iterator26.e(err);
         } finally {
-          _iterator25.f();
+          _iterator26.f();
         }
-        var _iterator26 = _createForOfIteratorHelper(W.jumpers),
-          _step26;
+        var _iterator27 = _createForOfIteratorHelper(W.jumpers),
+          _step27;
         try {
-          for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
-            var _s8 = _step26.value;
+          for (_iterator27.s(); !(_step27 = _iterator27.n()).done;) {
+            var _s8 = _step27.value;
             if (_s8.alive && _s8.y < 330 && hit(_s8.x, _s8.y, 16)) {
               _s8.alive = false;
               _s8.down = 240;
@@ -3516,15 +3553,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }
           }
         } catch (err) {
-          _iterator26.e(err);
+          _iterator27.e(err);
         } finally {
-          _iterator26.f();
+          _iterator27.f();
         }
-        var _iterator27 = _createForOfIteratorHelper(W.rollers),
-          _step27;
+        var _iterator28 = _createForOfIteratorHelper(W.rollers),
+          _step28;
         try {
-          for (_iterator27.s(); !(_step27 = _iterator27.n()).done;) {
-            var _s9 = _step27.value;
+          for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
+            var _s9 = _step28.value;
             if (_s9.alive && hit(_s9.x, _s9.y, 14)) {
               _s9.alive = false;
               bo.l = 0;
@@ -3532,15 +3569,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }
           }
         } catch (err) {
-          _iterator27.e(err);
+          _iterator28.e(err);
         } finally {
-          _iterator27.f();
+          _iterator28.f();
         }
-        var _iterator28 = _createForOfIteratorHelper(W.droppers),
-          _step28;
+        var _iterator29 = _createForOfIteratorHelper(W.droppers),
+          _step29;
         try {
-          for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
-            var d = _step28.value;
+          for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
+            var d = _step29.value;
             if (d.alive && hit(d.x, dropY(d), 14)) {
               d.alive = false;
               bo.l = 0;
@@ -3548,67 +3585,67 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }
           }
         } catch (err) {
-          _iterator28.e(err);
+          _iterator29.e(err);
         } finally {
-          _iterator28.f();
+          _iterator29.f();
         }
-        var _iterator29 = _createForOfIteratorHelper(W.shots),
-          _step29;
+        var _iterator30 = _createForOfIteratorHelper(W.shots),
+          _step30;
         try {
-          for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
-            var _q2 = _step29.value;
+          for (_iterator30.s(); !(_step30 = _iterator30.n()).done;) {
+            var _q2 = _step30.value;
             if (hit(_q2.x, _q2.y, 10)) {
               _q2.l = 0;
               bo.l = 0;
             }
           }
         } catch (err) {
-          _iterator29.e(err);
+          _iterator30.e(err);
         } finally {
-          _iterator29.f();
+          _iterator30.f();
         }
         if (b && !b.dead && hit(b.x, b.y, b.r + 2)) {
           bo.l = 0;
           hurtBoss();
         }
-        var _iterator30 = _createForOfIteratorHelper(W.solids),
-          _step30;
+        var _iterator31 = _createForOfIteratorHelper(W.solids),
+          _step31;
         try {
-          for (_iterator30.s(); !(_step30 = _iterator30.n()).done;) {
-            var _s0 = _step30.value;
+          for (_iterator31.s(); !(_step31 = _iterator31.n()).done;) {
+            var _s0 = _step31.value;
             if (!oneway(_s0) && _s0.k !== 'barrier' && bo.x > _s0.x && bo.x < _s0.x + _s0.w && bo.y > _s0.y && bo.y < _s0.y + _s0.h) bo.l = 0;
           }
         } catch (err) {
-          _iterator30.e(err);
+          _iterator31.e(err);
         } finally {
-          _iterator30.f();
+          _iterator31.f();
         }
       };
-      for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
+      for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
         _loop2();
       }
     } catch (err) {
-      _iterator21.e(err);
+      _iterator22.e(err);
     } finally {
-      _iterator21.f();
+      _iterator22.f();
     }
     W.bolts = W.bolts.filter(function (q) {
       return q.l > 0;
     });
-    var _iterator22 = _createForOfIteratorHelper(W.parts),
-      _step22;
+    var _iterator23 = _createForOfIteratorHelper(W.parts),
+      _step23;
     try {
-      for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
-        var _q3 = _step22.value;
+      for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
+        var _q3 = _step23.value;
         _q3.x += _q3.vx * f;
         _q3.y += _q3.vy * f;
         _q3.vy += .15 * f;
         _q3.l -= f;
       }
     } catch (err) {
-      _iterator22.e(err);
+      _iterator23.e(err);
     } finally {
-      _iterator22.f();
+      _iterator23.f();
     }
     W.parts = W.parts.filter(function (q) {
       return q.l > 0;
@@ -3617,11 +3654,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function collide(f) {
     if (p.dead || p.arrived) return;
     var pb = pbox();
-    var _iterator31 = _createForOfIteratorHelper(W.walkers),
-      _step31;
+    var _iterator32 = _createForOfIteratorHelper(W.walkers),
+      _step32;
     try {
       var _loop3 = function _loop3() {
-        var s = _step31.value;
+        var s = _step32.value;
         if (!s.alive || p.dead) return 1;
         var hh = WH[s.kind],
           top = s.gy - hh;
@@ -3635,19 +3672,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           burst(s.x, top + 6, s.kind === 'alien' ? PURPLE : s.kind === 'spider' ? PEN : GREEN, 14);
         }, f);
       };
-      for (_iterator31.s(); !(_step31 = _iterator31.n()).done;) {
+      for (_iterator32.s(); !(_step32 = _iterator32.n()).done;) {
         if (_loop3()) continue;
       }
     } catch (err) {
-      _iterator31.e(err);
+      _iterator32.e(err);
     } finally {
-      _iterator31.f();
+      _iterator32.f();
     }
-    var _iterator32 = _createForOfIteratorHelper(W.flyers),
-      _step32;
+    var _iterator33 = _createForOfIteratorHelper(W.flyers),
+      _step33;
     try {
       var _loop4 = function _loop4() {
-        var s = _step32.value;
+        var s = _step33.value;
         if (!s.alive || p.dead) return 1;
         if (ov(pb, {
           x: s.x - 16,
@@ -3660,62 +3697,62 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           burst(s.x, s.y, PURPLE, 14);
         }, f);
       };
-      for (_iterator32.s(); !(_step32 = _iterator32.n()).done;) {
-        if (_loop4()) continue;
-      }
-    } catch (err) {
-      _iterator32.e(err);
-    } finally {
-      _iterator32.f();
-    }
-    var _iterator33 = _createForOfIteratorHelper(W.jumpers),
-      _step33;
-    try {
       for (_iterator33.s(); !(_step33 = _iterator33.n()).done;) {
-        var s = _step33.value;
-        if (s.alive && s.y < 330 && circHit(s.x, s.y, s.kind === 'shark' ? 13 : 11, pb)) die();
+        if (_loop4()) continue;
       }
     } catch (err) {
       _iterator33.e(err);
     } finally {
       _iterator33.f();
     }
-    var _iterator34 = _createForOfIteratorHelper(W.fallers),
+    var _iterator34 = _createForOfIteratorHelper(W.jumpers),
       _step34;
     try {
       for (_iterator34.s(); !(_step34 = _iterator34.n()).done;) {
-        var m = _step34.value;
-        var y = fallY(m);
-        if (y > -10 && y < H && circHit(m.x, y, 10, pb)) die();
+        var s = _step34.value;
+        if (s.alive && s.y < 330 && circHit(s.x, s.y, s.kind === 'shark' ? 13 : 11, pb)) die();
       }
     } catch (err) {
       _iterator34.e(err);
     } finally {
       _iterator34.f();
     }
-    var _iterator35 = _createForOfIteratorHelper(W.droppers),
+    var _iterator35 = _createForOfIteratorHelper(W.fallers),
       _step35;
     try {
       for (_iterator35.s(); !(_step35 = _iterator35.n()).done;) {
-        var d = _step35.value;
-        if (d.alive && circHit(d.x, dropY(d), 10, pb)) die();
+        var m = _step35.value;
+        var y = fallY(m);
+        if (y > -10 && y < H && circHit(m.x, y, 10, pb)) die();
       }
     } catch (err) {
       _iterator35.e(err);
     } finally {
       _iterator35.f();
     }
-    var _iterator36 = _createForOfIteratorHelper(W.rollers),
+    var _iterator36 = _createForOfIteratorHelper(W.droppers),
       _step36;
     try {
       for (_iterator36.s(); !(_step36 = _iterator36.n()).done;) {
-        var _s1 = _step36.value;
-        if (_s1.alive && circHit(_s1.x, _s1.y, 11, pb)) die();
+        var d = _step36.value;
+        if (d.alive && circHit(d.x, dropY(d), 10, pb)) die();
       }
     } catch (err) {
       _iterator36.e(err);
     } finally {
       _iterator36.f();
+    }
+    var _iterator37 = _createForOfIteratorHelper(W.rollers),
+      _step37;
+    try {
+      for (_iterator37.s(); !(_step37 = _iterator37.n()).done;) {
+        var _s1 = _step37.value;
+        if (_s1.alive && circHit(_s1.x, _s1.y, 11, pb)) die();
+      }
+    } catch (err) {
+      _iterator37.e(err);
+    } finally {
+      _iterator37.f();
     }
     var b = W.boss;
     if (b && !b.dead && !p.dead && circHit(b.x, b.y, b.r, pb)) {
@@ -3725,20 +3762,20 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         hurtBoss();
       } else die();
     }
-    var _iterator37 = _createForOfIteratorHelper(W.shots),
-      _step37;
+    var _iterator38 = _createForOfIteratorHelper(W.shots),
+      _step38;
     try {
-      for (_iterator37.s(); !(_step37 = _iterator37.n()).done;) {
-        var q = _step37.value;
+      for (_iterator38.s(); !(_step38 = _iterator38.n()).done;) {
+        var q = _step38.value;
         if (q.l > 0 && !p.dead && circHit(q.x, q.y, 7, pb)) {
           q.l = 0;
           die();
         }
       }
     } catch (err) {
-      _iterator37.e(err);
+      _iterator38.e(err);
     } finally {
-      _iterator37.f();
+      _iterator38.f();
     }
   }
   function reachHeart() {
@@ -3756,7 +3793,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     beep(784, .2, 'triangle', .07);
     if (MODE === 'gara') {
       store();
-      finishDuo(p.idx);
+      if (pendingFinish == null) pendingFinish = p.idx;
     } else if (PLY.every(function (q) {
       return q.arrived;
     })) {
@@ -4335,7 +4372,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   $('saveForm').addEventListener('submit', function () {
     var _ref = _asyncToGenerator(_regenerator().m(function _callee(ev) {
-      var many, name, entries, r, _iterator38, _step38, en, rr, list, pos, _t;
+      var many, name, entries, r, _iterator39, _step39, en, rr, list, pos, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -4362,15 +4399,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               at: Date.now()
             }, lastResult)];
             r = null;
-            _iterator38 = _createForOfIteratorHelper(entries);
+            _iterator39 = _createForOfIteratorHelper(entries);
             _context.p = 2;
-            _iterator38.s();
+            _iterator39.s();
           case 3:
-            if ((_step38 = _iterator38.n()).done) {
+            if ((_step39 = _iterator39.n()).done) {
               _context.n = 7;
               break;
             }
-            en = _step38.value;
+            en = _step39.value;
             _context.n = 4;
             return saveScore(en);
           case 4:
@@ -4393,10 +4430,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           case 8:
             _context.p = 8;
             _t = _context.v;
-            _iterator38.e(_t);
+            _iterator39.e(_t);
           case 9:
             _context.p = 9;
-            _iterator38.f();
+            _iterator39.f();
             return _context.f(9);
           case 10:
             $('saveForm').hidden = true;
@@ -5166,11 +5203,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function drawPlayers() {
     var keep = p;
-    var _iterator39 = _createForOfIteratorHelper(PLY),
-      _step39;
+    var _iterator40 = _createForOfIteratorHelper(PLY),
+      _step40;
     try {
-      for (_iterator39.s(); !(_step39 = _iterator39.n()).done;) {
-        var q = _step39.value;
+      for (_iterator40.s(); !(_step40 = _iterator40.n()).done;) {
+        var q = _step40.value;
         p = q;
         drawTom();
         if (duo() && !q.dead) {
@@ -5179,9 +5216,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator39.e(err);
+      _iterator40.e(err);
     } finally {
-      _iterator39.f();
+      _iterator40.f();
     }
     p = keep;
   }
@@ -6894,11 +6931,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function bPlayers() {
     var keep = p;
-    var _iterator40 = _createForOfIteratorHelper(PLY),
-      _step40;
+    var _iterator41 = _createForOfIteratorHelper(PLY),
+      _step41;
     try {
-      for (_iterator40.s(); !(_step40 = _iterator40.n()).done;) {
-        var q = _step40.value;
+      for (_iterator41.s(); !(_step41 = _iterator41.n()).done;) {
+        var q = _step41.value;
         p = q;
         bTom();
         if (duo() && !q.dead) {
@@ -6907,9 +6944,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     } catch (err) {
-      _iterator40.e(err);
+      _iterator41.e(err);
     } finally {
-      _iterator40.f();
+      _iterator41.f();
     }
     p = keep;
   }
@@ -7585,117 +7622,117 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         var w = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 80;
         return a > x0 - w && a < x1 + w;
       };
-    var _iterator41 = _createForOfIteratorHelper(W.deco),
-      _step41;
-    try {
-      for (_iterator41.s(); !(_step41 = _iterator41.n()).done;) {
-        var _d3 = _step41.value;
-        if (vis(_d3.x, _d3.w || 120) || _d3.w && _d3.x < x1 && _d3.x + _d3.w > x0) bDeco(_d3);
-      }
-    } catch (err) {
-      _iterator41.e(err);
-    } finally {
-      _iterator41.f();
-    }
-    var _iterator42 = _createForOfIteratorHelper(LV.labels),
+    var _iterator42 = _createForOfIteratorHelper(W.deco),
       _step42;
     try {
       for (_iterator42.s(); !(_step42 = _iterator42.n()).done;) {
-        var l = _step42.value;
-        if (l.x < x1 + 50 && l.x + 340 > x0) bText(l.t, l.x, l.y, l.s || 26);
+        var _d3 = _step42.value;
+        if (vis(_d3.x, _d3.w || 120) || _d3.w && _d3.x < x1 && _d3.x + _d3.w > x0) bDeco(_d3);
       }
     } catch (err) {
       _iterator42.e(err);
     } finally {
       _iterator42.f();
     }
-    var _iterator43 = _createForOfIteratorHelper(W.hazards),
+    var _iterator43 = _createForOfIteratorHelper(LV.labels),
       _step43;
     try {
       for (_iterator43.s(); !(_step43 = _iterator43.n()).done;) {
-        var h = _step43.value;
-        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) bLiquid(h);
+        var l = _step43.value;
+        if (l.x < x1 + 50 && l.x + 340 > x0) bText(l.t, l.x, l.y, l.s || 26);
       }
     } catch (err) {
       _iterator43.e(err);
     } finally {
       _iterator43.f();
     }
-    var _iterator44 = _createForOfIteratorHelper(W.jumpers),
+    var _iterator44 = _createForOfIteratorHelper(W.hazards),
       _step44;
     try {
       for (_iterator44.s(); !(_step44 = _iterator44.n()).done;) {
-        var s = _step44.value;
-        if (vis(s.x)) bJumper(s);
+        var h = _step44.value;
+        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) bLiquid(h);
       }
     } catch (err) {
       _iterator44.e(err);
     } finally {
       _iterator44.f();
     }
-    var _iterator45 = _createForOfIteratorHelper(W.solids),
+    var _iterator45 = _createForOfIteratorHelper(W.jumpers),
       _step45;
     try {
       for (_iterator45.s(); !(_step45 = _iterator45.n()).done;) {
-        var _s10 = _step45.value;
-        if (_s10.x > x1 || _s10.x + _s10.w < x0 || _s10.y > y1 + 10 || _s10.y + _s10.h < y0) continue;
-        if (oneway(_s10)) bPlat(_s10);else if (_s10.k === 'barrier') bBarrier(_s10);else bGround(_s10);
+        var s = _step45.value;
+        if (vis(s.x)) bJumper(s);
       }
     } catch (err) {
       _iterator45.e(err);
     } finally {
       _iterator45.f();
     }
-    var _iterator46 = _createForOfIteratorHelper(W.hazards),
+    var _iterator46 = _createForOfIteratorHelper(W.solids),
       _step46;
     try {
       for (_iterator46.s(); !(_step46 = _iterator46.n()).done;) {
-        var _h = _step46.value;
-        if ((_h.k === 'spike' || _h.k === 'spikeD') && _h.x < x1 && _h.x + _h.w > x0) bSpikes(_h);
+        var _s10 = _step46.value;
+        if (_s10.x > x1 || _s10.x + _s10.w < x0 || _s10.y > y1 + 10 || _s10.y + _s10.h < y0) continue;
+        if (oneway(_s10)) bPlat(_s10);else if (_s10.k === 'barrier') bBarrier(_s10);else bGround(_s10);
       }
     } catch (err) {
       _iterator46.e(err);
     } finally {
       _iterator46.f();
     }
-    var _iterator47 = _createForOfIteratorHelper(W.ramps),
+    var _iterator47 = _createForOfIteratorHelper(W.hazards),
       _step47;
     try {
       for (_iterator47.s(); !(_step47 = _iterator47.n()).done;) {
-        var r = _step47.value;
-        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) bRamp(r);
+        var _h = _step47.value;
+        if ((_h.k === 'spike' || _h.k === 'spikeD') && _h.x < x1 && _h.x + _h.w > x0) bSpikes(_h);
       }
     } catch (err) {
       _iterator47.e(err);
     } finally {
       _iterator47.f();
     }
-    var _iterator48 = _createForOfIteratorHelper(W.ladders),
+    var _iterator48 = _createForOfIteratorHelper(W.ramps),
       _step48;
     try {
       for (_iterator48.s(); !(_step48 = _iterator48.n()).done;) {
-        var _l = _step48.value;
-        if (vis(_l.x)) bLadder(_l);
+        var r = _step48.value;
+        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) bRamp(r);
       }
     } catch (err) {
       _iterator48.e(err);
     } finally {
       _iterator48.f();
     }
-    LV.cps.forEach(function (c, i) {
-      if (i > 0 && vis(c.x)) bFlag(c, i);
-    });
-    var _iterator49 = _createForOfIteratorHelper(W.candies),
+    var _iterator49 = _createForOfIteratorHelper(W.ladders),
       _step49;
     try {
       for (_iterator49.s(); !(_step49 = _iterator49.n()).done;) {
-        var c = _step49.value;
-        if (!c.got && vis(c.x)) bDraw(SP.candy(c.c), c.x, c.y + 8 + Math.round(Math.sin(tick * .08 + c.x)) * 2, 3);
+        var _l = _step49.value;
+        if (vis(_l.x)) bLadder(_l);
       }
     } catch (err) {
       _iterator49.e(err);
     } finally {
       _iterator49.f();
+    }
+    LV.cps.forEach(function (c, i) {
+      if (i > 0 && vis(c.x)) bFlag(c, i);
+    });
+    var _iterator50 = _createForOfIteratorHelper(W.candies),
+      _step50;
+    try {
+      for (_iterator50.s(); !(_step50 = _iterator50.n()).done;) {
+        var c = _step50.value;
+        if (!c.got && vis(c.x)) bDraw(SP.candy(c.c), c.x, c.y + 8 + Math.round(Math.sin(tick * .08 + c.x)) * 2, 3);
+      }
+    } catch (err) {
+      _iterator50.e(err);
+    } finally {
+      _iterator50.f();
     }
     if (!PLY.every(function (q) {
       return q.guitar;
@@ -7705,120 +7742,120 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       bDraw(SP.bolt(), g.x + 18, g.y, 2.5);
     }
     bDraw(SP.heart(), W.heart.x, W.heart.y + 18 + (Math.floor(tick / 20) % 2 ? 2 : 0), 4.5);
-    var _iterator50 = _createForOfIteratorHelper(W.walkers),
-      _step50;
-    try {
-      for (_iterator50.s(); !(_step50 = _iterator50.n()).done;) {
-        var _s11 = _step50.value;
-        if (vis(_s11.x)) bWalker(_s11);
-      }
-    } catch (err) {
-      _iterator50.e(err);
-    } finally {
-      _iterator50.f();
-    }
-    var _iterator51 = _createForOfIteratorHelper(W.flyers),
+    var _iterator51 = _createForOfIteratorHelper(W.walkers),
       _step51;
     try {
       for (_iterator51.s(); !(_step51 = _iterator51.n()).done;) {
-        var _s12 = _step51.value;
-        if (vis(_s12.x)) bFlyer(_s12);
+        var _s11 = _step51.value;
+        if (vis(_s11.x)) bWalker(_s11);
       }
     } catch (err) {
       _iterator51.e(err);
     } finally {
       _iterator51.f();
     }
-    var _iterator52 = _createForOfIteratorHelper(W.rollers),
+    var _iterator52 = _createForOfIteratorHelper(W.flyers),
       _step52;
     try {
       for (_iterator52.s(); !(_step52 = _iterator52.n()).done;) {
-        var _s13 = _step52.value;
-        if (vis(_s13.x)) bRoller(_s13);
+        var _s12 = _step52.value;
+        if (vis(_s12.x)) bFlyer(_s12);
       }
     } catch (err) {
       _iterator52.e(err);
     } finally {
       _iterator52.f();
     }
-    var _iterator53 = _createForOfIteratorHelper(W.cannons),
+    var _iterator53 = _createForOfIteratorHelper(W.rollers),
       _step53;
     try {
       for (_iterator53.s(); !(_step53 = _iterator53.n()).done;) {
-        var _c2 = _step53.value;
-        if (vis(_c2.x)) bCannon(_c2);
+        var _s13 = _step53.value;
+        if (vis(_s13.x)) bRoller(_s13);
       }
     } catch (err) {
       _iterator53.e(err);
     } finally {
       _iterator53.f();
     }
-    var _iterator54 = _createForOfIteratorHelper(W.droppers),
+    var _iterator54 = _createForOfIteratorHelper(W.cannons),
       _step54;
     try {
       for (_iterator54.s(); !(_step54 = _iterator54.n()).done;) {
-        var _d4 = _step54.value;
-        if (vis(_d4.x)) bDropper(_d4);
+        var _c2 = _step54.value;
+        if (vis(_c2.x)) bCannon(_c2);
       }
     } catch (err) {
       _iterator54.e(err);
     } finally {
       _iterator54.f();
     }
-    var _iterator55 = _createForOfIteratorHelper(W.fallers),
+    var _iterator55 = _createForOfIteratorHelper(W.droppers),
       _step55;
     try {
       for (_iterator55.s(); !(_step55 = _iterator55.n()).done;) {
-        var m = _step55.value;
-        if (vis(m.x)) bFaller(m);
+        var _d4 = _step55.value;
+        if (vis(_d4.x)) bDropper(_d4);
       }
     } catch (err) {
       _iterator55.e(err);
     } finally {
       _iterator55.f();
     }
-    bBoss();
-    var _iterator56 = _createForOfIteratorHelper(W.shots),
+    var _iterator56 = _createForOfIteratorHelper(W.fallers),
       _step56;
     try {
       for (_iterator56.s(); !(_step56 = _iterator56.n()).done;) {
-        var q = _step56.value;
-        bShot(q);
+        var m = _step56.value;
+        if (vis(m.x)) bFaller(m);
       }
     } catch (err) {
       _iterator56.e(err);
     } finally {
       _iterator56.f();
     }
-    var _iterator57 = _createForOfIteratorHelper(W.bolts),
+    bBoss();
+    var _iterator57 = _createForOfIteratorHelper(W.shots),
       _step57;
     try {
       for (_iterator57.s(); !(_step57 = _iterator57.n()).done;) {
-        var b = _step57.value;
-        bDraw(SP.bolt(), b.x, b.y + 9, 3, b.d < 0);
+        var q = _step57.value;
+        bShot(q);
       }
     } catch (err) {
       _iterator57.e(err);
     } finally {
       _iterator57.f();
     }
-    bPlayers();
-    if (th === 5) {
-      ctx.fillStyle = 'rgba(31,95,163,.12)';
-      ctx.fillRect(x0, y0, viewW, H);
-    }
-    var _iterator58 = _createForOfIteratorHelper(W.parts),
+    var _iterator58 = _createForOfIteratorHelper(W.bolts),
       _step58;
     try {
       for (_iterator58.s(); !(_step58 = _iterator58.n()).done;) {
-        var _q4 = _step58.value;
-        ctx.globalAlpha = Math.max(0, _q4.l / 50);
-        bRect(_q4.x - 2, _q4.y - 2, 4, 4, _q4.c);
+        var b = _step58.value;
+        bDraw(SP.bolt(), b.x, b.y + 9, 3, b.d < 0);
       }
     } catch (err) {
       _iterator58.e(err);
     } finally {
       _iterator58.f();
+    }
+    bPlayers();
+    if (th === 5) {
+      ctx.fillStyle = 'rgba(31,95,163,.12)';
+      ctx.fillRect(x0, y0, viewW, H);
+    }
+    var _iterator59 = _createForOfIteratorHelper(W.parts),
+      _step59;
+    try {
+      for (_iterator59.s(); !(_step59 = _iterator59.n()).done;) {
+        var _q4 = _step59.value;
+        ctx.globalAlpha = Math.max(0, _q4.l / 50);
+        bRect(_q4.x - 2, _q4.y - 2, 4, 4, _q4.c);
+      }
+    } catch (err) {
+      _iterator59.e(err);
+    } finally {
+      _iterator59.f();
     }
     ctx.globalAlpha = 1;
   }
@@ -8136,216 +8173,216 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       var w = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 80;
       return a > x0 - w && a < x1 + w;
     };
-    var _iterator59 = _createForOfIteratorHelper(W.deco),
-      _step59;
-    try {
-      for (_iterator59.s(); !(_step59 = _iterator59.n()).done;) {
-        var _d5 = _step59.value;
-        if (vis(_d5.x, _d5.w || 120) || _d5.w && _d5.x < x1 && _d5.x + _d5.w > x0) drawDeco(_d5);
-      }
-    } catch (err) {
-      _iterator59.e(err);
-    } finally {
-      _iterator59.f();
-    }
-    var _iterator60 = _createForOfIteratorHelper(LV.labels),
+    var _iterator60 = _createForOfIteratorHelper(W.deco),
       _step60;
     try {
       for (_iterator60.s(); !(_step60 = _iterator60.n()).done;) {
-        var l = _step60.value;
-        if (l.x < x1 + 50 && l.x + 340 > x0) label(l.t, l.x, l.y, l.s || 26);
+        var _d5 = _step60.value;
+        if (vis(_d5.x, _d5.w || 120) || _d5.w && _d5.x < x1 && _d5.x + _d5.w > x0) drawDeco(_d5);
       }
     } catch (err) {
       _iterator60.e(err);
     } finally {
       _iterator60.f();
     }
-    var _iterator61 = _createForOfIteratorHelper(W.hazards),
+    var _iterator61 = _createForOfIteratorHelper(LV.labels),
       _step61;
     try {
       for (_iterator61.s(); !(_step61 = _iterator61.n()).done;) {
-        var h = _step61.value;
-        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) drawLiquid(h);
+        var l = _step61.value;
+        if (l.x < x1 + 50 && l.x + 340 > x0) label(l.t, l.x, l.y, l.s || 26);
       }
     } catch (err) {
       _iterator61.e(err);
     } finally {
       _iterator61.f();
     }
-    var _iterator62 = _createForOfIteratorHelper(W.jumpers),
+    var _iterator62 = _createForOfIteratorHelper(W.hazards),
       _step62;
     try {
       for (_iterator62.s(); !(_step62 = _iterator62.n()).done;) {
-        var s = _step62.value;
-        if (vis(s.x)) drawJumper(s);
+        var h = _step62.value;
+        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) drawLiquid(h);
       }
     } catch (err) {
       _iterator62.e(err);
     } finally {
       _iterator62.f();
     }
-    var _iterator63 = _createForOfIteratorHelper(W.solids),
+    var _iterator63 = _createForOfIteratorHelper(W.jumpers),
       _step63;
     try {
       for (_iterator63.s(); !(_step63 = _iterator63.n()).done;) {
-        var _s14 = _step63.value;
-        if (_s14.x > x1 || _s14.x + _s14.w < x0 || _s14.y > y1 + 10 || _s14.y + _s14.h < y0) continue;
-        if (oneway(_s14)) drawPlat(_s14);else if (_s14.k === 'barrier') drawBarrier(_s14);else drawGround(_s14);
+        var s = _step63.value;
+        if (vis(s.x)) drawJumper(s);
       }
     } catch (err) {
       _iterator63.e(err);
     } finally {
       _iterator63.f();
     }
-    var _iterator64 = _createForOfIteratorHelper(W.hazards),
+    var _iterator64 = _createForOfIteratorHelper(W.solids),
       _step64;
     try {
       for (_iterator64.s(); !(_step64 = _iterator64.n()).done;) {
-        var _h2 = _step64.value;
-        if ((_h2.k === 'spike' || _h2.k === 'spikeD') && _h2.x < x1 && _h2.x + _h2.w > x0) drawSpikes(_h2);
+        var _s14 = _step64.value;
+        if (_s14.x > x1 || _s14.x + _s14.w < x0 || _s14.y > y1 + 10 || _s14.y + _s14.h < y0) continue;
+        if (oneway(_s14)) drawPlat(_s14);else if (_s14.k === 'barrier') drawBarrier(_s14);else drawGround(_s14);
       }
     } catch (err) {
       _iterator64.e(err);
     } finally {
       _iterator64.f();
     }
-    var _iterator65 = _createForOfIteratorHelper(W.ramps),
+    var _iterator65 = _createForOfIteratorHelper(W.hazards),
       _step65;
     try {
       for (_iterator65.s(); !(_step65 = _iterator65.n()).done;) {
-        var r = _step65.value;
-        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) drawRamp(r);
+        var _h2 = _step65.value;
+        if ((_h2.k === 'spike' || _h2.k === 'spikeD') && _h2.x < x1 && _h2.x + _h2.w > x0) drawSpikes(_h2);
       }
     } catch (err) {
       _iterator65.e(err);
     } finally {
       _iterator65.f();
     }
-    var _iterator66 = _createForOfIteratorHelper(W.ladders),
+    var _iterator66 = _createForOfIteratorHelper(W.ramps),
       _step66;
     try {
       for (_iterator66.s(); !(_step66 = _iterator66.n()).done;) {
-        var _l2 = _step66.value;
-        if (vis(_l2.x)) drawLadder(_l2);
+        var r = _step66.value;
+        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) drawRamp(r);
       }
     } catch (err) {
       _iterator66.e(err);
     } finally {
       _iterator66.f();
     }
-    LV.cps.forEach(function (c, i) {
-      if (i > 0 && vis(c.x)) drawFlag(c, i);
-    });
-    var _iterator67 = _createForOfIteratorHelper(W.candies),
+    var _iterator67 = _createForOfIteratorHelper(W.ladders),
       _step67;
     try {
       for (_iterator67.s(); !(_step67 = _iterator67.n()).done;) {
-        var c = _step67.value;
-        if (!c.got && vis(c.x)) drawCandy(c);
+        var _l2 = _step67.value;
+        if (vis(_l2.x)) drawLadder(_l2);
       }
     } catch (err) {
       _iterator67.e(err);
     } finally {
       _iterator67.f();
     }
-    drawGuitar();
-    drawHeart(W.heart.x, W.heart.y, 16 * (1 + Math.sin(tick * .08) * .08), RED);
-    var _iterator68 = _createForOfIteratorHelper(W.walkers),
+    LV.cps.forEach(function (c, i) {
+      if (i > 0 && vis(c.x)) drawFlag(c, i);
+    });
+    var _iterator68 = _createForOfIteratorHelper(W.candies),
       _step68;
     try {
       for (_iterator68.s(); !(_step68 = _iterator68.n()).done;) {
-        var _s15 = _step68.value;
-        if (vis(_s15.x)) drawWalker(_s15);
+        var c = _step68.value;
+        if (!c.got && vis(c.x)) drawCandy(c);
       }
     } catch (err) {
       _iterator68.e(err);
     } finally {
       _iterator68.f();
     }
-    var _iterator69 = _createForOfIteratorHelper(W.flyers),
+    drawGuitar();
+    drawHeart(W.heart.x, W.heart.y, 16 * (1 + Math.sin(tick * .08) * .08), RED);
+    var _iterator69 = _createForOfIteratorHelper(W.walkers),
       _step69;
     try {
       for (_iterator69.s(); !(_step69 = _iterator69.n()).done;) {
-        var _s16 = _step69.value;
-        if (vis(_s16.x)) drawFlyer(_s16);
+        var _s15 = _step69.value;
+        if (vis(_s15.x)) drawWalker(_s15);
       }
     } catch (err) {
       _iterator69.e(err);
     } finally {
       _iterator69.f();
     }
-    var _iterator70 = _createForOfIteratorHelper(W.rollers),
+    var _iterator70 = _createForOfIteratorHelper(W.flyers),
       _step70;
     try {
       for (_iterator70.s(); !(_step70 = _iterator70.n()).done;) {
-        var _s17 = _step70.value;
-        if (vis(_s17.x)) drawRoller(_s17);
+        var _s16 = _step70.value;
+        if (vis(_s16.x)) drawFlyer(_s16);
       }
     } catch (err) {
       _iterator70.e(err);
     } finally {
       _iterator70.f();
     }
-    var _iterator71 = _createForOfIteratorHelper(W.cannons),
+    var _iterator71 = _createForOfIteratorHelper(W.rollers),
       _step71;
     try {
       for (_iterator71.s(); !(_step71 = _iterator71.n()).done;) {
-        var _c3 = _step71.value;
-        if (vis(_c3.x)) drawCannon(_c3);
+        var _s17 = _step71.value;
+        if (vis(_s17.x)) drawRoller(_s17);
       }
     } catch (err) {
       _iterator71.e(err);
     } finally {
       _iterator71.f();
     }
-    var _iterator72 = _createForOfIteratorHelper(W.droppers),
+    var _iterator72 = _createForOfIteratorHelper(W.cannons),
       _step72;
     try {
       for (_iterator72.s(); !(_step72 = _iterator72.n()).done;) {
-        var _d6 = _step72.value;
-        if (vis(_d6.x)) drawDropper(_d6);
+        var _c3 = _step72.value;
+        if (vis(_c3.x)) drawCannon(_c3);
       }
     } catch (err) {
       _iterator72.e(err);
     } finally {
       _iterator72.f();
     }
-    var _iterator73 = _createForOfIteratorHelper(W.fallers),
+    var _iterator73 = _createForOfIteratorHelper(W.droppers),
       _step73;
     try {
       for (_iterator73.s(); !(_step73 = _iterator73.n()).done;) {
-        var m = _step73.value;
-        if (vis(m.x)) drawFaller(m);
+        var _d6 = _step73.value;
+        if (vis(_d6.x)) drawDropper(_d6);
       }
     } catch (err) {
       _iterator73.e(err);
     } finally {
       _iterator73.f();
     }
-    drawBoss();
-    var _iterator74 = _createForOfIteratorHelper(W.shots),
+    var _iterator74 = _createForOfIteratorHelper(W.fallers),
       _step74;
     try {
       for (_iterator74.s(); !(_step74 = _iterator74.n()).done;) {
-        var q = _step74.value;
-        drawShot(q);
+        var m = _step74.value;
+        if (vis(m.x)) drawFaller(m);
       }
     } catch (err) {
       _iterator74.e(err);
     } finally {
       _iterator74.f();
     }
-    var _iterator75 = _createForOfIteratorHelper(W.bolts),
+    drawBoss();
+    var _iterator75 = _createForOfIteratorHelper(W.shots),
       _step75;
     try {
       for (_iterator75.s(); !(_step75 = _iterator75.n()).done;) {
-        var b = _step75.value;
-        drawBolt(b.x, b.y, b.d, 1);
+        var q = _step75.value;
+        drawShot(q);
       }
     } catch (err) {
       _iterator75.e(err);
     } finally {
       _iterator75.f();
+    }
+    var _iterator76 = _createForOfIteratorHelper(W.bolts),
+      _step76;
+    try {
+      for (_iterator76.s(); !(_step76 = _iterator76.n()).done;) {
+        var b = _step76.value;
+        drawBolt(b.x, b.y, b.d, 1);
+      }
+    } catch (err) {
+      _iterator76.e(err);
+    } finally {
+      _iterator76.f();
     }
     drawPlayers();
     if (LV.theme === 5) {
@@ -8364,11 +8401,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.fillStyle = 'rgba(45,48,64,.06)';
       ctx.fillRect(x0, y0, viewW, H);
     }
-    var _iterator76 = _createForOfIteratorHelper(W.parts),
-      _step76;
+    var _iterator77 = _createForOfIteratorHelper(W.parts),
+      _step77;
     try {
-      for (_iterator76.s(); !(_step76 = _iterator76.n()).done;) {
-        var _q5 = _step76.value;
+      for (_iterator77.s(); !(_step77 = _iterator77.n()).done;) {
+        var _q5 = _step77.value;
         ctx.globalAlpha = Math.max(0, _q5.l / 50);
         ctx.fillStyle = _q5.c;
         ctx.beginPath();
@@ -8376,9 +8413,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         ctx.fill();
       }
     } catch (err) {
-      _iterator76.e(err);
+      _iterator77.e(err);
     } finally {
-      _iterator76.f();
+      _iterator77.f();
     }
     ctx.globalAlpha = 1;
   }
@@ -8399,19 +8436,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return;
     }
     var s = '';
-    var _iterator77 = _createForOfIteratorHelper(LV.sections),
-      _step77;
+    var _iterator78 = _createForOfIteratorHelper(LV.sections),
+      _step78;
     try {
-      for (_iterator77.s(); !(_step77 = _iterator77.n()).done;) {
-        var _step77$value = _slicedToArray(_step77.value, 2),
-          x = _step77$value[0],
-          n = _step77$value[1];
+      for (_iterator78.s(); !(_step78 = _iterator78.n()).done;) {
+        var _step78$value = _slicedToArray(_step78.value, 2),
+          x = _step78$value[0],
+          n = _step78$value[1];
         if (p.x >= x) s = n;
       }
     } catch (err) {
-      _iterator77.e(err);
+      _iterator78.e(err);
     } finally {
-      _iterator77.f();
+      _iterator78.f();
     }
     if (s !== lastSec) {
       $('sec').textContent = s;
@@ -8425,6 +8462,47 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (c !== lastClock) {
       $('clock').textContent = c;
       lastClock = c;
+    }
+  }
+  function drawProgress(me) {
+    vSet(1, 1, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    var x0 = 70,
+      x1 = VIEW.w - 70,
+      y = 10,
+      w = x1 - x0,
+      hx = W.heart && W.heart.x || LV.END;
+    ctx.fillStyle = 'rgba(29,31,43,.55)';
+    ctx.fillRect(x0 - 6, y - 4, w + 12, 22);
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.fillRect(x0, y + 5, w, 4);
+    ctx.fillStyle = '#e0373f';
+    ctx.font = "700 14px 'Pixelify Sans', monospace";
+    ctx.fillText('♥', x1 + 2, y + 12);
+    var order = PLY.slice().sort(function (a, b) {
+      return (a === me) - (b === me);
+    });
+    var _iterator79 = _createForOfIteratorHelper(order),
+      _step79;
+    try {
+      for (_iterator79.s(); !(_step79 = _iterator79.n()).done;) {
+        var q = _step79.value;
+        var t = q.arrived ? 1 : Math.max(0, Math.min(1, (q.x - 60) / (hx - 60))),
+          px = x0 + t * w,
+          col = q.idx ? '#e0373f' : '#3f86d4',
+          r = q === me ? 8 : 6;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(px - r - 2, y + 7 - r - 2, (r + 2) * 2, (r + 2) * 2);
+        ctx.fillStyle = col;
+        ctx.fillRect(px - r, y + 7 - r, r * 2, r * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = "700 " + (q === me ? 12 : 10) + "px 'Pixelify Sans', monospace";
+        ctx.fillText(CHARS[q.char].name[0], px - (q === me ? 4 : 3), y + (q === me ? 11 : 10));
+      }
+    } catch (err) {
+      _iterator79.e(err);
+    } finally {
+      _iterator79.f();
     }
   }
   function render() {
@@ -8460,21 +8538,31 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }];
     var sx = camX,
       sy = camY;
+    var all = PLY,
+      w0 = W;
     for (var _i36 = 0, _views = views; _i36 < _views.length; _i36++) {
       var v = _views[_i36];
-      var q = PLY[v.pl];
+      var q = all[v.pl];
       if (!q) continue;
       VIEW = v;
       camX = q.camX;
       camY = q.camY;
+      if (gara() && WS) {
+        W = WS[q.idx];
+        PLY = [q];
+      }
       ctx.save();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.beginPath();
       ctx.rect(v.x * dpr, v.y * dpr, v.w * dpr, v.h * dpr);
       ctx.clip();
       draw();
+      PLY = all;
+      if (gara()) drawProgress(q);
       ctx.restore();
+      W = w0;
     }
+    PLY = all;
     camX = sx;
     camY = sy;
   }
@@ -8604,6 +8692,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       time: Math.round(time * 10) / 10,
       guitar: !!P0.guitar,
       boss: !!(W.boss && W.boss.dead),
+      worlds: gara() && WS ? WS.map(function (w) {
+        return {
+          got: w.candies.map(function (c, i) {
+            return c.got ? i : -1;
+          }).filter(function (i) {
+            return i >= 0;
+          }),
+          boss: !!(w.boss && w.boss.dead)
+        };
+      }) : null,
       at: Date.now()
     };
   }
@@ -8763,7 +8861,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       } else MODE = 'solo';
     }
     document.body.classList.toggle('duo', duo());
-    build(i);
+    pendingFinish = null;
+    if (gara()) {
+      build(i);
+      var w1 = W;
+      build(i);
+      WS = [w1, W];
+      W = w1;
+    } else {
+      WS = null;
+      build(i);
+    }
     time = 0;
     won = false;
     PLY = duo() ? [mkPlayer(0, PICK[0]), mkPlayer(1, PICK[1])] : [mkPlayer(0, PICK[0])];
@@ -8787,38 +8895,73 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }] : [];
     if (sv) {
       time = +sv.time || 0;
-      (sv.got || []).forEach(function (k) {
-        if (W.candies[k]) W.candies[k].got = true;
-      });
-      if (sv.boss && W.boss) {
-        W.boss.dead = true;
-        W.solids = W.solids.filter(function (o) {
-          return o !== W.barrier;
-        });
+      var wl = WS ? WS.map(function (w, k) {
+        return [w, sv.worlds && sv.worlds[k] || {
+          got: sv.got,
+          boss: sv.boss
+        }];
+      }) : [[W, {
+        got: sv.got,
+        boss: sv.boss
+      }]];
+      var _iterator80 = _createForOfIteratorHelper(wl),
+        _step80;
+      try {
+        var _loop5 = function _loop5() {
+          var _step80$value = _slicedToArray(_step80.value, 2),
+            w = _step80$value[0],
+            ws = _step80$value[1];
+          (ws.got || []).forEach(function (k) {
+            if (w.candies[k]) w.candies[k].got = true;
+          });
+          if (ws.boss && w.boss) {
+            w.boss.dead = true;
+            w.solids = w.solids.filter(function (o) {
+              return o !== w.barrier;
+            });
+          }
+        };
+        for (_iterator80.s(); !(_step80 = _iterator80.n()).done;) {
+          _loop5();
+        }
+      } catch (err) {
+        _iterator80.e(err);
+      } finally {
+        _iterator80.f();
       }
     }
-    for (var _i37 = 0, _PLY = PLY; _i37 < _PLY.length; _i37++) {
-      var q = _PLY[_i37];
-      var s = sp[q.idx] || null;
-      if (s) {
-        q.cp = Math.min(s.cp | 0, LV.cps.length - 1);
-        q.candies = s.candies | 0;
-        q.falls = s.falls | 0;
-        q.guitar = !!s.guitar;
-        q.arrived = !!s.arrived;
-        if (q.guitar) $(q.idx ? 'b2F' : 'bF').classList.remove('locked');
+    var _iterator81 = _createForOfIteratorHelper(PLY),
+      _step81;
+    try {
+      for (_iterator81.s(); !(_step81 = _iterator81.n()).done;) {
+        var q = _step81.value;
+        var s = sp[q.idx] || null;
+        if (s) {
+          q.cp = Math.min(s.cp | 0, LV.cps.length - 1);
+          q.candies = s.candies | 0;
+          q.falls = s.falls | 0;
+          q.guitar = !!s.guitar;
+          q.arrived = !!s.arrived;
+          if (q.guitar) $(q.idx ? 'b2F' : 'bF').classList.remove('locked');
+        }
+        if (WS) W = WS[q.idx];
+        use(q);
+        respawn();
+        p.inv = sv ? 60 : 0;
+        if (s && s.pos) {
+          p.x = s.pos.x;
+          p.y = s.pos.y;
+          camX = Math.max(0, Math.min(LV.END - viewW, p.x - viewW * 0.35));
+          camY = camTargetY();
+        }
+        store();
       }
-      use(q);
-      respawn();
-      p.inv = sv ? 60 : 0;
-      if (s && s.pos) {
-        p.x = s.pos.x;
-        p.y = s.pos.y;
-        camX = Math.max(0, Math.min(LV.END - viewW, p.x - viewW * 0.35));
-        camY = camTargetY();
-      }
-      store();
+    } catch (err) {
+      _iterator81.e(err);
+    } finally {
+      _iterator81.f();
     }
+    if (WS) W = WS[0];
     use(PLY[0]);
     $('falls').textContent = 'Cadute ' + falls;
     lastSaveAt = time;
@@ -8833,9 +8976,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function pauseGame() {
     if (!running || won) return;
     running = false;
-    for (var _i38 = 0, _PLY2 = PLY; _i38 < _PLY2.length; _i38++) {
-      var q = _PLY2[_i38];
-      for (var k in q.keys) q.keys[k] = false;
+    var _iterator82 = _createForOfIteratorHelper(PLY),
+      _step82;
+    try {
+      for (_iterator82.s(); !(_step82 = _iterator82.n()).done;) {
+        var q = _step82.value;
+        for (var k in q.keys) q.keys[k] = false;
+      }
+    } catch (err) {
+      _iterator82.e(err);
+    } finally {
+      _iterator82.f();
     }
     document.querySelectorAll('.btn.on').forEach(function (b) {
       return b.classList.remove('on');
@@ -8862,17 +9013,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       saveGame();
     }
     running = false;
-    var _iterator78 = _createForOfIteratorHelper(PLY),
-      _step78;
+    var _iterator83 = _createForOfIteratorHelper(PLY),
+      _step83;
     try {
-      for (_iterator78.s(); !(_step78 = _iterator78.n()).done;) {
-        var q = _step78.value;
+      for (_iterator83.s(); !(_step83 = _iterator83.n()).done;) {
+        var q = _step83.value;
         for (var k in q.keys) q.keys[k] = false;
       }
     } catch (err) {
-      _iterator78.e(err);
+      _iterator83.e(err);
     } finally {
-      _iterator78.f();
+      _iterator83.f();
     }
     document.querySelectorAll('.btn.on').forEach(function (b) {
       return b.classList.remove('on');
@@ -8912,7 +9063,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return b.setAttribute('aria-pressed', String(b.dataset.m === MODE));
     });
     $('pick2').hidden = !duo();
-    $('modeHelp').textContent = MODE === 'solo' ? 'Giochi da solo.' : MODE === 'gara' ? 'Uno di fronte all\'altro: vince chi arriva per primo al cuore.' : 'Uno di fronte all\'altro: arrivate tutti e due al cuore, i punti si sommano.';
+    $('modeHelp').textContent = MODE === 'solo' ? 'Giochi da solo.' : MODE === 'gara' ? 'Uno di fronte all\'altro, ognuno con la sua partita: vince chi arriva per primo al cuore.' : 'Uno di fronte all\'altro: arrivate tutti e due al cuore, i punti si sommano.';
     [0, 1].forEach(function (i) {
       var box = $(i ? 'chars2' : 'chars1');
       box.innerHTML = '';
