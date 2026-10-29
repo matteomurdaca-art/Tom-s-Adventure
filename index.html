@@ -1024,7 +1024,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
           <button class="go" id="playBtn" type="button">Gioca ▶</button>
         </div>
         <button class="go alt" id="openBoard" type="button">🏆 Classifica</button>
-        <div class="styleSw" role="group" aria-label="Stile grafico"><button type="button" data-s="matita" aria-pressed="true">✏️ Matita</button><button type="button" data-s="blocchi" aria-pressed="false">🧱 Blocchi</button></div>
+        <div class="styleSw" role="group" aria-label="Stile grafico"><button type="button" data-s="matita" aria-pressed="true">✏️ Matita</button><button type="button" data-s="blocchi" aria-pressed="false">🧱 Blocchi</button><button type="button" data-s="3d" aria-pressed="false">🎲 3D</button></div>
         <p class="help">Segui il sentiero dalla CASA alla VITTORIA: ogni livello finito si colora di verde e apre il successivo. Raccogli le caramelle e arriva presto al cuore per fare più punti.</p>
       </div>
     </div>
@@ -1035,11 +1035,11 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
-    <p class="note">Versione 13</p>
+    <p class="note">Versione 14 · prova 3D</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
-      <div class="styleSw" role="group" aria-label="Stile grafico"><button type="button" data-s="matita" aria-pressed="true">✏️ Matita</button><button type="button" data-s="blocchi" aria-pressed="false">🧱 Blocchi</button></div>
+      <div class="styleSw" role="group" aria-label="Stile grafico"><button type="button" data-s="matita" aria-pressed="true">✏️ Matita</button><button type="button" data-s="blocchi" aria-pressed="false">🧱 Blocchi</button><button type="button" data-s="3d" aria-pressed="false">🎲 3D</button></div>
       <button class="go alt" id="pauseMenu" type="button">◀ Indietro</button>
     </div>
   </div>
@@ -4020,7 +4020,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     };
     h += tomSvg(tp.x, tp.y);
     var mimg = $('map').querySelector('img');
-    if (STYLE === 'blocchi') {
+    if (STYLE !== 'matita') {
       mimg.src = blockMapURL();
       h = SEGS.map(function (d, k) {
         return "<path id=\"seg".concat(k, "\" d=\"").concat(d, "\" fill=\"none\" stroke=\"none\"/>");
@@ -6798,7 +6798,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var MAP_SRC = document.querySelector('#map img').getAttribute('src');
   var STYLE = 'matita';
   try {
-    if (localStorage.getItem('tom-style') === 'blocchi') STYLE = 'blocchi';
+    var _st = localStorage.getItem('tom-style');
+    if (_st === 'blocchi' || _st === '3d') STYLE = _st;
   } catch (e) {}
   var BPAL = {
     k: '#1d1f2b',
@@ -6907,7 +6908,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       x.fillStyle = fn ? fn(i, j, cols) : cols[Math.floor(brnd(i, j, cols.length) * cols.length)];
       x.fillRect(i * 3, j * 3, 3, 3);
     }
-    return ctx.createPattern(c, 'repeat');
+    var pt = ctx.createPattern(c, 'repeat');
+    try {
+      pt._c = c;
+    } catch (e) {}
+    return pt;
   }
   var BTEX = {};
   function tex(name) {
@@ -7973,7 +7978,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     ctx.restore();
   }
-  function drawBlocks() {
+  function drawBlocks(g3) {
     vSet(1, 1, 0, 0);
     ctx.imageSmoothingEnabled = false;
     var th = LV.theme;
@@ -7982,6 +7987,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     vSet(scale, scale, 0, 0);
     ctx.imageSmoothingEnabled = false;
     bBackdrop(th);
+    if (g3) {
+      vSet(1, 1, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(G3.cv, 0, 0, VIEW.w, VIEW.h);
+      ctx.imageSmoothingEnabled = false;
+    }
     vSet(scale, scale, -camX * scale, -camY * scale);
     ctx.imageSmoothingEnabled = false;
     var x0 = camX,
@@ -8016,17 +8027,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } finally {
       _iterator43.f();
     }
-    var _iterator44 = _createForOfIteratorHelper(W.hazards),
-      _step44;
-    try {
-      for (_iterator44.s(); !(_step44 = _iterator44.n()).done;) {
-        var h = _step44.value;
-        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) bLiquid(h);
+    if (!g3) {
+      var _iterator44 = _createForOfIteratorHelper(W.hazards),
+        _step44;
+      try {
+        for (_iterator44.s(); !(_step44 = _iterator44.n()).done;) {
+          var h = _step44.value;
+          if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) bLiquid(h);
+        }
+      } catch (err) {
+        _iterator44.e(err);
+      } finally {
+        _iterator44.f();
       }
-    } catch (err) {
-      _iterator44.e(err);
-    } finally {
-      _iterator44.f();
     }
     var _iterator45 = _createForOfIteratorHelper(W.jumpers),
       _step45;
@@ -8046,24 +8059,28 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       for (_iterator46.s(); !(_step46 = _iterator46.n()).done;) {
         var _s10 = _step46.value;
         if (_s10.x > x1 || _s10.x + _s10.w < x0 || _s10.y > y1 + 10 || _s10.y + _s10.h < y0) continue;
-        if (oneway(_s10)) bPlat(_s10);else if (_s10.k === 'barrier') bBarrier(_s10);else bGround(_s10);
+        if (oneway(_s10)) {
+          if (!g3 || _s10.k === 'spring') bPlat(_s10);
+        } else if (_s10.k === 'barrier') bBarrier(_s10);else if (!g3) bGround(_s10);
       }
     } catch (err) {
       _iterator46.e(err);
     } finally {
       _iterator46.f();
     }
-    var _iterator47 = _createForOfIteratorHelper(W.hazards),
-      _step47;
-    try {
-      for (_iterator47.s(); !(_step47 = _iterator47.n()).done;) {
-        var _h = _step47.value;
-        if ((_h.k === 'spike' || _h.k === 'spikeD') && _h.x < x1 && _h.x + _h.w > x0) bSpikes(_h);
+    if (!g3) {
+      var _iterator47 = _createForOfIteratorHelper(W.hazards),
+        _step47;
+      try {
+        for (_iterator47.s(); !(_step47 = _iterator47.n()).done;) {
+          var _h = _step47.value;
+          if ((_h.k === 'spike' || _h.k === 'spikeD') && _h.x < x1 && _h.x + _h.w > x0) bSpikes(_h);
+        }
+      } catch (err) {
+        _iterator47.e(err);
+      } finally {
+        _iterator47.f();
       }
-    } catch (err) {
-      _iterator47.e(err);
-    } finally {
-      _iterator47.f();
     }
     var _iterator48 = _createForOfIteratorHelper(W.ramps),
       _step48;
@@ -8228,6 +8245,278 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _iterator59.f();
     }
     ctx.globalAlpha = 1;
+  }
+  var G3 = {
+    ready: false,
+    loading: false,
+    failed: false,
+    scenes: []
+  };
+  function load3D() {
+    if (G3.ready || G3.loading || G3.failed) return;
+    G3.loading = true;
+    var add = function add(src, next) {
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = init3D;
+      sc.onerror = next;
+      document.head.appendChild(sc);
+    };
+    add('three.min.js', function () {
+      return add('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', function () {
+        G3.failed = true;
+        G3.loading = false;
+      });
+    });
+  }
+  function init3D() {
+    G3.loading = false;
+    try {
+      if (!window.THREE) throw new Error('no three');
+      G3.cv = document.createElement('canvas');
+      G3.r = new THREE.WebGLRenderer({
+        canvas: G3.cv,
+        alpha: true,
+        antialias: true
+      });
+      G3.r.setClearColor(0x000000, 0);
+      G3.cam = new THREE.PerspectiveCamera(40, 1, 10, 4000);
+      G3.pr = Math.min(2, window.devicePixelRatio || 1);
+      G3.D = 520;
+      G3.E = 105;
+      G3.tx = {};
+      G3.w = 0;
+      G3.h = 0;
+      G3.ready = true;
+    } catch (e) {
+      G3.failed = true;
+    }
+  }
+  function t3(name) {
+    if (!G3.tx[name]) {
+      var pt = tex(name),
+        c = pt && pt._c;
+      if (!c) return null;
+      var t = new THREE.CanvasTexture(c);
+      t.magFilter = THREE.NearestFilter;
+      t.minFilter = THREE.NearestFilter;
+      t.generateMipmaps = false;
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      G3.tx[name] = t;
+    }
+    return G3.tx[name];
+  }
+  function m3(name, rx, ry, extra) {
+    var base = t3(name),
+      o = Object.assign({}, extra || {});
+    if (base) {
+      var t = base.clone();
+      t.needsUpdate = true;
+      t.repeat.set(rx, ry);
+      o.map = t;
+    } else o.color = 0x999999;
+    return new THREE.MeshLambertMaterial(o);
+  }
+  function box3(sc, x, y, w, h, d, z, name, top) {
+    var g = new THREE.BoxGeometry(w, h, d),
+      T = 24;
+    var side = m3(name, d / T, h / T),
+      front = m3(name, w / T, h / T),
+      up = top ? m3(top, w / T, d / T) : m3(name, w / T, d / T);
+    var mesh = new THREE.Mesh(g, [side, side, up, up, front, front]);
+    mesh.position.set(x + w / 2, -(y + h / 2), z);
+    sc.add(mesh);
+    return mesh;
+  }
+  function buildScene3D(w) {
+    var sc = new THREE.Scene(),
+      th = LV.theme,
+      gt = GTOP[th],
+      DG = 84,
+      DP = 58;
+    sc.add(new THREE.HemisphereLight(0xffffff, 0x6a6a7a, th === 2 || th === 4 || th === 7 ? .62 : .78));
+    var dl = new THREE.DirectionalLight(0xffffff, .55);
+    dl.position.set(-.5, 1, .8);
+    sc.add(dl);
+    var topName = null;
+    if (gt) {
+      topName = 'top' + th;
+      if (!BTEX[topName]) BTEX[topName] = bTex([gt[0], gt[1], gt[0], gt[0]]);
+    }
+    var S3 = {
+      scene: sc,
+      dyn: [],
+      liq: [],
+      world: w
+    };
+    var _iterator60 = _createForOfIteratorHelper(w.solids),
+      _step60;
+    try {
+      for (_iterator60.s(); !(_step60 = _iterator60.n()).done;) {
+        var s = _step60.value;
+        if (s.k === 'barrier' || s.k === 'spring') continue;
+        if (oneway(s)) {
+          var name = s.k === 'crumble' ? th === 6 ? 'cloud' : 'crack' : PTEX[th] || 'plank';
+          var m = box3(sc, s.x, s.y, s.w, s.h, DP, 0, name);
+          S3.dyn.push([s, m]);
+          continue;
+        }
+        box3(sc, s.x, s.y, s.w, s.h, DG, 0, GTEX[th] || 'dirt', topName);
+        if (topName && s.y > -30) box3(sc, s.x - .5, s.y - .5, s.w + 1, 6, DG + 1, 0, topName);
+      }
+    } catch (err) {
+      _iterator60.e(err);
+    } finally {
+      _iterator60.f();
+    }
+    var _iterator61 = _createForOfIteratorHelper(w.hazards),
+      _step61;
+    try {
+      var _loop5 = function _loop5() {
+        var h = _step61.value;
+        if (h.k === 'spike' || h.k === 'spikeD') {
+          var n = Math.max(1, Math.round(h.w / 12)),
+            rows = [-27, -9, 9, 27],
+            g = new THREE.ConeGeometry(5.6, h.h + 2, 4);
+          var col = th === 8 || th === 2 ? 0xbfe4f6 : th === 5 ? 0xf6c9d8 : th === 9 ? 0x8bc34a : 0xd2d6e0;
+          var im = new THREE.InstancedMesh(g, new THREE.MeshLambertMaterial({
+              color: col
+            }), n * rows.length),
+            M = new THREE.Matrix4(),
+            q = new THREE.Quaternion(),
+            e = new THREE.Euler(h.k === 'spikeD' ? Math.PI : 0, Math.PI / 4, 0),
+            one = new THREE.Vector3(1, 1, 1);
+          q.setFromEuler(e);
+          var k = 0;
+          for (var i = 0; i < n; i++) {
+            var _iterator62 = _createForOfIteratorHelper(rows),
+              _step62;
+            try {
+              for (_iterator62.s(); !(_step62 = _iterator62.n()).done;) {
+                var z = _step62.value;
+                M.compose(new THREE.Vector3(h.x + i * 12 + 6, -(h.y + h.h / 2), z), q, one);
+                im.setMatrixAt(k++, M);
+              }
+            } catch (err) {
+              _iterator62.e(err);
+            } finally {
+              _iterator62.f();
+            }
+          }
+          sc.add(im);
+          return 1;
+        }
+        var name = h.k === 'lava' ? 'lava' : h.k === 'slime' ? 'slime' : 'water';
+        var m = box3(sc, h.x, h.y + 3, h.w, h.h - 3, DG + 4, 0, name, null);
+        m.material.forEach(function (mt) {
+          if (name === 'water') {
+            mt.transparent = true;
+            mt.opacity = .78;
+          } else mt.emissive.setHex(name === 'lava' ? 0x7a3000 : 0x203a10);
+          mt.needsUpdate = true;
+        });
+        S3.liq.push(m);
+      };
+      for (_iterator61.s(); !(_step61 = _iterator61.n()).done;) {
+        if (_loop5()) continue;
+      }
+    } catch (err) {
+      _iterator61.e(err);
+    } finally {
+      _iterator61.f();
+    }
+    return S3;
+  }
+  function sceneFor(w) {
+    var S3 = G3.scenes.find(function (o) {
+      return o.world === w;
+    });
+    if (S3) return S3;
+    var keep = WS ? WS : [W];
+    G3.scenes = G3.scenes.filter(function (o) {
+      if (keep.indexOf(o.world) >= 0) return true;
+      o.scene.traverse(function (n) {
+        if (n.geometry) n.geometry.dispose();
+        if (n.material) (Array.isArray(n.material) ? n.material : [n.material]).forEach(function (mt) {
+          if (mt.map) mt.map.dispose();
+          mt.dispose();
+        });
+      });
+      return false;
+    });
+    S3 = buildScene3D(w);
+    G3.scenes.push(S3);
+    return S3;
+  }
+  function render3D() {
+    var S3 = sceneFor(W),
+      r = G3.r,
+      pw = Math.max(2, Math.round(VIEW.w * G3.pr)),
+      ph = Math.max(2, Math.round(VIEW.h * G3.pr));
+    if (G3.w !== pw || G3.h !== ph) {
+      r.setSize(pw, ph, false);
+      G3.w = pw;
+      G3.h = ph;
+    }
+    var _iterator63 = _createForOfIteratorHelper(S3.dyn),
+      _step63;
+    try {
+      for (_iterator63.s(); !(_step63 = _iterator63.n()).done;) {
+        var _step63$value = _slicedToArray(_step63.value, 2),
+          s = _step63$value[0],
+          m = _step63$value[1];
+        var ox = 0;
+        if (s.k === 'crumble' && s.t > 0 && !s.gone) ox = Math.floor(s.t / 3) % 2 ? 2 : -2;
+        m.position.set(s.x + s.w / 2 + ox, -(s.y + s.h / 2), 0);
+        m.visible = s.y < camY + H + 200;
+      }
+    } catch (err) {
+      _iterator63.e(err);
+    } finally {
+      _iterator63.f();
+    }
+    var _iterator64 = _createForOfIteratorHelper(S3.liq),
+      _step64;
+    try {
+      for (_iterator64.s(); !(_step64 = _iterator64.n()).done;) {
+        var _m = _step64.value;
+        _m.material.forEach(function (mt) {
+          if (mt.map) mt.map.offset.x = tick * .004 % 1;
+        });
+      }
+    } catch (err) {
+      _iterator64.e(err);
+    } finally {
+      _iterator64.f();
+    }
+    var cam = G3.cam,
+      Dz = G3.D,
+      cx = camX + viewW / 2,
+      cy = -(camY + H / 2) + G3.E,
+      n = 10,
+      k = n / Dz;
+    cam.position.set(cx, cy, Dz);
+    cam.rotation.set(0, 0, 0);
+    cam.updateMatrixWorld();
+    cam.projectionMatrix.makePerspective((camX - cx) * k, (camX + viewW - cx) * k, (-camY - cy) * k, (-(camY + H) - cy) * k, n, 4000);
+    cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert();
+    r.render(S3.scene, cam);
+  }
+  function draw3D() {
+    if (!G3.ready) {
+      load3D();
+      drawBlocks();
+      return;
+    }
+    try {
+      render3D();
+    } catch (e) {
+      G3.failed = true;
+      G3.ready = false;
+      drawBlocks();
+      return;
+    }
+    drawBlocks(true);
   }
   var SEG_TILES = null;
   function segTiles() {
@@ -8491,7 +8780,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return c.toDataURL();
   }
   function applyStyleClass() {
-    document.body.classList.toggle('blocks', STYLE === 'blocchi');
+    document.body.classList.toggle('blocks', STYLE !== 'matita');
+    if (STYLE === '3d') load3D();
     document.querySelectorAll('.styleSw button').forEach(function (b) {
       return b.setAttribute('aria-pressed', String(b.dataset.s === STYLE));
     });
@@ -8511,11 +8801,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   });
   applyStyleClass();
   if (document.fonts) document.fonts.load("700 15px 'Pixelify Sans'").then(function () {
-    if (STYLE === 'blocchi' && !$('menu').hidden) renderMap();
+    if (STYLE !== 'matita' && !$('menu').hidden) renderMap();
   }).catch(function () {});
   function draw() {
     if (STYLE === 'blocchi') {
       drawBlocks();
+      return;
+    }
+    if (STYLE === '3d') {
+      draw3D();
       return;
     }
     ctx.imageSmoothingEnabled = true;
@@ -8543,216 +8837,216 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       var w = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 80;
       return a > x0 - w && a < x1 + w;
     };
-    var _iterator60 = _createForOfIteratorHelper(W.deco),
-      _step60;
-    try {
-      for (_iterator60.s(); !(_step60 = _iterator60.n()).done;) {
-        var _d7 = _step60.value;
-        if (vis(_d7.x, _d7.w || 120) || _d7.w && _d7.x < x1 && _d7.x + _d7.w > x0) drawDeco(_d7);
-      }
-    } catch (err) {
-      _iterator60.e(err);
-    } finally {
-      _iterator60.f();
-    }
-    var _iterator61 = _createForOfIteratorHelper(LV.labels),
-      _step61;
-    try {
-      for (_iterator61.s(); !(_step61 = _iterator61.n()).done;) {
-        var l = _step61.value;
-        if (l.x < x1 + 50 && l.x + 340 > x0) label(l.t, l.x, l.y, l.s || 26);
-      }
-    } catch (err) {
-      _iterator61.e(err);
-    } finally {
-      _iterator61.f();
-    }
-    var _iterator62 = _createForOfIteratorHelper(W.hazards),
-      _step62;
-    try {
-      for (_iterator62.s(); !(_step62 = _iterator62.n()).done;) {
-        var h = _step62.value;
-        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) drawLiquid(h);
-      }
-    } catch (err) {
-      _iterator62.e(err);
-    } finally {
-      _iterator62.f();
-    }
-    var _iterator63 = _createForOfIteratorHelper(W.jumpers),
-      _step63;
-    try {
-      for (_iterator63.s(); !(_step63 = _iterator63.n()).done;) {
-        var s = _step63.value;
-        if (vis(s.x)) drawJumper(s);
-      }
-    } catch (err) {
-      _iterator63.e(err);
-    } finally {
-      _iterator63.f();
-    }
-    var _iterator64 = _createForOfIteratorHelper(W.solids),
-      _step64;
-    try {
-      for (_iterator64.s(); !(_step64 = _iterator64.n()).done;) {
-        var _s14 = _step64.value;
-        if (_s14.x > x1 || _s14.x + _s14.w < x0 || _s14.y > y1 + 10 || _s14.y + _s14.h < y0) continue;
-        if (oneway(_s14)) drawPlat(_s14);else if (_s14.k === 'barrier') drawBarrier(_s14);else drawGround(_s14);
-      }
-    } catch (err) {
-      _iterator64.e(err);
-    } finally {
-      _iterator64.f();
-    }
-    var _iterator65 = _createForOfIteratorHelper(W.hazards),
+    var _iterator65 = _createForOfIteratorHelper(W.deco),
       _step65;
     try {
       for (_iterator65.s(); !(_step65 = _iterator65.n()).done;) {
-        var _h2 = _step65.value;
-        if ((_h2.k === 'spike' || _h2.k === 'spikeD') && _h2.x < x1 && _h2.x + _h2.w > x0) drawSpikes(_h2);
+        var _d7 = _step65.value;
+        if (vis(_d7.x, _d7.w || 120) || _d7.w && _d7.x < x1 && _d7.x + _d7.w > x0) drawDeco(_d7);
       }
     } catch (err) {
       _iterator65.e(err);
     } finally {
       _iterator65.f();
     }
-    var _iterator66 = _createForOfIteratorHelper(W.ramps),
+    var _iterator66 = _createForOfIteratorHelper(LV.labels),
       _step66;
     try {
       for (_iterator66.s(); !(_step66 = _iterator66.n()).done;) {
-        var r = _step66.value;
-        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) drawRamp(r);
+        var l = _step66.value;
+        if (l.x < x1 + 50 && l.x + 340 > x0) label(l.t, l.x, l.y, l.s || 26);
       }
     } catch (err) {
       _iterator66.e(err);
     } finally {
       _iterator66.f();
     }
-    var _iterator67 = _createForOfIteratorHelper(W.ladders),
+    var _iterator67 = _createForOfIteratorHelper(W.hazards),
       _step67;
     try {
       for (_iterator67.s(); !(_step67 = _iterator67.n()).done;) {
-        var _l2 = _step67.value;
-        if (vis(_l2.x)) drawLadder(_l2);
+        var h = _step67.value;
+        if (h.k !== 'spike' && h.k !== 'spikeD' && h.x < x1 && h.x + h.w > x0) drawLiquid(h);
       }
     } catch (err) {
       _iterator67.e(err);
     } finally {
       _iterator67.f();
     }
-    LV.cps.forEach(function (c, i) {
-      if (i > 0 && vis(c.x)) drawFlag(c, i);
-    });
-    var _iterator68 = _createForOfIteratorHelper(W.candies),
+    var _iterator68 = _createForOfIteratorHelper(W.jumpers),
       _step68;
     try {
       for (_iterator68.s(); !(_step68 = _iterator68.n()).done;) {
-        var c = _step68.value;
-        if (!c.got && vis(c.x)) drawCandy(c);
+        var s = _step68.value;
+        if (vis(s.x)) drawJumper(s);
       }
     } catch (err) {
       _iterator68.e(err);
     } finally {
       _iterator68.f();
     }
-    drawGuitar();
-    drawHeart(W.heart.x, W.heart.y, 16 * (1 + Math.sin(tick * .08) * .08), RED);
-    var _iterator69 = _createForOfIteratorHelper(W.walkers),
+    var _iterator69 = _createForOfIteratorHelper(W.solids),
       _step69;
     try {
       for (_iterator69.s(); !(_step69 = _iterator69.n()).done;) {
-        var _s15 = _step69.value;
-        if (vis(_s15.x)) drawWalker(_s15);
+        var _s14 = _step69.value;
+        if (_s14.x > x1 || _s14.x + _s14.w < x0 || _s14.y > y1 + 10 || _s14.y + _s14.h < y0) continue;
+        if (oneway(_s14)) drawPlat(_s14);else if (_s14.k === 'barrier') drawBarrier(_s14);else drawGround(_s14);
       }
     } catch (err) {
       _iterator69.e(err);
     } finally {
       _iterator69.f();
     }
-    var _iterator70 = _createForOfIteratorHelper(W.flyers),
+    var _iterator70 = _createForOfIteratorHelper(W.hazards),
       _step70;
     try {
       for (_iterator70.s(); !(_step70 = _iterator70.n()).done;) {
-        var _s16 = _step70.value;
-        if (vis(_s16.x)) drawFlyer(_s16);
+        var _h2 = _step70.value;
+        if ((_h2.k === 'spike' || _h2.k === 'spikeD') && _h2.x < x1 && _h2.x + _h2.w > x0) drawSpikes(_h2);
       }
     } catch (err) {
       _iterator70.e(err);
     } finally {
       _iterator70.f();
     }
-    var _iterator71 = _createForOfIteratorHelper(W.rollers),
+    var _iterator71 = _createForOfIteratorHelper(W.ramps),
       _step71;
     try {
       for (_iterator71.s(); !(_step71 = _iterator71.n()).done;) {
-        var _s17 = _step71.value;
-        if (vis(_s17.x)) drawRoller(_s17);
+        var r = _step71.value;
+        if (r.x1 < x1 + 20 && r.x2 > x0 - 20) drawRamp(r);
       }
     } catch (err) {
       _iterator71.e(err);
     } finally {
       _iterator71.f();
     }
-    var _iterator72 = _createForOfIteratorHelper(W.cannons),
+    var _iterator72 = _createForOfIteratorHelper(W.ladders),
       _step72;
     try {
       for (_iterator72.s(); !(_step72 = _iterator72.n()).done;) {
-        var _c3 = _step72.value;
-        if (vis(_c3.x)) drawCannon(_c3);
+        var _l2 = _step72.value;
+        if (vis(_l2.x)) drawLadder(_l2);
       }
     } catch (err) {
       _iterator72.e(err);
     } finally {
       _iterator72.f();
     }
-    var _iterator73 = _createForOfIteratorHelper(W.droppers),
+    LV.cps.forEach(function (c, i) {
+      if (i > 0 && vis(c.x)) drawFlag(c, i);
+    });
+    var _iterator73 = _createForOfIteratorHelper(W.candies),
       _step73;
     try {
       for (_iterator73.s(); !(_step73 = _iterator73.n()).done;) {
-        var _d8 = _step73.value;
-        if (vis(_d8.x)) drawDropper(_d8);
+        var c = _step73.value;
+        if (!c.got && vis(c.x)) drawCandy(c);
       }
     } catch (err) {
       _iterator73.e(err);
     } finally {
       _iterator73.f();
     }
-    var _iterator74 = _createForOfIteratorHelper(W.fallers),
+    drawGuitar();
+    drawHeart(W.heart.x, W.heart.y, 16 * (1 + Math.sin(tick * .08) * .08), RED);
+    var _iterator74 = _createForOfIteratorHelper(W.walkers),
       _step74;
     try {
       for (_iterator74.s(); !(_step74 = _iterator74.n()).done;) {
-        var m = _step74.value;
-        if (vis(m.x)) drawFaller(m);
+        var _s15 = _step74.value;
+        if (vis(_s15.x)) drawWalker(_s15);
       }
     } catch (err) {
       _iterator74.e(err);
     } finally {
       _iterator74.f();
     }
-    drawBoss();
-    var _iterator75 = _createForOfIteratorHelper(W.shots),
+    var _iterator75 = _createForOfIteratorHelper(W.flyers),
       _step75;
     try {
       for (_iterator75.s(); !(_step75 = _iterator75.n()).done;) {
-        var q = _step75.value;
-        drawShot(q);
+        var _s16 = _step75.value;
+        if (vis(_s16.x)) drawFlyer(_s16);
       }
     } catch (err) {
       _iterator75.e(err);
     } finally {
       _iterator75.f();
     }
-    var _iterator76 = _createForOfIteratorHelper(W.bolts),
+    var _iterator76 = _createForOfIteratorHelper(W.rollers),
       _step76;
     try {
       for (_iterator76.s(); !(_step76 = _iterator76.n()).done;) {
-        var b = _step76.value;
-        drawBolt(b.x, b.y, b.d, 1);
+        var _s17 = _step76.value;
+        if (vis(_s17.x)) drawRoller(_s17);
       }
     } catch (err) {
       _iterator76.e(err);
     } finally {
       _iterator76.f();
+    }
+    var _iterator77 = _createForOfIteratorHelper(W.cannons),
+      _step77;
+    try {
+      for (_iterator77.s(); !(_step77 = _iterator77.n()).done;) {
+        var _c3 = _step77.value;
+        if (vis(_c3.x)) drawCannon(_c3);
+      }
+    } catch (err) {
+      _iterator77.e(err);
+    } finally {
+      _iterator77.f();
+    }
+    var _iterator78 = _createForOfIteratorHelper(W.droppers),
+      _step78;
+    try {
+      for (_iterator78.s(); !(_step78 = _iterator78.n()).done;) {
+        var _d8 = _step78.value;
+        if (vis(_d8.x)) drawDropper(_d8);
+      }
+    } catch (err) {
+      _iterator78.e(err);
+    } finally {
+      _iterator78.f();
+    }
+    var _iterator79 = _createForOfIteratorHelper(W.fallers),
+      _step79;
+    try {
+      for (_iterator79.s(); !(_step79 = _iterator79.n()).done;) {
+        var m = _step79.value;
+        if (vis(m.x)) drawFaller(m);
+      }
+    } catch (err) {
+      _iterator79.e(err);
+    } finally {
+      _iterator79.f();
+    }
+    drawBoss();
+    var _iterator80 = _createForOfIteratorHelper(W.shots),
+      _step80;
+    try {
+      for (_iterator80.s(); !(_step80 = _iterator80.n()).done;) {
+        var q = _step80.value;
+        drawShot(q);
+      }
+    } catch (err) {
+      _iterator80.e(err);
+    } finally {
+      _iterator80.f();
+    }
+    var _iterator81 = _createForOfIteratorHelper(W.bolts),
+      _step81;
+    try {
+      for (_iterator81.s(); !(_step81 = _iterator81.n()).done;) {
+        var b = _step81.value;
+        drawBolt(b.x, b.y, b.d, 1);
+      }
+    } catch (err) {
+      _iterator81.e(err);
+    } finally {
+      _iterator81.f();
     }
     drawPlayers();
     if (LV.theme === 5) {
@@ -8771,11 +9065,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.fillStyle = 'rgba(45,48,64,.06)';
       ctx.fillRect(x0, y0, viewW, H);
     }
-    var _iterator77 = _createForOfIteratorHelper(W.parts),
-      _step77;
+    var _iterator82 = _createForOfIteratorHelper(W.parts),
+      _step82;
     try {
-      for (_iterator77.s(); !(_step77 = _iterator77.n()).done;) {
-        var _q5 = _step77.value;
+      for (_iterator82.s(); !(_step82 = _iterator82.n()).done;) {
+        var _q5 = _step82.value;
         ctx.globalAlpha = Math.max(0, _q5.l / 50);
         ctx.fillStyle = _q5.c;
         ctx.beginPath();
@@ -8783,9 +9077,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         ctx.fill();
       }
     } catch (err) {
-      _iterator77.e(err);
+      _iterator82.e(err);
     } finally {
-      _iterator77.f();
+      _iterator82.f();
     }
     ctx.globalAlpha = 1;
   }
@@ -8806,19 +9100,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return;
     }
     var s = '';
-    var _iterator78 = _createForOfIteratorHelper(LV.sections),
-      _step78;
+    var _iterator83 = _createForOfIteratorHelper(LV.sections),
+      _step83;
     try {
-      for (_iterator78.s(); !(_step78 = _iterator78.n()).done;) {
-        var _step78$value = _slicedToArray(_step78.value, 2),
-          x = _step78$value[0],
-          n = _step78$value[1];
+      for (_iterator83.s(); !(_step83 = _iterator83.n()).done;) {
+        var _step83$value = _slicedToArray(_step83.value, 2),
+          x = _step83$value[0],
+          n = _step83$value[1];
         if (p.x >= x) s = n;
       }
     } catch (err) {
-      _iterator78.e(err);
+      _iterator83.e(err);
     } finally {
-      _iterator78.f();
+      _iterator83.f();
     }
     if (s !== lastSec) {
       $('sec').textContent = s;
@@ -8852,11 +9146,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var order = PLY.slice().sort(function (a, b) {
       return (a === me) - (b === me);
     });
-    var _iterator79 = _createForOfIteratorHelper(order),
-      _step79;
+    var _iterator84 = _createForOfIteratorHelper(order),
+      _step84;
     try {
-      for (_iterator79.s(); !(_step79 = _iterator79.n()).done;) {
-        var q = _step79.value;
+      for (_iterator84.s(); !(_step84 = _iterator84.n()).done;) {
+        var q = _step84.value;
         var t = q.arrived ? 1 : Math.max(0, Math.min(1, (q.x - 60) / (hx - 60))),
           px = x0 + t * w,
           col = q.idx ? '#e0373f' : '#3f86d4',
@@ -8870,9 +9164,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         ctx.fillText(CHARS[q.char].name[0], px - (q === me ? 4 : 3), y + (q === me ? 11 : 10));
       }
     } catch (err) {
-      _iterator79.e(err);
+      _iterator84.e(err);
     } finally {
-      _iterator79.f();
+      _iterator84.f();
     }
   }
   function render() {
@@ -9274,13 +9568,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         got: sv.got,
         boss: sv.boss
       }]];
-      var _iterator80 = _createForOfIteratorHelper(wl),
-        _step80;
+      var _iterator85 = _createForOfIteratorHelper(wl),
+        _step85;
       try {
-        var _loop5 = function _loop5() {
-          var _step80$value = _slicedToArray(_step80.value, 2),
-            w = _step80$value[0],
-            ws = _step80$value[1];
+        var _loop6 = function _loop6() {
+          var _step85$value = _slicedToArray(_step85.value, 2),
+            w = _step85$value[0],
+            ws = _step85$value[1];
           (ws.got || []).forEach(function (k) {
             if (w.candies[k]) w.candies[k].got = true;
           });
@@ -9291,20 +9585,20 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             });
           }
         };
-        for (_iterator80.s(); !(_step80 = _iterator80.n()).done;) {
-          _loop5();
+        for (_iterator85.s(); !(_step85 = _iterator85.n()).done;) {
+          _loop6();
         }
       } catch (err) {
-        _iterator80.e(err);
+        _iterator85.e(err);
       } finally {
-        _iterator80.f();
+        _iterator85.f();
       }
     }
-    var _iterator81 = _createForOfIteratorHelper(PLY),
-      _step81;
+    var _iterator86 = _createForOfIteratorHelper(PLY),
+      _step86;
     try {
-      for (_iterator81.s(); !(_step81 = _iterator81.n()).done;) {
-        var q = _step81.value;
+      for (_iterator86.s(); !(_step86 = _iterator86.n()).done;) {
+        var q = _step86.value;
         var s = sp[q.idx] || null;
         if (s) {
           q.cp = Math.min(s.cp | 0, LV.cps.length - 1);
@@ -9327,9 +9621,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         store();
       }
     } catch (err) {
-      _iterator81.e(err);
+      _iterator86.e(err);
     } finally {
-      _iterator81.f();
+      _iterator86.f();
     }
     if (WS) W = WS[0];
     use(PLY[0]);
@@ -9346,17 +9640,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function pauseGame() {
     if (!running || won) return;
     running = false;
-    var _iterator82 = _createForOfIteratorHelper(PLY),
-      _step82;
+    var _iterator87 = _createForOfIteratorHelper(PLY),
+      _step87;
     try {
-      for (_iterator82.s(); !(_step82 = _iterator82.n()).done;) {
-        var q = _step82.value;
+      for (_iterator87.s(); !(_step87 = _iterator87.n()).done;) {
+        var q = _step87.value;
         for (var k in q.keys) q.keys[k] = false;
       }
     } catch (err) {
-      _iterator82.e(err);
+      _iterator87.e(err);
     } finally {
-      _iterator82.f();
+      _iterator87.f();
     }
     document.querySelectorAll('.btn.on').forEach(function (b) {
       return b.classList.remove('on');
@@ -9383,17 +9677,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       saveGame();
     }
     running = false;
-    var _iterator83 = _createForOfIteratorHelper(PLY),
-      _step83;
+    var _iterator88 = _createForOfIteratorHelper(PLY),
+      _step88;
     try {
-      for (_iterator83.s(); !(_step83 = _iterator83.n()).done;) {
-        var q = _step83.value;
+      for (_iterator88.s(); !(_step88 = _iterator88.n()).done;) {
+        var q = _step88.value;
         for (var k in q.keys) q.keys[k] = false;
       }
     } catch (err) {
-      _iterator83.e(err);
+      _iterator88.e(err);
     } finally {
-      _iterator83.f();
+      _iterator88.f();
     }
     document.querySelectorAll('.btn.on').forEach(function (b) {
       return b.classList.remove('on');
