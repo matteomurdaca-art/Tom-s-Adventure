@@ -1035,7 +1035,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
-    <p class="note">Versione 12</p>
+    <p class="note">Versione 13</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
@@ -1482,8 +1482,51 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       t: 0,
       dead: false,
       shoot: 70,
-      r: 30
+      r: 30,
+      ground: kind === 'gorilla' || kind === 'mammut',
+      dir: -1,
+      jy: 0,
+      jv: 0,
+      hop: 90,
+      walk: 0,
+      land: 0
     };
+  }
+  function bossWalk(b, f) {
+    var sp = (b.kind === 'mammut' ? 1.6 : 1.25) * (b.hp <= 2 ? 1.35 : 1),
+      stand = b.jy === 0 && b.jv === 0 && b.hop < 30;
+    if (!stand) {
+      b.x += b.dir * sp * f;
+      if (b.jy === 0) b.walk += sp * f * .12;
+    }
+    if (b.x > b.cx + b.ax) {
+      b.x = b.cx + b.ax;
+      b.dir = -1;
+    } else if (b.x < b.cx - b.ax) {
+      b.x = b.cx - b.ax;
+      b.dir = 1;
+    }
+    if (b.jy === 0 && b.jv === 0) {
+      b.hop -= f;
+      if (b.hop <= 0) {
+        b.jv = b.kind === 'mammut' ? -7.6 : -8.2;
+        b.hop = 95 + Math.floor(b.t * 7) % 60;
+      }
+    }
+    if (b.jv !== 0) {
+      b.jy += b.jv * f;
+      b.jv += .3 * f;
+      if (b.jy >= 0) {
+        b.jy = 0;
+        b.jv = 0;
+        b.land = 16;
+        burst(b.x - 22, b.by + 34, '#a99f92', 6);
+        burst(b.x + 22, b.by + 34, '#a99f92', 6);
+        if (onScreen(b.x)) beep(70, .22, 'square', .06, -30);
+      }
+    }
+    if (b.land > 0) b.land -= f;
+    b.y = b.by + b.jy;
   }
   function DECO(kind, x, y) {
     var s = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
@@ -2294,7 +2337,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
   }, {
     name: 'Il Polo Nord',
-    sub: 'difficile · ghiaccio scivoloso, pinguini, Yeti',
+    sub: 'difficile · ghiaccio scivoloso, pinguini, Mammut di ghiaccio',
     nbg: '#e3f4fb',
     par: 200,
     END: 5400,
@@ -2333,7 +2376,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }, {
       x: 2420,
       y: 80,
-      t: 'TOM VS YETI'
+      t: 'TOM VS MAMMUT'
     }, {
       x: 3280,
       y: 150,
@@ -2348,7 +2391,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       t: 'TOM ARRIVO',
       s: 30
     }],
-    sections: [[0, 'SI SCIVOLA!'], [700, 'LASTRONI DI GHIACCIO'], [1000, 'TOM VS PINGUINI'], [1980, 'PALLE DI NEVE'], [2400, 'TOM VS YETI'], [3000, 'ACQUA GELATA'], [4350, 'LA SCALA DI GHIACCIO'], [5050, 'TOM ARRIVO']],
+    sections: [[0, 'SI SCIVOLA!'], [700, 'LASTRONI DI GHIACCIO'], [1000, 'TOM VS PINGUINI'], [1980, 'PALLE DI NEVE'], [2400, 'TOM VS MAMMUT'], [3000, 'ACQUA GELATA'], [4350, 'LA SCALA DI GHIACCIO'], [5050, 'TOM ARRIVO']],
     build() {
       S(0, 300, 700, 60, 'ground');
       HZ(700, 312, 300, 48, 'water');
@@ -2373,7 +2416,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       S(1980, 300, 1290, 60, 'ground');
       ROLL('snowball', 2100, 2010, 2350, 1.4, 288);
       W.barrier = S(2950, 0, 22, 300, 'barrier');
-      BOSS('yeti', 2660, 215, 140, 35, 2400);
+      BOSS('mammut', 2660, 264, 150, 0, 2400);
       HZ(3270, 312, 430, 48, 'water');
       MOV(3300, 270, 70, 'x', 3300, 3400, .9, 1);
       MOV(3500, 260, 70, 'y', 200, 280, .8, 1);
@@ -2399,7 +2442,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
   }, {
     name: 'La Giungla',
-    sub: 'difficile · coccodrilli, liane, Serpentone',
+    sub: 'difficile · coccodrilli, liane, Gorillone',
     nbg: '#e0f2d8',
     par: 220,
     END: 5800,
@@ -2437,7 +2480,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }, {
       x: 2650,
       y: 80,
-      t: 'TOM VS SERPENTONE'
+      t: 'TOM VS GORILLONE'
     }, {
       x: 3640,
       y: 150,
@@ -2452,7 +2495,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       t: 'TOM ARRIVO',
       s: 30
     }],
-    sections: [[0, 'NELLA GIUNGLA'], [800, 'IL PONTE DEI COCCODRILLI'], [1500, 'SU PER LA LIANA'], [2000, 'SCIMMIE E COCCHI'], [2560, 'TOM VS SERPENTONE'], [3600, 'I TRONCHI'], [4300, 'L\'ULTIMA CORSA'], [5450, 'TOM ARRIVO']],
+    sections: [[0, 'NELLA GIUNGLA'], [800, 'IL PONTE DEI COCCODRILLI'], [1500, 'SU PER LA LIANA'], [2000, 'SCIMMIE E COCCHI'], [2560, 'TOM VS GORILLONE'], [3600, 'I TRONCHI'], [4300, 'L\'ULTIMA CORSA'], [5450, 'TOM ARRIVO']],
     build() {
       S(0, 300, 800, 60, 'ground');
       WALK('snake', 450, 300, 700, 1.8);
@@ -2474,7 +2517,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       FLY(2200, 60, 60, 20, 0, 'parrot');
       FLY(2380, 75, 40, 25, 50, 'parrot');
       W.barrier = S(3200, 0, 22, 300, 'barrier');
-      BOSS('serpentone', 2900, 210, 140, 30, 2560);
+      BOSS('gorilla', 2900, 264, 140, 0, 2560);
       HZ(3600, 312, 700, 48, 'water');
       MOV(3640, 270, 80, 'x', 3640, 3760, 1, 1);
       MOV(3880, 260, 80, 'x', 3880, 4000, 1.1, -1);
@@ -3431,8 +3474,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (b && !b.dead) {
       b.t += f;
       b.inv -= f;
-      b.y = b.by + Math.sin(b.t * .045) * b.ay;
-      b.x = b.cx + Math.sin(b.t * .017) * b.ax;
+      if (b.ground) bossWalk(b, f);else {
+        b.y = b.by + Math.sin(b.t * .045) * b.ay;
+        b.x = b.cx + Math.sin(b.t * .017) * b.ax;
+      }
       var tg = PLY.filter(function (q) {
         return !q.dead && !q.arrived && q.x > b.trig;
       }).sort(function (a, c) {
@@ -3818,7 +3863,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         temporale: YELLOW,
         talpa: '#8a5a32',
         yeti: '#9fd3f0',
-        serpentone: GREEN
+        serpentone: GREEN,
+        gorilla: '#4a4e5e',
+        mammut: '#9fd3f0'
       }[b.kind] || BLUE, 40);
       W.shots = W.shots.filter(function (q) {
         return q.kind === 'ball';
@@ -4650,7 +4697,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         temporale: '#d6a400',
         talpa: '#8a5a32',
         yeti: BLUE,
-        serpentone: GREEN
+        serpentone: GREEN,
+        gorilla: '#4a4e5e',
+        mammut: BLUE
       }[k] || RED;
       for (var i = 0; i < 3; i++) {
         pen(2.4, i === 1 ? bc : 'rgba(141,147,166,.45)');
@@ -5977,9 +6026,218 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         ctx.lineTo(b.x + 4, b.y + 33);
         ctx.stroke();
       }
+    } else if (b.kind === 'gorilla') {
+      var _d2 = p.x + 10 < b.x ? -1 : 1,
+        beat = b.jy === 0 && b.jv === 0 && b.hop < 30,
+        air = b.jy < -4,
+        sw = Math.sin(b.walk) * 7;
+      var tube = function tube(w, c, x0, y0, cx1, cy1, x1, y1) {
+        for (var _i13 = 0, _arr7 = [[w + 3, PEN], [w, c]]; _i13 < _arr7.length; _i13++) {
+          var _arr7$_i = _slicedToArray(_arr7[_i13], 2),
+            lw = _arr7$_i[0],
+            cc = _arr7$_i[1];
+          pen(lw, cc);
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.quadraticCurveTo(cx1, cy1, x1, y1);
+          ctx.stroke();
+        }
+      };
+      ctx.lineCap = 'round';
+      tube(9, '#4a4e5e', b.x - 10, b.y + 14, b.x - 12, b.y + 24, b.x - 12 - sw * .5, b.y + 32);
+      tube(9, '#4a4e5e', b.x + 10, b.y + 14, b.x + 12, b.y + 24, b.x + 12 + sw * .5, b.y + 32);
+      ctx.fillStyle = '#4a4e5e';
+      pen(2.6);
+      ctx.beginPath();
+      ctx.ellipse(b.x, b.y + 2, 26, 21, 0, 0, 6.283);
+      ctx.fill();
+      ctx.stroke();
+      pen(1.2, '#2a2d38');
+      ctx.beginPath();
+      for (var _a = 3.5; _a < 5.95; _a += .32) {
+        ctx.moveTo(b.x + Math.cos(_a) * 22, b.y + 2 + Math.sin(_a) * 17);
+        ctx.lineTo(b.x + Math.cos(_a) * 28, b.y + 2 + Math.sin(_a) * 23);
+      }
+      ctx.stroke();
+      ctx.fillStyle = '#8d93a6';
+      pen(1.6);
+      ctx.beginPath();
+      ctx.ellipse(b.x + _d2 * 3, b.y + 6, 13, 11, 0, 0, 6.283);
+      ctx.fill();
+      ctx.stroke();
+      for (var _i14 = 0, _arr8 = [-1, 1]; _i14 < _arr8.length; _i14++) {
+        var _sd = _arr8[_i14];
+        var _hx = void 0,
+          _hy = void 0,
+          cy = void 0;
+        if (beat) {
+          var _k4 = Math.floor(tick / 7) % 2 === (_sd > 0 ? 0 : 1);
+          _hx = b.x + _d2 * 3 + _sd * 6;
+          _hy = b.y + (_k4 ? 0 : 9);
+          cy = b.y - 12;
+        } else if (air) {
+          _hx = b.x + _sd * 36;
+          _hy = b.y - 30;
+          cy = b.y - 20;
+        } else {
+          _hx = b.x + _sd * 30 + _sd * _sd * (_sd > 0 ? sw : -sw) * .6;
+          _hy = b.y + 30;
+          cy = b.y - 4;
+        }
+        tube(10, '#4a4e5e', b.x + _sd * 20, b.y - 8, b.x + _sd * 36, cy, _hx, _hy);
+        circle(_hx, _hy, 6, '#c9b49a', 2);
+      }
+      ctx.lineCap = 'butt';
+      var hx = b.x + _d2 * 5,
+        hy = b.y - 22,
+        fx = hx + _d2 * 3;
+      circle(hx, hy, 14, '#4a4e5e', 2.6);
+      ctx.fillStyle = '#c9b49a';
+      pen(1.8);
+      ctx.beginPath();
+      ctx.ellipse(fx, hy + 3, 9.5, 8, 0, 0, 6.283);
+      ctx.fill();
+      ctx.stroke();
+      pen(3.4, PEN);
+      ctx.beginPath();
+      ctx.moveTo(fx - 9, hy - 6);
+      ctx.lineTo(fx - 1, hy - 3);
+      ctx.moveTo(fx + 9, hy - 6);
+      ctx.lineTo(fx + 1, hy - 3);
+      ctx.stroke();
+      ctx.fillStyle = PEN;
+      ctx.beginPath();
+      ctx.arc(fx - 4, hy - 1, 1.9, 0, 6.28);
+      ctx.arc(fx + 4, hy - 1, 1.9, 0, 6.28);
+      ctx.arc(fx - 2, hy + 4, 1, 0, 6.28);
+      ctx.arc(fx + 2, hy + 4, 1, 0, 6.28);
+      ctx.fill();
+      pen(1.8);
+      ctx.beginPath();
+      if (beat) {
+        ctx.ellipse(fx, hy + 8.5, 3.6, 2.6, 0, 0, 6.28);
+      } else {
+        ctx.moveTo(fx - 5, hy + 8);
+        ctx.lineTo(fx + 5, hy + 8);
+      }
+      ctx.stroke();
+      if (beat) label('UH! UH!', b.x - 30, b.y - 62, 16, PEN);
+      if (b.land > 0) {
+        pen(1.8, '#8d93a6');
+        ctx.beginPath();
+        for (var _i15 = 0, _arr9 = [-1, 1]; _i15 < _arr9.length; _i15++) {
+          var _sd2 = _arr9[_i15];
+          ctx.moveTo(b.x + _sd2 * 30, b.y + 32);
+          ctx.lineTo(b.x + _sd2 * 46, b.y + 24);
+          ctx.moveTo(b.x + _sd2 * 32, b.y + 28);
+          ctx.lineTo(b.x + _sd2 * 44, b.y + 14);
+        }
+        ctx.stroke();
+      }
+    } else if (b.kind === 'mammut') {
+      var _d3 = p.x + 10 < b.x ? -1 : 1,
+        stand = b.jy === 0 && b.jv === 0 && b.hop < 30,
+        _sw = Math.sin(b.walk) * 4,
+        cx = b.x - _d3 * 6;
+      ctx.fillStyle = '#6b4a2e';
+      pen(2.2);
+      [-22, -10, 8, 20].forEach(function (lx, i) {
+        var o = i % 2 ? _sw : -_sw;
+        ctx.beginPath();
+        ctx.rect(cx + lx - 5 + o * .5, b.y + 12, 11, 22);
+        ctx.fill();
+        ctx.stroke();
+      });
+      ctx.fillStyle = '#8a5a32';
+      pen(2.6);
+      ctx.beginPath();
+      ctx.ellipse(cx, b.y, 33, 22, 0, 0, 6.283);
+      ctx.fill();
+      ctx.stroke();
+      pen(1.4, '#5a3a1d');
+      ctx.beginPath();
+      for (var x = -26; x <= 26; x += 6) {
+        ctx.moveTo(cx + x, b.y + 12);
+        ctx.lineTo(cx + x + 2, b.y + 24);
+      }
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      pen(1.4, '#9fd3f0');
+      for (var _x14 = -22; _x14 <= 14; _x14 += 12) {
+        ctx.beginPath();
+        ctx.ellipse(cx + _x14, b.y - 18 + Math.abs(_x14) * .12, 7, 3.6, 0, 0, 6.283);
+        ctx.fill();
+        ctx.stroke();
+      }
+      var _hx2 = b.x + _d3 * 20,
+        _hy2 = b.y - 8,
+        _up = stand ? -14 + Math.sin(tick * .3) * 5 : 0;
+      ctx.fillStyle = '#7a5230';
+      pen(2);
+      ctx.beginPath();
+      ctx.ellipse(_hx2 - _d3 * 11, _hy2 + 3, 8, 11, 0, 0, 6.283);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#9b6a3e';
+      pen(2.6);
+      ctx.beginPath();
+      ctx.arc(_hx2, _hy2, 16, 0, 6.283);
+      ctx.fill();
+      ctx.stroke();
+      pen(2, '#5a3a1d');
+      ctx.beginPath();
+      for (var _k5 = -2; _k5 <= 2; _k5++) {
+        ctx.moveTo(_hx2 + _k5 * 3, _hy2 - 14);
+        ctx.lineTo(_hx2 + _k5 * 4, _hy2 - 22 - (_k5 % 2 ? 3 : 0));
+      }
+      ctx.stroke();
+      ctx.lineCap = 'round';
+      for (var _i16 = 0, _arr0 = [[12, PEN], [9, '#9b6a3e']]; _i16 < _arr0.length; _i16++) {
+        var _arr0$_i = _slicedToArray(_arr0[_i16], 2),
+          lw = _arr0$_i[0],
+          cc = _arr0$_i[1];
+        pen(lw, cc);
+        ctx.beginPath();
+        ctx.moveTo(_hx2 + _d3 * 9, _hy2 + 6);
+        ctx.quadraticCurveTo(_hx2 + _d3 * 22, _hy2 + 18 + _up, _hx2 + _d3 * 17, _hy2 + 32 + _up * 2);
+        ctx.stroke();
+      }
+      ctx.lineCap = 'butt';
+      ctx.fillStyle = '#e3f1fb';
+      pen(2, '#3f86d4');
+      ctx.beginPath();
+      ctx.moveTo(_hx2 + _d3 * 5, _hy2 + 9);
+      ctx.quadraticCurveTo(_hx2 + _d3 * 28, _hy2 + 28, _hx2 + _d3 * 36, _hy2 + 6);
+      ctx.quadraticCurveTo(_hx2 + _d3 * 27, _hy2 + 18, _hx2 + _d3 * 9, _hy2 + 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      circle(_hx2 + _d3 * 6, _hy2 - 4, 3.8, '#fff', 1.4);
+      ctx.fillStyle = PEN;
+      ctx.beginPath();
+      ctx.arc(_hx2 + _d3 * 7, _hy2 - 4, 1.9, 0, 6.28);
+      ctx.fill();
+      pen(2.4);
+      ctx.beginPath();
+      ctx.moveTo(_hx2 + _d3 * 1, _hy2 - 11);
+      ctx.lineTo(_hx2 + _d3 * 12, _hy2 - 8);
+      ctx.stroke();
+      if (stand) label('PRUUU!', b.x - 28, b.y - 62, 16, '#3f86d4');
+      if (b.land > 0) {
+        pen(1.8, '#9fd3f0');
+        ctx.beginPath();
+        for (var _i17 = 0, _arr1 = [-1, 1]; _i17 < _arr1.length; _i17++) {
+          var _sd3 = _arr1[_i17];
+          ctx.moveTo(b.x + _sd3 * 34, b.y + 32);
+          ctx.lineTo(b.x + _sd3 * 50, b.y + 24);
+          ctx.moveTo(b.x + _sd3 * 36, b.y + 28);
+          ctx.lineTo(b.x + _sd3 * 48, b.y + 14);
+        }
+        ctx.stroke();
+      }
     } else if (b.kind === 'drago') {
       var fl = Math.sin(tick * .15) * 10,
-        _d2 = p.x + 10 < b.x ? -1 : 1;
+        _d4 = p.x + 10 < b.x ? -1 : 1;
       ctx.fillStyle = '#f6a46b';
       pen(2.4);
       ctx.beginPath();
@@ -6000,42 +6258,42 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.stroke();
       pen(3, RED);
       ctx.beginPath();
-      ctx.moveTo(b.x - _d2 * 18, b.y + 12);
-      ctx.quadraticCurveTo(b.x - _d2 * 34, b.y + 30, b.x - _d2 * 42, b.y + 18);
+      ctx.moveTo(b.x - _d4 * 18, b.y + 12);
+      ctx.quadraticCurveTo(b.x - _d4 * 34, b.y + 30, b.x - _d4 * 42, b.y + 18);
       ctx.stroke();
       circle(b.x, b.y + 6, 20, RED, 2.6);
       ctx.fillStyle = YELLOW;
       ctx.beginPath();
       ctx.ellipse(b.x, b.y + 12, 10, 7, 0, 0, 6.28);
       ctx.fill();
-      circle(b.x + _d2 * 12, b.y - 12, 13, RED, 2.4);
+      circle(b.x + _d4 * 12, b.y - 12, 13, RED, 2.4);
       ctx.fillStyle = YELLOW;
       pen(1.6);
       ctx.beginPath();
-      ctx.moveTo(b.x + _d2 * 6, b.y - 22);
-      ctx.lineTo(b.x + _d2 * 2, b.y - 34);
-      ctx.lineTo(b.x + _d2 * 12, b.y - 24);
-      ctx.moveTo(b.x + _d2 * 16, b.y - 24);
-      ctx.lineTo(b.x + _d2 * 20, b.y - 36);
-      ctx.lineTo(b.x + _d2 * 22, b.y - 21);
+      ctx.moveTo(b.x + _d4 * 6, b.y - 22);
+      ctx.lineTo(b.x + _d4 * 2, b.y - 34);
+      ctx.lineTo(b.x + _d4 * 12, b.y - 24);
+      ctx.moveTo(b.x + _d4 * 16, b.y - 24);
+      ctx.lineTo(b.x + _d4 * 20, b.y - 36);
+      ctx.lineTo(b.x + _d4 * 22, b.y - 21);
       ctx.fill();
       ctx.stroke();
-      circle(b.x + _d2 * 16, b.y - 14, 3.4, '#fff', 1.2);
+      circle(b.x + _d4 * 16, b.y - 14, 3.4, '#fff', 1.2);
       ctx.fillStyle = PEN;
       ctx.beginPath();
-      ctx.arc(b.x + _d2 * 17, b.y - 14, 1.6, 0, 6.28);
+      ctx.arc(b.x + _d4 * 17, b.y - 14, 1.6, 0, 6.28);
       ctx.fill();
       pen(2);
       ctx.beginPath();
-      ctx.moveTo(b.x + _d2 * 9, b.y - 20);
-      ctx.lineTo(b.x + _d2 * 20, b.y - 18);
+      ctx.moveTo(b.x + _d4 * 9, b.y - 20);
+      ctx.lineTo(b.x + _d4 * 20, b.y - 18);
       ctx.stroke();
       if (b.shoot < 20) {
         ctx.fillStyle = ORANGE;
         ctx.beginPath();
-        ctx.moveTo(b.x + _d2 * 24, b.y - 8);
-        ctx.lineTo(b.x + _d2 * 36, b.y - 14);
-        ctx.lineTo(b.x + _d2 * 34, b.y - 2);
+        ctx.moveTo(b.x + _d4 * 24, b.y - 8);
+        ctx.lineTo(b.x + _d4 * 36, b.y - 14);
+        ctx.lineTo(b.x + _d4 * 34, b.y - 2);
         ctx.closePath();
         ctx.fill();
       }
@@ -6047,11 +6305,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.stroke();
       pen(3);
       ctx.beginPath();
-      for (var _i13 = -1; _i13 <= 1; _i13 += 2) for (var _k4 = 0; _k4 < 4; _k4++) {
-        var w = Math.sin(tick * .12 + _k4) * 3;
+      for (var _i18 = -1; _i18 <= 1; _i18 += 2) for (var _k6 = 0; _k6 < 4; _k6++) {
+        var w = Math.sin(tick * .12 + _k6) * 3;
         ctx.moveTo(b.x, b.y);
-        ctx.lineTo(b.x + _i13 * (26 + _k4 * 3), b.y - 18 + _k4 * 10 + w);
-        ctx.lineTo(b.x + _i13 * (36 + _k4 * 3), b.y + 8 + _k4 * 8);
+        ctx.lineTo(b.x + _i18 * (26 + _k6 * 3), b.y - 18 + _k6 * 10 + w);
+        ctx.lineTo(b.x + _i18 * (36 + _k6 * 3), b.y + 8 + _k6 * 8);
       }
       ctx.stroke();
       circle(b.x, b.y, 24, '#3b3f4f', 2.6);
@@ -6068,7 +6326,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      for (var _i14 = 0; _i14 < 4; _i14++) circle(b.x - 9 + _i14 * 6, b.y - 4 + (_i14 % 3 === 0 ? 2 : 0), 2.6, RED, .8);
+      for (var _i19 = 0; _i19 < 4; _i19++) circle(b.x - 9 + _i19 * 6, b.y - 4 + (_i19 % 3 === 0 ? 2 : 0), 2.6, RED, .8);
       pen(2, '#fff');
       ctx.beginPath();
       ctx.moveTo(b.x - 5, b.y + 10);
@@ -6079,7 +6337,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     ctx.globalAlpha = 1;
     var n = b.hp;
-    for (var _i15 = 0; _i15 < n; _i15++) drawHeart(b.x - (n - 1) * 7 + _i15 * 14, b.y - 48, 5, RED);
+    for (var _i20 = 0; _i20 < n; _i20++) drawHeart(b.x - (n - 1) * 7 + _i20 * 14, b.y - 48, 5, RED);
   }
   function drawShot(q) {
     if (q.kind === 'gassata') {
@@ -6112,6 +6370,27 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.beginPath();
       ctx.arc(q.x - 2, q.y - 2, 1.8, 0, 6.28);
       ctx.fill();
+    } else if (q.kind === 'gorilla') {
+      circle(q.x, q.y, 7, '#8a5a32', 1.8);
+      pen(1.2, '#e8cfa8');
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, 3, 0, 6.28);
+      ctx.stroke();
+    } else if (q.kind === 'mammut') {
+      ctx.save();
+      ctx.translate(q.x, q.y);
+      ctx.rotate(Math.atan2(q.vy, q.vx));
+      ctx.fillStyle = '#e3f1fb';
+      pen(1.6, '#3f86d4');
+      ctx.beginPath();
+      ctx.moveTo(10, 0);
+      ctx.lineTo(-6, -5);
+      ctx.lineTo(-3, 0);
+      ctx.lineTo(-6, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     } else if (q.kind === 'coco') {
       circle(q.x, q.y, 7, '#8a5a32', 1.8);
       pen(1.2, '#e8cfa8');
@@ -6332,10 +6611,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.fillRect(x - 30, y - 170, 60, 170);
       pen(2.4);
       ctx.strokeRect(x - 30, y - 170, 60, 170);
-      for (var _i16 = 0; _i16 < 3; _i16++) {
+      for (var _i21 = 0; _i21 < 3; _i21++) {
         ctx.fillStyle = '#fff';
-        ctx.fillRect(x - 30 + _i16 * 22, y - 184, 16, 14);
-        ctx.strokeRect(x - 30 + _i16 * 22, y - 184, 16, 14);
+        ctx.fillRect(x - 30 + _i21 * 22, y - 184, 16, 14);
+        ctx.strokeRect(x - 30 + _i21 * 22, y - 184, 16, 14);
       }
       ctx.fillStyle = PEN;
       ctx.beginPath();
@@ -6416,10 +6695,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.closePath();
       ctx.fill();
       pen(1.6, 'rgba(107,113,134,.4)');
-      for (var _i17 = 0; _i17 < 3; _i17++) {
-        var yy = y - h - 14 - (tick * .4 + _i17 * 20) % 60;
+      for (var _i22 = 0; _i22 < 3; _i22++) {
+        var yy = y - h - 14 - (tick * .4 + _i22 * 20) % 60;
         ctx.beginPath();
-        ctx.arc(x + Math.sin(yy * .05) * 8, yy, 6 + _i17 * 2, 0, 6.28);
+        ctx.arc(x + Math.sin(yy * .05) * 8, yy, 6 + _i22 * 2, 0, 6.28);
         ctx.stroke();
       }
     } else if (d.kind === 'seaweed') {
@@ -6468,11 +6747,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     } else if (d.kind === 'pine') {
       ctx.fillStyle = 'rgba(74,163,90,.3)';
       pen(1.6, 'rgba(45,48,64,.35)');
-      for (var _k5 = 0; _k5 < 3; _k5++) {
+      for (var _k7 = 0; _k7 < 3; _k7++) {
         ctx.beginPath();
-        ctx.moveTo(x - (26 - _k5 * 6) * s, y - (10 + _k5 * 26) * s);
-        ctx.lineTo(x, y - (48 + _k5 * 26) * s);
-        ctx.lineTo(x + (26 - _k5 * 6) * s, y - (10 + _k5 * 26) * s);
+        ctx.moveTo(x - (26 - _k7 * 6) * s, y - (10 + _k7 * 26) * s);
+        ctx.lineTo(x, y - (48 + _k7 * 26) * s);
+        ctx.lineTo(x + (26 - _k7 * 6) * s, y - (10 + _k7 * 26) * s);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
@@ -6481,10 +6760,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       pen(1.2, 'rgba(63,134,212,.45)');
       var _yy2 = (y + tick * .3 * s) % 300;
       ctx.beginPath();
-      for (var _i18 = 0; _i18 < 3; _i18++) {
-        var _a = _i18 * Math.PI / 3;
-        ctx.moveTo(x - Math.cos(_a) * 5 * s, _yy2 - Math.sin(_a) * 5 * s);
-        ctx.lineTo(x + Math.cos(_a) * 5 * s, _yy2 + Math.sin(_a) * 5 * s);
+      for (var _i23 = 0; _i23 < 3; _i23++) {
+        var _a2 = _i23 * Math.PI / 3;
+        ctx.moveTo(x - Math.cos(_a2) * 5 * s, _yy2 - Math.sin(_a2) * 5 * s);
+        ctx.lineTo(x + Math.cos(_a2) * 5 * s, _yy2 + Math.sin(_a2) * 5 * s);
       }
       ctx.stroke();
     } else if (d.kind === 'palm') {
@@ -6495,10 +6774,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       ctx.stroke();
       ctx.fillStyle = 'rgba(74,163,90,.35)';
       pen(1.6, 'rgba(45,48,64,.35)');
-      for (var _k6 = 0; _k6 < 5; _k6++) {
-        var _a2 = -Math.PI * .9 + _k6 * Math.PI * .45;
+      for (var _k8 = 0; _k8 < 5; _k8++) {
+        var _a3 = -Math.PI * .9 + _k8 * Math.PI * .45;
         ctx.beginPath();
-        ctx.ellipse(x + 4 * s + Math.cos(_a2) * 24 * s, y - 130 * s + Math.sin(_a2) * 12 * s, 26 * s, 7 * s, _a2, 0, 6.28);
+        ctx.ellipse(x + 4 * s + Math.cos(_a3) * 24 * s, y - 130 * s + Math.sin(_a3) * 12 * s, 26 * s, 7 * s, _a3, 0, 6.28);
         ctx.fill();
         ctx.stroke();
       }
@@ -6902,8 +7181,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       bRect(-20, -24, 3, 18, '#5d6273');
       bRect(17, -24, 3, 18, '#5d6273');
       var wr = Math.floor(p.walk * 2) % 2;
-      for (var _i19 = 0, _arr7 = [-12, 12]; _i19 < _arr7.length; _i19++) {
-        var wx = _arr7[_i19];
+      for (var _i24 = 0, _arr10 = [-12, 12]; _i24 < _arr10.length; _i24++) {
+        var wx = _arr10[_i24];
         bRect(wx - 5, -7, 10, 7, '#1d1f2b');
         bRect(wx - 2 + (wr ? 1 : -1), -5, 3, 3, '#c7ccd8');
       }
@@ -6917,8 +7196,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       bRect(-18, -9, 36, 4, '#9aa0b5');
       bRect(-18, -9, 36, 1, '#c7ccd8');
       var _wr3 = Math.floor(p.walk) % 2;
-      for (var _i20 = 0, _arr8 = [-13, 14]; _i20 < _arr8.length; _i20++) {
-        var _wx4 = _arr8[_i20];
+      for (var _i25 = 0, _arr11 = [-13, 14]; _i25 < _arr11.length; _i25++) {
+        var _wx4 = _arr11[_i25];
         bRect(_wx4 - 4, -6, 8, 6, '#1d1f2b');
         bRect(_wx4 - 1, -4, 2, 2, _wr3 ? '#c7ccd8' : '#5d6273');
       }
@@ -6963,10 +7242,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     bRect(s.x + s.w - 3, s.y, 3, s.h, 'rgba(0,0,0,.18)');
     if (s.h < 60) bRect(s.x, s.y + s.h - 3, s.w, 3, 'rgba(0,0,0,.25)');
     if (th === 3 && s.y < 200 && s.y > -500) {
-      for (var _x14 = s.x + 6; _x14 < s.x + s.w - 20; _x14 += 40) {
+      for (var _x15 = s.x + 6; _x15 < s.x + s.w - 20; _x15 += 40) {
         ctx.fillStyle = tex('brick');
-        ctx.fillRect(_x14, s.y - 12, 18, 12);
-        bRect(_x14, s.y - 12, 18, 3, '#a9abb5');
+        ctx.fillRect(_x15, s.y - 12, 18, 12);
+        bRect(_x15, s.y - 12, 18, 3, '#a9abb5');
       }
     }
   }
@@ -7001,6 +7280,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       talpa: '155,118,83',
       yeti: '159,211,240',
       serpentone: '74,163,90',
+      gorilla: '74,78,94',
+      mammut: '159,211,240',
       ragno: '232,236,244'
     }[k] || '224,55,63';
     for (var y = s.y; y < s.y + s.h; y += 22) {
@@ -7055,16 +7336,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         bRect(x, y + 10, 4, H - y, '#6b4a2e');
       } else for (var yy = y; yy > y - 400; yy -= 8) bRect(x, yy - 4, 3, 4, '#5d6273');
     }
-    for (var _x15 = r.x1; _x15 < r.x2; _x15 += 6) {
-      var _y5 = Math.round((r.y1 + (_x15 + 3 - r.x1) * sl) / 3) * 3;
+    for (var _x16 = r.x1; _x16 < r.x2; _x16 += 6) {
+      var _y5 = Math.round((r.y1 + (_x16 + 3 - r.x1) * sl) / 3) * 3;
       if (th === 7) {
-        bRect(_x15, _y5, 6, 3, '#9aa0b5');
-        bRect(_x15, _y5 + 3, 6, 2, '#5d6273');
-        if (Math.floor((_x15 - r.x1) / 6) % 3 === 0) bRect(_x15, _y5 + 5, 6, 4, '#6b4a2e');
+        bRect(_x16, _y5, 6, 3, '#9aa0b5');
+        bRect(_x16, _y5 + 3, 6, 2, '#5d6273');
+        if (Math.floor((_x16 - r.x1) / 6) % 3 === 0) bRect(_x16, _y5 + 5, 6, 4, '#6b4a2e');
       } else {
-        bRect(_x15, _y5, 6, 12, Math.floor(_x15 / 6) % 2 ? '#b88a4f' : '#a87b44');
-        bRect(_x15, _y5, 6, 2, '#c99b5e');
-        bRect(_x15, _y5 + 9, 6, 3, '#7d5a30');
+        bRect(_x16, _y5, 6, 12, Math.floor(_x16 / 6) % 2 ? '#b88a4f' : '#a87b44');
+        bRect(_x16, _y5, 6, 2, '#c99b5e');
+        bRect(_x16, _y5 + 9, 6, 3, '#7d5a30');
       }
     }
     if (r.y2 < r.y1) {
@@ -7141,11 +7422,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         for (var k = 0; k < 4; k++) bRect(x - 6 + k * 1.5, 312 - 3 * (k + 1), 12 - k * 3, 3, '#8fa1b3');
       }
       if (s.kind === 'croc') {
-        var _x16 = Math.round(s.x + Math.sin(tick * .04 + s.off) * 5);
-        bRect(_x16 - 9, 309, 6, 6, '#7cc242');
-        bRect(_x16 + 3, 309, 6, 6, '#7cc242');
-        bRect(_x16 - 7, 310, 3, 3, '#1d1f2b');
-        bRect(_x16 + 5, 310, 3, 3, '#1d1f2b');
+        var _x17 = Math.round(s.x + Math.sin(tick * .04 + s.off) * 5);
+        bRect(_x17 - 9, 309, 6, 6, '#7cc242');
+        bRect(_x17 + 3, 309, 6, 6, '#7cc242');
+        bRect(_x17 - 7, 310, 3, 3, '#1d1f2b');
+        bRect(_x17 + 5, 310, 3, 3, '#1d1f2b');
       }
       return;
     }
@@ -7234,6 +7515,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       talpa: ['#8e9098', '#b7bcc9'],
       yeti: ['#ffffff', '#e3f1fb'],
       serpentone: ['#7cc242', '#e9f7c9'],
+      gorilla: ['#7d5a30', '#e8cfa8'],
+      mammut: ['#ffffff', '#bfe4f6'],
       ball: ['#3b3f4f', '#7d828f'],
       coco: ['#7d5a30', '#e8cfa8']
     }[k] || ['#3b3f4f', '#7d828f'];
@@ -7285,7 +7568,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#c9ccd8', -9, -2, 18, 3);
       B('#e8ecf4', -9, -2, 18, 1);
       B('#9aa0b5', -6, 1, 12, 2);
-      for (var _i21 = 0; _i21 < 6; _i21++) B((_i21 + t) % 2 ? '#f2c230' : '#e0373f', -8 + _i21 * 3, -1, 1, 1);
+      for (var _i26 = 0; _i26 < 6; _i26++) B((_i26 + t) % 2 ? '#f2c230' : '#e0373f', -8 + _i26 * 3, -1, 1, 1);
     } else if (b.kind === 'ragno') {
       B('#8d93a6', 0, -30, 0.25, 23);
       for (var k = 0; k < 4; k++) {
@@ -7302,7 +7585,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#f2c230', -1, -12, 2, 2);
       B('#f2c230', 3, -12, 1, 2);
       B('#e0373f', -1, -9, 2, 1);
-      for (var _i22 = 0; _i22 < 4; _i22++) B('#e0373f', -4 + _i22 * 2 + (_i22 > 1 ? 1 : 0), -3, 1, 1);
+      for (var _i27 = 0; _i27 < 4; _i27++) B('#e0373f', -4 + _i27 * 2 + (_i27 > 1 ? 1 : 0), -3, 1, 1);
       B('#ffffff', -2, 2, 1, 2);
       B('#ffffff', 1, 2, 1, 2);
     } else if (b.kind === 'drago') {
@@ -7326,9 +7609,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         B('#f2c230', d > 0 ? 10 : -13, -4, 2, 1);
       }
     } else if (b.kind === 'polpo') {
-      for (var _i23 = 0; _i23 < 6; _i23++) {
-        var _w2 = Math.round(Math.sin(tick * .12 + _i23));
-        B('#8a5cc7', -6 + _i23 * 2 + _w2, 3, 2, 7 + _i23 % 2);
+      for (var _i28 = 0; _i28 < 6; _i28++) {
+        var _w2 = Math.round(Math.sin(tick * .12 + _i28));
+        B('#8a5cc7', -6 + _i28 * 2 + _w2, 3, 2, 7 + _i28 % 2);
       }
       B('#b48ee0', -7, -8, 14, 11);
       B('#b48ee0', -6, -9, 12, 1);
@@ -7388,7 +7671,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       B('#ffffff', -3, 1, 1, 1);
       B('#ffffff', 2, 1, 1, 1);
     } else if (b.kind === 'serpentone') {
-      for (var _i24 = 0; _i24 < 6; _i24++) B(_i24 % 2 ? '#6fae4a' : '#7cc242', -12 - _i24 * 3, 6 + _i24 * 3, 4, 4);
+      for (var _i29 = 0; _i29 < 6; _i29++) B(_i29 % 2 ? '#6fae4a' : '#7cc242', -12 - _i29 * 3, 6 + _i29 * 3, 4, 4);
       B('#7cc242', -7, -6, 14, 11);
       B('#3d7a1f', -7, 4, 14, 1);
       B('#a7e26b', -5, -5, 4, 1);
@@ -7403,10 +7686,97 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         B('#e0373f', -1.5, 9, 1, 1);
         B('#e0373f', 0.5, 9, 1, 1);
       }
+    } else if (b.kind === 'gorilla') {
+      var M = function M(c, px, py, pw, ph) {
+          return B(c, d > 0 ? px : -px - pw, py, pw, ph);
+        },
+        beat = b.jy === 0 && b.jv === 0 && b.hop < 30,
+        air = b.jy < -4,
+        sw = Math.floor(b.walk) % 2;
+      M('#3b3f4f', -5, 5, 3, 4 - (sw && !air ? 1 : 0));
+      M('#3b3f4f', 2, 5, 3, 4 - (!sw && !air ? 1 : 0));
+      M('#4a4e5e', -6, -5, 12, 11);
+      M('#3b3f4f', -6, 5, 12, 1);
+      M('#8d93a6', -3, -2, 7, 6);
+      M('#a9aebd', -2, -1, 3, 1);
+      if (beat) {
+        M('#4a4e5e', -9, -5, 3, 5);
+        M('#4a4e5e', 6, -5, 3, 5);
+        M('#c9b49a', -3, t ? -2 : 1, 2, 2);
+        M('#c9b49a', 2, t ? 1 : -2, 2, 2);
+      } else if (air) {
+        M('#4a4e5e', -9, -12, 3, 8);
+        M('#4a4e5e', 6, -12, 3, 8);
+        M('#c9b49a', -9, -13, 3, 2);
+        M('#c9b49a', 6, -13, 3, 2);
+      } else {
+        M('#4a4e5e', -9, -5 + sw, 3, 11);
+        M('#4a4e5e', 6, -5 + (1 - sw), 3, 11);
+        M('#c9b49a', -9, 6 + sw, 3, 2);
+        M('#c9b49a', 6, 6 + (1 - sw), 3, 2);
+      }
+      M('#4a4e5e', -3, -12, 8, 7);
+      M('#c9b49a', 0, -10, 5, 5);
+      M('#1d1f2b', -1, -11, 6, 1);
+      M('#1d1f2b', 1, -9, 1, 1);
+      M('#1d1f2b', 3, -9, 1, 1);
+      M('#1d1f2b', 1, -7, 1, 1);
+      M('#1d1f2b', 3, -7, 1, 1);
+      M('#1d1f2b', 1, -6, 3, beat ? 2 : 1);
+      if (beat) bText('UH! UH!', X - 30, Y - 62, 16, '#1d1f2b');
+      if (b.land > 0) {
+        B('#a99f92', -12, 8, 3, 1);
+        B('#a99f92', 9, 8, 3, 1);
+        B('#a99f92', -13, 6, 2, 1);
+        B('#a99f92', 11, 6, 2, 1);
+      }
+    } else if (b.kind === 'mammut') {
+      var _M = function _M(c, px, py, pw, ph) {
+          return B(c, d > 0 ? px : -px - pw, py, pw, ph);
+        },
+        stand = b.jy === 0 && b.jv === 0 && b.hop < 30,
+        _sw2 = Math.floor(b.walk) % 2;
+      _M('#6b4a2e', -9, 4, 3, 5 - _sw2);
+      _M('#6b4a2e', -4, 4, 3, 5 - (1 - _sw2));
+      _M('#6b4a2e', 1, 4, 3, 5 - _sw2);
+      _M('#6b4a2e', 5, 4, 3, 5 - (1 - _sw2));
+      _M('#8a5a32', -10, -5, 17, 10);
+      _M('#5a3a1d', -10, 4, 17, 1);
+      _M('#5a3a1d', -8, 2, 1, 2);
+      _M('#5a3a1d', -4, 2, 1, 2);
+      _M('#5a3a1d', 0, 2, 1, 2);
+      _M('#5a3a1d', 4, 2, 1, 2);
+      _M('#ffffff', -9, -6, 5, 2);
+      _M('#ffffff', -2, -6, 4, 1);
+      _M('#e3f1fb', 3, -6, 3, 1);
+      _M('#7a5230', 3, -6, 3, 6);
+      _M('#9b6a3e', 5, -9, 7, 8);
+      _M('#5a3a1d', 6, -11, 4, 2);
+      _M('#ffffff', 9, -7, 2, 2);
+      _M('#1d1f2b', 10, -7, 1, 1);
+      _M('#1d1f2b', 8, -8, 4, 1);
+      if (stand) {
+        _M('#9b6a3e', 11, -4, 2, 3);
+        _M('#9b6a3e', 12, -8, 2, 4);
+        _M('#9b6a3e', 13, -10, 2, 2);
+      } else {
+        _M('#9b6a3e', 11, -1, 2, 6);
+        _M('#9b6a3e', 12, 4, 2, 2);
+      }
+      _M('#e3f1fb', 9, 1, 4, 2);
+      _M('#e3f1fb', 12, -1, 2, 2);
+      _M('#3f86d4', 9, 3, 4, 1);
+      if (stand) bText('PRUUU!', X - 28, Y - 62, 16, '#3f86d4');
+      if (b.land > 0) {
+        B('#bfe4f6', -14, 8, 3, 1);
+        B('#bfe4f6', 11, 8, 3, 1);
+        B('#bfe4f6', -15, 6, 2, 1);
+        B('#bfe4f6', 13, 6, 2, 1);
+      }
     }
     ctx.restore();
     var n = b.hp;
-    for (var _i25 = 0; _i25 < n; _i25++) bDraw(SP.heart(), b.x - (n - 1) * 8 + _i25 * 16, b.y - 46, 1.5);
+    for (var _i30 = 0; _i30 < n; _i30++) bDraw(SP.heart(), b.x - (n - 1) * 8 + _i30 * 16, b.y - 46, 1.5);
   }
   function bDeco(d) {
     var x = d.x,
@@ -7488,16 +7858,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         h = Math.round(160 * s / 12) * 12;
       ctx.save();
       ctx.globalAlpha = .35;
-      for (var _k7 = 0; _k7 < h; _k7 += 12) {
-        var ww = w - _k7 / h * (w - 30 * s);
-        bRect(x - ww, y - _k7 - 12, ww * 2, 12, '#5c2216');
+      for (var _k9 = 0; _k9 < h; _k9 += 12) {
+        var ww = w - _k9 / h * (w - 30 * s);
+        bRect(x - ww, y - _k9 - 12, ww * 2, 12, '#5c2216');
       }
       bRect(x - 30 * s, y - h - 12, 60 * s, 8, '#f07a2a');
       ctx.restore();
       return;
     }
     if (d.kind === 'seaweed') {
-      for (var _k8 = -1; _k8 <= 1; _k8++) for (var yy = 0; yy < 70 * s; yy += 6) bRect(x + _k8 * 10 + Math.round(Math.sin(yy * .12 + tick * .04 + _k8) * 1.5) * 3, y - yy - 6, 4, 6, _k8 ? '#3d7a1f' : '#4aa35a');
+      for (var _k0 = -1; _k0 <= 1; _k0++) for (var yy = 0; yy < 70 * s; yy += 6) bRect(x + _k0 * 10 + Math.round(Math.sin(yy * .12 + tick * .04 + _k0) * 1.5) * 3, y - yy - 6, 4, 6, _k0 ? '#3d7a1f' : '#4aa35a');
       return;
     }
     if (d.kind === 'cloud') {
@@ -7505,7 +7875,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return;
     }
     if (d.kind === 'stalactite') {
-      for (var _k9 = 0; _k9 < 4; _k9++) bRect(x - 12 * s + _k9 * 3 * s, y + _k9 * 10 * s, (24 - _k9 * 6) * s, 10 * s, _k9 % 2 ? '#6e7078' : '#7d7f87');
+      for (var _k1 = 0; _k1 < 4; _k1++) bRect(x - 12 * s + _k1 * 3 * s, y + _k1 * 10 * s, (24 - _k1 * 6) * s, 10 * s, _k1 % 2 ? '#6e7078' : '#7d7f87');
       return;
     }
     if (d.kind === 'lantern') {
@@ -7517,10 +7887,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return;
     }
     if (d.kind === 'pine') {
-      for (var _k0 = 0; _k0 < 4; _k0++) {
-        var _w3 = (30 - _k0 * 7) * s;
-        bRect(x - _w3, y - (18 + _k0 * 20) * s, _w3 * 2, 20 * s, _k0 % 2 ? '#2f7d43' : '#3f9a4f');
-        bRect(x - _w3, y - (18 + _k0 * 20) * s, _w3 * 2, 4 * s, '#ffffff');
+      for (var _k10 = 0; _k10 < 4; _k10++) {
+        var _w3 = (30 - _k10 * 7) * s;
+        bRect(x - _w3, y - (18 + _k10 * 20) * s, _w3 * 2, 20 * s, _k10 % 2 ? '#2f7d43' : '#3f9a4f');
+        bRect(x - _w3, y - (18 + _k10 * 20) * s, _w3 * 2, 4 * s, '#ffffff');
       }
       bRect(x - 4, y - 18 * s, 9, 18 * s, '#6b4a2e');
       return;
@@ -7532,7 +7902,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return;
     }
     if (d.kind === 'palm') {
-      for (var _k1 = 0; _k1 < 11; _k1++) bRect(x + Math.round(Math.sin(_k1 * .3) * 2) * 3, y - _k1 * 12 * s - 12, 10 * s, 12 * s, _k1 % 2 ? '#8a5a32' : '#9b6a3d');
+      for (var _k11 = 0; _k11 < 11; _k11++) bRect(x + Math.round(Math.sin(_k11 * .3) * 2) * 3, y - _k11 * 12 * s - 12, 10 * s, 12 * s, _k11 % 2 ? '#8a5a32' : '#9b6a3d');
       var tx = x + 6,
         ty = y - 132 * s;
       bRect(tx - 36 * s, ty, 72 * s, 9 * s, '#3f9a3a');
@@ -7567,9 +7937,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     }
     if (th === 1 || th === 6 || th === 8) {
-      for (var _i26 = 0; _i26 < 6; _i26++) {
-        var cx = ((_i26 * 260 - camX * .15) % (vw + 300) + vw + 300) % (vw + 300) - 150;
-        blockCloud(cx, 25 + _i26 * 37 % 70, th === 6 ? 1.3 : 1);
+      for (var _i31 = 0; _i31 < 6; _i31++) {
+        var cx = ((_i31 * 260 - camX * .15) % (vw + 300) + vw + 300) % (vw + 300) - 150;
+        blockCloud(cx, 25 + _i31 * 37 % 70, th === 6 ? 1.3 : 1);
       }
     }
     var HC = {
@@ -7587,18 +7957,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       base = Math.floor(ox / 24);
     ctx.save();
     ctx.globalAlpha = th === 2 || th === 4 || th === 7 ? .7 : .42;
-    for (var _i27 = -1; _i27 < vw / 24 + 2; _i27++) {
-      var gx = base + _i27;
+    for (var _i32 = -1; _i32 < vw / 24 + 2; _i32++) {
+      var gx = base + _i32;
       var hgt = void 0;
       if (th === 8) hgt = Math.abs((gx % 14 + 14) % 14 - 7) * 12 + 24;else if (th === 3) hgt = ((gx % 9 + 9) % 9 < 2 ? 120 : 48) + (gx % 2 ? 0 : 12);else if (th === 7) hgt = 72 + Math.round(Math.sin(gx * .7) * 2) * 12;else hgt = Math.round(Math.sin(gx * .35) * 2 + Math.sin(gx * .13) * 3 + 5) * 12;
       if (th === 6) hgt = Math.max(12, hgt - 36);
-      bRect(_i27 * 24 - off, H - hgt - 40, 24, hgt + 40, HC);
+      bRect(_i32 * 24 - off, H - hgt - 40, 24, hgt + 40, HC);
       if (th === 9 && (gx % 5 + 5) % 5 === 0) {
-        bRect(_i27 * 24 - off + 6, H - hgt - 88, 12, 48, '#6b4a2e');
-        bRect(_i27 * 24 - off - 12, H - hgt - 112, 48, 36, '#256b37');
+        bRect(_i32 * 24 - off + 6, H - hgt - 88, 12, 48, '#6b4a2e');
+        bRect(_i32 * 24 - off - 12, H - hgt - 112, 48, 36, '#256b37');
       }
       if (th === 7) {
-        bRect(_i27 * 24 - off, 0, 24, 36 + Math.round(Math.sin(gx * .9) * 2) * 12 + 24, HC);
+        bRect(_i32 * 24 - off, 0, 24, 36 + Math.round(Math.sin(gx * .9) * 2) * 12 + 24, HC);
       }
     }
     ctx.restore();
@@ -7626,8 +7996,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _step42;
     try {
       for (_iterator42.s(); !(_step42 = _iterator42.n()).done;) {
-        var _d3 = _step42.value;
-        if (vis(_d3.x, _d3.w || 120) || _d3.w && _d3.x < x1 && _d3.x + _d3.w > x0) bDeco(_d3);
+        var _d5 = _step42.value;
+        if (vis(_d5.x, _d5.w || 120) || _d5.w && _d5.x < x1 && _d5.x + _d5.w > x0) bDeco(_d5);
       }
     } catch (err) {
       _iterator42.e(err);
@@ -7794,8 +8164,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _step55;
     try {
       for (_iterator55.s(); !(_step55 = _iterator55.n()).done;) {
-        var _d4 = _step55.value;
-        if (vis(_d4.x)) bDropper(_d4);
+        var _d6 = _step55.value;
+        if (vis(_d6.x)) bDropper(_d6);
       }
     } catch (err) {
       _iterator55.e(err);
@@ -7916,8 +8286,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       gold: ['#f6d76a', '#f2c230', '#ffe48a']
     };
     var region = function region(mx, my) {
-      for (var _i28 = 0, _R = R; _i28 < _R.length; _i28++) {
-        var r = _R[_i28];
+      for (var _i33 = 0, _R = R; _i33 < _R.length; _i33++) {
+        var r = _R[_i33];
         if (dE(mx, my, r[1], r[2], r[3], r[4]) < 1) return r[0];
       }
       return 'grass';
@@ -7937,19 +8307,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     NODES.forEach(function (n, k) {
       if (!done[ORDER[k]]) return;
-      for (var _j = 0; _j < rows; _j++) for (var _i29 = 0; _i29 < cols; _i29++) {
-        var e = dE((_i29 + .5) * 28, (_j + .5) * 28, n.x, n.y, n.rx * 1.35 + 20, n.ry * 1.35 + 20);
+      for (var _j = 0; _j < rows; _j++) for (var _i34 = 0; _i34 < cols; _i34++) {
+        var e = dE((_i34 + .5) * 28, (_j + .5) * 28, n.x, n.y, n.rx * 1.35 + 20, n.ry * 1.35 + 20);
         if (e < 1) {
           x.fillStyle = e > .72 ? 'rgba(90,240,110,.85)' : 'rgba(120,255,140,.33)';
-          x.fillRect(_i29 * T, _j * T, T, T);
+          x.fillRect(_i34 * T, _j * T, T, T);
         }
       }
     });
-    if (all) for (var _j2 = 0; _j2 < rows; _j2++) for (var _i30 = 0; _i30 < cols; _i30++) {
-      var e = dE((_i30 + .5) * 28, (_j2 + .5) * 28, GOAL.x, GOAL.y, GOAL.rx * 1.6, GOAL.ry * 1.6);
+    if (all) for (var _j2 = 0; _j2 < rows; _j2++) for (var _i35 = 0; _i35 < cols; _i35++) {
+      var e = dE((_i35 + .5) * 28, (_j2 + .5) * 28, GOAL.x, GOAL.y, GOAL.rx * 1.6, GOAL.ry * 1.6);
       if (e < 1) {
         x.fillStyle = e > .72 ? 'rgba(255,215,64,.9)' : 'rgba(255,230,120,.35)';
-        x.fillRect(_i30 * T, _j2 * T, T, T);
+        x.fillRect(_i35 * T, _j2 * T, T, T);
       }
     }
     var st = segTiles(),
@@ -7979,21 +8349,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         return dE(mx, my, n.x, n.y, n.rx + 60, n.ry + 60) < 1;
       }) || dE(mx, my, 360, 140, 140, 120) < 1 || dE(mx, my, GOAL.x, GOAL.y, 150, 120) < 1;
     };
-    for (var _j3 = 1; _j3 < rows - 1; _j3++) for (var _i31 = 0; _i31 < cols; _i31++) {
-      var mx = (_i31 + .5) * 28,
+    for (var _j3 = 1; _j3 < rows - 1; _j3++) for (var _i36 = 0; _i36 < cols; _i36++) {
+      var mx = (_i36 + .5) * 28,
         my = (_j3 + .5) * 28;
-      if (regs[_j3][_i31] !== 'grass' || painted.has(_i31 + ',' + _j3) || near(mx, my)) continue;
-      var _r2 = brnd(_i31, _j3, 9);
-      if (_r2 > .93 && !painted.has(_i31 + ',' + (_j3 + 1)) && !painted.has(_i31 + ',' + (_j3 - 1))) {
+      if (regs[_j3][_i36] !== 'grass' || painted.has(_i36 + ',' + _j3) || near(mx, my)) continue;
+      var _r2 = brnd(_i36, _j3, 9);
+      if (_r2 > .93 && !painted.has(_i36 + ',' + (_j3 + 1)) && !painted.has(_i36 + ',' + (_j3 - 1))) {
         x.fillStyle = '#6b4a2e';
-        x.fillRect(_i31 * T + 5, _j3 * T + 4, 4, 10);
+        x.fillRect(_i36 * T + 5, _j3 * T + 4, 4, 10);
         x.fillStyle = '#2f7d2e';
-        x.fillRect(_i31 * T - 1, _j3 * T - 9, 16, 13);
+        x.fillRect(_i36 * T - 1, _j3 * T - 9, 16, 13);
         x.fillStyle = '#3f9a3a';
-        x.fillRect(_i31 * T + 2, _j3 * T - 11, 10, 5);
+        x.fillRect(_i36 * T + 2, _j3 * T - 11, 10, 5);
       } else if (_r2 > .88) {
-        x.fillStyle = ['#e0373f', '#f2c230', '#ffffff', '#8a5cc7'][Math.floor(brnd(_i31, _j3, 10) * 4)];
-        x.fillRect(_i31 * T + 5, _j3 * T + 5, 4, 4);
+        x.fillStyle = ['#e0373f', '#f2c230', '#ffffff', '#8a5cc7'][Math.floor(brnd(_i36, _j3, 10) * 4)];
+        x.fillRect(_i36 * T + 5, _j3 * T + 5, 4, 4);
       }
     }
     var q = function q(cx, cy) {
@@ -8030,8 +8400,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L = q(265, 284);
     L(-10, -8, 20, 14, '#8d8f99');
     L(-10, -8, 20, 1, '#a9abb5');
-    for (var _i32 = 0, _arr9 = [-10, -4, 2, 7]; _i32 < _arr9.length; _i32++) {
-      var cx2 = _arr9[_i32];
+    for (var _i37 = 0, _arr12 = [-10, -4, 2, 7]; _i37 < _arr12.length; _i37++) {
+      var cx2 = _arr12[_i37];
       L(cx2, -10, 3, 2, '#8d8f99');
     }
     L(-4, -16, 8, 8, '#9b9da7');
@@ -8048,10 +8418,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(4, -5, 4, 1, '#9fd3f0');
     L(6, 4, 5, 1, '#9fd3f0');
     L = q(542, 296);
-    for (var _i33 = 0, _arr0 = [[-12, -2], [8, -6]]; _i33 < _arr0.length; _i33++) {
-      var _arr0$_i = _slicedToArray(_arr0[_i33], 2),
-        _tx = _arr0$_i[0],
-        ty = _arr0$_i[1];
+    for (var _i38 = 0, _arr13 = [[-12, -2], [8, -6]]; _i38 < _arr13.length; _i38++) {
+      var _arr13$_i = _slicedToArray(_arr13[_i38], 2),
+        _tx = _arr13$_i[0],
+        ty = _arr13$_i[1];
       L(_tx, ty, 2, 6, '#6b4a2e');
       L(_tx - 3, ty - 6, 8, 6, '#256b37');
       L(_tx - 2, ty - 7, 6, 1, '#3f9a3a');
@@ -8063,9 +8433,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(3, 3, 2, 5, '#3b3f4f');
     L(-1, 0, 1, 1, '#1d1f2b');
     L = q(628, 269);
-    for (var _i34 = 0, _arr1 = [-9, 0, 9]; _i34 < _arr1.length; _i34++) {
-      var pk = _arr1[_i34];
-      for (var _k10 = 0; _k10 < 5; _k10++) L(pk - 4 + _k10 * .8, 4 - _k10 * 2, 8 - _k10 * 1.6, 2, _k10 > 2 ? '#ffffff' : '#bfe4f6');
+    for (var _i39 = 0, _arr14 = [-9, 0, 9]; _i39 < _arr14.length; _i39++) {
+      var pk = _arr14[_i39];
+      for (var _k12 = 0; _k12 < 5; _k12++) L(pk - 4 + _k12 * .8, 4 - _k12 * 2, 8 - _k12 * 1.6, 2, _k12 > 2 ? '#ffffff' : '#bfe4f6');
     }
     L = q(655, 165);
     L(-8, -8, 16, 14, '#5d6273');
@@ -8075,12 +8445,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(5, -6, 1, 12, '#6b4a2e');
     L(-1, -4, 1, 10, '#b88a4f');
     L(1, -4, 1, 10, '#b88a4f');
-    for (var _k11 = 0; _k11 < 4; _k11++) L(-1, -3 + _k11 * 3, 3, 1, '#b88a4f');
+    for (var _k13 = 0; _k13 < 4; _k13++) L(-1, -3 + _k13 * 3, 3, 1, '#b88a4f');
     L(7, 2, 6, 4, '#9aa0b5');
     L(8, 6, 1, 1, '#1d1f2b');
     L(11, 6, 1, 1, '#1d1f2b');
     L = q(379, 165);
-    for (var _k12 = 0; _k12 < 9; _k12++) L(-14 + _k12 * 1.3, 6 - _k12 * 2, 28 - _k12 * 2.6, 2, _k12 % 2 ? '#3f3131' : '#4a3a3a');
+    for (var _k14 = 0; _k14 < 9; _k14++) L(-14 + _k14 * 1.3, 6 - _k14 * 2, 28 - _k14 * 2.6, 2, _k14 % 2 ? '#3f3131' : '#4a3a3a');
     L(-4, -12, 8, 2, '#f07a2a');
     L(-1, -10, 2, 14, '#f07a2a');
     L(-1, -10, 1, 6, '#f2c230');
@@ -8089,10 +8459,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     L(8, -19, 2, 3, '#f07a2a');
     L(8, -16, 2, 1, '#c25a14');
     L = q(435, 48);
-    for (var _i35 = 0, _arr10 = [[-14, -2], [6, -6]]; _i35 < _arr10.length; _i35++) {
-      var _arr10$_i = _slicedToArray(_arr10[_i35], 2),
-        _cx = _arr10$_i[0],
-        cy2 = _arr10$_i[1];
+    for (var _i40 = 0, _arr15 = [[-14, -2], [6, -6]]; _i40 < _arr15.length; _i40++) {
+      var _arr15$_i = _slicedToArray(_arr15[_i40], 2),
+        _cx = _arr15$_i[0],
+        cy2 = _arr15$_i[1];
       L(_cx, cy2, 14, 4, '#ffffff');
       L(_cx + 3, cy2 - 3, 7, 3, '#ffffff');
       L(_cx + 1, cy2 + 4, 12, 1, '#c9d6e6');
@@ -8177,8 +8547,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _step60;
     try {
       for (_iterator60.s(); !(_step60 = _iterator60.n()).done;) {
-        var _d5 = _step60.value;
-        if (vis(_d5.x, _d5.w || 120) || _d5.w && _d5.x < x1 && _d5.x + _d5.w > x0) drawDeco(_d5);
+        var _d7 = _step60.value;
+        if (vis(_d7.x, _d7.w || 120) || _d7.w && _d7.x < x1 && _d7.x + _d7.w > x0) drawDeco(_d7);
       }
     } catch (err) {
       _iterator60.e(err);
@@ -8339,8 +8709,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       _step73;
     try {
       for (_iterator73.s(); !(_step73 = _iterator73.n()).done;) {
-        var _d6 = _step73.value;
-        if (vis(_d6.x)) drawDropper(_d6);
+        var _d8 = _step73.value;
+        if (vis(_d8.x)) drawDropper(_d8);
       }
     } catch (err) {
       _iterator73.e(err);
@@ -8540,8 +8910,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       sy = camY;
     var all = PLY,
       w0 = W;
-    for (var _i36 = 0, _views = views; _i36 < _views.length; _i36++) {
-      var v = _views[_i36];
+    for (var _i41 = 0, _views = views; _i41 < _views.length; _i41++) {
+      var v = _views[_i41];
       var q = all[v.pl];
       if (!q) continue;
       VIEW = v;
@@ -8798,7 +9168,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _loadSave() {
     _loadSave = _asyncToGenerator(_regenerator().m(function _callee8() {
-      var a, b, ref, _d7, pick, _t1;
+      var a, b, ref, _d9, pick, _t1;
       return _regenerator().w(function (_context8) {
         while (1) switch (_context8.p = _context8.n) {
           case 0:
@@ -8815,8 +9185,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             _context8.n = 3;
             return ref.get();
           case 3:
-            _d7 = _context8.v;
-            if (_d7.exists) a = _d7.data();
+            _d9 = _context8.v;
+            if (_d9.exists) a = _d9.data();
           case 4:
             _context8.n = 6;
             break;
