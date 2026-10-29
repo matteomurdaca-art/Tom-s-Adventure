@@ -908,6 +908,9 @@ canvas{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); dis
 @media (max-width:560px){ .mapinfo{grid-template-columns:auto 1fr; grid-template-areas:"step name" "step sub" "state state" "btn btn"} .mapinfo .go{margin-top:6px} .maptitle{font-size:26px!important} .node{width:26px; height:26px; font-size:15px; border-width:2px} }
 .toast{position:fixed; left:50%; top:14px; transform:translateX(-50%); z-index:60; background:#4aa35a; color:#fff; font:700 18px var(--hand); padding:6px 16px; border:2.5px solid var(--pencil); border-radius:10px; pointer-events:none}
 .savedNote.ok{color:#2f7d2e; font-weight:700}
+.savedNote.bad{color:#c62828; font-weight:700}
+.toast.bad{background:#e0373f}
+.privWarn{margin:0; padding:6px 8px; background:#fff3cd; border:2px solid #e0373f; border-radius:8px; font:700 14px var(--hand); color:#7a1d22}
 .styleSw{display:inline-flex; align-self:center; border:2.5px solid var(--pencil); border-radius:10px 13px 9px 12px; overflow:hidden; background:#fff}
 .styleSw button{font:700 18px var(--hand); padding:3px 12px; background:#fff; color:var(--pencil); border:0; cursor:pointer}
 .styleSw button+button{border-left:2.5px solid var(--pencil)}
@@ -1018,6 +1021,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
         <svg id="mapSvg" viewBox="0 0 1400 782" aria-hidden="true"></svg>
       </div>
       <div class="side">
+        <p class="privWarn" id="privWarn" hidden>⚠ Safari è in <b>Navigazione privata</b>: qui le partite non si possono salvare. Apri il gioco in una scheda normale (o dall'icona sulla Home).</p>
         <button class="go cont" id="contBtn" type="button" hidden></button>
         <div class="mapinfo" id="mapInfo">
           <div class="mi-step" id="miStep"></div>
@@ -1034,12 +1038,22 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="overlay" id="resume" hidden>
+  <div class="card">
+    <h2>💾 Partita salvata</h2>
+    <p id="resumeInfo"></p>
+    <div class="row">
+      <button class="go" id="resumeLoad" type="button">▶ Carica partita salvata</button>
+      <button class="go alt" id="resumeMap" type="button">🗺️ Vai alla mappa</button>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="pause" hidden>
   <div class="card">
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
-    <p class="note savedNote" id="savedNote">💾 La partita si salva da sola: quando torni, nel menu trovi "▶ Continua la partita".</p>
-    <p class="note">Versione 16 · prova 3D</p>
+    <p class="note savedNote" id="savedNote">💾 La partita si salva da sola: quando riapri il gioco trovi "▶ Carica partita salvata".</p>
+    <p class="note">Versione 17 · prova 3D</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="saveBtn" type="button">💾 Salva</button>
@@ -8293,7 +8307,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       sc.onerror = next;
       document.head.appendChild(sc);
     };
-    add('three.min.js?v=16', function () {
+    add('three.min.js?v=17', function () {
       return add('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', fail3D);
     });
   }
@@ -9398,12 +9412,23 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   var lastSaveAt = 0,
     saving = false;
+  var lastSaveOk = false;
+  function storageOK() {
+    try {
+      localStorage.setItem('tom-test', '1');
+      var ok = localStorage.getItem('tom-test') === '1';
+      localStorage.removeItem('tom-test');
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  }
   function saveGame() {
     return _saveGame.apply(this, arguments);
   }
   function _saveGame() {
     _saveGame = _asyncToGenerator(_regenerator().m(function _callee6() {
-      var snap, ref, _t9;
+      var snap, ok, txt, ref, _t9;
       return _regenerator().w(function (_context6) {
         while (1) switch (_context6.p = _context6.n) {
           case 0:
@@ -9411,13 +9436,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               _context6.n = 1;
               break;
             }
-            return _context6.a(2);
+            return _context6.a(2, lastSaveOk);
           case 1:
             snap = snapshot();
             lastSaveAt = time;
             saving = true;
+            ok = false;
             try {
-              localStorage.setItem('tom-save', JSON.stringify(snap));
+              txt = JSON.stringify(snap);
+              localStorage.setItem('tom-save', txt);
+              ok = localStorage.getItem('tom-save') === txt;
             } catch (e) {}
             _context6.p = 2;
             _context6.n = 3;
@@ -9425,31 +9453,34 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           case 3:
             ref = _context6.v;
             if (!ref) {
-              _context6.n = 4;
+              _context6.n = 5;
               break;
             }
             _context6.n = 4;
             return ref.set(snap);
           case 4:
-            _context6.n = 6;
-            break;
+            ok = true;
           case 5:
-            _context6.p = 5;
-            _t9 = _context6.v;
+            _context6.n = 7;
+            break;
           case 6:
-            saving = false;
-            showContinue(snap);
+            _context6.p = 6;
+            _t9 = _context6.v;
           case 7:
-            return _context6.a(2);
+            saving = false;
+            lastSaveOk = ok;
+            showContinue(snap);
+            return _context6.a(2, ok);
         }
-      }, _callee6, null, [[2, 5]]);
+      }, _callee6, null, [[2, 6]]);
     }));
     return _saveGame.apply(this, arguments);
   }
   var toastT = 0;
-  function toast(msg) {
+  function toast(msg, bad) {
     var t = $('toast');
     t.textContent = msg;
+    t.classList.toggle('bad', !!bad);
     t.hidden = false;
     clearTimeout(toastT);
     toastT = setTimeout(function () {
@@ -9465,7 +9496,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function _saveNow() {
     _saveNow = _asyncToGenerator(_regenerator().m(function _callee7() {
-      var n;
+      var ok, n;
       return _regenerator().w(function (_context7) {
         while (1) switch (_context7.n) {
           case 0:
@@ -9474,12 +9505,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             _context7.n = 1;
             return saveGame();
           case 1:
+            ok = _context7.v;
             n = $('savedNote');
-            n.textContent = '✔ Partita salvata alle ' + hhmm() + '. Quando torni, nel menu premi "▶ Continua la partita".';
-            n.classList.add('ok');
-            toast('💾 Partita salvata!');
-          case 2:
-            return _context7.a(2);
+            n.classList.remove('ok', 'bad');
+            if (ok) {
+              n.textContent = '✔ Partita salvata alle ' + hhmm() + '. Quando riapri il gioco trovi "▶ Carica partita salvata".';
+              n.classList.add('ok');
+              toast('💾 Partita salvata!');
+            } else {
+              n.textContent = '⚠ Partita NON salvata: Safari è in Navigazione privata. Apri il gioco in una scheda normale.';
+              n.classList.add('bad');
+              toast('⚠ Partita NON salvata (Navigazione privata)', true);
+            }
+            return _context7.a(2, ok);
         }
       }, _callee7);
     }));
@@ -9576,7 +9614,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       b.hidden = true;
       return;
     }
-    b.textContent = '▶ Continua la partita';
+    b.textContent = '▶ Carica partita salvata';
     var sm = document.createElement('small');
     sm.textContent = "Livello ".concat(STEP(sv.level), " \xB7 ").concat(LEVELS[sv.level].name, " \xB7 ").concat(fmt(sv.time || 0), " \xB7 \uD83C\uDF6C ").concat(sv.candies || 0) + (sv.mode && sv.mode !== 'solo' ? " \xB7 2 giocatori (".concat(sv.mode, ")") : '');
     b.append(sm);
@@ -9727,7 +9765,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     $('pause').hidden = false;
     var sn = $('savedNote');
     sn.classList.remove('ok');
-    sn.textContent = '💾 La partita si salva da sola: quando torni, nel menu trovi "▶ Continua la partita".';
+    sn.textContent = '💾 La partita si salva da sola: quando riapri il gioco trovi "▶ Carica partita salvata".';
     saveGame();
   }
   function resumeGame() {
@@ -9743,8 +9781,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     if (running || !$('pause').hidden) {
       store();
-      saveGame();
-      toast('💾 Partita salvata: la ritrovi in "Continua"');
+      saving = false;
+      saveGame().then(function (ok) {
+        return toast(ok ? '💾 Partita salvata: la ritrovi in "Carica partita salvata"' : '⚠ Partita NON salvata (Navigazione privata)', !ok);
+      });
     }
     running = false;
     var _iterator88 = _createForOfIteratorHelper(PLY),
@@ -9862,9 +9902,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     saveNow();
   };
   $('saveExitBtn').onclick = function () {
-    saveNow().then(function () {
-      goBack();
-      toast('💾 Partita salvata: la ritrovi in "Continua"');
+    saveNow().then(function (ok) {
+      if (ok) {
+        goBack();
+        toast('💾 Partita salvata: la ritrovi in "Carica partita salvata"');
+      }
     });
   };
   $('restartBtn').onclick = function () {
@@ -9899,7 +9941,40 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       } catch (e) {}
     }
   });
-  loadSave().then(showContinue);
+  function saveLabel(sv) {
+    return "Livello ".concat(STEP(sv.level), " \xB7 ").concat(LEVELS[sv.level].name, " \xB7 ").concat(fmt(sv.time || 0), " \xB7 \uD83C\uDF6C ").concat(sv.candies || 0) + (sv.mode && sv.mode !== 'solo' ? " \xB7 2 giocatori (".concat(sv.mode, ")") : '');
+  }
+  function offerResume(sv) {
+    if (!sv || running) return;
+    showContinue(sv);
+    $('resumeInfo').textContent = saveLabel(sv);
+    $('resume').hidden = false;
+  }
+  $('resumeLoad').onclick = function () {
+    $('resume').hidden = true;
+    if (pendingSave) startLevel(pendingSave.level, pendingSave);
+  };
+  $('resumeMap').onclick = function () {
+    $('resume').hidden = true;
+  };
+  (function () {
+    var sv = null;
+    try {
+      sv = JSON.parse(localStorage.getItem('tom-save') || 'null');
+    } catch (e) {}
+    if (sv && typeof sv.level === 'number' && LEVELS[sv.level]) offerResume(sv);
+    if (!storageOK()) $('privWarn').hidden = false;
+    loadSave().then(function (x) {
+      if (x && !running && (!pendingSave || (x.at || 0) > (pendingSave.at || 0))) {
+        if ($('resume').hidden) showContinue(x);else offerResume(x);
+      }
+    });
+  })();
+  addEventListener('pageshow', function (e) {
+    if (e.persisted && !running) loadSave().then(function (x) {
+      if (x) showContinue(x);
+    });
+  });
   resize();
   build(0);
   respawn();
