@@ -787,6 +787,7 @@ try {
     } catch (e) {}
   }
   window.onerror = function (m, src, line, col) {
+    if (src && /three/.test(src)) return true;
     show(m + ' (riga ' + line + ':' + col + ')');
   };
   window.addEventListener && window.addEventListener('unhandledrejection', function (e) {
@@ -1038,7 +1039,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note savedNote" id="savedNote">💾 La partita si salva da sola: quando torni, nel menu trovi "▶ Continua la partita".</p>
-    <p class="note">Versione 15 · prova 3D</p>
+    <p class="note">Versione 16 · prova 3D</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt" id="saveBtn" type="button">💾 Salva</button>
@@ -8257,8 +8258,33 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     failed: false,
     scenes: []
   };
+  function fail3D() {
+    G3.failed = true;
+    G3.loading = false;
+    G3.ready = false;
+    if (STYLE === '3d') {
+      setStyle('blocchi');
+      try {
+        toast('Il 3D non funziona su questo dispositivo: uso i Blocchi');
+      } catch (e) {}
+    }
+  }
   function load3D() {
-    if (G3.ready || G3.loading || G3.failed) return;
+    if (G3.ready || G3.loading) return;
+    if (G3.failed) {
+      fail3D();
+      return;
+    }
+    try {
+      var c = document.createElement('canvas');
+      if (!(c.getContext('webgl') || c.getContext('experimental-webgl'))) {
+        fail3D();
+        return;
+      }
+    } catch (e) {
+      fail3D();
+      return;
+    }
     G3.loading = true;
     var add = function add(src, next) {
       var sc = document.createElement('script');
@@ -8267,11 +8293,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       sc.onerror = next;
       document.head.appendChild(sc);
     };
-    add('three.min.js', function () {
-      return add('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', function () {
-        G3.failed = true;
-        G3.loading = false;
-      });
+    add('three.min.js?v=16', function () {
+      return add('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', fail3D);
     });
   }
   function init3D() {
@@ -8294,7 +8317,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       G3.h = 0;
       G3.ready = true;
     } catch (e) {
-      G3.failed = true;
+      fail3D();
     }
   }
   function t3(name) {
@@ -8516,8 +8539,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     try {
       render3D();
     } catch (e) {
-      G3.failed = true;
-      G3.ready = false;
+      fail3D();
       drawBlocks();
       return;
     }
