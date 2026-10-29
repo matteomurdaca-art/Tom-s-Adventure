@@ -905,6 +905,8 @@ canvas{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); dis
   .side .help{display:none}
 }
 @media (max-width:560px){ .mapinfo{grid-template-columns:auto 1fr; grid-template-areas:"step name" "step sub" "state state" "btn btn"} .mapinfo .go{margin-top:6px} .maptitle{font-size:26px!important} .node{width:26px; height:26px; font-size:15px; border-width:2px} }
+.toast{position:fixed; left:50%; top:14px; transform:translateX(-50%); z-index:60; background:#4aa35a; color:#fff; font:700 18px var(--hand); padding:6px 16px; border:2.5px solid var(--pencil); border-radius:10px; pointer-events:none}
+.savedNote.ok{color:#2f7d2e; font-weight:700}
 .styleSw{display:inline-flex; align-self:center; border:2.5px solid var(--pencil); border-radius:10px 13px 9px 12px; overflow:hidden; background:#fff}
 .styleSw button{font:700 18px var(--hand); padding:3px 12px; background:#fff; color:var(--pencil); border:0; cursor:pointer}
 .styleSw button+button{border-left:2.5px solid var(--pencil)}
@@ -1030,14 +1032,17 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
     </div>
   </div>
 </div>
+<div class="toast" id="toast" hidden></div>
 <div class="overlay" id="pause" hidden>
   <div class="card">
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
-    <p class="note">La partita è salvata: se chiudi il gioco, la ritrovi in "Continua".</p>
-    <p class="note">Versione 14 · prova 3D</p>
+    <p class="note savedNote" id="savedNote">💾 La partita si salva da sola: quando torni, nel menu trovi "▶ Continua la partita".</p>
+    <p class="note">Versione 15 · prova 3D</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
+      <button class="go alt" id="saveBtn" type="button">💾 Salva</button>
+      <button class="go alt" id="saveExitBtn" type="button">💾 Salva ed esci</button>
       <button class="go alt" id="restartBtn" type="button">Ricomincia livello</button>
       <div class="styleSw" role="group" aria-label="Stile grafico"><button type="button" data-s="matita" aria-pressed="true">✏️ Matita</button><button type="button" data-s="blocchi" aria-pressed="false">🧱 Blocchi</button><button type="button" data-s="3d" aria-pressed="false">🎲 3D</button></div>
       <button class="go alt" id="pauseMenu" type="button">◀ Indietro</button>
@@ -9419,41 +9424,80 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }));
     return _saveGame.apply(this, arguments);
   }
+  var toastT = 0;
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      t.hidden = true;
+    }, 1800);
+  }
+  function hhmm() {
+    var d = new Date();
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  function saveNow() {
+    return _saveNow.apply(this, arguments);
+  }
+  function _saveNow() {
+    _saveNow = _asyncToGenerator(_regenerator().m(function _callee7() {
+      var n;
+      return _regenerator().w(function (_context7) {
+        while (1) switch (_context7.n) {
+          case 0:
+            store();
+            saving = false;
+            _context7.n = 1;
+            return saveGame();
+          case 1:
+            n = $('savedNote');
+            n.textContent = '✔ Partita salvata alle ' + hhmm() + '. Quando torni, nel menu premi "▶ Continua la partita".';
+            n.classList.add('ok');
+            toast('💾 Partita salvata!');
+          case 2:
+            return _context7.a(2);
+        }
+      }, _callee7);
+    }));
+    return _saveNow.apply(this, arguments);
+  }
   function clearSave() {
     return _clearSave.apply(this, arguments);
   }
   function _clearSave() {
-    _clearSave = _asyncToGenerator(_regenerator().m(function _callee7() {
+    _clearSave = _asyncToGenerator(_regenerator().m(function _callee8() {
       var ref, _t0;
-      return _regenerator().w(function (_context7) {
-        while (1) switch (_context7.p = _context7.n) {
+      return _regenerator().w(function (_context8) {
+        while (1) switch (_context8.p = _context8.n) {
           case 0:
             try {
               localStorage.removeItem('tom-save');
             } catch (e) {}
-            _context7.p = 1;
-            _context7.n = 2;
+            _context8.p = 1;
+            _context8.n = 2;
             return getSaveRef();
           case 2:
-            ref = _context7.v;
+            ref = _context8.v;
             if (!ref) {
-              _context7.n = 3;
+              _context8.n = 3;
               break;
             }
-            _context7.n = 3;
+            _context8.n = 3;
             return ref.delete();
           case 3:
-            _context7.n = 5;
+            _context8.n = 5;
             break;
           case 4:
-            _context7.p = 4;
-            _t0 = _context7.v;
+            _context8.p = 4;
+            _t0 = _context8.v;
           case 5:
             showContinue(null);
           case 6:
-            return _context7.a(2);
+            return _context8.a(2);
         }
-      }, _callee7, null, [[1, 4]]);
+      }, _callee8, null, [[1, 4]]);
     }));
     return _clearSave.apply(this, arguments);
   }
@@ -9461,32 +9505,32 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return _loadSave.apply(this, arguments);
   }
   function _loadSave() {
-    _loadSave = _asyncToGenerator(_regenerator().m(function _callee8() {
+    _loadSave = _asyncToGenerator(_regenerator().m(function _callee9() {
       var a, b, ref, _d9, pick, _t1;
-      return _regenerator().w(function (_context8) {
-        while (1) switch (_context8.p = _context8.n) {
+      return _regenerator().w(function (_context9) {
+        while (1) switch (_context9.p = _context9.n) {
           case 0:
             a = null, b = null;
-            _context8.p = 1;
-            _context8.n = 2;
+            _context9.p = 1;
+            _context9.n = 2;
             return getSaveRef();
           case 2:
-            ref = _context8.v;
+            ref = _context9.v;
             if (!ref) {
-              _context8.n = 4;
+              _context9.n = 4;
               break;
             }
-            _context8.n = 3;
+            _context9.n = 3;
             return ref.get();
           case 3:
-            _d9 = _context8.v;
+            _d9 = _context9.v;
             if (_d9.exists) a = _d9.data();
           case 4:
-            _context8.n = 6;
+            _context9.n = 6;
             break;
           case 5:
-            _context8.p = 5;
-            _t1 = _context8.v;
+            _context9.p = 5;
+            _t1 = _context9.v;
           case 6:
             try {
               b = JSON.parse(localStorage.getItem('tom-save') || 'null');
@@ -9496,9 +9540,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }).sort(function (x, y) {
               return (y.at || 0) - (x.at || 0);
             })[0];
-            return _context8.a(2, pick || null);
+            return _context9.a(2, pick || null);
         }
-      }, _callee8, null, [[1, 5]]);
+      }, _callee9, null, [[1, 5]]);
     }));
     return _loadSave.apply(this, arguments);
   }
@@ -9659,6 +9703,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return a + q.candies;
     }, 0), "/").concat(W.candies.length);
     $('pause').hidden = false;
+    var sn = $('savedNote');
+    sn.classList.remove('ok');
+    sn.textContent = '💾 La partita si salva da sola: quando torni, nel menu trovi "▶ Continua la partita".';
     saveGame();
   }
   function resumeGame() {
@@ -9675,6 +9722,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (running || !$('pause').hidden) {
       store();
       saveGame();
+      toast('💾 Partita salvata: la ritrovi in "Continua"');
     }
     running = false;
     var _iterator88 = _createForOfIteratorHelper(PLY),
@@ -9788,6 +9836,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (running) pauseGame();else if (!$('pause').hidden) resumeGame();
   };
   $('resumeBtn').onclick = resumeGame;
+  $('saveBtn').onclick = function () {
+    saveNow();
+  };
+  $('saveExitBtn').onclick = function () {
+    saveNow().then(function () {
+      goBack();
+      toast('💾 Partita salvata: la ritrovi in "Continua"');
+    });
+  };
   $('restartBtn').onclick = function () {
     return startLevel(lvIdx);
   };
