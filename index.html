@@ -1033,6 +1033,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
           <button class="go" id="playBtn" type="button">Gioca ▶</button>
         </div>
         <button class="go alt" id="openBoard" type="button">🏆 Classifica</button>
+        <button class="go alt" id="resetBtn" type="button">🔄 Ricomincia da capo</button>
         <div class="styleSw" role="group" aria-label="Stile grafico"><button type="button" data-s="matita" aria-pressed="true">✏️ Matita</button><button type="button" data-s="blocchi" aria-pressed="false">🧱 Blocchi</button><button type="button" data-s="3d" aria-pressed="false">🎲 3D</button></div>
         <p class="help">Segui il sentiero dalla CASA alla VITTORIA: ogni livello finito si colora di verde e apre il successivo. Raccogli le caramelle e arriva presto al cuore per fare più punti.</p>
       </div>
@@ -1040,6 +1041,16 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="overlay" id="resetBox" hidden>
+  <div class="card">
+    <h2>🔄 Ricominciare l'avventura?</h2>
+    <p>Si riparte dal livello 1: tutti i livelli tornano da sbloccare uno alla volta. La classifica resta.</p>
+    <div class="row">
+      <button class="go" id="resetYes" type="button">Sì, ricomincia da capo</button>
+      <button class="go alt" id="resetNo" type="button">No, torna alla mappa</button>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="resume" hidden>
   <div class="card">
     <h2>💾 Partita salvata</h2>
@@ -1055,7 +1066,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note savedNote" id="savedNote">💾 La partita si salva da sola: quando riapri il gioco trovi "▶ Carica partita salvata".</p>
-    <p class="note">Versione 20 · livello finale</p>
+    <p class="note">Versione 21</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt musBtn" type="button">Musica sì</button>
@@ -4565,11 +4576,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       b.setAttribute('aria-label', "Livello ".concat(k + 1, ": ").concat(L.name).concat(st === 'done' ? ', completato' : st === 'locked' ? ', bloccato' : ''));
       if (st === 'locked') b.innerHTML = LOCK;else b.textContent = String(k + 1);
       b.onclick = function () {
-        if (mapSel === k && st !== 'locked') {
+        mapSel = k;
+        if (st !== 'locked') {
           openSetup(li);
           return;
         }
-        mapSel = k;
         renderMap();
       };
       map.append(b);
@@ -4598,9 +4609,29 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   $('playBtn').onclick = function () {
     if (unlockedStep(mapSel)) openSetup(ORDER[mapSel]);
   };
+  $('resetBtn').onclick = function () {
+    $('resetBox').hidden = false;
+  };
+  $('resetNo').onclick = function () {
+    $('resetBox').hidden = true;
+  };
+  $('resetYes').onclick = function () {
+    done = LEVELS.map(function () {
+      return false;
+    });
+    try {
+      localStorage.setItem('tom-done', JSON.stringify(done));
+    } catch (e) {}
+    try {
+      clearSave();
+    } catch (e) {}
+    $('resetBox').hidden = true;
+    mapSel = 0;
+    renderMap();
+  };
   function showMap(anim) {
     var ns = nextStep();
-    mapSel = Math.min(ns, ORDER.length - 1);
+    mapSel = ns >= ORDER.length ? 0 : ns;
     renderMap();
     $('menu').hidden = false;
     if (anim != null && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
