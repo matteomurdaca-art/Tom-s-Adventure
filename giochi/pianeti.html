@@ -1,0 +1,3285 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d1f2b">
+<title>Tom tra i Pianeti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1f2b;--paper:#f6f7fb;--yel:#f2c230;--blu:#3f86d4;--red:#e0373f;--grn:#4aa35a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#14151d;color:#fff;font-family:'Pixelify Sans',monospace}
+body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#stage{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#cv{position:absolute;top:0;left:0;display:block;touch-action:none}
+#hud{position:absolute;top:6px;right:8px;display:none;z-index:5}
+body.playing #hud{display:flex}
+#hud button{font:700 16px 'Pixelify Sans',monospace;background:rgba(20,21,29,.75);color:#fff;border:2px solid #5d6273;padding:6px 10px;margin-left:6px;cursor:pointer}
+#pad{position:absolute;left:0;right:0;bottom:0;height:0;display:none;z-index:4}
+body.playing #pad{display:block}
+.kb{position:absolute;bottom:14px;width:78px;height:78px;border:3px solid rgba(255,255,255,.7);background:rgba(20,21,29,.45);color:#fff;font:700 30px 'Pixelify Sans',monospace;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;border-radius:14px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.3)}
+.kb.on{background:rgba(242,194,48,.75);color:#1d1f2b}
+.kb small{font-size:12px;display:block}
+.kb.bl1{left:14px} .kb.bl2{left:104px} .kb.bl3{left:194px}
+.kb.br1{right:14px} .kb.br2{right:104px} .kb.br3{right:194px}
+.kb.big.bl2{left:122px} .kb.big.br2{right:122px}
+.kb.blu{left:59px;bottom:104px} .kb.bld{left:59px}
+.kb.big{width:96px;height:96px}
+@media (orientation:landscape) and (min-height:561px){ .kb{bottom:64px} .kb.blu{bottom:154px} }
+@media (max-height:420px){ .kb{width:64px;height:64px;font-size:24px} .kb.bl2{left:88px} .kb.bl3{left:162px} .kb.br2{right:88px} .kb.br3{right:162px} .kb.big{width:76px;height:76px} .kb.big.bl2{left:98px} .kb.big.br2{right:98px} }
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(10,11,18,.72);z-index:10;padding:12px;overflow:auto}
+.ov[hidden],[hidden]{display:none!important}
+.card{background:#f6f7fb;color:#1d1f2b;border:4px solid #14151d;box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:16px 18px;max-width:760px;width:100%;text-align:center;max-height:100%;overflow:auto}
+.card h1{margin:0 0 6px;font-size:34px} .card h2{margin:0 0 8px;font-size:26px}
+.card p{margin:6px 0}
+.go{font:700 20px 'Pixelify Sans',monospace;background:var(--yel);color:#1d1f2b;border:3px solid #14151d;padding:9px 16px;margin:5px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.22),inset 3px 3px 0 rgba(255,255,255,.5)}
+.go.alt{background:#fff} .go:disabled{opacity:.45;cursor:default}
+.go small{display:block;font-size:13px;font-weight:400}
+.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}
+.kchars{display:flex;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.kchar{font:700 15px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:4px;padding:6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;color:#1d1f2b}
+.kchar canvas{width:44px;height:58px;image-rendering:pixelated;image-rendering:crisp-edges}
+.kchar.sel{background:var(--yel)}
+.note{font-size:14px;color:#5d6273}
+#kpnote.ok{color:#2f7d2e;font-weight:700} #kpnote.bad{color:#c62828;font-weight:700}
+#ktoast{position:absolute;left:50%;top:12px;transform:translateX(-50%);-webkit-transform:translateX(-50%);z-index:30;background:#4aa35a;color:#fff;font:700 18px 'Pixelify Sans',monospace;padding:6px 14px;border:3px solid #14151d;pointer-events:none;white-space:nowrap}
+#ktoast.bad{background:#e0373f}
+#kpriv{background:#fff3cd;border:2px solid #e0373f;color:#7a1d22;padding:6px 8px;font-size:14px;margin:6px 0}
+.lvls{display:flex;flex-wrap:wrap;justify-content:center}
+.lvl{font:700 16px 'Pixelify Sans',monospace;width:150px;min-height:92px;margin:5px;padding:8px;border:3px solid #14151d;background:#fff;cursor:pointer;color:#1d1f2b;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lvl b{font-size:26px} .lvl.done{background:#c9f0cf} .lvl.lock{background:#e3e5ec;color:#9aa0b5;cursor:default}
+.lvl small{font-weight:400;font-size:13px}
+a.home{color:#1d1f2b}
+
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="hud"><button id="kback" type="button">◀ Indietro</button><button id="kpbtn" type="button">❚❚ Pausa</button></div>
+<div id="pad"></div>
+<div class="ov" id="kpause" hidden><div class="card">
+  <h2>❚❚ Pausa</h2>
+  <p id="kpnote"></p>
+  <div class="row">
+    <button class="go" id="kresume" type="button">▶ Riprendi</button>
+    <button class="go alt" id="ksave" type="button">💾 Salva</button>
+    <button class="go alt" id="ksaveexit" type="button">◀ Salva ed esci</button>
+  </div>
+  <div class="row"><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+  <p class="note">Tom tra i Pianeti · Sala giochi di Tom · versione 1</p>
+</div></div>
+<div id="ktoast" hidden></div>
+<div class="ov" id="menu"><div class="card">
+  <h1>🪐 Tom tra i Pianeti</h1>
+  <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
+  <button class="go" id="cont" type="button" hidden></button>
+  <h2>Chi va nello spazio?</h2>
+  <div class="kchars" id="chars"></div>
+  <h2>Scegli il livello</h2>
+  <div class="lvls" id="levels"></div>
+  <p class="note">Su ogni pianeta la gravità ti tiene giù: cammina tutto intorno, salta verso il pianeta vicino, raccogli le gemme e arriva alla cometa. Salta sulla testa dei blob verdi, ma non sui ricci!</p>
+  <div class="row"><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+</div></div>
+<div class="ov" id="win" hidden><div class="card">
+  <h1 id="winT"></h1><p id="winS"></p>
+  <div class="row"><button class="go" id="winNext" type="button">Prossimo livello ▶</button><button class="go alt" id="winAgain" type="button">🔄 Rigioca</button><button class="go alt" id="winMenu" type="button">◀ Menu</button></div>
+</div></div>
+
+<script>/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) });
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true });
+  defineProperty(
+    GeneratorFunctionPrototype,
+    "constructor",
+    { value: GeneratorFunction, configurable: true }
+  );
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    defineProperty(this, "_invoke", { value: enqueue });
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per GeneratorResume behavior specified since ES2015:
+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume
+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method;
+    var method = delegate.iterator[methodName];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method, or a missing .next method, always terminate the
+      // yield* loop.
+      context.delegate = null;
+
+      // Note: ["return"] must be used for ES3 parsing compatibility.
+      if (methodName === "throw" && delegate.iterator["return"]) {
+        // If the delegate iterator has a return method, give it a
+        // chance to clean up.
+        context.method = "return";
+        context.arg = undefined;
+        maybeInvokeDelegate(delegate, context);
+
+        if (context.method === "throw") {
+          // If maybeInvokeDelegate(context) changed context.method from
+          // "return" to "throw", let that override the TypeError below.
+          return ContinueSentinel;
+        }
+      }
+      if (methodName !== "return") {
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a '" + methodName + "' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(val) {
+    var object = Object(val);
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable != null) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    throw new TypeError(typeof iterable + " is not iterable");
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+(function(){
+ if(!String.prototype.padStart){String.prototype.padStart=function(n,c){var s=String(this);c=c===undefined?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};}
+ if(!Object.assign){Object.assign=function(t){for(var i=1;i<arguments.length;i++){var s=arguments[i];if(s)for(var k in s)if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k];}return t;};}
+ if(!Array.prototype.findIndex){Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};}
+ if(window.NodeList&&!NodeList.prototype.forEach){NodeList.prototype.forEach=Array.prototype.forEach;}
+ [Element.prototype,Document.prototype,DocumentFragment.prototype].forEach(function(P){ if(!P.append){P.append=function(){for(var i=0;i<arguments.length;i++){var n=arguments[i];this.appendChild(n instanceof Node?n:document.createTextNode(String(n)));}};} });
+ var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+ if(C&&!C.ellipse){C.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){this.save();this.translate(x,y);this.rotate(rot);this.scale(rx,ry);this.arc(0,0,1,a0,a1,ccw);this.restore();};}
+})();
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n2 = 0, F = function F() {}; return { s: F, n: function n() { return _n2 >= r.length ? { done: !0 } : { done: !1, value: r[_n2++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var K = function () {
+  var K = {};
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  K.$ = $;
+  var cv = $('cv'),
+    ctx = cv.getContext('2d');
+  K.cv = cv;
+  K.ctx = ctx;
+  K.W = 800;
+  K.H = 450;
+  K.dpr = 1;
+  function resize() {
+    var st = $('stage');
+    var w = Math.max(200, st.clientWidth),
+      h = Math.max(150, st.clientHeight);
+    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 2);
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+    cv.width = Math.round(w * K.dpr);
+    cv.height = Math.round(h * K.dpr);
+    K.W = w;
+    K.H = h;
+    K.onResize && K.onResize(w, h);
+  }
+  K.resize = resize;
+  var lsw = 0,
+    lsh = 0;
+  addEventListener('resize', resize);
+  addEventListener('orientationchange', function () {
+    setTimeout(resize, 150);
+    setTimeout(resize, 500);
+  });
+  K.keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    a: false,
+    b: false
+  };
+  var prev = {};
+  K.pressed = function (k) {
+    return K.keys[k] && !prev[k];
+  };
+  var BTN = [];
+  K.buttons = function (list) {
+    var pad = $('pad');
+    pad.innerHTML = '';
+    BTN.length = 0;
+    var _iterator = _createForOfIteratorHelper(list),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var b = _step.value;
+        var e = document.createElement('div');
+        e.className = 'kb ' + (b.cls || '') + ' ' + b.pos;
+        e.id = 'kb_' + b.k;
+        e.innerHTML = b.label;
+        pad.appendChild(e);
+        BTN.push({
+          el: e,
+          k: b.k
+        });
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  };
+  function touchKeys(e) {
+    var playing = K.playing && $('kpause').hidden;
+    var st = {};
+    var hit = false;
+    if (playing) for (var i = 0; i < e.touches.length; i++) {
+      var t = e.touches[i];
+      var best = null,
+        bd = 1e9;
+      var _iterator2 = _createForOfIteratorHelper(BTN),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var b = _step2.value;
+          var r = b.el.getBoundingClientRect();
+          if (!r.width || b.el.offsetParent === null) continue;
+          if (t.clientY < r.top - 45 || t.clientY > r.bottom + 200) continue;
+          if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
+          var cx = (r.left + r.right) / 2,
+            cy = (r.top + r.bottom) / 2,
+            dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .3;
+          if (dd < bd) {
+            bd = dd;
+            best = b;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      if (best) {
+        st[best.k] = true;
+        hit = true;
+      }
+    }
+    var _iterator3 = _createForOfIteratorHelper(BTN),
+      _step3;
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var _b = _step3.value;
+        K.keys[_b.k] = !!st[_b.k] || !!kbd[_b.k];
+        _b.el.classList.toggle('on', !!st[_b.k]);
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    if (hit && e.cancelable) e.preventDefault();
+  }
+  ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (ev) {
+    return document.addEventListener(ev, touchKeys, {
+      passive: false
+    });
+  });
+  document.addEventListener('mousedown', function (e) {
+    var b = BTN.find(function (b) {
+      return b.el.contains(e.target);
+    });
+    if (b) {
+      K.keys[b.k] = true;
+      b.el.classList.add('on');
+      var _up = function up() {
+        K.keys[b.k] = !!kbd[b.k];
+        b.el.classList.remove('on');
+        removeEventListener('mouseup', _up);
+      };
+      addEventListener('mouseup', _up);
+    }
+  });
+  var KMAP = {
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    KeyA: 'left',
+    KeyD: 'right',
+    KeyW: 'up',
+    KeyS: 'down',
+    Space: 'a',
+    KeyZ: 'a',
+    KeyK: 'a',
+    KeyX: 'b',
+    KeyL: 'b',
+    Enter: 'b',
+    ShiftLeft: 'b'
+  };
+  var kbd = {};
+  addEventListener('keydown', function (e) {
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      if (K.playing) K.togglePause();
+      return;
+    }
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = true;
+      K.keys[k] = true;
+      if (K.playing) e.preventDefault();
+    }
+  });
+  addEventListener('keyup', function (e) {
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = false;
+      K.keys[k] = false;
+    }
+  });
+  document.addEventListener('contextmenu', function (e) {
+    if (K.playing) e.preventDefault();
+  });
+  var ac = null;
+  K.soundOn = true;
+  K.musicOn = true;
+  try {
+    if (localStorage.getItem('tomk-sound') === '0') K.soundOn = false;
+    if (localStorage.getItem('tomk-music') === '0') K.musicOn = false;
+  } catch (e) {}
+  function actx() {
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended' && ac.resume) ac.resume();
+    } catch (e) {}
+    return ac;
+  }
+  ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(function (ev) {
+    return document.addEventListener(ev, function () {
+      var c = actx();
+      if (c) {
+        try {
+          var b = c.createBuffer(1, 1, 22050),
+            s = c.createBufferSource();
+          s.buffer = b;
+          s.connect(c.destination);
+          s.start(0);
+        } catch (e) {}
+      }
+    }, {
+      passive: true
+    });
+  });
+  K.beep = function (f, d, type, vol, slide) {
+    if (!K.soundOn) return;
+    var c = actx();
+    if (!c) return;
+    try {
+      var o = c.createOscillator(),
+        g = c.createGain();
+      o.type = type || 'square';
+      o.frequency.value = f;
+      if (slide) o.frequency.linearRampToValueAtTime(Math.max(20, f + slide), c.currentTime + d);
+      g.gain.value = vol || .05;
+      g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + d);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start();
+      o.stop(c.currentTime + d);
+    } catch (e) {}
+  };
+  K.jingle = function (notes, step, type) {
+    return notes.forEach(function (n, i) {
+      return setTimeout(function () {
+        return K.beep(n, .14, type || 'triangle', .06);
+      }, i * (step || 90));
+    });
+  };
+  var NT = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11
+  };
+  var fq = function fq(n) {
+    var m = /^([A-G])(#|b)?(\d)$/.exec(n);
+    if (!m) return 0;
+    var s = NT[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+    return 440 * Math.pow(2, (12 * (+m[3] + 1) + s - 69) / 12);
+  };
+  var parse = function parse(str) {
+    var t = str.split(/\s+/),
+      out = [];
+    for (var i = 0; i < t.length; i++) {
+      if (t[i] === '-') continue;
+      var len = 1;
+      for (var j = i + 1; j < t.length && t[j] === '-'; j++) len++;
+      out.push({
+        step: i,
+        len,
+        f: fq(t[i])
+      });
+    }
+    return {
+      notes: out,
+      steps: t.length
+    };
+  };
+  K.MUS = {};
+  K.addMusic = function (name, m) {
+    m.M = parse(m.mel);
+    m.B = parse(m.bass);
+    m.A = m.arp ? m.arp.split(' ').map(fq) : null;
+    K.MUS[name] = m;
+  };
+  var MZ = {
+    cur: null,
+    next: 0,
+    step: 0,
+    bus: null,
+    echo: null,
+    noise: null
+  };
+  function mzBus() {
+    if (MZ.bus) return true;
+    var c = actx();
+    if (!c) return false;
+    try {
+      MZ.bus = c.createGain();
+      MZ.bus.gain.value = .5;
+      MZ.bus.connect(c.destination);
+      var dl = c.createDelay(),
+        fb = c.createGain(),
+        wet = c.createGain();
+      MZ.echo = c.createGain();
+      dl.delayTime.value = .33;
+      fb.gain.value = .33;
+      wet.gain.value = .45;
+      MZ.echo.connect(MZ.bus);
+      MZ.echo.connect(dl);
+      dl.connect(fb);
+      fb.connect(dl);
+      dl.connect(wet);
+      wet.connect(MZ.bus);
+      var nb = c.createBuffer(1, c.sampleRate * .5, c.sampleRate),
+        d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      MZ.noise = nb;
+    } catch (e) {
+      MZ.bus = null;
+      return false;
+    }
+    return true;
+  }
+  function tone(type, f, t, dur, v, out, bell) {
+    var o = ac.createOscillator(),
+      g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    var a = .008,
+      rel = bell ? dur * 1.6 : Math.min(.08, dur * .4);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + a);
+    if (bell) g.gain.exponentialRampToValueAtTime(.0001, t + rel);else {
+      g.gain.setValueAtTime(v, t + Math.max(a, dur - rel));
+      g.gain.linearRampToValueAtTime(.0001, t + dur);
+    }
+    o.connect(g);
+    g.connect(out);
+    o.start(t);
+    o.stop(t + (bell ? rel : dur) + .05);
+  }
+  function drum(k, t) {
+    if (k === 'k') {
+      var o = ac.createOscillator(),
+        _g = ac.createGain();
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + .12);
+      _g.gain.setValueAtTime(.42, t);
+      _g.gain.exponentialRampToValueAtTime(.001, t + .15);
+      o.connect(_g);
+      _g.connect(MZ.bus);
+      o.start(t);
+      o.stop(t + .16);
+      return;
+    }
+    var s = ac.createBufferSource(),
+      f = ac.createBiquadFilter(),
+      g = ac.createGain();
+    s.buffer = MZ.noise;
+    f.type = 'highpass';
+    f.frequency.value = k === 'h' ? 7000 : 1500;
+    var len = k === 'h' ? .04 : .12;
+    g.gain.setValueAtTime(k === 'h' ? .1 : .2, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + len);
+    s.connect(f);
+    f.connect(g);
+    g.connect(MZ.bus);
+    s.start(t);
+    s.stop(t + len + .02);
+  }
+  function mzStep(m, s, t) {
+    var sd = 60 / m.tempo / 2,
+      out = m.echo ? MZ.echo : MZ.bus;
+    var ms = s % m.M.steps;
+    var _iterator4 = _createForOfIteratorHelper(m.M.notes),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var n = _step4.value;
+        if (n.step === ms) tone(m.lead, n.f, t, n.len * sd * .95, m.lv, out, m.bell);
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
+    }
+    var bs = s % m.B.steps;
+    var _iterator5 = _createForOfIteratorHelper(m.B.notes),
+      _step5;
+    try {
+      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+        var _n = _step5.value;
+        if (_n.step === bs) tone('triangle', _n.f, t, _n.len * sd * .9, .25, MZ.bus);
+      }
+    } catch (err) {
+      _iterator5.e(err);
+    } finally {
+      _iterator5.f();
+    }
+    var dk = m.drums.charAt(s % m.drums.length);
+    if (dk !== '-') drum(dk, t);
+    if (m.A && s % 2 === 0) tone('sine', m.A[s / 2 % m.A.length], t, sd * .9, .05, out, true);
+  }
+  K.wantMusic = null;
+  function musicTick() {
+    var want = K.musicOn && K.playing && $('kpause').hidden ? K.wantMusic : null;
+    if (want !== MZ.cur) {
+      if (MZ.bus) {
+        try {
+          MZ.bus.disconnect();
+        } catch (e) {}
+        MZ.bus = null;
+      }
+      MZ.cur = want;
+      MZ.step = 0;
+      if (want) {
+        if (mzBus()) MZ.next = ac.currentTime + .08;else MZ.cur = null;
+      }
+    }
+    if (!MZ.cur || !MZ.bus || !K.MUS[MZ.cur]) return;
+    var m = K.MUS[MZ.cur],
+      sd = 60 / m.tempo / 2;
+    if (MZ.next < ac.currentTime) MZ.next = ac.currentTime + .02;
+    try {
+      while (MZ.next < ac.currentTime + .15) {
+        mzStep(m, MZ.step, MZ.next);
+        MZ.next += sd;
+        MZ.step++;
+      }
+    } catch (e) {}
+  }
+  K.storageOK = function () {
+    try {
+      localStorage.setItem('tomk-test', '1');
+      var ok = localStorage.getItem('tomk-test') === '1';
+      localStorage.removeItem('tomk-test');
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.load = function (key, def) {
+    try {
+      var v = localStorage.getItem(key);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) {
+      return def;
+    }
+  };
+  K.save = function (key, val) {
+    try {
+      var t = JSON.stringify(val);
+      localStorage.setItem(key, t);
+      return localStorage.getItem(key) === t;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.del = function (key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {}
+  };
+  var toastT = 0;
+  K.toast = function (msg, bad) {
+    var t = $('ktoast');
+    t.textContent = msg;
+    t.className = bad ? 'bad' : '';
+    t.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      t.hidden = true;
+    }, 2000);
+  };
+  K.playing = false;
+  K.game = null;
+  K.start = function () {
+    K.playing = true;
+    $('kpause').hidden = true;
+    document.body.classList.add('playing');
+    last = 0;
+  };
+  K.stop = function () {
+    K.playing = false;
+    document.body.classList.remove('playing');
+    for (var k in K.keys) K.keys[k] = false;
+    BTN.forEach(function (b) {
+      return b.el.classList.remove('on');
+    });
+  };
+  K.togglePause = function () {
+    if (!K.playing) return;
+    if ($('kpause').hidden) {
+      $('kpause').hidden = false;
+      $('kpnote').textContent = '';
+      for (var k in K.keys) K.keys[k] = false;
+      K.game && K.game.save && K.game.save();
+    } else $('kpause').hidden = true;
+  };
+  function saveExit() {
+    var ok = true;
+    if (K.game && K.game.save) ok = K.game.save();
+    K.stop();
+    $('kpause').hidden = true;
+    K.game && K.game.exit && K.game.exit();
+    K.toast(ok ? '💾 Partita salvata: la ritrovi in "Continua"' : '⚠ Partita NON salvata (Navigazione privata)', !ok);
+  }
+  K.saveExit = saveExit;
+  function updToggles() {
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.textContent = K.soundOn ? '🔊 Suono sì' : '🔈 Suono no';
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.textContent = K.musicOn ? '🎵 Musica sì' : '🎵 Musica no';
+    });
+  }
+  K.initUI = function () {
+    $('kback').onclick = saveExit;
+    $('kpbtn').onclick = K.togglePause;
+    $('kresume').onclick = function () {
+      $('kpause').hidden = true;
+      last = 0;
+    };
+    $('ksave').onclick = function () {
+      var ok = K.game && K.game.save ? K.game.save() : false;
+      $('kpnote').textContent = ok ? '✔ Partita salvata' : '⚠ Non salvata: Safari è in Navigazione privata';
+      $('kpnote').className = ok ? 'ok' : 'bad';
+    };
+    $('ksaveexit').onclick = saveExit;
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.onclick = function () {
+        K.soundOn = !K.soundOn;
+        try {
+          localStorage.setItem('tomk-sound', K.soundOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.onclick = function () {
+        K.musicOn = !K.musicOn;
+        try {
+          localStorage.setItem('tomk-music', K.musicOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    updToggles();
+    if (!K.storageOK()) {
+      var w = $('kpriv');
+      if (w) w.hidden = false;
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && K.playing && $('kpause').hidden) K.togglePause();
+    });
+    addEventListener('pagehide', function () {
+      if (K.playing && K.game && K.game.save) K.game.save();
+    });
+  };
+  var last = 0;
+  K.time = 0;
+  function loop(t) {
+    if (window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
+    var st = $('stage'),
+      sw = st.clientWidth,
+      sh = st.clientHeight;
+    if (sw !== lsw || sh !== lsh) {
+      lsw = sw;
+      lsh = sh;
+      resize();
+    }
+    var dt = last ? t - last : 16.67;
+    last = t;
+    var f = Math.min(dt / 16.67, 2.5);
+    var paused = !$('kpause').hidden;
+    if (K.game) {
+      if (K.playing && !paused) {
+        K.time += f;
+        K.game.update(f);
+      } else if (K.game.idle) K.game.idle(f);
+      K.game.draw();
+    }
+    for (var k in K.keys) prev[k] = K.keys[k];
+    musicTick();
+    requestAnimationFrame(loop);
+  }
+  K.run = function () {
+    resize();
+    requestAnimationFrame(loop);
+  };
+  var PAL = {
+    k: '#1d1f2b',
+    w: '#ffffff',
+    W: '#e8ecf4',
+    g: '#9aa0b5',
+    G: '#5d6273',
+    s: '#f2c59a',
+    S: '#d99a6c',
+    h: '#4a2e1c',
+    o: '#f07a2a',
+    O: '#c25a14',
+    r: '#e0373f',
+    R: '#9c1f26',
+    y: '#f2c230',
+    Y: '#c99a00',
+    b: '#3f86d4',
+    B: '#24548f',
+    c: '#9fd3f0',
+    l: '#7cc242',
+    L: '#3d7a1f',
+    n: '#4aa35a',
+    p: '#8a5cc7',
+    P: '#5a3a8a',
+    q: '#e096d2',
+    m: '#9b7653',
+    M: '#6b4a2e',
+    e: '#e8cfa8',
+    d: '#3b3f4f',
+    C: '#c8642a',
+    E: '#e8d2a6',
+    D: '#c9a978'
+  };
+  K.PAL = PAL;
+  var SC = {};
+  K.sprite = function (key, rows, over) {
+    if (SC[key]) return SC[key];
+    var w = Math.max.apply(null, rows.map(function (r) {
+        return r.length;
+      })),
+      h = rows.length,
+      c = document.createElement('canvas');
+    c.width = w + 2;
+    c.height = h + 2;
+    var x = c.getContext('2d');
+    var put = function put(col, dx, dy) {
+      return rows.forEach(function (r, j) {
+        for (var i = 0; i < r.length; i++) {
+          var ch = r[i];
+          if (ch === '.' || ch === ' ') continue;
+          x.fillStyle = col || over && over[ch] || PAL[ch] || '#f0f';
+          x.fillRect(i + dx, j + dy, 1, 1);
+        }
+      });
+    };
+    for (var _i = 0, _arr = [[0, 1], [2, 1], [1, 0], [1, 2]]; _i < _arr.length; _i++) {
+      var _arr$_i = _slicedToArray(_arr[_i], 2),
+        dx = _arr$_i[0],
+        dy = _arr$_i[1];
+      put('#14151d', dx, dy);
+    }
+    put(null, 1, 1);
+    return SC[key] = c;
+  };
+  K.draw = function (c, x, y, U, flip) {
+    var w = c.width * U,
+      h = c.height * U;
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+    if (flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, -w / 2, -h + U, w, h);
+    ctx.restore();
+  };
+  var TOMHEAD = ["..h.h.h...", ".hhhhhhh..", ".hhssssss.", ".hsssswks.", ".ssssssss.", "..sssskss."];
+  var TOMBODY = {
+    stand: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "...d..d...", "..kk..kk.."],
+    walkA: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "..d....d..", ".kk....kk."],
+    walkB: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "....dd....", "....kk...."],
+    jump: ["s..oooo..s", ".soooooos.", "...oooo...", "...dddd...", "..d....d..", ".kk....kk."]
+  };
+  var MILLYHEAD = ["..CCCCC...", ".CCCCCCC..", ".CCssssss.", ".CCsswkss.", ".CCssssss.", ".CC.ssks.."];
+  var MILLYBODY = {
+    stand: ["...pppp...", "..sppppps.", ".pppppppp.", "...s..s...", "..kk..kk.."],
+    walkA: ["...pppp...", "..sppppps.", ".pppppppp.", "..s....s..", ".kk....kk."],
+    walkB: ["...pppp...", "..sppppps.", ".pppppppp.", "....ss....", "....kk...."],
+    jump: ["s..pppp..s", ".spppppps.", ".pppppppp.", "..s....s..", ".kk....kk."]
+  };
+  var PAPHEAD = ["...ssss...", "..sWssss..", ".sssssss..", ".Sssswks..", ".ssssssss.", "..sssskss."];
+  var PAPTOP = ["...bbbb...", "..bbbbbb..", "..bbbbbb..", "..sbbbbs..", "...dddd..."];
+  var PAPLEGS = {
+    stand: ["...d..d...", "...d..d...", "..kk..kk.."],
+    walkA: ["..d....d..", "..d....d..", ".kk....kk."],
+    walkB: ["....dd....", "....dd....", "....kk...."],
+    jump: ["..d....d..", "..d....d..", ".kk....kk."]
+  };
+  var BUNNY = {
+    stand: ["............", ".......EEEE.", "......EEEEEE", "..ww..EEkEEq", ".wEEEEDEEEE.", ".EEEEEEDEE..", ".EEEEEEDE...", "..EE..EE...."],
+    jump: ["......EEEE..", ".....EEEEEE.", "..ww.EEkEEq.", ".wEEEEDEEE..", "EEEEEEEDE...", ".EEEEEEE....", "..E.....E...", "............"]
+  };
+  K.CHARS = {
+    tommy: {
+      name: 'Tommy',
+      col: '#f07a2a'
+    },
+    milly: {
+      name: 'Milly',
+      col: '#8a5cc7'
+    },
+    papone: {
+      name: 'Papone',
+      col: '#3f86d4'
+    },
+    carotino: {
+      name: 'Carotino',
+      col: '#e8d2a6'
+    }
+  };
+  K.CHAR_ORDER = ['tommy', 'milly', 'papone', 'carotino'];
+  K.charS = function (ch, f) {
+    f = f || 'stand';
+    if (ch === 'milly') return K.sprite('milly_' + f, MILLYHEAD.concat(MILLYBODY[f] || MILLYBODY.stand));
+    if (ch === 'papone') return K.sprite('pap_' + f, PAPHEAD.concat(f === 'jump' ? ["s..bbbb..s", ".sbbbbbbs.", "..bbbbbb..", "..bbbbbb..", "...dddd..."] : PAPTOP, PAPLEGS[f] || PAPLEGS.stand));
+    if (ch === 'carotino') return K.sprite('bun_' + (f === 'jump' || f === 'walkA' ? 'jump' : 'stand'), BUNNY[f === 'jump' || f === 'walkA' ? 'jump' : 'stand']);
+    return K.sprite('tom_' + f, TOMHEAD.concat(TOMBODY[f] || TOMBODY.stand));
+  };
+  K.headS = function (ch) {
+    if (ch === 'milly') return K.sprite('mh', MILLYHEAD);
+    if (ch === 'papone') return K.sprite('ph', PAPHEAD);
+    if (ch === 'carotino') return K.sprite('bh', BUNNY.stand.slice(0, 5));
+    return K.sprite('th', TOMHEAD);
+  };
+  K.rect = function (x, y, w, h, c) {
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  };
+  K.text = function (t, x, y, size, col, align, shadow) {
+    ctx.font = '700 ' + size + "px 'Pixelify Sans', monospace";
+    ctx.textAlign = align || 'left';
+    if (shadow !== false) {
+      ctx.fillStyle = 'rgba(20,21,29,.8)';
+      ctx.fillText(t, x + 2, y + 2);
+    }
+    ctx.fillStyle = col || '#fff';
+    ctx.fillText(t, x, y);
+    ctx.textAlign = 'left';
+  };
+  K.rnd = function (i, j, s) {
+    var v = Math.sin(i * 127.1 + (j || 0) * 311.7 + (s || 0) * 74.7) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  K.fmt = function (s) {
+    return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  };
+  K.charPicker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var c = document.createElement('canvas'),
+        s = K.charS(ch, 'stand');
+      c.width = s.width;
+      c.height = s.height;
+      var x = c.getContext('2d');
+      x.drawImage(s, 0, 0);
+      b.appendChild(c);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+  return K;
+}();
+(function () {
+  var ctx = K.ctx,
+    $ = K.$;
+  var G = .42,
+    JV = 8.6,
+    WALK = 3.1,
+    PR = 16;
+  K.addMusic('pspazio', {
+    tempo: 112,
+    lead: 'triangle',
+    lv: .2,
+    echo: true,
+    mel: 'E5 - G5 - B5 - A5 G5 E5 - - - D5 - E5 - G5 - E5 - D5 - B4 - - - - - - -',
+    bass: 'E2 - - - B2 - - - C3 - - - D3 - - -',
+    arp: 'E5 G5 B5 G5',
+    drums: 'k---h---'
+  });
+  K.addMusic('pghiaccio', {
+    tempo: 120,
+    lead: 'triangle',
+    lv: .22,
+    bell: true,
+    echo: true,
+    mel: 'B5 - G5 - E5 - G5 B5 - A5 - F#5 - D5 - - - B5 - G5 - E5 - D5 E5 - G5 - E5 - - -',
+    bass: 'E2 - - - C3 - - - D3 - - - B2 - - -',
+    drums: 'k---h-h-'
+  });
+  K.addMusic('plava', {
+    tempo: 140,
+    lead: 'square',
+    lv: .08,
+    mel: 'D5 - F5 D5 A5 - G5 F5 E5 - C5 - D5 - - - D5 - F5 D5 A5 - C6 A5 G5 - F5 - E5 - - -',
+    bass: 'D2 D3 D2 D3 A#1 A#2 A#1 A#2 C2 C3 C2 C3 A1 A2 A1 A2',
+    drums: 'k-sk-ks-'
+  });
+  K.addMusic('pboss', {
+    tempo: 156,
+    lead: 'sawtooth',
+    lv: .07,
+    mel: 'E5 E5 - G5 - E5 A5 G5 F#5 - D5 - E5 - - - E5 E5 - G5 - B5 C6 B5 A5 - F#5 - G5 - - -',
+    bass: 'E2 E2 E3 E2 E2 E3 E2 E3 C2 C2 C3 C2 D2 D2 D3 D2',
+    drums: 'kkhskkhs'
+  });
+  K.addMusic('pwin', {
+    tempo: 130,
+    lead: 'triangle',
+    lv: .2,
+    mel: 'G5 C6 E6 G6 - E6 G6 - - - - - - - - -',
+    bass: 'C3 - - - G2 - - - C3 - - - - - - -',
+    drums: 'k---k---'
+  });
+  var PK = {
+    grass: {
+      base: '#9b7653',
+      dark: '#6b4a2e',
+      top: '#5fb04a',
+      top2: '#7cc242',
+      deco: ['tree', 'flower', 'flower']
+    },
+    rock: {
+      base: '#8e909a',
+      dark: '#5d6273',
+      top: '#b7bcc9',
+      top2: '#a3a8b6',
+      deco: ['crystal', 'rock']
+    },
+    ice: {
+      base: '#9fd3f0',
+      dark: '#5d9ec9',
+      top: '#ffffff',
+      top2: '#e3f1fb',
+      deco: ['pine', 'crystal'],
+      ice: true
+    },
+    lava: {
+      base: '#4a3a3a',
+      dark: '#2e1f1f',
+      top: '#7a3a2a',
+      top2: '#f07a2a',
+      deco: ['rocklava']
+    },
+    candy: {
+      base: '#f6c9d8',
+      dark: '#e096d2',
+      top: '#ffffff',
+      top2: '#f2c230',
+      deco: ['lolly', 'flower']
+    },
+    boss: {
+      base: '#6b5a4a',
+      dark: '#4a3a2e',
+      top: '#9b7653',
+      top2: '#c99b5e',
+      deco: ['rock']
+    }
+  };
+  var LEVELS = [{
+    name: 'Primi passi',
+    sub: 'facile · si salta da un pianeta all\'altro',
+    mus: 'pspazio',
+    bg: ['#0b1030', '#2b1d5c'],
+    P: [{
+      r: 160,
+      k: 'grass',
+      g: [5, -150, 120, 40]
+    }, {
+      r: 110,
+      gap: 110,
+      dir: -10,
+      k: 'grass',
+      g: [4, -140, 100, 40]
+    }, {
+      r: 100,
+      gap: 112,
+      dir: 25,
+      k: 'candy',
+      g: [5, -160, 140, 40],
+      blob: [-60, .012]
+    }, {
+      r: 130,
+      gap: 112,
+      dir: -20,
+      k: 'grass',
+      g: [5, -150, 120, 45],
+      blob: [-120, -.010],
+      cp: -90
+    }, {
+      r: 90,
+      gap: 110,
+      dir: 15,
+      k: 'candy',
+      g: [3, -130, 80, 40]
+    }, {
+      r: 120,
+      gap: 112,
+      dir: -15,
+      k: 'grass',
+      goal: -90
+    }]
+  }, {
+    name: 'Lune danzanti',
+    sub: 'lune che girano e trampolini stellari',
+    mus: 'pspazio',
+    bg: ['#120a30', '#3a1d6c'],
+    P: [{
+      r: 150,
+      k: 'rock',
+      g: [4, -140, 100, 40]
+    }, {
+      r: 120,
+      gap: 115,
+      dir: 0,
+      k: 'grass',
+      g: [4, -150, 120, 40],
+      moon: {
+        r: 45,
+        R: 250,
+        w: .008
+      },
+      pad: 2
+    }, {
+      r: 170,
+      gap: 330,
+      dir: -15,
+      k: 'grass',
+      g: [8, -170, 160, 45],
+      blob: [-60, .010],
+      hog: [-130, -.008],
+      cp: -90
+    }, {
+      r: 100,
+      gap: 112,
+      dir: -35,
+      k: 'candy',
+      g: [4, -150, 120, 40]
+    }, {
+      r: 90,
+      gap: 115,
+      dir: 5,
+      k: 'rock',
+      g: [4, -140, 100, 40],
+      moon: {
+        r: 40,
+        R: 220,
+        w: -.01
+      }
+    }, {
+      r: 130,
+      gap: 118,
+      dir: 25,
+      k: 'grass',
+      blob: [-40, .012],
+      goal: -90
+    }]
+  }, {
+    name: 'Il pianeta di ghiaccio',
+    sub: 'media · si scivola, attenti alle punte',
+    mus: 'pghiaccio',
+    bg: ['#06223c', '#1d6c9c'],
+    P: [{
+      r: 150,
+      k: 'ice',
+      g: [4, -140, 100, 40]
+    }, {
+      r: 120,
+      gap: 110,
+      dir: -10,
+      k: 'ice',
+      g: [5, -160, 140, 40],
+      spike: [-20, 10]
+    }, {
+      r: 100,
+      gap: 112,
+      dir: 20,
+      k: 'rock',
+      g: [4, -150, 120, 40],
+      hog: [-90, .01]
+    }, {
+      r: 150,
+      gap: 115,
+      dir: -25,
+      k: 'ice',
+      g: [6, -160, 140, 45],
+      spike: [-150, -125],
+      blob: [-40, .011],
+      cp: -90
+    }, {
+      r: 110,
+      gap: 112,
+      dir: 10,
+      k: 'ice',
+      g: [4, -150, 120, 40],
+      moon: {
+        r: 45,
+        R: 240,
+        w: .009
+      },
+      pad: 6
+    }, {
+      r: 90,
+      gap: 112,
+      dir: -40,
+      k: 'rock',
+      g: [3, -130, 80, 40]
+    }, {
+      r: 140,
+      gap: 300,
+      dir: 15,
+      k: 'ice',
+      spike: [-170, -150],
+      hog: [-40, -.012],
+      goal: -90
+    }]
+  }, {
+    name: 'Fuoco e lava',
+    sub: 'difficile · lava, ricci e meteoriti',
+    mus: 'plava',
+    bg: ['#1a0505', '#5c1d1d'],
+    P: [{
+      r: 150,
+      k: 'rock',
+      g: [4, -140, 100, 40]
+    }, {
+      r: 120,
+      gap: 112,
+      dir: -5,
+      k: 'lava',
+      g: [4, -150, 120, 40],
+      spike: [-30, 0],
+      lavaS: 1
+    }, {
+      r: 110,
+      gap: 112,
+      dir: 25,
+      k: 'lava',
+      g: [5, -160, 140, 40],
+      hog: [-90, .012],
+      met: [150, .02]
+    }, {
+      r: 150,
+      gap: 115,
+      dir: -20,
+      k: 'rock',
+      g: [6, -160, 140, 45],
+      blob: [-50, .012],
+      hog: [-140, -.01],
+      cp: -90
+    }, {
+      r: 100,
+      gap: 112,
+      dir: 15,
+      k: 'lava',
+      g: [4, -150, 120, 40],
+      spike: [-140, -115],
+      lavaS: 1,
+      met: [120, -.024]
+    }, {
+      r: 120,
+      gap: 112,
+      dir: -25,
+      k: 'rock',
+      g: [4, -150, 120, 40],
+      pad: 7
+    }, {
+      r: 90,
+      gap: 112,
+      dir: -60,
+      k: 'lava',
+      g: [3, -130, 80, 40]
+    }, {
+      r: 140,
+      gap: 320,
+      dir: 10,
+      k: 'rock',
+      blob: [-60, .012],
+      hog: [-120, -.012],
+      goal: -90
+    }]
+  }, {
+    name: 'Il Re Roccia',
+    sub: 'finale · il gigante di pietra',
+    mus: 'pspazio',
+    boss: true,
+    bg: ['#0b0b20', '#4a1d4a'],
+    P: [{
+      r: 150,
+      k: 'grass',
+      g: [4, -140, 100, 40]
+    }, {
+      r: 110,
+      gap: 112,
+      dir: -10,
+      k: 'candy',
+      g: [4, -150, 120, 40]
+    }, {
+      r: 120,
+      gap: 112,
+      dir: 20,
+      k: 'rock',
+      g: [5, -160, 140, 40],
+      hog: [-60, .012],
+      moon: {
+        r: 40,
+        R: 230,
+        w: .01
+      },
+      cp: -90
+    }, {
+      r: 100,
+      gap: 112,
+      dir: -20,
+      k: 'grass',
+      g: [4, -150, 120, 40],
+      pad: 4
+    }, {
+      r: 240,
+      gap: 330,
+      dir: 5,
+      k: 'boss',
+      bossP: 1
+    }]
+  }];
+  var L = null,
+    li = 0,
+    planets = [],
+    gems = [],
+    foes = [],
+    pads = [],
+    flags = [],
+    goal = null,
+    boss = null;
+  var pl = null,
+    cam = {
+      x: 0,
+      y: 0,
+      rot: 0
+    },
+    hearts = 3,
+    gotGems = 0,
+    cp = 0,
+    levelT = 0,
+    won = false,
+    parts = [],
+    msg = null;
+  var pick = 'tommy';
+  var ang = function ang(d) {
+    return d * Math.PI / 180;
+  };
+  function build(i) {
+    li = i;
+    L = LEVELS[i];
+    planets = [];
+    gems = [];
+    foes = [];
+    pads = [];
+    flags = [];
+    goal = null;
+    boss = null;
+    parts = [];
+    won = false;
+    levelT = 0;
+    gotGems = 0;
+    msg = null;
+    var moonSpec = [];
+    L.P.forEach(function (s, n) {
+      var x = 0,
+        y = 0;
+      if (n > 0) {
+        var pr = planets[n - 1],
+          d = pr.r + (s.gap || 110) + s.r;
+        for (var k = 0; k < 24; k++) {
+          var a = ang((s.dir || 0) + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 12);
+          x = pr.x + Math.cos(a) * d;
+          y = pr.y + Math.sin(a) * d;
+          if (!planets.slice(0, -1).some(function (Q) {
+            return Math.hypot(Q.x - x, Q.y - y) < Q.r + s.r + 150;
+          })) break;
+        }
+      }
+      var P = {
+        x,
+        y,
+        r: s.r,
+        k: s.k,
+        idx: n,
+        dx: 0,
+        dy: 0,
+        spike: s.spike ? [ang(s.spike[0]), ang(s.spike[1])] : null,
+        lavaS: !!s.lavaS,
+        deco: []
+      };
+      planets.push(P);
+      var kd = PK[s.k].deco;
+      for (var _a = 0; _a < 360; _a += 37) {
+        if (K.rnd(n, _a) < .5) continue;
+        var aa = ang(_a + K.rnd(n, _a, 1) * 20);
+        if (P.spike && inArc(aa, P.spike[0] - .2, P.spike[1] + .2)) continue;
+        P.deco.push({
+          a: aa,
+          k: kd[Math.floor(K.rnd(n, _a, 2) * kd.length)]
+        });
+      }
+      if (s.g) {
+        var _s$g = _slicedToArray(s.g, 4),
+          cnt = _s$g[0],
+          a0 = _s$g[1],
+          span = _s$g[2],
+          h = _s$g[3];
+        for (var _k = 0; _k < cnt; _k++) {
+          var _a2 = ang(a0 + (cnt > 1 ? span * _k / (cnt - 1) : 0));
+          gems.push({
+            p: n,
+            a: _a2,
+            h: h,
+            got: false
+          });
+        }
+      }
+      if (s.blob) foes.push({
+        t: 'blob',
+        p: n,
+        a: ang(s.blob[0]),
+        w: s.blob[1],
+        alive: true,
+        h: 0
+      });
+      if (s.hog) foes.push({
+        t: 'hog',
+        p: n,
+        a: ang(s.hog[0]),
+        w: s.hog[1],
+        alive: true,
+        h: 0
+      });
+      if (s.met) foes.push({
+        t: 'met',
+        p: n,
+        a: 0,
+        w: s.met[1],
+        alive: true,
+        h: s.met[0] - s.r
+      });
+      if (s.cp != null) flags.push({
+        p: n,
+        a: ang(s.cp)
+      });
+      if (s.goal != null) goal = {
+        p: n,
+        a: ang(s.goal),
+        on: true
+      };
+      if (s.bossP) boss = {
+        p: n,
+        a: ang(-90),
+        w: .011,
+        hp: 3,
+        inv: 0,
+        jy: 0,
+        jv: 0,
+        hop: 120,
+        alive: true,
+        r: 46
+      };
+      if (s.moon) moonSpec.push([n, s.moon]);
+      if (s.pad != null) pads.push({
+        p: n,
+        a: ang(-90 + 40),
+        to: s.pad
+      });
+    });
+    var _loop = function _loop() {
+      var _moonSpec$_i = _slicedToArray(_moonSpec[_i2], 2),
+        n = _moonSpec$_i[0],
+        ms = _moonSpec$_i[1];
+      var C = planets[n];
+      var vx = 0,
+        vy = 0;
+      for (var _i3 = 0, _planets = planets; _i3 < _planets.length; _i3++) {
+        var Q = _planets[_i3];
+        if (Q === C) continue;
+        var d = Math.hypot(Q.x - C.x, Q.y - C.y);
+        if (d < C.r + Q.r + 600) {
+          vx += (Q.x - C.x) / d;
+          vy += (Q.y - C.y) / d;
+        }
+      }
+      var base = Math.atan2(-vy, -vx),
+        R = C.r + ms.r + 100;
+      var amp = ang(70);
+      var clash = function clash(a) {
+        return planets.some(function (Q) {
+          return Q !== C && Math.hypot(C.x + Math.cos(a) * R - Q.x, C.y + Math.sin(a) * R - Q.y) < Q.r + ms.r + 70;
+        });
+      };
+      while (amp > ang(10) && (clash(base + amp) || clash(base - amp) || clash(base))) amp -= ang(5);
+      planets.push({
+        x: 0,
+        y: 0,
+        r: ms.r,
+        k: C.k === 'ice' ? 'ice' : 'rock',
+        idx: planets.length,
+        orbit: {
+          p: n,
+          R: R,
+          base: base,
+          amp: amp,
+          w: Math.abs(ms.w) * 1.4,
+          t: 0,
+          a: base
+        },
+        dx: 0,
+        dy: 0,
+        deco: [],
+        moon: 1
+      });
+    };
+    for (var _i2 = 0, _moonSpec = moonSpec; _i2 < _moonSpec.length; _i2++) {
+      _loop();
+    }
+    moons(0);
+    pl = {
+      x: 0,
+      y: -planets[0].r,
+      vx: 0,
+      vy: 0,
+      on: true,
+      ground: planets[0],
+      face: 1,
+      walk: 0,
+      inv: 0,
+      fly: 0,
+      dead: 0,
+      jumpHeld: false
+    };
+    cp = -1;
+    hearts = 3;
+    setCam(true);
+    K.wantMusic = L.mus;
+  }
+  function inArc(a, a0, a1) {
+    var n = function n(x) {
+      x %= 2 * Math.PI;
+      return x < 0 ? x + 2 * Math.PI : x;
+    };
+    var A = n(a - a0),
+      S = n(a1 - a0);
+    return A <= S;
+  }
+  function moons(f) {
+    var _iterator6 = _createForOfIteratorHelper(planets),
+      _step6;
+    try {
+      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+        var P = _step6.value;
+        if (P.orbit) {
+          var o = P.orbit,
+            C = planets[o.p];
+          o.t += o.w * f;
+          o.a = o.base + Math.sin(o.t) * o.amp;
+          var nx = C.x + Math.cos(o.a) * o.R,
+            ny = C.y + Math.sin(o.a) * o.R;
+          P.dx = nx - P.x;
+          P.dy = ny - P.y;
+          if (f === 0) {
+            P.dx = P.dy = 0;
+          }
+          P.x = nx;
+          P.y = ny;
+        }
+      }
+    } catch (err) {
+      _iterator6.e(err);
+    } finally {
+      _iterator6.f();
+    }
+  }
+  var onP = function onP(P, a, h) {
+    return {
+      x: P.x + Math.cos(a) * (P.r + h),
+      y: P.y + Math.sin(a) * (P.r + h)
+    };
+  };
+  function nearest(x, y) {
+    var best = null,
+      bd = 1e9;
+    var _iterator7 = _createForOfIteratorHelper(planets),
+      _step7;
+    try {
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        var P = _step7.value;
+        var d = Math.hypot(x - P.x, y - P.y) - P.r;
+        if (d < bd) {
+          bd = d;
+          best = P;
+        }
+      }
+    } catch (err) {
+      _iterator7.e(err);
+    } finally {
+      _iterator7.f();
+    }
+    return [best, bd];
+  }
+  function setCam(snap) {
+    var _nearest = nearest(pl.x, pl.y),
+      _nearest2 = _slicedToArray(_nearest, 1),
+      P = _nearest2[0];
+    var a = Math.atan2(pl.y - P.y, pl.x - P.x);
+    var target = -Math.PI / 2 - a;
+    var d = target - cam.rot;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    if (snap) {
+      cam.rot = target;
+      cam.x = pl.x;
+      cam.y = pl.y;
+    } else {
+      cam.rot += d * .08;
+    }
+  }
+  function burst(x, y, c, n) {
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * 6.28,
+        s = 1 + Math.random() * 3;
+      parts.push({
+        x,
+        y,
+        vx: Math.cos(a) * s,
+        vy: Math.sin(a) * s,
+        l: 30 + Math.random() * 20,
+        c
+      });
+    }
+  }
+  function hurt() {
+    if (pl.inv > 0 || pl.dead || won) return;
+    hearts--;
+    pl.inv = 90;
+    K.beep(220, .25, 'square', .05, -120);
+    burst(pl.x, pl.y, '#e0373f', 10);
+    var _nearest3 = nearest(pl.x, pl.y),
+      _nearest4 = _slicedToArray(_nearest3, 1),
+      P = _nearest4[0],
+      ux = pl.x - P.x,
+      uy = pl.y - P.y,
+      d = Math.hypot(ux, uy) || 1;
+    pl.vx += ux / d * 6;
+    pl.vy += uy / d * 6;
+    pl.on = false;
+    if (hearts <= 0) die();
+  }
+  function die() {
+    if (pl.dead) return;
+    pl.dead = 1;
+    K.beep(300, .4, 'sawtooth', .06, -220);
+  }
+  function respawn() {
+    var P, a;
+    if (cp >= 0) {
+      P = planets[flags[cp].p];
+      a = flags[cp].a;
+    } else {
+      P = planets[0];
+      a = ang(-90);
+    }
+    var q = onP(P, a, 0);
+    pl.x = q.x;
+    pl.y = q.y;
+    pl.vx = pl.vy = 0;
+    pl.dead = 0;
+    pl.inv = 60;
+    pl.fly = 0;
+    hearts = 3;
+    setCam(true);
+  }
+  function update(f) {
+    levelT += f / 60;
+    moons(f);
+    if (boss && boss.alive) bossStep(f);
+    var _iterator8 = _createForOfIteratorHelper(foes),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var e = _step8.value;
+        if (e.alive) {
+          e.a += e.w * f;
+        }
+      }
+    } catch (err) {
+      _iterator8.e(err);
+    } finally {
+      _iterator8.f();
+    }
+    var _iterator9 = _createForOfIteratorHelper(parts),
+      _step9;
+    try {
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var _q2 = _step9.value;
+        _q2.x += _q2.vx * f;
+        _q2.y += _q2.vy * f;
+        _q2.l -= f;
+      }
+    } catch (err) {
+      _iterator9.e(err);
+    } finally {
+      _iterator9.f();
+    }
+    parts = parts.filter(function (q) {
+      return q.l > 0;
+    });
+    if (msg) {
+      msg.t -= f;
+      if (msg.t <= 0) msg = null;
+    }
+    if (won) {
+      pl.walk += f * .2;
+      setCam(false);
+      cam.x += (pl.x - cam.x) * .1;
+      cam.y += (pl.y - cam.y) * .1;
+      return;
+    }
+    if (pl.dead) {
+      pl.dead += f;
+      if (pl.dead > 50) respawn();
+      return;
+    }
+    if (pl.inv > 0) pl.inv -= f;
+    var _nearest5 = nearest(pl.x, pl.y),
+      _nearest6 = _slicedToArray(_nearest5, 2),
+      P = _nearest6[0],
+      sd = _nearest6[1];
+    if (sd > 650) {
+      die();
+      return;
+    }
+    var ux = pl.x - P.x,
+      uy = pl.y - P.y;
+    var d = Math.hypot(ux, uy) || 1;
+    ux /= d;
+    uy /= d;
+    var tx = -uy,
+      ty = ux;
+    if (pl.fly > 0) {
+      pl.fly -= f;
+      pl.x += pl.vx * f;
+      pl.y += pl.vy * f;
+      if (K.time % 3 < 1) parts.push({
+        x: pl.x,
+        y: pl.y,
+        vx: 0,
+        vy: 0,
+        l: 24,
+        c: '#f2c230'
+      });
+    } else {
+      if (pl.on && pl.ground) {
+        pl.x += pl.ground.dx;
+        pl.y += pl.ground.dy;
+      }
+      pl.vx -= ux * G * f;
+      pl.vy -= uy * G * f;
+      var want = (K.keys.right ? 1 : 0) - (K.keys.left ? 1 : 0);
+      if (want) pl.face = want;
+      var vt = pl.vx * tx + pl.vy * ty,
+        ice = pl.on && PK[P.k] && PK[P.k].ice;
+      var k = pl.on ? ice ? .05 : .3 : .09,
+        nvt = vt + (want * WALK - vt) * Math.min(1, k * f);
+      pl.vx += (nvt - vt) * tx;
+      pl.vy += (nvt - vt) * ty;
+      var jump = K.keys.a || K.keys.up;
+      if (jump && !pl.jumpHeld && pl.on) {
+        pl.vx += ux * JV;
+        pl.vy += uy * JV;
+        pl.on = false;
+        K.beep(480, .12, 'square', .04, 260);
+      }
+      var vr = pl.vx * ux + pl.vy * uy;
+      if (!jump && vr > 3.5 && !pl.on) {
+        pl.vx -= ux * (vr - 3.5) * .25;
+        pl.vy -= uy * (vr - 3.5) * .25;
+      }
+      pl.jumpHeld = jump;
+      var sp = Math.hypot(pl.vx, pl.vy);
+      if (sp > 14) {
+        pl.vx *= 14 / sp;
+        pl.vy *= 14 / sp;
+      }
+      pl.x += pl.vx * f;
+      pl.y += pl.vy * f;
+      if (Math.abs(nvt) > .3 && pl.on) pl.walk += f * Math.abs(nvt) * .09;
+    }
+    pl.on = false;
+    pl.ground = null;
+    var _iterator0 = _createForOfIteratorHelper(planets),
+      _step0;
+    try {
+      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+        var _Q = _step0.value;
+        var dx = pl.x - _Q.x,
+          dy = pl.y - _Q.y,
+          _dd = Math.hypot(dx, dy);
+        if (_dd < _Q.r) {
+          var _nx = dx / _dd,
+            _ny = dy / _dd;
+          pl.x = _Q.x + _nx * _Q.r;
+          pl.y = _Q.y + _ny * _Q.r;
+          var _vn = pl.vx * _nx + pl.vy * _ny;
+          if (_vn < 0) {
+            pl.vx -= _nx * _vn;
+            pl.vy -= _ny * _vn;
+          }
+          pl.on = true;
+          pl.ground = _Q;
+          if (pl.fly > 0) pl.fly = 0;
+          if (_Q.spike) {
+            var a = Math.atan2(dy, dx);
+            if (inArc(a, _Q.spike[0], _Q.spike[1])) hurt();
+          }
+        }
+      }
+    } catch (err) {
+      _iterator0.e(err);
+    } finally {
+      _iterator0.f();
+    }
+    var _iterator1 = _createForOfIteratorHelper(pads),
+      _step1;
+    try {
+      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+        var pd = _step1.value;
+        var _Q2 = planets[pd.p],
+          _q3 = onP(_Q2, pd.a, 0);
+        if (pl.on && pl.ground === _Q2 && Math.hypot(pl.x - _q3.x, pl.y - _q3.y) < 26 && pl.fly <= 0) {
+          var T = planets[pd.to],
+            ax = _Q2.x - T.x,
+            ay = _Q2.y - T.y,
+            al = Math.hypot(ax, ay);
+          var tx2 = T.x + ax / al * (T.r + 60),
+            ty2 = T.y + ay / al * (T.r + 60);
+          var _dx = tx2 - pl.x,
+            _dy = ty2 - pl.y,
+            dl = Math.hypot(_dx, _dy);
+          pl.vx = _dx / dl * 15;
+          pl.vy = _dy / dl * 15;
+          pl.fly = dl / 15;
+          pl.on = false;
+          K.jingle([523, 784, 1046, 1318], 50, 'triangle');
+        }
+      }
+    } catch (err) {
+      _iterator1.e(err);
+    } finally {
+      _iterator1.f();
+    }
+    var bx = pl.x + ux * 18,
+      by = pl.y + uy * 18;
+    var _iterator10 = _createForOfIteratorHelper(gems),
+      _step10;
+    try {
+      for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+        var g = _step10.value;
+        if (!g.got) {
+          var _q4 = onP(planets[g.p], g.a, g.h);
+          if (Math.hypot(_q4.x - bx, _q4.y - by) < 28) {
+            g.got = true;
+            gotGems++;
+            burst(_q4.x, _q4.y, '#9fd3f0', 6);
+            K.beep(1200 + gotGems % 6 * 120, .07, 'triangle', .05);
+          }
+        }
+      }
+    } catch (err) {
+      _iterator10.e(err);
+    } finally {
+      _iterator10.f();
+    }
+    flags.forEach(function (fl, i) {
+      if (i > cp) {
+        var q = onP(planets[fl.p], fl.a, 0);
+        if (Math.hypot(q.x - pl.x, q.y - pl.y) < 40) {
+          cp = i;
+          K.jingle([700, 900], 60);
+          msg = {
+            t: 90,
+            s: 'Bandierina presa!'
+          };
+          saveRun();
+        }
+      }
+    });
+    var _iterator11 = _createForOfIteratorHelper(foes),
+      _step11;
+    try {
+      for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+        var _e = _step11.value;
+        if (_e.alive) {
+          var _Q3 = planets[_e.p],
+            _q5 = onP(_Q3, _e.a, _e.h + (_e.t === 'met' ? 0 : 12));
+          var _dd2 = Math.hypot(_q5.x - bx, _q5.y - by);
+          if (_dd2 < (_e.t === 'met' ? 22 : 28)) {
+            var _nx2 = Math.cos(_e.a),
+              _ny2 = Math.sin(_e.a),
+              _vn2 = pl.vx * _nx2 + pl.vy * _ny2,
+              _above = (bx - _Q3.x) * _nx2 + (by - _Q3.y) * _ny2 > _Q3.r + _e.h + 18;
+            if (_e.t === 'blob' && _vn2 < -.5 && _above) {
+              _e.alive = false;
+              burst(_q5.x, _q5.y, '#7cc242', 14);
+              pl.vx = _nx2 * 7 + pl.vx * .3;
+              pl.vy = _ny2 * 7 + pl.vy * .3;
+              K.beep(220, .15, 'square', .06, 400);
+            } else hurt();
+          }
+        }
+      }
+    } catch (err) {
+      _iterator11.e(err);
+    } finally {
+      _iterator11.f();
+    }
+    if (boss && boss.alive) {
+      var Q = planets[boss.p],
+        q = onP(Q, boss.a, boss.r + boss.jy);
+      var dd = Math.hypot(q.x - bx, q.y - by);
+      if (dd < boss.r + 16) {
+        var nx = Math.cos(boss.a),
+          ny = Math.sin(boss.a),
+          vn = pl.vx * nx + pl.vy * ny,
+          above = (bx - Q.x) * nx + (by - Q.y) * ny > Q.r + boss.jy + boss.r * 1.4;
+        if (vn < -.5 && above && boss.inv <= 0) {
+          boss.hp--;
+          boss.inv = 80;
+          pl.vx = nx * 10;
+          pl.vy = ny * 10;
+          burst(q.x, q.y, '#c99b5e', 20);
+          K.beep(160, .25, 'square', .07, 300);
+          if (boss.hp <= 0) {
+            boss.alive = false;
+            burst(q.x, q.y, '#f2c230', 40);
+            goal = {
+              p: boss.p,
+              a: ang(-90),
+              on: true
+            };
+            msg = {
+              t: 150,
+              s: 'Hai battuto il Re Roccia! Prendi la cometa!'
+            };
+            K.jingle([392, 523, 659, 784, 1046], 100);
+          }
+        } else if (boss.inv <= 0) hurt();
+      }
+    }
+    if (goal && goal.on) {
+      var _q = onP(planets[goal.p], goal.a, 50);
+      if (Math.hypot(_q.x - bx, _q.y - by) < 34) winLevel();
+    }
+    setCam(false);
+    var look = 48;
+    cam.x += (pl.x + ux * look - cam.x) * Math.min(1, .1 * f);
+    cam.y += (pl.y + uy * look - cam.y) * Math.min(1, .1 * f);
+  }
+  function bossStep(f) {
+    var b = boss;
+    if (b.inv > 0) b.inv -= f;
+    var sp = b.hp <= 1 ? 1.6 : b.hp <= 2 ? 1.3 : 1;
+    b.a += b.w * sp * f;
+    if (b.jy === 0 && b.jv === 0) {
+      b.hop -= f;
+      if (b.hop <= 0) {
+        b.jv = 7;
+        b.hop = 110 + Math.floor(K.rnd(b.hp, levelT | 0) * 60);
+      }
+    }
+    if (b.jv !== 0 || b.jy > 0) {
+      b.jy += b.jv * f;
+      b.jv -= .35 * f;
+      if (b.jy <= 0) {
+        b.jy = 0;
+        b.jv = 0;
+        K.beep(70, .22, 'square', .06, -30);
+        burst(onP(planets[b.p], b.a, 0).x, onP(planets[b.p], b.a, 0).y, '#a99f92', 12);
+      }
+    }
+  }
+  function winLevel() {
+    if (won) return;
+    won = true;
+    goal.on = false;
+    K.wantMusic = 'pwin';
+    burst(pl.x, pl.y, '#f2c230', 40);
+    K.jingle([523, 659, 784, 1046, 1318], 110);
+    var tot = gems.length,
+      best = PROG.gems[li] || 0;
+    if (gotGems > best) PROG.gems[li] = gotGems;
+    PROG.done[li] = true;
+    if (PROG.open < li + 1 && li + 1 < LEVELS.length) PROG.open = li + 1;
+    K.save('tompianeti-prog', PROG);
+    K.del('tompianeti-run');
+    setTimeout(function () {
+      if (won) showWin();
+    }, 1600);
+  }
+  var SPR = {};
+  function spr(k) {
+    if (SPR[k]) return SPR[k];
+    var S = K.sprite,
+      m = {
+        tree: ["..lll..", ".lllll.", "lllLlll", ".lllll.", "...M...", "...M..."],
+        flower: [".r.r.", "rryrr", ".r.r.", "..l..", "..l.."],
+        crystal: ["..c..", ".cwc.", ".ccc.", "cccbc", "ccbcc"],
+        rock: [".ggg.", "gggWg", "gGggg"],
+        pine: ["...W...", "..WLW..", ".LLLLL.", "..WWW..", "LLLLLLL", "...M..."],
+        rocklava: [".ddd.", "ddodd", "doddd"],
+        lolly: ["..rr..", ".rwwr.", ".rrrr.", "..rr..", "...w..", "...w..", "...w.."],
+        gem: ["..cc..", ".cwcc.", "cwcccc", "cccccb", ".ccbb.", "..bb.."],
+        blob: ["...lll...", ".lllllll.", "llwkllwkl", "llllllll.", "lllkkklll", ".LLLLLLL."],
+        hog: ["k.k.k.k.k", ".kmmmmmk.", "kmmwkmmmk", "kmmmmmmmo", ".kmmmmmk."],
+        met: [".ooo.", "ooyoo", "oyyyo", "ooyoo", ".ooo."],
+        flag: ["kyyyy", "kyyy.", "kyy..", "k....", "k....", "k....", "k....", "k...."],
+        pad: ["..yyyyy..", ".yykkkyy.", "yyyyyyyyy", "RRRRRRRRR"]
+      };
+    return SPR[k] = S('p_' + k, m[k]);
+  }
+  function drawAt(c, x, y, a, U, flip) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a + Math.PI / 2);
+    if (flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, -c.width * U / 2, -c.height * U + U, c.width * U, c.height * U);
+    ctx.restore();
+  }
+  var stars = null;
+  function drawStars(W, H) {
+    if (!stars) {
+      stars = [];
+      for (var i = 0; i < 140; i++) stars.push({
+        x: K.rnd(i, 1) * 2 - 1,
+        y: K.rnd(i, 2) * 2 - 1,
+        s: K.rnd(i, 3) < .15 ? 3 : 2,
+        t: K.rnd(i, 4) * 6
+      });
+    }
+    var R = Math.max(W, H);
+    ctx.save();
+    ctx.translate(W / 2, H / 2);
+    ctx.rotate(cam.rot * .35);
+    var _iterator12 = _createForOfIteratorHelper(stars),
+      _step12;
+    try {
+      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+        var s = _step12.value;
+        var tw = Math.floor(K.time / 12 + s.t) % 9 === 0;
+        ctx.fillStyle = tw ? '#ffe48a' : '#ffffff';
+        ctx.fillRect(Math.round(s.x * R - cam.x * .05 % R), Math.round(s.y * R - cam.y * .05 % R), s.s, s.s);
+      }
+    } catch (err) {
+      _iterator12.e(err);
+    } finally {
+      _iterator12.f();
+    }
+    ctx.globalAlpha = .25;
+    ctx.fillStyle = '#e096d2';
+    ctx.beginPath();
+    ctx.arc(R * .3, -R * .2, R * .22, 0, 6.28);
+    ctx.fill();
+    ctx.fillStyle = '#3f86d4';
+    ctx.beginPath();
+    ctx.arc(-R * .35, R * .25, R * .25, 0, 6.28);
+    ctx.fill();
+    ctx.restore();
+  }
+  function drawPlanet(P) {
+    var t = PK[P.k] || PK.rock;
+    ctx.fillStyle = '#14151d';
+    ctx.beginPath();
+    ctx.arc(P.x, P.y, P.r + 4, 0, 6.283);
+    ctx.fill();
+    ctx.fillStyle = t.base;
+    ctx.beginPath();
+    ctx.arc(P.x, P.y, P.r, 0, 6.283);
+    ctx.fill();
+    ctx.fillStyle = t.dark;
+    ctx.beginPath();
+    ctx.arc(P.x + P.r * .12, P.y + P.r * .12, P.r * .72, 0, 6.283);
+    ctx.fill();
+    ctx.fillStyle = t.base;
+    for (var k = 0; k < 6; k++) {
+      var a = k * 1.7 + P.r,
+        rr = P.r * (.25 + .35 * K.rnd(k, P.r));
+      ctx.beginPath();
+      ctx.arc(P.x + Math.cos(a) * rr, P.y + Math.sin(a) * rr, P.r * .09 + 3, 0, 6.283);
+      ctx.fill();
+    }
+    ctx.lineWidth = 9;
+    ctx.strokeStyle = t.top;
+    ctx.beginPath();
+    ctx.arc(P.x, P.y, P.r - 4, 0, 6.283);
+    ctx.stroke();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = t.top2;
+    ctx.setLineDash([6, 10]);
+    ctx.beginPath();
+    ctx.arc(P.x, P.y, P.r - 1, 0, 6.283);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (P.spike) {
+      var _P$spike = _slicedToArray(P.spike, 2),
+        a0 = _P$spike[0],
+        a1 = _P$spike[1];
+      var a1n = a1;
+      if (a1n < a0) a1n += Math.PI * 2;
+      var lava = P.lavaS;
+      for (var _a3 = a0; _a3 <= a1n; _a3 += 10 / P.r) {
+        var q = onP(P, _a3, 0),
+          q2 = onP(P, _a3, lava ? 6 : 14),
+          l = onP(P, _a3 - 4 / P.r, 0),
+          r = onP(P, _a3 + 4 / P.r, 0);
+        ctx.fillStyle = lava ? Math.floor(K.time / 8 + _a3 * 10) % 2 ? '#f2c230' : '#f07a2a' : '#e8ecf4';
+        ctx.beginPath();
+        ctx.moveTo(l.x, l.y);
+        ctx.lineTo(q2.x, q2.y);
+        ctx.lineTo(r.x, r.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+    var _iterator13 = _createForOfIteratorHelper(P.deco),
+      _step13;
+    try {
+      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+        var d = _step13.value;
+        var _q6 = onP(P, d.a, -2);
+        drawAt(spr(d.k), _q6.x, _q6.y, d.a, 3);
+      }
+    } catch (err) {
+      _iterator13.e(err);
+    } finally {
+      _iterator13.f();
+    }
+  }
+  function draw() {
+    var W = K.W,
+      H = K.H;
+    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
+    var bg = L ? L.bg : ['#0b1030', '#2b1d5c'],
+      g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, bg[0]);
+    g.addColorStop(1, bg[1]);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    drawStars(W, H);
+    if (!L) {
+      return;
+    }
+    var sc = Math.min(W / 880, H / 500);
+    ctx.save();
+    ctx.translate(W / 2, H / 2 + H * .06);
+    ctx.rotate(cam.rot);
+    ctx.scale(sc, sc);
+    ctx.translate(-cam.x, -cam.y);
+    ctx.strokeStyle = 'rgba(255,255,255,.12)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 10]);
+    var _iterator14 = _createForOfIteratorHelper(planets),
+      _step14;
+    try {
+      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+        var _P = _step14.value;
+        if (_P.orbit) {
+          var C = planets[_P.orbit.p];
+          ctx.beginPath();
+          ctx.arc(C.x, C.y, _P.orbit.R, _P.orbit.base - _P.orbit.amp, _P.orbit.base + _P.orbit.amp);
+          ctx.stroke();
+        }
+      }
+    } catch (err) {
+      _iterator14.e(err);
+    } finally {
+      _iterator14.f();
+    }
+    ctx.setLineDash([]);
+    var _iterator15 = _createForOfIteratorHelper(pads),
+      _step15;
+    try {
+      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+        var pd = _step15.value;
+        var _Q4 = planets[pd.p],
+          T = planets[pd.to],
+          _q7 = onP(_Q4, pd.a, 0);
+        ctx.strokeStyle = 'rgba(242,194,48,.3)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([2, 14]);
+        ctx.beginPath();
+        ctx.moveTo(_q7.x, _q7.y);
+        ctx.lineTo(T.x, T.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    } catch (err) {
+      _iterator15.e(err);
+    } finally {
+      _iterator15.f();
+    }
+    var _iterator16 = _createForOfIteratorHelper(planets),
+      _step16;
+    try {
+      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+        var _P2 = _step16.value;
+        drawPlanet(_P2);
+      }
+    } catch (err) {
+      _iterator16.e(err);
+    } finally {
+      _iterator16.f();
+    }
+    var _iterator17 = _createForOfIteratorHelper(pads),
+      _step17;
+    try {
+      for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+        var _pd = _step17.value;
+        var _Q5 = planets[_pd.p],
+          _q8 = onP(_Q5, _pd.a, 0);
+        drawAt(spr('pad'), _q8.x, _q8.y, _pd.a, 4);
+        if (Math.floor(K.time / 15) % 2) {
+          var q2 = onP(_Q5, _pd.a, 34);
+          ctx.fillStyle = '#f2c230';
+          ctx.font = "700 22px 'Pixelify Sans',monospace";
+          ctx.save();
+          ctx.translate(q2.x, q2.y);
+          ctx.rotate(_pd.a + Math.PI / 2);
+          ctx.textAlign = 'center';
+          ctx.fillText('★', 0, 0);
+          ctx.restore();
+        }
+      }
+    } catch (err) {
+      _iterator17.e(err);
+    } finally {
+      _iterator17.f();
+    }
+    flags.forEach(function (fl, i) {
+      var Q = planets[fl.p],
+        q = onP(Q, fl.a, 0);
+      drawAt(spr('flag'), q.x, q.y, fl.a, 4);
+      if (i <= cp) {
+        var q2 = onP(Q, fl.a, 24);
+        ctx.fillStyle = '#4aa35a';
+        ctx.beginPath();
+        ctx.arc(q2.x, q2.y, 4, 0, 6.28);
+        ctx.fill();
+      }
+    });
+    var _iterator18 = _createForOfIteratorHelper(gems),
+      _step18;
+    try {
+      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+        var gm = _step18.value;
+        if (!gm.got) {
+          var _Q6 = planets[gm.p],
+            b = Math.sin(K.time * .08 + gm.a * 3) * 4,
+            _q9 = onP(_Q6, gm.a, gm.h + b - 10);
+          drawAt(spr('gem'), _q9.x, _q9.y, gm.a, 3);
+        }
+      }
+    } catch (err) {
+      _iterator18.e(err);
+    } finally {
+      _iterator18.f();
+    }
+    var _iterator19 = _createForOfIteratorHelper(foes),
+      _step19;
+    try {
+      for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
+        var e = _step19.value;
+        if (e.alive) {
+          var _Q7 = planets[e.p],
+            _q0 = onP(_Q7, e.a, e.h);
+          if (e.t === 'met') {
+            var c = spr('met');
+            ctx.save();
+            ctx.translate(_q0.x, _q0.y);
+            ctx.rotate(K.time * .1);
+            ctx.drawImage(c, -c.width * 2, -c.height * 2, c.width * 4, c.height * 4);
+            ctx.restore();
+            ctx.fillStyle = 'rgba(240,122,42,.3)';
+            var tq = onP(_Q7, e.a - e.w * 8, e.h);
+            ctx.beginPath();
+            ctx.arc(tq.x, tq.y, 8, 0, 6.28);
+            ctx.fill();
+          } else drawAt(spr(e.t), _q0.x, _q0.y, e.a, 4, e.w < 0);
+        }
+      }
+    } catch (err) {
+      _iterator19.e(err);
+    } finally {
+      _iterator19.f();
+    }
+    if (boss && boss.alive) {
+      var Q = planets[boss.p],
+        q = onP(Q, boss.a, boss.jy);
+      if (!(boss.inv > 0 && Math.floor(boss.inv / 5) % 2)) drawBoss(q.x, q.y, boss.a);
+    }
+    if (goal && goal.on) drawComet(onP(planets[goal.p], goal.a, 50), goal.a);
+    if (!(pl.inv > 0 && Math.floor(pl.inv / 5) % 2)) {
+      var _nearest7 = nearest(pl.x, pl.y),
+        _nearest8 = _slicedToArray(_nearest7, 1),
+        P = _nearest8[0],
+        a = Math.atan2(pl.y - P.y, pl.x - P.x);
+      var fr = pl.dead ? 'jump' : !pl.on || pl.fly > 0 ? 'jump' : Math.abs(pl.vx * -Math.sin(a) + pl.vy * Math.cos(a)) > .5 ? Math.floor(pl.walk * 1.3) % 2 ? 'walkA' : 'walkB' : 'stand';
+      ctx.save();
+      if (pl.dead) ctx.globalAlpha = Math.max(0, 1 - pl.dead / 50);
+      drawAt(K.charS(pick, fr), pl.x, pl.y, a, 3, pl.face < 0);
+      ctx.restore();
+    }
+    var _iterator20 = _createForOfIteratorHelper(parts),
+      _step20;
+    try {
+      for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
+        var _q1 = _step20.value;
+        ctx.globalAlpha = Math.max(0, _q1.l / 50);
+        ctx.fillStyle = _q1.c;
+        ctx.fillRect(_q1.x - 3, _q1.y - 3, 6, 6);
+      }
+    } catch (err) {
+      _iterator20.e(err);
+    } finally {
+      _iterator20.f();
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    hud(W, H);
+  }
+  function drawBoss(x, y, a) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a + Math.PI / 2);
+    var r = boss.r,
+      U = 6;
+    var R = function R(px, py, w, h, c) {
+      ctx.fillStyle = c;
+      ctx.fillRect(px * U, py * U, w * U, h * U);
+    };
+    var w = Math.floor(K.time / 10) % 2;
+    R(-8, -1, 6, 2, '#14151d');
+    R(2, -1, 6, 2, '#14151d');
+    R(-8.5, -15.5, 17, 15, '#14151d');
+    R(-8, -15, 16, 14, '#8e909a');
+    R(-8, -15, 16, 2, '#b7bcc9');
+    R(-6, -12, 3, 3, '#6b6f7d');
+    R(3, -5, 3, 3, '#6b6f7d');
+    R(-5, -11, 3, 3, '#ffffff');
+    R(2, -11, 3, 3, '#ffffff');
+    R(-4, -10, 2, 2, '#e0373f');
+    R(3, -10, 2, 2, '#e0373f');
+    R(-6, -13, 4, 1, '#14151d');
+    R(2, -13, 4, 1, '#14151d');
+    R(-4, -6, 8, 2, '#14151d');
+    R(-3, -6, 1, 1, '#fff');
+    R(2, -6, 1, 1, '#fff');
+    R(-11, -12 + w, 3, 8, '#6b6f7d');
+    R(8, -12 + (1 - w), 3, 8, '#6b6f7d');
+    R(-3, -19, 6, 4, '#f2c230');
+    R(-4, -21, 2, 2, '#f2c230');
+    R(-1, -22, 2, 3, '#f2c230');
+    R(2, -21, 2, 2, '#f2c230');
+    R(-1, -18, 2, 2, '#e0373f');
+    ctx.restore();
+    var n = boss.hp;
+    for (var i = 0; i < n; i++) {
+      var q = onP(planets[boss.p], boss.a, boss.jy + r * 2.6 + (i - (n - 1) / 2) * 0);
+      ctx.fillStyle = '#e0373f';
+      ctx.save();
+      ctx.translate(q.x, q.y);
+      ctx.rotate(boss.a + Math.PI / 2);
+      ctx.font = "700 22px 'Pixelify Sans',monospace";
+      ctx.textAlign = 'center';
+      ctx.fillText('♥', (i - (n - 1) / 2) * 22, 0);
+      ctx.restore();
+    }
+  }
+  function drawComet(q, a) {
+    ctx.save();
+    ctx.translate(q.x, q.y);
+    ctx.rotate(a + Math.PI / 2 + Math.sin(K.time * .05) * .1);
+    for (var i = 0; i < 6; i++) {
+      ctx.globalAlpha = .5 - i * .07;
+      ctx.fillStyle = i % 2 ? '#9fd3f0' : '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-14 - i * 9, 6 + i * 5, 10 - i, 0, 6.28);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#14151d';
+    ctx.beginPath();
+    ctx.arc(0, 0, 19, 0, 6.28);
+    ctx.fill();
+    ctx.fillStyle = '#f2c230';
+    ctx.beginPath();
+    ctx.arc(0, 0, 16, 0, 6.28);
+    ctx.fill();
+    ctx.fillStyle = '#ffe48a';
+    ctx.beginPath();
+    ctx.arc(-4, -4, 7, 0, 6.28);
+    ctx.fill();
+    ctx.fillStyle = '#14151d';
+    ctx.fillRect(-7, -3, 3, 4);
+    ctx.fillRect(4, -3, 3, 4);
+    ctx.fillRect(-4, 5, 8, 2);
+    ctx.restore();
+  }
+  function hud(W, H) {
+    K.rect(8, 8, 214, 40, 'rgba(20,21,29,.72)');
+    for (var i = 0; i < 3; i++) K.text('♥', 16 + i * 26, 38, 26, i < hearts ? '#e0373f' : '#5d6273');
+    K.draw(spr('gem'), 106, 38, 3);
+    K.text(gotGems + '/' + gems.length, 124, 36, 20, '#9fd3f0');
+    K.text(L.name, W / 2, 30, 20, '#fff', 'center');
+    if (msg) K.text(msg.s, W / 2, H * .3, 26, '#f2c230', 'center');
+    if (boss && boss.alive && levelT < 5) K.text('Salta sulla testa del Re Roccia 3 volte!', W / 2, H * .22, 20, '#ffe48a', 'center');
+  }
+  var PROG = K.load('tompianeti-prog', {
+    open: 0,
+    gems: {},
+    done: {}
+  });
+  if (!PROG.gems) PROG.gems = {};
+  if (!PROG.done) PROG.done = {};
+  function snap() {
+    if (!L || won) return null;
+    return {
+      li: li,
+      pick: pick,
+      pl: {
+        x: pl.x,
+        y: pl.y
+      },
+      cp: cp,
+      hearts: hearts,
+      got: gems.map(function (g) {
+        return g.got;
+      }),
+      foes: foes.map(function (e) {
+        return e.alive;
+      }),
+      boss: boss ? boss.hp : null,
+      t: levelT,
+      moons: planets.filter(function (P) {
+        return P.orbit;
+      }).map(function (P) {
+        return P.orbit.t;
+      })
+    };
+  }
+  function saveRun() {
+    var s = snap();
+    return s ? K.save('tompianeti-run', s) : true;
+  }
+  function restore(s) {
+    pick = s.pick || pick;
+    build(s.li);
+    gems.forEach(function (g, i) {
+      g.got = !!s.got[i];
+    });
+    gotGems = gems.filter(function (g) {
+      return g.got;
+    }).length;
+    foes.forEach(function (e, i) {
+      e.alive = s.foes[i] !== false;
+    });
+    var k = 0;
+    var _iterator21 = _createForOfIteratorHelper(planets),
+      _step21;
+    try {
+      for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
+        var P = _step21.value;
+        if (P.orbit && s.moons && s.moons[k] != null) {
+          P.orbit.t = s.moons[k++];
+        }
+      }
+    } catch (err) {
+      _iterator21.e(err);
+    } finally {
+      _iterator21.f();
+    }
+    moons(0);
+    if (boss && s.boss != null) {
+      boss.hp = s.boss;
+      if (boss.hp <= 0) {
+        boss.alive = false;
+        goal = {
+          p: boss.p,
+          a: ang(-90),
+          on: true
+        };
+      }
+    }
+    cp = s.cp;
+    hearts = s.hearts || 3;
+    levelT = s.t || 0;
+    if (cp >= 0) respawn();
+    hearts = s.hearts || 3;
+  }
+  function renderMenu() {
+    K.charPicker($('chars'), pick, function (ch) {
+      pick = ch;
+      K.save('tompianeti-pick', ch);
+      renderMenu();
+    });
+    var box = $('levels');
+    box.innerHTML = '';
+    LEVELS.forEach(function (l, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      var open = i <= PROG.open;
+      b.className = 'lvl' + (PROG.done[i] ? ' done' : '') + (open ? '' : ' lock');
+      b.innerHTML = '<b>' + (i + 1) + '</b>' + l.name + '<small>' + (open ? PROG.done[i] ? '💎 ' + (PROG.gems[i] || 0) + ' gemme · rigioca' : l.sub : '🔒 finisci il livello prima') + '</small>';
+      b.onclick = function () {
+        if (!open) return;
+        K.del('tompianeti-run');
+        build(i);
+        $('menu').hidden = true;
+        K.start();
+      };
+      box.appendChild(b);
+    });
+    var sv = K.load('tompianeti-run', null),
+      cb = $('cont');
+    if (sv && LEVELS[sv.li]) {
+      cb.hidden = false;
+      cb.innerHTML = '▶ Continua la partita<small>' + LEVELS[sv.li].name + ' · 💎 ' + sv.got.filter(Boolean).length + '</small>';
+      cb.onclick = function () {
+        restore(sv);
+        $('menu').hidden = true;
+        K.start();
+      };
+    } else cb.hidden = true;
+  }
+  function showMenu() {
+    K.stop();
+    $('win').hidden = true;
+    L = null;
+    renderMenu();
+    $('menu').hidden = false;
+    K.wantMusic = null;
+  }
+  function showWin() {
+    K.stop();
+    $('winT').textContent = li === LEVELS.length - 1 ? 'HAI SALVATO LA GALASSIA! 🌟' : 'Cometa presa! ☄️';
+    $('winS').textContent = '💎 Gemme: ' + gotGems + '/' + gems.length + ' · Tempo ' + K.fmt(levelT);
+    $('winNext').hidden = li + 1 >= LEVELS.length;
+    $('win').hidden = false;
+  }
+  $('winNext').onclick = function () {
+    $('win').hidden = true;
+    build(li + 1);
+    K.start();
+  };
+  $('winAgain').onclick = function () {
+    $('win').hidden = true;
+    build(li);
+    K.start();
+  };
+  $('winMenu').onclick = showMenu;
+  pick = K.load('tompianeti-pick', 'tommy');
+  if (!K.CHARS[pick]) pick = 'tommy';
+  K.buttons([{
+    k: 'left',
+    label: '◀',
+    pos: 'bl1 big'
+  }, {
+    k: 'right',
+    label: '▶',
+    pos: 'bl2 big'
+  }, {
+    k: 'a',
+    label: 'SALTA',
+    pos: 'br1 big'
+  }]);
+  K.game = {
+    update: update,
+    draw: draw,
+    save: saveRun,
+    exit: showMenu
+  };
+  K.initUI();
+  K.run();
+  showMenu();
+  window.__P = {
+    build: build,
+    update: update,
+    get pl() {
+      return pl;
+    },
+    get planets() {
+      return planets;
+    },
+    get gems() {
+      return gems;
+    },
+    get foes() {
+      return foes;
+    },
+    get boss() {
+      return boss;
+    },
+    get goal() {
+      return goal;
+    },
+    get won() {
+      return won;
+    },
+    LEVELS: LEVELS
+  };
+})();</script>
+</body>
+</html>

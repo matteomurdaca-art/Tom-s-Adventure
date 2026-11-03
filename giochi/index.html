@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d1f2b">
+<title>Sala giochi di Tom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1f2b;--yel:#f2c230}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:#1d1f2b;background:linear-gradient(180deg,#2b1d5c,#1d1f2b);color:#fff;font-family:'Pixelify Sans',monospace;padding:16px}
+h1{text-align:center;font-size:38px;margin:8px 0 4px;text-shadow:3px 3px 0 #14151d}
+.sub{text-align:center;color:#c7ccd8;margin:0 0 18px}
+.grid{display:flex;flex-wrap:wrap;justify-content:center;max-width:1100px;margin:0 auto}
+a.game{display:flex;flex-direction:column;align-items:center;width:200px;min-height:230px;margin:9px;padding:14px 12px;background:#f6f7fb;color:#1d1f2b;text-decoration:none;border:4px solid #14151d;box-shadow:6px 6px 0 rgba(0,0,0,.45);text-align:center}
+a.game:active{transform:translate(3px,3px);box-shadow:3px 3px 0 rgba(0,0,0,.45)}
+.ic{font-size:64px;line-height:1.1}
+a.game b{font-size:22px;margin:6px 0 4px}
+a.game span{font-size:14px;color:#5d6273}
+.g1{background:#fff3c4!important}.g2{background:#ffe0cc!important}.g3{background:#e6dcff!important}.g4{background:#d9f2ff!important}.g5{background:#dff5dd!important}
+.note{text-align:center;color:#9aa0b5;font-size:13px;max-width:700px;margin:18px auto 0}
+</style>
+</head>
+<body>
+<h1>🎮 Sala giochi di Tom</h1>
+<p class="sub">Scegli un gioco: Tommy, Milly, Papone e Carotino ti aspettano!</p>
+<div class="grid">
+  <a class="game g1" href="../"><div class="ic">✏️</div><b>L'avventura di Tom</b><span>Il gioco nato dal disegno di Tommy: 10 livelli, boss, poteri e negozio</span></a>
+  <a class="game g2" href="kart.html"><div class="ic">🏎️</div><b>Tom Kart</b><span>Corse in kart su 4 piste con pacchi regalo, razzi carota e turbo</span></a>
+  <a class="game g3" href="pianeti.html"><div class="ic">🪐</div><b>Tom tra i Pianeti</b><span>Cammina tutto intorno ai pianeti rotondi e prendi la cometa</span></a>
+  <a class="game g4" href="corsa.html"><div class="ic">🏃</div><b>Corsa Pazza</b><span>12 concorrenti, 3 manche a ostacoli: chi vince la corona?</span></a>
+  <a class="game g5" href="robot.html"><div class="ic">🤖</div><b>Robottino</b><span>Il robot con l'elica: plana, dà pugni e ritrova gli ingranaggi</span></a>
+</div>
+<p class="note">Ogni gioco ha Pausa e Indietro: quando esci la partita si salva e la ritrovi in "Continua". Giochi originali fatti per Tommy.</p>
+</body>
+</html>

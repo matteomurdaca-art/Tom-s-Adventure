@@ -1042,6 +1042,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
           <button class="go" id="playBtn" type="button">Gioca ▶</button>
         </div>
         <button class="go alt" id="openBoard" type="button">🏆 Classifica</button>
+        <a class="go alt" id="arcadeLink" href="giochi/index.html" hidden>🎮 Sala giochi</a>
         <button class="go alt" id="shopBtn" type="button">🛒 Negozio</button>
         <button class="go alt" id="resetBtn" type="button">🔄 Ricomincia da capo</button>
         <div class="styleSw" role="group" aria-label="Stile grafico"><button type="button" data-s="matita" aria-pressed="true">✏️ Matita</button><button type="button" data-s="blocchi" aria-pressed="false">🧱 Blocchi</button><button type="button" data-s="arcade" aria-pressed="false">👾 Arcade</button><button type="button" data-s="3d" aria-pressed="false">🎲 3D</button></div>
@@ -1085,7 +1086,7 @@ body.blocks .char,body.blocks .modes button{border-radius:0}
     <h2>⏸ Pausa</h2>
     <p id="pauseInfo"></p>
     <p class="note savedNote" id="savedNote">💾 La partita si salva da sola: quando riapri il gioco trovi "▶ Carica partita salvata".</p>
-    <p class="note">Versione 22 · Arcade</p>
+    <p class="note">Versione 23 · Sala giochi</p>
     <div class="row">
       <button class="go" id="resumeBtn" type="button">▶ Riprendi</button>
       <button class="go alt musBtn" type="button">Musica sì</button>
@@ -4967,6 +4968,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     updShopBtn();
   };
   updShopBtn();
+  try {
+    if (/github\.io$/.test(location.hostname) || location.protocol === 'http:') $('arcadeLink').hidden = false;
+  } catch (e) {}
   $('resetNo').onclick = function () {
     $('resetBox').hidden = true;
   };

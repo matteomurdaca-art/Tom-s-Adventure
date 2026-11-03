@@ -1,0 +1,3206 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d1f2b">
+<title>Corsa Pazza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1f2b;--paper:#f6f7fb;--yel:#f2c230;--blu:#3f86d4;--red:#e0373f;--grn:#4aa35a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#14151d;color:#fff;font-family:'Pixelify Sans',monospace}
+body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#stage{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#cv{position:absolute;top:0;left:0;display:block;touch-action:none}
+#hud{position:absolute;top:6px;right:8px;display:none;z-index:5}
+body.playing #hud{display:flex}
+#hud button{font:700 16px 'Pixelify Sans',monospace;background:rgba(20,21,29,.75);color:#fff;border:2px solid #5d6273;padding:6px 10px;margin-left:6px;cursor:pointer}
+#pad{position:absolute;left:0;right:0;bottom:0;height:0;display:none;z-index:4}
+body.playing #pad{display:block}
+.kb{position:absolute;bottom:14px;width:78px;height:78px;border:3px solid rgba(255,255,255,.7);background:rgba(20,21,29,.45);color:#fff;font:700 30px 'Pixelify Sans',monospace;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;border-radius:14px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.3)}
+.kb.on{background:rgba(242,194,48,.75);color:#1d1f2b}
+.kb small{font-size:12px;display:block}
+.kb.bl1{left:14px} .kb.bl2{left:104px} .kb.bl3{left:194px}
+.kb.br1{right:14px} .kb.br2{right:104px} .kb.br3{right:194px}
+.kb.big.bl2{left:122px} .kb.big.br2{right:122px}
+.kb.blu{left:59px;bottom:104px} .kb.bld{left:59px}
+.kb.big{width:96px;height:96px}
+@media (orientation:landscape) and (min-height:561px){ .kb{bottom:64px} .kb.blu{bottom:154px} }
+@media (max-height:420px){ .kb{width:64px;height:64px;font-size:24px} .kb.bl2{left:88px} .kb.bl3{left:162px} .kb.br2{right:88px} .kb.br3{right:162px} .kb.big{width:76px;height:76px} .kb.big.bl2{left:98px} .kb.big.br2{right:98px} }
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(10,11,18,.72);z-index:10;padding:12px;overflow:auto}
+.ov[hidden],[hidden]{display:none!important}
+.card{background:#f6f7fb;color:#1d1f2b;border:4px solid #14151d;box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:16px 18px;max-width:760px;width:100%;text-align:center;max-height:100%;overflow:auto}
+.card h1{margin:0 0 6px;font-size:34px} .card h2{margin:0 0 8px;font-size:26px}
+.card p{margin:6px 0}
+.go{font:700 20px 'Pixelify Sans',monospace;background:var(--yel);color:#1d1f2b;border:3px solid #14151d;padding:9px 16px;margin:5px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.22),inset 3px 3px 0 rgba(255,255,255,.5)}
+.go.alt{background:#fff} .go:disabled{opacity:.45;cursor:default}
+.go small{display:block;font-size:13px;font-weight:400}
+.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}
+.kchars{display:flex;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.kchar{font:700 15px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:4px;padding:6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;color:#1d1f2b}
+.kchar canvas{width:44px;height:58px;image-rendering:pixelated;image-rendering:crisp-edges}
+.kchar.sel{background:var(--yel)}
+.note{font-size:14px;color:#5d6273}
+#kpnote.ok{color:#2f7d2e;font-weight:700} #kpnote.bad{color:#c62828;font-weight:700}
+#ktoast{position:absolute;left:50%;top:12px;transform:translateX(-50%);-webkit-transform:translateX(-50%);z-index:30;background:#4aa35a;color:#fff;font:700 18px 'Pixelify Sans',monospace;padding:6px 14px;border:3px solid #14151d;pointer-events:none;white-space:nowrap}
+#ktoast.bad{background:#e0373f}
+#kpriv{background:#fff3cd;border:2px solid #e0373f;color:#7a1d22;padding:6px 8px;font-size:14px;margin:6px 0}
+.lvls{display:flex;flex-wrap:wrap;justify-content:center}
+.lvl{font:700 16px 'Pixelify Sans',monospace;width:150px;min-height:92px;margin:5px;padding:8px;border:3px solid #14151d;background:#fff;cursor:pointer;color:#1d1f2b;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lvl b{font-size:26px} .lvl.done{background:#c9f0cf} .lvl.lock{background:#e3e5ec;color:#9aa0b5;cursor:default}
+.lvl small{font-weight:400;font-size:13px}
+a.home{color:#1d1f2b}
+
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="hud"><button id="kback" type="button">◀ Indietro</button><button id="kpbtn" type="button">❚❚ Pausa</button></div>
+<div id="pad"></div>
+<div class="ov" id="kpause" hidden><div class="card">
+  <h2>❚❚ Pausa</h2>
+  <p id="kpnote"></p>
+  <div class="row">
+    <button class="go" id="kresume" type="button">▶ Riprendi</button>
+    <button class="go alt" id="ksave" type="button">💾 Salva</button>
+    <button class="go alt" id="ksaveexit" type="button">◀ Salva ed esci</button>
+  </div>
+  <div class="row"><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+  <p class="note">Corsa Pazza · Sala giochi di Tom · versione 1</p>
+</div></div>
+<div id="ktoast" hidden></div>
+<div class="ov" id="menu"><div class="card">
+  <h1>🏃 Corsa Pazza</h1>
+  <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
+  <button class="go" id="cont" type="button" hidden></button>
+  <h2>Chi corre?</h2>
+  <div class="kchars" id="chars"></div>
+  <p>12 concorrenti, 3 manche: <b>La Corsa dei Martelli</b> (passano i primi 8), <b>Piastrelle Ballerine</b> (restano in 6) e <b>La Salita della Corona</b>.</p>
+  <p id="rec" class="note"></p>
+  <button class="go" id="go" type="button">▶ Inizia la gara</button>
+  <p class="note">◀ ▶ per correre · SALTA per saltare. Occhio ai martelli, alle barre che girano e alle palle che rotolano!</p>
+  <div class="row"><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+</div></div>
+<div class="ov" id="end" hidden><div class="card">
+  <h1 id="endT"></h1><p id="endS"></p>
+  <div class="row"><button class="go" id="endNext" type="button">Prossima manche ▶</button><button class="go alt" id="endAgain" type="button">🔄 Nuova gara</button><button class="go alt" id="endMenu" type="button">◀ Menu</button></div>
+</div></div>
+
+<script>/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) });
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true });
+  defineProperty(
+    GeneratorFunctionPrototype,
+    "constructor",
+    { value: GeneratorFunction, configurable: true }
+  );
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    defineProperty(this, "_invoke", { value: enqueue });
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per GeneratorResume behavior specified since ES2015:
+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume
+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method;
+    var method = delegate.iterator[methodName];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method, or a missing .next method, always terminate the
+      // yield* loop.
+      context.delegate = null;
+
+      // Note: ["return"] must be used for ES3 parsing compatibility.
+      if (methodName === "throw" && delegate.iterator["return"]) {
+        // If the delegate iterator has a return method, give it a
+        // chance to clean up.
+        context.method = "return";
+        context.arg = undefined;
+        maybeInvokeDelegate(delegate, context);
+
+        if (context.method === "throw") {
+          // If maybeInvokeDelegate(context) changed context.method from
+          // "return" to "throw", let that override the TypeError below.
+          return ContinueSentinel;
+        }
+      }
+      if (methodName !== "return") {
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a '" + methodName + "' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(val) {
+    var object = Object(val);
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable != null) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    throw new TypeError(typeof iterable + " is not iterable");
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+(function(){
+ if(!String.prototype.padStart){String.prototype.padStart=function(n,c){var s=String(this);c=c===undefined?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};}
+ if(!Object.assign){Object.assign=function(t){for(var i=1;i<arguments.length;i++){var s=arguments[i];if(s)for(var k in s)if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k];}return t;};}
+ if(!Array.prototype.findIndex){Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};}
+ if(window.NodeList&&!NodeList.prototype.forEach){NodeList.prototype.forEach=Array.prototype.forEach;}
+ [Element.prototype,Document.prototype,DocumentFragment.prototype].forEach(function(P){ if(!P.append){P.append=function(){for(var i=0;i<arguments.length;i++){var n=arguments[i];this.appendChild(n instanceof Node?n:document.createTextNode(String(n)));}};} });
+ var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+ if(C&&!C.ellipse){C.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){this.save();this.translate(x,y);this.rotate(rot);this.scale(rx,ry);this.arc(0,0,1,a0,a1,ccw);this.restore();};}
+})();
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n2 = 0, F = function F() {}; return { s: F, n: function n() { return _n2 >= r.length ? { done: !0 } : { done: !1, value: r[_n2++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var K = function () {
+  var K = {};
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  K.$ = $;
+  var cv = $('cv'),
+    ctx = cv.getContext('2d');
+  K.cv = cv;
+  K.ctx = ctx;
+  K.W = 800;
+  K.H = 450;
+  K.dpr = 1;
+  function resize() {
+    var st = $('stage');
+    var w = Math.max(200, st.clientWidth),
+      h = Math.max(150, st.clientHeight);
+    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 2);
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+    cv.width = Math.round(w * K.dpr);
+    cv.height = Math.round(h * K.dpr);
+    K.W = w;
+    K.H = h;
+    K.onResize && K.onResize(w, h);
+  }
+  K.resize = resize;
+  var lsw = 0,
+    lsh = 0;
+  addEventListener('resize', resize);
+  addEventListener('orientationchange', function () {
+    setTimeout(resize, 150);
+    setTimeout(resize, 500);
+  });
+  K.keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    a: false,
+    b: false
+  };
+  var prev = {};
+  K.pressed = function (k) {
+    return K.keys[k] && !prev[k];
+  };
+  var BTN = [];
+  K.buttons = function (list) {
+    var pad = $('pad');
+    pad.innerHTML = '';
+    BTN.length = 0;
+    var _iterator = _createForOfIteratorHelper(list),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var b = _step.value;
+        var e = document.createElement('div');
+        e.className = 'kb ' + (b.cls || '') + ' ' + b.pos;
+        e.id = 'kb_' + b.k;
+        e.innerHTML = b.label;
+        pad.appendChild(e);
+        BTN.push({
+          el: e,
+          k: b.k
+        });
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  };
+  function touchKeys(e) {
+    var playing = K.playing && $('kpause').hidden;
+    var st = {};
+    var hit = false;
+    if (playing) for (var i = 0; i < e.touches.length; i++) {
+      var t = e.touches[i];
+      var best = null,
+        bd = 1e9;
+      var _iterator2 = _createForOfIteratorHelper(BTN),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var b = _step2.value;
+          var r = b.el.getBoundingClientRect();
+          if (!r.width || b.el.offsetParent === null) continue;
+          if (t.clientY < r.top - 45 || t.clientY > r.bottom + 200) continue;
+          if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
+          var cx = (r.left + r.right) / 2,
+            cy = (r.top + r.bottom) / 2,
+            dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .3;
+          if (dd < bd) {
+            bd = dd;
+            best = b;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      if (best) {
+        st[best.k] = true;
+        hit = true;
+      }
+    }
+    var _iterator3 = _createForOfIteratorHelper(BTN),
+      _step3;
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var _b = _step3.value;
+        K.keys[_b.k] = !!st[_b.k] || !!kbd[_b.k];
+        _b.el.classList.toggle('on', !!st[_b.k]);
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    if (hit && e.cancelable) e.preventDefault();
+  }
+  ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (ev) {
+    return document.addEventListener(ev, touchKeys, {
+      passive: false
+    });
+  });
+  document.addEventListener('mousedown', function (e) {
+    var b = BTN.find(function (b) {
+      return b.el.contains(e.target);
+    });
+    if (b) {
+      K.keys[b.k] = true;
+      b.el.classList.add('on');
+      var _up = function up() {
+        K.keys[b.k] = !!kbd[b.k];
+        b.el.classList.remove('on');
+        removeEventListener('mouseup', _up);
+      };
+      addEventListener('mouseup', _up);
+    }
+  });
+  var KMAP = {
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    KeyA: 'left',
+    KeyD: 'right',
+    KeyW: 'up',
+    KeyS: 'down',
+    Space: 'a',
+    KeyZ: 'a',
+    KeyK: 'a',
+    KeyX: 'b',
+    KeyL: 'b',
+    Enter: 'b',
+    ShiftLeft: 'b'
+  };
+  var kbd = {};
+  addEventListener('keydown', function (e) {
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      if (K.playing) K.togglePause();
+      return;
+    }
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = true;
+      K.keys[k] = true;
+      if (K.playing) e.preventDefault();
+    }
+  });
+  addEventListener('keyup', function (e) {
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = false;
+      K.keys[k] = false;
+    }
+  });
+  document.addEventListener('contextmenu', function (e) {
+    if (K.playing) e.preventDefault();
+  });
+  var ac = null;
+  K.soundOn = true;
+  K.musicOn = true;
+  try {
+    if (localStorage.getItem('tomk-sound') === '0') K.soundOn = false;
+    if (localStorage.getItem('tomk-music') === '0') K.musicOn = false;
+  } catch (e) {}
+  function actx() {
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended' && ac.resume) ac.resume();
+    } catch (e) {}
+    return ac;
+  }
+  ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(function (ev) {
+    return document.addEventListener(ev, function () {
+      var c = actx();
+      if (c) {
+        try {
+          var b = c.createBuffer(1, 1, 22050),
+            s = c.createBufferSource();
+          s.buffer = b;
+          s.connect(c.destination);
+          s.start(0);
+        } catch (e) {}
+      }
+    }, {
+      passive: true
+    });
+  });
+  K.beep = function (f, d, type, vol, slide) {
+    if (!K.soundOn) return;
+    var c = actx();
+    if (!c) return;
+    try {
+      var o = c.createOscillator(),
+        g = c.createGain();
+      o.type = type || 'square';
+      o.frequency.value = f;
+      if (slide) o.frequency.linearRampToValueAtTime(Math.max(20, f + slide), c.currentTime + d);
+      g.gain.value = vol || .05;
+      g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + d);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start();
+      o.stop(c.currentTime + d);
+    } catch (e) {}
+  };
+  K.jingle = function (notes, step, type) {
+    return notes.forEach(function (n, i) {
+      return setTimeout(function () {
+        return K.beep(n, .14, type || 'triangle', .06);
+      }, i * (step || 90));
+    });
+  };
+  var NT = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11
+  };
+  var fq = function fq(n) {
+    var m = /^([A-G])(#|b)?(\d)$/.exec(n);
+    if (!m) return 0;
+    var s = NT[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+    return 440 * Math.pow(2, (12 * (+m[3] + 1) + s - 69) / 12);
+  };
+  var parse = function parse(str) {
+    var t = str.split(/\s+/),
+      out = [];
+    for (var i = 0; i < t.length; i++) {
+      if (t[i] === '-') continue;
+      var len = 1;
+      for (var j = i + 1; j < t.length && t[j] === '-'; j++) len++;
+      out.push({
+        step: i,
+        len,
+        f: fq(t[i])
+      });
+    }
+    return {
+      notes: out,
+      steps: t.length
+    };
+  };
+  K.MUS = {};
+  K.addMusic = function (name, m) {
+    m.M = parse(m.mel);
+    m.B = parse(m.bass);
+    m.A = m.arp ? m.arp.split(' ').map(fq) : null;
+    K.MUS[name] = m;
+  };
+  var MZ = {
+    cur: null,
+    next: 0,
+    step: 0,
+    bus: null,
+    echo: null,
+    noise: null
+  };
+  function mzBus() {
+    if (MZ.bus) return true;
+    var c = actx();
+    if (!c) return false;
+    try {
+      MZ.bus = c.createGain();
+      MZ.bus.gain.value = .5;
+      MZ.bus.connect(c.destination);
+      var dl = c.createDelay(),
+        fb = c.createGain(),
+        wet = c.createGain();
+      MZ.echo = c.createGain();
+      dl.delayTime.value = .33;
+      fb.gain.value = .33;
+      wet.gain.value = .45;
+      MZ.echo.connect(MZ.bus);
+      MZ.echo.connect(dl);
+      dl.connect(fb);
+      fb.connect(dl);
+      dl.connect(wet);
+      wet.connect(MZ.bus);
+      var nb = c.createBuffer(1, c.sampleRate * .5, c.sampleRate),
+        d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      MZ.noise = nb;
+    } catch (e) {
+      MZ.bus = null;
+      return false;
+    }
+    return true;
+  }
+  function tone(type, f, t, dur, v, out, bell) {
+    var o = ac.createOscillator(),
+      g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    var a = .008,
+      rel = bell ? dur * 1.6 : Math.min(.08, dur * .4);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + a);
+    if (bell) g.gain.exponentialRampToValueAtTime(.0001, t + rel);else {
+      g.gain.setValueAtTime(v, t + Math.max(a, dur - rel));
+      g.gain.linearRampToValueAtTime(.0001, t + dur);
+    }
+    o.connect(g);
+    g.connect(out);
+    o.start(t);
+    o.stop(t + (bell ? rel : dur) + .05);
+  }
+  function drum(k, t) {
+    if (k === 'k') {
+      var o = ac.createOscillator(),
+        _g = ac.createGain();
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + .12);
+      _g.gain.setValueAtTime(.42, t);
+      _g.gain.exponentialRampToValueAtTime(.001, t + .15);
+      o.connect(_g);
+      _g.connect(MZ.bus);
+      o.start(t);
+      o.stop(t + .16);
+      return;
+    }
+    var s = ac.createBufferSource(),
+      f = ac.createBiquadFilter(),
+      g = ac.createGain();
+    s.buffer = MZ.noise;
+    f.type = 'highpass';
+    f.frequency.value = k === 'h' ? 7000 : 1500;
+    var len = k === 'h' ? .04 : .12;
+    g.gain.setValueAtTime(k === 'h' ? .1 : .2, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + len);
+    s.connect(f);
+    f.connect(g);
+    g.connect(MZ.bus);
+    s.start(t);
+    s.stop(t + len + .02);
+  }
+  function mzStep(m, s, t) {
+    var sd = 60 / m.tempo / 2,
+      out = m.echo ? MZ.echo : MZ.bus;
+    var ms = s % m.M.steps;
+    var _iterator4 = _createForOfIteratorHelper(m.M.notes),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var n = _step4.value;
+        if (n.step === ms) tone(m.lead, n.f, t, n.len * sd * .95, m.lv, out, m.bell);
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
+    }
+    var bs = s % m.B.steps;
+    var _iterator5 = _createForOfIteratorHelper(m.B.notes),
+      _step5;
+    try {
+      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+        var _n = _step5.value;
+        if (_n.step === bs) tone('triangle', _n.f, t, _n.len * sd * .9, .25, MZ.bus);
+      }
+    } catch (err) {
+      _iterator5.e(err);
+    } finally {
+      _iterator5.f();
+    }
+    var dk = m.drums.charAt(s % m.drums.length);
+    if (dk !== '-') drum(dk, t);
+    if (m.A && s % 2 === 0) tone('sine', m.A[s / 2 % m.A.length], t, sd * .9, .05, out, true);
+  }
+  K.wantMusic = null;
+  function musicTick() {
+    var want = K.musicOn && K.playing && $('kpause').hidden ? K.wantMusic : null;
+    if (want !== MZ.cur) {
+      if (MZ.bus) {
+        try {
+          MZ.bus.disconnect();
+        } catch (e) {}
+        MZ.bus = null;
+      }
+      MZ.cur = want;
+      MZ.step = 0;
+      if (want) {
+        if (mzBus()) MZ.next = ac.currentTime + .08;else MZ.cur = null;
+      }
+    }
+    if (!MZ.cur || !MZ.bus || !K.MUS[MZ.cur]) return;
+    var m = K.MUS[MZ.cur],
+      sd = 60 / m.tempo / 2;
+    if (MZ.next < ac.currentTime) MZ.next = ac.currentTime + .02;
+    try {
+      while (MZ.next < ac.currentTime + .15) {
+        mzStep(m, MZ.step, MZ.next);
+        MZ.next += sd;
+        MZ.step++;
+      }
+    } catch (e) {}
+  }
+  K.storageOK = function () {
+    try {
+      localStorage.setItem('tomk-test', '1');
+      var ok = localStorage.getItem('tomk-test') === '1';
+      localStorage.removeItem('tomk-test');
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.load = function (key, def) {
+    try {
+      var v = localStorage.getItem(key);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) {
+      return def;
+    }
+  };
+  K.save = function (key, val) {
+    try {
+      var t = JSON.stringify(val);
+      localStorage.setItem(key, t);
+      return localStorage.getItem(key) === t;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.del = function (key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {}
+  };
+  var toastT = 0;
+  K.toast = function (msg, bad) {
+    var t = $('ktoast');
+    t.textContent = msg;
+    t.className = bad ? 'bad' : '';
+    t.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      t.hidden = true;
+    }, 2000);
+  };
+  K.playing = false;
+  K.game = null;
+  K.start = function () {
+    K.playing = true;
+    $('kpause').hidden = true;
+    document.body.classList.add('playing');
+    last = 0;
+  };
+  K.stop = function () {
+    K.playing = false;
+    document.body.classList.remove('playing');
+    for (var k in K.keys) K.keys[k] = false;
+    BTN.forEach(function (b) {
+      return b.el.classList.remove('on');
+    });
+  };
+  K.togglePause = function () {
+    if (!K.playing) return;
+    if ($('kpause').hidden) {
+      $('kpause').hidden = false;
+      $('kpnote').textContent = '';
+      for (var k in K.keys) K.keys[k] = false;
+      K.game && K.game.save && K.game.save();
+    } else $('kpause').hidden = true;
+  };
+  function saveExit() {
+    var ok = true;
+    if (K.game && K.game.save) ok = K.game.save();
+    K.stop();
+    $('kpause').hidden = true;
+    K.game && K.game.exit && K.game.exit();
+    K.toast(ok ? '💾 Partita salvata: la ritrovi in "Continua"' : '⚠ Partita NON salvata (Navigazione privata)', !ok);
+  }
+  K.saveExit = saveExit;
+  function updToggles() {
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.textContent = K.soundOn ? '🔊 Suono sì' : '🔈 Suono no';
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.textContent = K.musicOn ? '🎵 Musica sì' : '🎵 Musica no';
+    });
+  }
+  K.initUI = function () {
+    $('kback').onclick = saveExit;
+    $('kpbtn').onclick = K.togglePause;
+    $('kresume').onclick = function () {
+      $('kpause').hidden = true;
+      last = 0;
+    };
+    $('ksave').onclick = function () {
+      var ok = K.game && K.game.save ? K.game.save() : false;
+      $('kpnote').textContent = ok ? '✔ Partita salvata' : '⚠ Non salvata: Safari è in Navigazione privata';
+      $('kpnote').className = ok ? 'ok' : 'bad';
+    };
+    $('ksaveexit').onclick = saveExit;
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.onclick = function () {
+        K.soundOn = !K.soundOn;
+        try {
+          localStorage.setItem('tomk-sound', K.soundOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.onclick = function () {
+        K.musicOn = !K.musicOn;
+        try {
+          localStorage.setItem('tomk-music', K.musicOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    updToggles();
+    if (!K.storageOK()) {
+      var w = $('kpriv');
+      if (w) w.hidden = false;
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && K.playing && $('kpause').hidden) K.togglePause();
+    });
+    addEventListener('pagehide', function () {
+      if (K.playing && K.game && K.game.save) K.game.save();
+    });
+  };
+  var last = 0;
+  K.time = 0;
+  function loop(t) {
+    if (window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
+    var st = $('stage'),
+      sw = st.clientWidth,
+      sh = st.clientHeight;
+    if (sw !== lsw || sh !== lsh) {
+      lsw = sw;
+      lsh = sh;
+      resize();
+    }
+    var dt = last ? t - last : 16.67;
+    last = t;
+    var f = Math.min(dt / 16.67, 2.5);
+    var paused = !$('kpause').hidden;
+    if (K.game) {
+      if (K.playing && !paused) {
+        K.time += f;
+        K.game.update(f);
+      } else if (K.game.idle) K.game.idle(f);
+      K.game.draw();
+    }
+    for (var k in K.keys) prev[k] = K.keys[k];
+    musicTick();
+    requestAnimationFrame(loop);
+  }
+  K.run = function () {
+    resize();
+    requestAnimationFrame(loop);
+  };
+  var PAL = {
+    k: '#1d1f2b',
+    w: '#ffffff',
+    W: '#e8ecf4',
+    g: '#9aa0b5',
+    G: '#5d6273',
+    s: '#f2c59a',
+    S: '#d99a6c',
+    h: '#4a2e1c',
+    o: '#f07a2a',
+    O: '#c25a14',
+    r: '#e0373f',
+    R: '#9c1f26',
+    y: '#f2c230',
+    Y: '#c99a00',
+    b: '#3f86d4',
+    B: '#24548f',
+    c: '#9fd3f0',
+    l: '#7cc242',
+    L: '#3d7a1f',
+    n: '#4aa35a',
+    p: '#8a5cc7',
+    P: '#5a3a8a',
+    q: '#e096d2',
+    m: '#9b7653',
+    M: '#6b4a2e',
+    e: '#e8cfa8',
+    d: '#3b3f4f',
+    C: '#c8642a',
+    E: '#e8d2a6',
+    D: '#c9a978'
+  };
+  K.PAL = PAL;
+  var SC = {};
+  K.sprite = function (key, rows, over) {
+    if (SC[key]) return SC[key];
+    var w = Math.max.apply(null, rows.map(function (r) {
+        return r.length;
+      })),
+      h = rows.length,
+      c = document.createElement('canvas');
+    c.width = w + 2;
+    c.height = h + 2;
+    var x = c.getContext('2d');
+    var put = function put(col, dx, dy) {
+      return rows.forEach(function (r, j) {
+        for (var i = 0; i < r.length; i++) {
+          var ch = r[i];
+          if (ch === '.' || ch === ' ') continue;
+          x.fillStyle = col || over && over[ch] || PAL[ch] || '#f0f';
+          x.fillRect(i + dx, j + dy, 1, 1);
+        }
+      });
+    };
+    for (var _i = 0, _arr = [[0, 1], [2, 1], [1, 0], [1, 2]]; _i < _arr.length; _i++) {
+      var _arr$_i = _slicedToArray(_arr[_i], 2),
+        dx = _arr$_i[0],
+        dy = _arr$_i[1];
+      put('#14151d', dx, dy);
+    }
+    put(null, 1, 1);
+    return SC[key] = c;
+  };
+  K.draw = function (c, x, y, U, flip) {
+    var w = c.width * U,
+      h = c.height * U;
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+    if (flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, -w / 2, -h + U, w, h);
+    ctx.restore();
+  };
+  var TOMHEAD = ["..h.h.h...", ".hhhhhhh..", ".hhssssss.", ".hsssswks.", ".ssssssss.", "..sssskss."];
+  var TOMBODY = {
+    stand: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "...d..d...", "..kk..kk.."],
+    walkA: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "..d....d..", ".kk....kk."],
+    walkB: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "....dd....", "....kk...."],
+    jump: ["s..oooo..s", ".soooooos.", "...oooo...", "...dddd...", "..d....d..", ".kk....kk."]
+  };
+  var MILLYHEAD = ["..CCCCC...", ".CCCCCCC..", ".CCssssss.", ".CCsswkss.", ".CCssssss.", ".CC.ssks.."];
+  var MILLYBODY = {
+    stand: ["...pppp...", "..sppppps.", ".pppppppp.", "...s..s...", "..kk..kk.."],
+    walkA: ["...pppp...", "..sppppps.", ".pppppppp.", "..s....s..", ".kk....kk."],
+    walkB: ["...pppp...", "..sppppps.", ".pppppppp.", "....ss....", "....kk...."],
+    jump: ["s..pppp..s", ".spppppps.", ".pppppppp.", "..s....s..", ".kk....kk."]
+  };
+  var PAPHEAD = ["...ssss...", "..sWssss..", ".sssssss..", ".Sssswks..", ".ssssssss.", "..sssskss."];
+  var PAPTOP = ["...bbbb...", "..bbbbbb..", "..bbbbbb..", "..sbbbbs..", "...dddd..."];
+  var PAPLEGS = {
+    stand: ["...d..d...", "...d..d...", "..kk..kk.."],
+    walkA: ["..d....d..", "..d....d..", ".kk....kk."],
+    walkB: ["....dd....", "....dd....", "....kk...."],
+    jump: ["..d....d..", "..d....d..", ".kk....kk."]
+  };
+  var BUNNY = {
+    stand: ["............", ".......EEEE.", "......EEEEEE", "..ww..EEkEEq", ".wEEEEDEEEE.", ".EEEEEEDEE..", ".EEEEEEDE...", "..EE..EE...."],
+    jump: ["......EEEE..", ".....EEEEEE.", "..ww.EEkEEq.", ".wEEEEDEEE..", "EEEEEEEDE...", ".EEEEEEE....", "..E.....E...", "............"]
+  };
+  K.CHARS = {
+    tommy: {
+      name: 'Tommy',
+      col: '#f07a2a'
+    },
+    milly: {
+      name: 'Milly',
+      col: '#8a5cc7'
+    },
+    papone: {
+      name: 'Papone',
+      col: '#3f86d4'
+    },
+    carotino: {
+      name: 'Carotino',
+      col: '#e8d2a6'
+    }
+  };
+  K.CHAR_ORDER = ['tommy', 'milly', 'papone', 'carotino'];
+  K.charS = function (ch, f) {
+    f = f || 'stand';
+    if (ch === 'milly') return K.sprite('milly_' + f, MILLYHEAD.concat(MILLYBODY[f] || MILLYBODY.stand));
+    if (ch === 'papone') return K.sprite('pap_' + f, PAPHEAD.concat(f === 'jump' ? ["s..bbbb..s", ".sbbbbbbs.", "..bbbbbb..", "..bbbbbb..", "...dddd..."] : PAPTOP, PAPLEGS[f] || PAPLEGS.stand));
+    if (ch === 'carotino') return K.sprite('bun_' + (f === 'jump' || f === 'walkA' ? 'jump' : 'stand'), BUNNY[f === 'jump' || f === 'walkA' ? 'jump' : 'stand']);
+    return K.sprite('tom_' + f, TOMHEAD.concat(TOMBODY[f] || TOMBODY.stand));
+  };
+  K.headS = function (ch) {
+    if (ch === 'milly') return K.sprite('mh', MILLYHEAD);
+    if (ch === 'papone') return K.sprite('ph', PAPHEAD);
+    if (ch === 'carotino') return K.sprite('bh', BUNNY.stand.slice(0, 5));
+    return K.sprite('th', TOMHEAD);
+  };
+  K.rect = function (x, y, w, h, c) {
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  };
+  K.text = function (t, x, y, size, col, align, shadow) {
+    ctx.font = '700 ' + size + "px 'Pixelify Sans', monospace";
+    ctx.textAlign = align || 'left';
+    if (shadow !== false) {
+      ctx.fillStyle = 'rgba(20,21,29,.8)';
+      ctx.fillText(t, x + 2, y + 2);
+    }
+    ctx.fillStyle = col || '#fff';
+    ctx.fillText(t, x, y);
+    ctx.textAlign = 'left';
+  };
+  K.rnd = function (i, j, s) {
+    var v = Math.sin(i * 127.1 + (j || 0) * 311.7 + (s || 0) * 74.7) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  K.fmt = function (s) {
+    return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  };
+  K.charPicker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var c = document.createElement('canvas'),
+        s = K.charS(ch, 'stand');
+      c.width = s.width;
+      c.height = s.height;
+      var x = c.getContext('2d');
+      x.drawImage(s, 0, 0);
+      b.appendChild(c);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+  return K;
+}();
+(function () {
+  var ctx = K.ctx,
+    $ = K.$;
+  var H = 360,
+    GR = .55,
+    JV = -10.4,
+    SPD = 3.3;
+  K.addMusic('cpazza', {
+    tempo: 156,
+    lead: 'square',
+    lv: .09,
+    mel: 'C5 C5 - E5 G5 - E5 C5 D5 - D5 F5 A5 - F5 D5 E5 E5 - G5 C6 - B5 A5 G5 - F5 - E5 - D5 -',
+    bass: 'C3 G2 C3 G2 D3 A2 D3 A2 E3 B2 E3 B2 G2 D3 G2 D3',
+    drums: 'k-hsk-hs'
+  });
+  K.addMusic('ctiles', {
+    tempo: 132,
+    lead: 'triangle',
+    lv: .2,
+    mel: 'A5 - E5 - A5 - C6 B5 A5 - E5 - F5 - G5 - A5 - E5 - A5 - C6 D6 E6 - D6 - C6 - B5 -',
+    bass: 'A2 - E3 - F2 - C3 - G2 - D3 - E2 - B2 -',
+    drums: 'k-h-k-hh'
+  });
+  K.addMusic('cfinale', {
+    tempo: 170,
+    lead: 'sawtooth',
+    lv: .07,
+    mel: 'E5 - E5 G5 - E5 A5 - G5 - E5 - D5 - C5 - E5 - E5 G5 - B5 C6 - B5 - G5 - A5 - - -',
+    bass: 'A2 A3 A2 A3 F2 F3 F2 F3 C3 C4 C3 C4 G2 G3 G2 G3',
+    drums: 'kkhskkhs'
+  });
+  K.addMusic('cwin', {
+    tempo: 130,
+    lead: 'square',
+    lv: .09,
+    mel: 'C5 E5 G5 C6 - G5 C6 - - - - - - - - -',
+    bass: 'C3 - - - G2 - - - C3 - - - - - - -',
+    drums: 'k---k---'
+  });
+  var BOTS = [['Luca', '#3f86d4', '#4a2e1c'], ['Sara', '#e0373f', '#c8642a'], ['Giulia', '#4aa35a', '#1d1f2b'], ['Marco', '#f2c230', '#4a2e1c'], ['Nina', '#e096d2', '#f2c230'], ['Leo', '#9fd3f0', '#6b4a2e'], ['Ada', '#8a5cc7', '#1d1f2b'], ['Teo', '#f07a2a', '#e8cfa8']];
+  var ROUNDS = [{
+    name: 'La Corsa dei Martelli',
+    kind: 'race',
+    keep: 8,
+    mus: 'cpazza',
+    sub: 'arriva tra i primi 8'
+  }, {
+    name: 'Piastrelle Ballerine',
+    kind: 'tiles',
+    keep: 6,
+    mus: 'ctiles',
+    sub: 'resta in piedi: le piastrelle cadono!'
+  }, {
+    name: 'La Salita della Corona',
+    kind: 'race',
+    keep: 1,
+    mus: 'cfinale',
+    sub: 'il primo che prende la corona vince'
+  }];
+  var round = 0,
+    R = null,
+    W = null,
+    runners = [],
+    me = null,
+    camX = 0,
+    camY = 0,
+    rt = 0,
+    over = false,
+    endT = 0,
+    parts = [],
+    banner = null,
+    pick = 'tommy',
+    field = [];
+  function kidSprite(name, shirt, hair, f) {
+    return K.sprite('kid_' + name + '_' + f, ["..h.h.h...", ".hhhhhhh..", ".hhssssss.", ".hsssswks.", ".ssssssss.", "..sssskss."].concat({
+      stand: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "...d..d...", "..kk..kk.."],
+      walkA: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "..d....d..", ".kk....kk."],
+      walkB: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "....dd....", "....kk...."],
+      jump: ["s..oooo..s", ".soooooos.", "...oooo...", "...dddd...", "..d....d..", ".kk....kk."]
+    }[f]), {
+      o: shirt,
+      h: hair
+    });
+  }
+  function mkRunner(o, i) {
+    return {
+      name: o.name,
+      ch: o.ch,
+      shirt: o.shirt,
+      hair: o.hair,
+      bot: o.bot,
+      x: 40 + i % 6 * 26,
+      y: 300 - 34,
+      w: 18,
+      h: 34,
+      vx: 0,
+      vy: 0,
+      on: false,
+      face: 1,
+      walk: 0,
+      stun: 0,
+      fin: 0,
+      out: false,
+      cp: 40,
+      sp: o.bot ? 2.2 + K.rnd(i, round, 1) * .8 : SPD,
+      react: o.bot ? 4 + Math.floor(K.rnd(i, round, 2) * 10) : 0,
+      err: o.bot ? .04 + K.rnd(i, round, 3) * .12 : 0,
+      think: 0,
+      dir: 1,
+      jumpCd: 0,
+      place: 0
+    };
+  }
+  function course(kind, n) {
+    W = {
+      solids: [],
+      water: [],
+      pend: [],
+      sweep: [],
+      belts: [],
+      pads: [],
+      movers: [],
+      balls: [],
+      ballT: 0,
+      cps: [],
+      finish: 0,
+      crown: null,
+      tiles: [],
+      len: 0
+    };
+    var S = function S(x, y, w, h, k) {
+      var o = {
+        x,
+        y,
+        w,
+        h,
+        k: k || 'g'
+      };
+      W.solids.push(o);
+      return o;
+    };
+    if (kind === 'tiles') {
+      W.len = 1100;
+      W.water.push({
+        x: -200,
+        y: 330,
+        w: 1500,
+        h: 60
+      });
+      for (var x = 120; x < 1000; x += 56) W.tiles.push(S(x, 160, 52, 16, 'tile'));
+      for (var _x = 148; _x < 980; _x += 56) W.tiles.push(S(_x, 230, 52, 16, 'tile'));
+      for (var _x2 = 120; _x2 < 1000; _x2 += 56) W.tiles.push(S(_x2, 300, 52, 16, 'tile'));
+      S(100, -200, 20, 530, 'wall');
+      S(1012, -200, 20, 530, 'wall');
+      return;
+    }
+    if (n === 0) {
+      S(0, 300, 1100, 60);
+      W.pend.push({
+        x: 480,
+        y: 40,
+        L: 200,
+        A: 1.0,
+        w: .035,
+        ph: 0
+      }, {
+        x: 760,
+        y: 40,
+        L: 200,
+        A: 1.0,
+        w: .04,
+        ph: 1.6
+      });
+      W.water.push({
+        x: 1100,
+        y: 330,
+        w: 240,
+        h: 60
+      });
+      W.movers.push({
+        o: S(1120, 282, 90, 16, 'mov'),
+        a: 1120,
+        b: 1240,
+        sp: 1.3,
+        d: 1
+      });
+      S(1340, 300, 900, 60);
+      W.cps.push(1360);
+      W.sweep.push({
+        x: 1560,
+        y: 282,
+        L: 80,
+        w: .045,
+        a: 0
+      });
+      W.belts.push({
+        x: 1720,
+        w: 220,
+        y: 300,
+        v: -1.6
+      });
+      W.pads.push({
+        x: 2222,
+        y: 300
+      });
+      S(2240, 170, 380, 190);
+      W.pend.push({
+        x: 2430,
+        y: -60,
+        L: 190,
+        A: 1.1,
+        w: .045,
+        ph: .5
+      });
+      W.cps.push(2260);
+      S(2620, 300, 1180, 60);
+      W.cps.push(2640);
+      W.balls.push({
+        x: 3700,
+        per: 110
+      });
+      W.finish = 3600;
+      W.len = 3800;
+    } else {
+      S(0, 300, 700, 60);
+      W.sweep.push({
+        x: 420,
+        y: 282,
+        L: 90,
+        w: .05,
+        a: 0
+      });
+      W.water.push({
+        x: 700,
+        y: 330,
+        w: 260,
+        h: 60
+      });
+      S(760, 284, 60, 40);
+      S(870, 284, 60, 40);
+      S(960, 300, 500, 60);
+      W.cps.push(980);
+      W.pend.push({
+        x: 1180,
+        y: 40,
+        L: 200,
+        A: 1.1,
+        w: .045,
+        ph: 0
+      });
+      W.pads.push({
+        x: 1482,
+        y: 300
+      });
+      S(1500, 180, 300, 180);
+      W.pend.push({
+        x: 1650,
+        y: -70,
+        L: 190,
+        A: 1.1,
+        w: .05,
+        ph: 1
+      });
+      W.water.push({
+        x: 1800,
+        y: 330,
+        w: 300,
+        h: 60
+      });
+      S(1850, 250, 60, 90);
+      S(1960, 230, 60, 110);
+      W.movers.push({
+        o: S(2040, 250, 50, 16, 'mov'),
+        a: 2040,
+        b: 2050,
+        sp: .2,
+        d: 1
+      });
+      S(2100, 300, 700, 60);
+      W.cps.push(2120);
+      W.belts.push({
+        x: 2200,
+        w: 260,
+        y: 300,
+        v: -1.8
+      });
+      W.sweep.push({
+        x: 2620,
+        y: 282,
+        L: 90,
+        w: -.05,
+        a: 1
+      });
+      S(2800, 240, 120, 120);
+      S(2920, 180, 120, 180);
+      S(3040, 120, 120, 240);
+      W.cps.push(2820);
+      W.pend.push({
+        x: 3220,
+        y: -120,
+        L: 200,
+        A: 1.0,
+        w: .05,
+        ph: 2
+      });
+      S(3160, 120, 560, 240);
+      W.balls.push({
+        x: 3660,
+        per: 120,
+        y: 120 - 20
+      });
+      W.finish = 3640;
+      W.crown = {
+        x: 3660,
+        y: 70
+      };
+      W.len = 3760;
+    }
+  }
+  function startRound(r, keepField) {
+    round = r;
+    R = ROUNDS[r];
+    course(R.kind, r);
+    rt = 0;
+    over = false;
+    endT = 0;
+    parts = [];
+    banner = {
+      t: 150,
+      s: R.name,
+      s2: R.sub
+    };
+    if (!keepField) {
+      field = [{
+        name: K.CHARS[pick].name,
+        ch: pick,
+        bot: false
+      }].concat(K.CHAR_ORDER.filter(function (c) {
+        return c !== pick;
+      }).map(function (c) {
+        return {
+          name: K.CHARS[c].name,
+          ch: c,
+          bot: true
+        };
+      })).concat(BOTS.map(function (b) {
+        return {
+          name: b[0],
+          shirt: b[1],
+          hair: b[2],
+          bot: true
+        };
+      }));
+    }
+    runners = field.map(function (o, i) {
+      return mkRunner(o, i);
+    });
+    me = runners.find(function (r) {
+      return !r.bot;
+    });
+    if (R.kind === 'tiles') {
+      runners.forEach(function (q, i) {
+        q.x = 140 + i * 71 % 820;
+        q.y = [160, 230, 300][i % 3] - q.h;
+        q.dir = i % 2 ? 1 : -1;
+      });
+    } else runners.forEach(function (q, i) {
+      q.x = 30 + i * 5 % 12 * 22;
+    });
+    camX = Math.max(0, me.x - 200);
+    K.wantMusic = R.mus;
+    countdown = 3.2;
+  }
+  var countdown = 0;
+  var ov = function ov(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  };
+  function solidAt(x, y) {
+    return W.solids.some(function (s) {
+      return !s.gone && x >= s.x && x <= s.x + s.w && y >= s.y && y <= s.y + s.h;
+    });
+  }
+  function knock(q, dx, dy) {
+    if (q.stun > 0) return;
+    q.vx = dx;
+    q.vy = dy;
+    q.on = false;
+    q.stun = 30;
+    if (q === me) K.beep(160, .2, 'square', .06, 200);
+    for (var i = 0; i < 6; i++) parts.push({
+      x: q.x + 9,
+      y: q.y + 10,
+      vx: (Math.random() - .5) * 4,
+      vy: -Math.random() * 3,
+      l: 30,
+      c: '#ffffff'
+    });
+  }
+  function step(q, f) {
+    if (q.out || q.fin) {
+      if (q.fin && R.kind === 'race') {
+        q.vx *= .9;
+      }
+    }
+    var want = 0,
+      jump = false;
+    if (q.bot) {
+      var _botThink = botThink(q, f);
+      var _botThink2 = _slicedToArray(_botThink, 2);
+      want = _botThink2[0];
+      jump = _botThink2[1];
+      if (jump && q.on) q.hold = 16;
+      if (q.hold > 0) {
+        q.hold -= f;
+        jump = true;
+      }
+    } else if (!q.fin) {
+      want = (K.keys.right ? 1 : 0) - (K.keys.left ? 1 : 0);
+      jump = K.keys.a || K.keys.up;
+    }
+    if (q.fin) {
+      want = 0;
+      jump = false;
+    }
+    if (q.stun > 0) {
+      q.stun -= f;
+      want = 0;
+    }
+    if (want) q.face = want;
+    var acc = q.on ? .3 : .12;
+    q.vx += (want * q.sp - q.vx) * Math.min(1, acc * f);
+    if (q.on) {
+      var _iterator6 = _createForOfIteratorHelper(W.belts),
+        _step6;
+      try {
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+          var b = _step6.value;
+          if (q.x + q.w > b.x && q.x < b.x + b.w && Math.abs(q.y + q.h - b.y) < 3) q.x += b.v * f;
+        }
+      } catch (err) {
+        _iterator6.e(err);
+      } finally {
+        _iterator6.f();
+      }
+    }
+    if (jump && !q.jh && q.on) {
+      q.vy = JV;
+      q.on = false;
+      if (q === me) K.beep(480, .1, 'square', .04, 260);
+    }
+    if (!jump && q.vy < -4 && !q.pad) q.vy = -4;
+    q.jh = jump;
+    q.vy = Math.min(q.vy + GR * f, 12);
+    q.x += q.vx * f;
+    var _iterator7 = _createForOfIteratorHelper(W.solids),
+      _step7;
+    try {
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        var s = _step7.value;
+        if (s.gone || s.k === 'tile' && false) continue;
+        if (s.k === 'mov' || s.k === 'tile') continue;
+        if (ov(q, s)) {
+          if (q.vx > 0) q.x = s.x - q.w;else if (q.vx < 0) q.x = s.x + s.w;
+          q.vx = 0;
+        }
+      }
+    } catch (err) {
+      _iterator7.e(err);
+    } finally {
+      _iterator7.f();
+    }
+    var pb = q.y + q.h;
+    q.y += q.vy * f;
+    q.on = false;
+    q.gr = null;
+    var _iterator8 = _createForOfIteratorHelper(W.solids),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var _s = _step8.value;
+        if (_s.gone || !ov(q, _s)) continue;
+        if (_s.k === 'mov' || _s.k === 'tile') {
+          if (q.vy >= 0 && pb <= _s.y + 6) {
+            q.y = _s.y - q.h;
+            q.vy = 0;
+            q.on = true;
+            q.gr = _s;
+            q.pad = false;
+            if (_s.k === 'tile' && _s.t == null) _s.t = 120;
+          }
+          continue;
+        }
+        if (q.vy > 0) {
+          q.y = _s.y - q.h;
+          q.vy = 0;
+          q.on = true;
+          q.gr = _s;
+          q.pad = false;
+        } else if (q.vy < 0) {
+          q.y = _s.y + _s.h;
+          q.vy = 0;
+        }
+      }
+    } catch (err) {
+      _iterator8.e(err);
+    } finally {
+      _iterator8.f();
+    }
+    var _iterator9 = _createForOfIteratorHelper(W.pads),
+      _step9;
+    try {
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var p = _step9.value;
+        if (q.on && Math.abs(q.x + q.w / 2 - p.x) < 22 && Math.abs(q.y + q.h - p.y) < 3) {
+          q.vy = -15.5;
+          q.on = false;
+          q.pad = true;
+          if (q === me) K.beep(300, .25, 'sine', .06, 600);
+        }
+      }
+    } catch (err) {
+      _iterator9.e(err);
+    } finally {
+      _iterator9.f();
+    }
+    if (q.on && Math.abs(q.vx) > .3) q.walk += f * Math.abs(q.vx) * .09;
+    if (q.on && q.gr && q.gr.k === 'g' && q.x > q.gr.x + 10 && q.x < q.gr.x + q.gr.w - 30) {
+      q.cp = q.x;
+      q.cpy = q.gr.y;
+    }
+    if (q.y > H + 10 || W.water.some(function (w) {
+      return q.x + q.w > w.x && q.x < w.x + w.w && q.y + q.h > w.y + 6;
+    })) {
+      for (var i = 0; i < 10; i++) parts.push({
+        x: q.x + 9,
+        y: 330,
+        vx: (Math.random() - .5) * 5,
+        vy: -Math.random() * 5,
+        l: 35,
+        c: '#9fd3f0'
+      });
+      if (R.kind === 'tiles') {
+        q.out = true;
+        q.x = -999;
+        if (q === me) K.beep(200, .5, 'sawtooth', .06, -150);
+      } else {
+        q.x = Math.max(0, q.cp - 30);
+        q.y = (q.cpy || 300) - q.h - 40;
+        q.vx = q.vy = 0;
+        q.stun = 20;
+        if (q === me) K.beep(200, .3, 'sawtooth', .05, -120);
+      }
+    }
+    q.x = Math.max(0, Math.min(W.len - q.w, q.x));
+  }
+  function botThink(q, f) {
+    if (q.fin || q.out) return [0, false];
+    q.think -= f;
+    q.jumpCd -= f;
+    if (R.kind === 'tiles') {
+      if (q.think <= 0) {
+        q.think = 40 + Math.random() * 80;
+        q.idle = Math.random() < .55;
+        if (Math.random() < .3) q.dir = -q.dir;
+      }
+      var crack = q.on && q.gr && q.gr.t != null && q.gr.t < 55;
+      if (crack) {
+        var y = q.gr.y,
+          cx = q.x + q.w / 2;
+        var best = null,
+          bd = 1e9;
+        var up = W.tiles.find(function (t) {
+          return !t.gone && (t.t == null || t.t > 40) && t.y < y - 40 && t.y > y - 80 && cx > t.x - 6 && cx < t.x + t.w + 6;
+        });
+        if (up && Math.random() > q.err) return [0, true];
+        var _iterator0 = _createForOfIteratorHelper(W.tiles),
+          _step0;
+        try {
+          for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+            var t = _step0.value;
+            if (!t.gone && (t.t == null || t.t > 55) && t !== q.gr && Math.abs(t.y - y) < 2) {
+              var d = Math.abs(t.x + t.w / 2 - cx);
+              if (d < bd) {
+                bd = d;
+                best = t;
+              }
+            }
+          }
+        } catch (err) {
+          _iterator0.e(err);
+        } finally {
+          _iterator0.f();
+        }
+        if (best && bd < 260) {
+          q.dir = best.x + best.w / 2 > cx ? 1 : -1;
+          if (bd < 10) return [0, false];
+        } else if (q.err < .1 && Math.random() < .02) return [q.dir, true];
+      } else if (q.idle) return [0, false];
+      var _fx = q.x + q.w / 2 + q.dir * 30,
+        below = W.solids.some(function (s) {
+          return !s.gone && s.k === 'tile' && _fx > s.x && _fx < s.x + s.w && s.y >= q.y + q.h - 2 && s.y < q.y + q.h + 80;
+        });
+      var _jump = false;
+      if (!below) {
+        if (Math.random() < .5 + q.err) q.dir = -q.dir;else _jump = q.on;
+      }
+      if (q.on && q.gr && q.gr.t != null && q.gr.t < 20 && Math.random() < .15) _jump = true;
+      if (q.x < 140) q.dir = 1;
+      if (q.x > 970) q.dir = -1;
+      return [q.dir, _jump];
+    }
+    var jump = false;
+    var fx = q.x + q.w / 2 + q.face * (44 + q.vx * 6),
+      fy = q.y + q.h;
+    var gap = q.on && !W.solids.some(function (s) {
+      return !s.gone && s.k !== 'mov' && fx >= s.x && fx <= s.x + s.w && s.y >= fy - 2 && s.y < fy + 60;
+    });
+    var wall = solidAt(q.x + q.w / 2 + q.face * 16, q.y + q.h - 8) || solidAt(q.x + q.w / 2 + q.face * 16, q.y + 4);
+    var danger = false;
+    var _iterator1 = _createForOfIteratorHelper(W.sweep),
+      _step1;
+    try {
+      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+        var s = _step1.value;
+        var dx = s.x - (q.x + q.w / 2);
+        if (dx > 10 && dx < 80) danger = true;
+      }
+    } catch (err) {
+      _iterator1.e(err);
+    } finally {
+      _iterator1.f();
+    }
+    var _iterator10 = _createForOfIteratorHelper(W.balls),
+      _step10;
+    try {
+      for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+        var b = _step10.value;
+        if (b.cur) {
+          var _iterator13 = _createForOfIteratorHelper(b.cur),
+            _step13;
+          try {
+            for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+              var o = _step13.value;
+              var _dx = o.x - (q.x + q.w / 2);
+              if (_dx > 0 && _dx < 90 && Math.abs(o.y - (q.y + q.h - 16)) < 40) danger = true;
+            }
+          } catch (err) {
+            _iterator13.e(err);
+          } finally {
+            _iterator13.f();
+          }
+        }
+      }
+    } catch (err) {
+      _iterator10.e(err);
+    } finally {
+      _iterator10.f();
+    }
+    if ((wall || danger) && q.jumpCd <= 0) {
+      if (Math.random() > q.err) {
+        jump = true;
+        q.jumpCd = q.react;
+      } else q.jumpCd = 20;
+    }
+    var want = 1;
+    var mv = W.movers.find(function (m) {
+      return m.o.x + m.o.w > q.x && m.o.x - (q.x + q.w) < 260 && q.gr !== m.o;
+    });
+    if (gap && mv) {
+      var dist = mv.o.x - (q.x + q.w);
+      if (dist > 105 || dist < -mv.o.w + 40) {
+        want = 0;
+        gap = false;
+      }
+    }
+    if (gap && q.gr && q.gr.k === 'mov') {
+      var nx = 1e9;
+      var _iterator11 = _createForOfIteratorHelper(W.solids),
+        _step11;
+      try {
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+          var s2 = _step11.value;
+          if (s2.k !== 'mov' && !s2.gone && s2.x > q.x && s2.y > q.y - 40) nx = Math.min(nx, s2.x);
+        }
+      } catch (err) {
+        _iterator11.e(err);
+      } finally {
+        _iterator11.f();
+      }
+      var _dist = nx - (q.x + q.w);
+      if (_dist > 80) {
+        want = 0;
+        gap = false;
+      }
+    }
+    var _iterator12 = _createForOfIteratorHelper(W.pend),
+      _step12;
+    try {
+      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+        var p = _step12.value;
+        if (p.hx == null) continue;
+        var _dx2 = p.hx - (q.x + q.w / 2);
+        if (p.hy > q.y - 14 && _dx2 > -30 && _dx2 < 120 && q.on && Math.random() > q.err * .5) want = 0;
+      }
+    } catch (err) {
+      _iterator12.e(err);
+    } finally {
+      _iterator12.f();
+    }
+    if (gap && q.jumpCd <= 0 && want) {
+      jump = true;
+      q.jumpCd = q.react;
+    }
+    return [want, jump || q.on && q.vy === 0 && Math.abs(q.vx) < .2 && want && Math.random() < .05];
+  }
+  function obstacles(f) {
+    var _iterator14 = _createForOfIteratorHelper(W.movers),
+      _step14;
+    try {
+      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+        var m = _step14.value;
+        var o = m.o,
+          ox = o.x;
+        o.x += m.sp * m.d * f;
+        if (o.x > m.b) {
+          o.x = m.b;
+          m.d = -1;
+        }
+        if (o.x < m.a) {
+          o.x = m.a;
+          m.d = 1;
+        }
+        var dx = o.x - ox;
+        var _iterator20 = _createForOfIteratorHelper(runners),
+          _step20;
+        try {
+          for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
+            var q = _step20.value;
+            if (q.gr === o) q.x += dx;
+          }
+        } catch (err) {
+          _iterator20.e(err);
+        } finally {
+          _iterator20.f();
+        }
+      }
+    } catch (err) {
+      _iterator14.e(err);
+    } finally {
+      _iterator14.f();
+    }
+    var _iterator15 = _createForOfIteratorHelper(W.pend),
+      _step15;
+    try {
+      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+        var p = _step15.value;
+        p.ang = p.A * Math.sin(rt * 60 * p.w + p.ph);
+        p.hx = p.x + Math.sin(p.ang) * p.L;
+        p.hy = p.y + Math.cos(p.ang) * p.L;
+        var vxh = p.A * Math.cos(rt * 60 * p.w + p.ph) * p.w * p.L;
+        var _iterator21 = _createForOfIteratorHelper(runners),
+          _step21;
+        try {
+          for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
+            var _q = _step21.value;
+            if (!_q.out && Math.hypot(_q.x + _q.w / 2 - p.hx, _q.y + _q.h / 2 - p.hy) < 34) knock(_q, (vxh > 0 ? 1 : -1) * 7, -6);
+          }
+        } catch (err) {
+          _iterator21.e(err);
+        } finally {
+          _iterator21.f();
+        }
+      }
+    } catch (err) {
+      _iterator15.e(err);
+    } finally {
+      _iterator15.f();
+    }
+    var _iterator16 = _createForOfIteratorHelper(W.sweep),
+      _step16;
+    try {
+      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+        var s = _step16.value;
+        s.a += s.w * f;
+        var ex = Math.cos(s.a) * s.L,
+          ey = Math.sin(s.a) * s.L * .25;
+        var _iterator22 = _createForOfIteratorHelper(runners),
+          _step22;
+        try {
+          for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
+            var _q2 = _step22.value;
+            if (_q2.out) continue;
+            var cx = _q2.x + _q2.w / 2,
+              by = _q2.y + _q2.h;
+            if (by > s.y - 6 && by < s.y + 22 && Math.abs(cx - s.x) < Math.abs(ex) + 4 && Math.sign(cx - s.x) === Math.sign(ex)) knock(_q2, (s.w > 0 ? -1 : 1) * Math.sign(ex) * -7, -7);
+          }
+        } catch (err) {
+          _iterator22.e(err);
+        } finally {
+          _iterator22.f();
+        }
+      }
+    } catch (err) {
+      _iterator16.e(err);
+    } finally {
+      _iterator16.f();
+    }
+    var _iterator17 = _createForOfIteratorHelper(W.balls),
+      _step17;
+    try {
+      var _loop = function _loop() {
+        var b = _step17.value;
+        b.cur = b.cur || [];
+        b.t = (b.t || 0) + f;
+        if (b.t > b.per) {
+          b.t = 0;
+          b.cur.push({
+            x: b.x,
+            y: (b.y || 300) - 20,
+            vx: -3.2
+          });
+        }
+        var _iterator23 = _createForOfIteratorHelper(b.cur),
+          _step23;
+        try {
+          for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
+            var _o = _step23.value;
+            _o.x += _o.vx * f;
+            var _iterator24 = _createForOfIteratorHelper(runners),
+              _step24;
+            try {
+              for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
+                var _q3 = _step24.value;
+                if (!_q3.out && Math.hypot(_q3.x + _q3.w / 2 - _o.x, _q3.y + _q3.h - 16 - _o.y) < 30) knock(_q3, -6, -7);
+              }
+            } catch (err) {
+              _iterator24.e(err);
+            } finally {
+              _iterator24.f();
+            }
+          }
+        } catch (err) {
+          _iterator23.e(err);
+        } finally {
+          _iterator23.f();
+        }
+        b.cur = b.cur.filter(function (o) {
+          return o.x > b.x - 900;
+        });
+      };
+      for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+        _loop();
+      }
+    } catch (err) {
+      _iterator17.e(err);
+    } finally {
+      _iterator17.f();
+    }
+    var _iterator18 = _createForOfIteratorHelper(W.tiles),
+      _step18;
+    try {
+      var _loop2 = function _loop2() {
+        var t = _step18.value;
+        if (t.gone) {
+          t.back = (t.back || 0) + f;
+          if (t.back > 540 && !runners.some(function (q) {
+            return !q.out && q.x + q.w > t.x && q.x < t.x + t.w && q.y + q.h > t.y - 4 && q.y < t.y + t.h;
+          })) {
+            t.gone = false;
+            t.t = null;
+            t.back = 0;
+          }
+        }
+      };
+      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+        _loop2();
+      }
+    } catch (err) {
+      _iterator18.e(err);
+    } finally {
+      _iterator18.f();
+    }
+    var _iterator19 = _createForOfIteratorHelper(W.tiles),
+      _step19;
+    try {
+      var _loop3 = function _loop3() {
+        var t = _step19.value;
+        if (t.t != null && !t.gone && runners.some(function (q) {
+          return !q.out && q.gr === t;
+        })) {
+          t.t -= f;
+          if (t.t <= 0) {
+            t.gone = true;
+            for (var i = 0; i < 4; i++) parts.push({
+              x: t.x + i * 13,
+              y: t.y,
+              vx: 0,
+              vy: 1,
+              l: 40,
+              c: '#f2c230'
+            });
+          }
+        }
+      };
+      for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
+        _loop3();
+      }
+    } catch (err) {
+      _iterator19.e(err);
+    } finally {
+      _iterator19.f();
+    }
+  }
+  function separate() {
+    for (var i = 0; i < runners.length; i++) for (var j = i + 1; j < runners.length; j++) {
+      var a = runners[i],
+        b = runners[j];
+      if (a.out || b.out) continue;
+      if (Math.abs(a.x - b.x) < 16 && Math.abs(a.y - b.y) < 28) {
+        var p = a.x < b.x ? -1 : 1,
+          d = (16 - Math.abs(a.x - b.x)) / 2;
+        if (a.bot || a.vx) a.x += p * d * .3;
+        if (b.bot || b.vx) b.x -= p * d * .3;
+      }
+    }
+  }
+  function update(f) {
+    if (banner) {
+      banner.t -= f;
+      if (banner.t <= 0) banner = null;
+    }
+    var _iterator25 = _createForOfIteratorHelper(parts),
+      _step25;
+    try {
+      for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
+        var _q4 = _step25.value;
+        _q4.x += _q4.vx * f;
+        _q4.y += _q4.vy * f;
+        _q4.vy += .2 * f;
+        _q4.l -= f;
+      }
+    } catch (err) {
+      _iterator25.e(err);
+    } finally {
+      _iterator25.f();
+    }
+    parts = parts.filter(function (q) {
+      return q.l > 0;
+    });
+    if (countdown > 0) {
+      var c0 = Math.ceil(countdown);
+      countdown -= f / 60;
+      var c1 = Math.ceil(countdown);
+      if (c1 !== c0) K.beep(c1 > 0 ? 440 : 880, .2, 'square', .06);
+      obstacles(0);
+      return;
+    }
+    rt += f / 60;
+    obstacles(f);
+    var _iterator26 = _createForOfIteratorHelper(runners),
+      _step26;
+    try {
+      for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
+        var _q5 = _step26.value;
+        if (!_q5.out) step(_q5, f);
+      }
+    } catch (err) {
+      _iterator26.e(err);
+    } finally {
+      _iterator26.f();
+    }
+    separate();
+    if (R.kind === 'race') {
+      var _iterator27 = _createForOfIteratorHelper(runners),
+        _step27;
+      try {
+        for (_iterator27.s(); !(_step27 = _iterator27.n()).done;) {
+          var q = _step27.value;
+          if (!q.fin && q.x + q.w > W.finish && (!W.crown || Math.abs(q.y + q.h - (W.crown.y + 40)) < 60)) {
+            q.fin = rt;
+            q.place = runners.filter(function (r) {
+              return r.fin;
+            }).length;
+            if (q === me) K.jingle([523, 659, 784, 1046], 90);
+            if (W.crown && q.place === 1) {
+              parts.push({
+                x: W.crown.x,
+                y: W.crown.y,
+                vx: 0,
+                vy: -1,
+                l: 60,
+                c: '#f2c230'
+              });
+            }
+          }
+        }
+      } catch (err) {
+        _iterator27.e(err);
+      } finally {
+        _iterator27.f();
+      }
+      var nf = runners.filter(function (r) {
+        return r.fin;
+      }).length;
+      if (!over && (nf >= R.keep || me.fin && R.keep > 1 && nf >= R.keep)) {
+        over = true;
+        endT = 90;
+      }
+    } else {
+      var alive = runners.filter(function (r) {
+        return !r.out;
+      }).length;
+      if (!over && (alive <= R.keep || rt > 45)) {
+        over = true;
+        endT = 90;
+      }
+    }
+    if (over) {
+      endT -= f;
+      if (endT <= 0) endRound();
+    }
+    var tx = Math.max(0, Math.min(W.len - K.W / scale(), me.out ? camX : me.x - K.W / scale() * .38));
+    camX += (tx - camX) * Math.min(1, .12 * f);
+    var ty = Math.min(0, me.y + me.h / 2 - H * .55);
+    camY += (ty - camY) * Math.min(1, .1 * f);
+  }
+  function endRound() {
+    var qual;
+    if (R.kind === 'race') qual = runners.filter(function (r) {
+      return r.fin;
+    }).sort(function (a, b) {
+      return a.fin - b.fin;
+    }).slice(0, R.keep);else {
+      var alive = runners.filter(function (r) {
+        return !r.out;
+      });
+      qual = alive.length > R.keep ? alive.slice(0, alive.length) : alive;
+    }
+    var meIn = qual.indexOf(me) >= 0;
+    K.stop();
+    K.del('corsa-run');
+    if (!meIn) {
+      showEnd(false, qual);
+      return;
+    }
+    if (round === ROUNDS.length - 1) {
+      PROG.crowns = (PROG.crowns || 0) + 1;
+      K.save('corsa-prog', PROG);
+      showEnd(true, qual, true);
+      return;
+    }
+    field = qual.map(function (q) {
+      return {
+        name: q.name,
+        ch: q.ch,
+        shirt: q.shirt,
+        hair: q.hair,
+        bot: q.bot
+      };
+    });
+    PROG.best = Math.max(PROG.best || 0, round + 1);
+    K.save('corsa-prog', PROG);
+    showEnd(true, qual, false);
+  }
+  var scale = function scale() {
+    return K.H / H;
+  };
+  function drawRunner(q) {
+    if (q.out) return;
+    var fr = !q.on ? 'jump' : Math.abs(q.vx) > .4 ? Math.floor(q.walk * 1.3) % 2 ? 'walkA' : 'walkB' : 'stand';
+    var c = q.ch ? K.charS(q.ch, fr) : kidSprite(q.name, q.shirt, q.hair, fr);
+    ctx.save();
+    if (q.stun > 0) {
+      ctx.translate(q.x + q.w / 2, q.y + q.h / 2);
+      ctx.rotate(Math.sin(q.stun * .5) * .5);
+      ctx.translate(-(q.x + q.w / 2), -(q.y + q.h / 2));
+    }
+    K.draw(c, q.x + q.w / 2, q.y + q.h, 3, q.face < 0);
+    ctx.restore();
+    if (q === me) {
+      ctx.fillStyle = '#f2c230';
+      ctx.beginPath();
+      ctx.moveTo(q.x + q.w / 2 - 7, q.y - 22);
+      ctx.lineTo(q.x + q.w / 2 + 7, q.y - 22);
+      ctx.lineTo(q.x + q.w / 2, q.y - 12);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.font = "700 11px 'Pixelify Sans',monospace";
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(20,21,29,.7)';
+      ctx.fillText(q.name, q.x + q.w / 2 + 1, q.y - 7);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(q.name, q.x + q.w / 2, q.y - 8);
+      ctx.textAlign = 'left';
+    }
+    if (q.fin && R.kind === 'race') {
+      ctx.font = "700 14px 'Pixelify Sans',monospace";
+      ctx.fillStyle = '#4aa35a';
+      ctx.fillText('✔', q.x + 4, q.y - 20);
+    }
+  }
+  function draw() {
+    var Wd = K.W,
+      Hd = K.H,
+      sc = scale();
+    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    var g = ctx.createLinearGradient(0, 0, 0, Hd);
+    g.addColorStop(0, '#5ab8ff');
+    g.addColorStop(1, '#d6f0ff');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, Wd, Hd);
+    if (!W) return;
+    ctx.setTransform(K.dpr * sc, 0, 0, K.dpr * sc, 0, 0);
+    var vw = Wd / sc;
+    for (var i = -1; i < vw / 260 + 2; i++) {
+      var wi = Math.floor(camX * .3 / 260) + i,
+        x = wi * 260 - camX * .3,
+        cols = ['#e0373f', '#3f86d4', '#8a5cc7', '#f07a2a'],
+        c = cols[(wi % 4 + 4) % 4];
+      ctx.fillStyle = c;
+      ctx.beginPath();
+      ctx.moveTo(x, 250);
+      ctx.lineTo(x + 110, 150);
+      ctx.lineTo(x + 220, 250);
+      ctx.closePath();
+      ctx.fill();
+      for (var k = 0; k < 5; k++) {
+        ctx.fillStyle = k % 2 ? '#ffffff' : c;
+        ctx.fillRect(x + k * 44, 250, 44, 90);
+      }
+      ctx.fillStyle = '#14151d';
+      ctx.fillRect(x + 108, 130, 4, 24);
+      ctx.fillStyle = '#f2c230';
+      ctx.fillRect(x + 112, 130, 18, 10);
+    }
+    ctx.strokeStyle = '#5d6273';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (var _x3 = -(camX * .5 % 120); _x3 < vw; _x3 += 120) {
+      ctx.moveTo(_x3, 40);
+      ctx.quadraticCurveTo(_x3 + 60, 70, _x3 + 120, 40);
+    }
+    ctx.stroke();
+    for (var _x4 = -(camX * .5 % 40); _x4 < vw; _x4 += 40) {
+      var _k = Math.floor((_x4 + camX * .5) / 40);
+      ctx.fillStyle = ['#e0373f', '#f2c230', '#4aa35a', '#3f86d4'][(_k % 4 + 4) % 4];
+      var yy = 40 + Math.sin((_x4 + camX * .5 % 120) / 120 * Math.PI) * 0 + 14 * Math.sin((_x4 + camX * .5 % 120) % 120 / 120 * Math.PI);
+      ctx.beginPath();
+      ctx.moveTo(_x4, yy);
+      ctx.lineTo(_x4 + 14, yy);
+      ctx.lineTo(_x4 + 7, yy + 14);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.save();
+    ctx.translate(-Math.round(camX), -Math.round(camY));
+    var _iterator28 = _createForOfIteratorHelper(W.water),
+      _step28;
+    try {
+      for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
+        var w = _step28.value;
+        ctx.fillStyle = '#2a7fd0';
+        ctx.fillRect(w.x, w.y, w.w, w.h + 400);
+        ctx.fillStyle = '#9fd3f0';
+        for (var _x5 = w.x; _x5 < w.x + w.w; _x5 += 12) ctx.fillRect(_x5, w.y + (Math.sin(_x5 * .1 + rt * 4) > 0 ? 0 : 3), 12, 3);
+      }
+    } catch (err) {
+      _iterator28.e(err);
+    } finally {
+      _iterator28.f();
+    }
+    var _iterator29 = _createForOfIteratorHelper(W.solids),
+      _step29;
+    try {
+      for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
+        var s = _step29.value;
+        if (s.gone) continue;
+        if (s.k === 'tile') {
+          var shake = s.t != null ? Math.floor(s.t / 3) % 2 ? 2 : -2 : 0;
+          ctx.fillStyle = '#14151d';
+          ctx.fillRect(s.x + shake - 2, s.y - 2, s.w + 4, s.h + 4);
+          ctx.fillStyle = s.t != null ? s.t < 15 ? '#e0373f' : '#f07a2a' : '#f2c230';
+          ctx.fillRect(s.x + shake, s.y, s.w, s.h);
+          ctx.fillStyle = 'rgba(255,255,255,.5)';
+          ctx.fillRect(s.x + shake, s.y, s.w, 3);
+          continue;
+        }
+        if (s.k === 'wall') {
+          ctx.fillStyle = '#8a5cc7';
+          ctx.fillRect(s.x, s.y, s.w, s.h);
+          continue;
+        }
+        ctx.fillStyle = '#14151d';
+        ctx.fillRect(s.x - 3, s.y - 3, s.w + 6, s.h + 6);
+        ctx.fillStyle = s.k === 'mov' ? '#e096d2' : '#f6c9d8';
+        ctx.fillRect(s.x, s.y, s.w, s.h);
+        ctx.fillStyle = s.k === 'mov' ? '#f6c9d8' : '#e0373f';
+        for (var _x6 = s.x; _x6 < s.x + s.w; _x6 += 32) ctx.fillRect(_x6, s.y, 16, 10);
+        ctx.fillStyle = 'rgba(0,0,0,.08)';
+        ctx.fillRect(s.x, s.y + 10, s.w, s.h - 10);
+      }
+    } catch (err) {
+      _iterator29.e(err);
+    } finally {
+      _iterator29.f();
+    }
+    var _iterator30 = _createForOfIteratorHelper(W.belts),
+      _step30;
+    try {
+      for (_iterator30.s(); !(_step30 = _iterator30.n()).done;) {
+        var _b2 = _step30.value;
+        ctx.fillStyle = '#3b3f4f';
+        ctx.fillRect(_b2.x, _b2.y - 4, _b2.w, 8);
+        ctx.fillStyle = '#f2c230';
+        var o = (rt * 60 * _b2.v % 20 + 20) % 20;
+        for (var _x7 = _b2.x + o; _x7 < _b2.x + _b2.w - 6; _x7 += 20) ctx.fillRect(_x7, _b2.y - 3, 6, 6);
+        ctx.fillStyle = '#fff';
+        ctx.font = "700 14px 'Pixelify Sans',monospace";
+        ctx.fillText('◀◀', _b2.x + _b2.w / 2 - 12, _b2.y + 24);
+      }
+    } catch (err) {
+      _iterator30.e(err);
+    } finally {
+      _iterator30.f();
+    }
+    var _iterator31 = _createForOfIteratorHelper(W.pads),
+      _step31;
+    try {
+      for (_iterator31.s(); !(_step31 = _iterator31.n()).done;) {
+        var p = _step31.value;
+        ctx.fillStyle = '#14151d';
+        ctx.fillRect(p.x - 24, p.y - 10, 48, 10);
+        ctx.fillStyle = '#4aa35a';
+        ctx.fillRect(p.x - 22, p.y - 8, 44, 6);
+        ctx.fillStyle = '#fff';
+        ctx.fillText('↑', p.x - 5, p.y - 14);
+      }
+    } catch (err) {
+      _iterator31.e(err);
+    } finally {
+      _iterator31.f();
+    }
+    var _iterator32 = _createForOfIteratorHelper(W.pend),
+      _step32;
+    try {
+      for (_iterator32.s(); !(_step32 = _iterator32.n()).done;) {
+        var _p = _step32.value;
+        if (_p.hx == null) continue;
+        ctx.strokeStyle = '#5d6273';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(_p.x, _p.y);
+        ctx.lineTo(_p.hx, _p.hy);
+        ctx.stroke();
+        ctx.save();
+        ctx.translate(_p.hx, _p.hy);
+        ctx.rotate(-_p.ang);
+        ctx.fillStyle = '#14151d';
+        ctx.fillRect(-36, -20, 72, 40);
+        ctx.fillStyle = '#e0373f';
+        ctx.fillRect(-33, -17, 66, 34);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-33, -17, 66, 6);
+        ctx.fillStyle = '#f2c230';
+        ctx.fillRect(-10, -17, 20, 34);
+        ctx.restore();
+        ctx.fillStyle = '#3b3f4f';
+        ctx.beginPath();
+        ctx.arc(_p.x, _p.y, 8, 0, 6.28);
+        ctx.fill();
+      }
+    } catch (err) {
+      _iterator32.e(err);
+    } finally {
+      _iterator32.f();
+    }
+    var _iterator33 = _createForOfIteratorHelper(W.sweep),
+      _step33;
+    try {
+      for (_iterator33.s(); !(_step33 = _iterator33.n()).done;) {
+        var _s2 = _step33.value;
+        var ex = Math.cos(_s2.a) * _s2.L,
+          ey = Math.sin(_s2.a) * _s2.L * .25;
+        ctx.strokeStyle = '#14151d';
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(_s2.x - ex, _s2.y - ey);
+        ctx.lineTo(_s2.x + ex, _s2.y + ey);
+        ctx.stroke();
+        ctx.strokeStyle = '#8a5cc7';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+        ctx.fillStyle = '#f2c230';
+        ctx.beginPath();
+        ctx.arc(_s2.x, _s2.y, 9, 0, 6.28);
+        ctx.fill();
+      }
+    } catch (err) {
+      _iterator33.e(err);
+    } finally {
+      _iterator33.f();
+    }
+    var _iterator34 = _createForOfIteratorHelper(W.balls),
+      _step34;
+    try {
+      for (_iterator34.s(); !(_step34 = _iterator34.n()).done;) {
+        var _b3 = _step34.value;
+        var _iterator37 = _createForOfIteratorHelper(_b3.cur || []),
+          _step37;
+        try {
+          for (_iterator37.s(); !(_step37 = _iterator37.n()).done;) {
+            var _o2 = _step37.value;
+            ctx.fillStyle = '#14151d';
+            ctx.beginPath();
+            ctx.arc(_o2.x, _o2.y, 22, 0, 6.28);
+            ctx.fill();
+            ctx.fillStyle = '#3f86d4';
+            ctx.beginPath();
+            ctx.arc(_o2.x, _o2.y, 19, 0, 6.28);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.save();
+            ctx.translate(_o2.x, _o2.y);
+            ctx.rotate(-_o2.x * .05);
+            ctx.fillRect(-19, -3, 38, 6);
+            ctx.restore();
+          }
+        } catch (err) {
+          _iterator37.e(err);
+        } finally {
+          _iterator37.f();
+        }
+      }
+    } catch (err) {
+      _iterator34.e(err);
+    } finally {
+      _iterator34.f();
+    }
+    if (R.kind === 'race') {
+      var fy = W.crown ? 120 : 300;
+      for (var _i2 = 0; _i2 < 10; _i2++) for (var j = 0; j < 2; j++) {
+        ctx.fillStyle = (_i2 + j) % 2 ? '#14151d' : '#ffffff';
+        ctx.fillRect(W.finish + j * 10, fy - 100 + _i2 * 10, 10, 10);
+      }
+      ctx.fillStyle = '#e0373f';
+      ctx.fillRect(W.finish - 6, fy - 120, 32, 20);
+      ctx.fillStyle = '#fff';
+      ctx.font = "700 12px 'Pixelify Sans',monospace";
+      ctx.fillText('FINE', W.finish - 4, fy - 106);
+      if (W.crown) {
+        var _c = W.crown,
+          b = Math.sin(rt * 4) * 4;
+        ctx.fillStyle = '#14151d';
+        ctx.fillRect(_c.x - 20, _c.y - 14 + b, 40, 28);
+        ctx.fillStyle = '#f2c230';
+        ctx.fillRect(_c.x - 18, _c.y - 2 + b, 36, 14);
+        ctx.beginPath();
+        ctx.moveTo(_c.x - 18, _c.y - 2 + b);
+        ctx.lineTo(_c.x - 12, _c.y - 14 + b);
+        ctx.lineTo(_c.x - 6, _c.y - 2 + b);
+        ctx.lineTo(_c.x, _c.y - 16 + b);
+        ctx.lineTo(_c.x + 6, _c.y - 2 + b);
+        ctx.lineTo(_c.x + 12, _c.y - 14 + b);
+        ctx.lineTo(_c.x + 18, _c.y - 2 + b);
+        ctx.fill();
+        ctx.fillStyle = '#e0373f';
+        ctx.fillRect(_c.x - 3, _c.y + 3 + b, 6, 6);
+      }
+    }
+    var order = runners.slice().sort(function (a, b) {
+      return (a === me) - (b === me);
+    });
+    var _iterator35 = _createForOfIteratorHelper(order),
+      _step35;
+    try {
+      for (_iterator35.s(); !(_step35 = _iterator35.n()).done;) {
+        var q = _step35.value;
+        drawRunner(q);
+      }
+    } catch (err) {
+      _iterator35.e(err);
+    } finally {
+      _iterator35.f();
+    }
+    var _iterator36 = _createForOfIteratorHelper(parts),
+      _step36;
+    try {
+      for (_iterator36.s(); !(_step36 = _iterator36.n()).done;) {
+        var _q6 = _step36.value;
+        ctx.globalAlpha = Math.max(0, _q6.l / 40);
+        ctx.fillStyle = _q6.c;
+        ctx.fillRect(_q6.x - 3, _q6.y - 3, 6, 6);
+      }
+    } catch (err) {
+      _iterator36.e(err);
+    } finally {
+      _iterator36.f();
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
+    hud(Wd, Hd);
+  }
+  function hud(Wd, Hd) {
+    K.rect(8, 8, 300, 54, 'rgba(20,21,29,.72)');
+    K.text('Manche ' + (round + 1) + '/3 · ' + R.name, 16, 30, 15, '#f2c230');
+    if (R.kind === 'race') {
+      var nf = runners.filter(function (r) {
+        return r.fin;
+      }).length;
+      var pos = runners.filter(function (r) {
+        return r.fin ? !me.fin || r.fin < me.fin : !me.fin && r.x > me.x;
+      }).length + 1;
+      K.text((me.fin ? 'Arrivato ' + me.place + '°!' : pos + '° posto') + ' · arrivati ' + nf + '/' + R.keep, 16, 54, 16, '#fff');
+    } else {
+      var al = runners.filter(function (r) {
+        return !r.out;
+      }).length;
+      K.text('In piedi: ' + al + ' · ne restano ' + R.keep + ' · ' + Math.max(0, 45 - Math.floor(rt)) + 's', 16, 54, 16, me.out ? '#e0373f' : '#fff');
+    }
+    if (countdown > 0) K.text(Math.ceil(countdown) > 0 ? String(Math.ceil(countdown)) : 'VIA!', Wd / 2, Hd * .4, 90, '#f2c230', 'center');else if (rt < 1) K.text('VIA!', Wd / 2, Hd * .4, 90, '#4aa35a', 'center');
+    if (banner && countdown > 0) {
+      K.text(banner.s, Wd / 2, Hd * .22, 34, '#fff', 'center');
+      K.text(banner.s2, Wd / 2, Hd * .22 + 30, 20, '#ffe48a', 'center');
+    }
+    if (me.out) K.text('Sei caduto in acqua! Guarda come finisce…', Wd / 2, Hd * .3, 22, '#fff', 'center');
+    if (over) K.text(R.kind === 'race' ? 'MANCHE FINITA!' : 'TEMPO SCADUTO!', Wd / 2, Hd * .35, 40, '#f2c230', 'center');
+  }
+  var PROG = K.load('corsa-prog', {
+    best: 0,
+    crowns: 0
+  });
+  function snap() {
+    if (!W || over) return null;
+    return {
+      round: round,
+      pick: pick,
+      field: field,
+      rt: rt,
+      cd: countdown,
+      runners: runners.map(function (q) {
+        return {
+          x: q.x,
+          y: q.y,
+          fin: q.fin,
+          out: q.out,
+          cp: q.cp,
+          place: q.place
+        };
+      }),
+      tiles: W.tiles.map(function (t) {
+        return t.gone ? 2 : t.t != null ? 1 : 0;
+      })
+    };
+  }
+  function restore(s) {
+    pick = s.pick;
+    field = s.field;
+    startRound(s.round, true);
+    rt = s.rt;
+    countdown = Math.max(1.2, s.cd || 0);
+    s.runners.forEach(function (o, i) {
+      if (runners[i]) Object.assign(runners[i], o);
+    });
+    W.tiles.forEach(function (t, i) {
+      if (s.tiles[i] === 2) t.gone = true;else if (s.tiles[i] === 1) t.t = 30;
+    });
+  }
+  function renderMenu() {
+    K.charPicker($('chars'), pick, function (ch) {
+      pick = ch;
+      K.save('corsa-pick', ch);
+      renderMenu();
+    });
+    $('rec').textContent = PROG.crowns ? '👑 Corone vinte: ' + PROG.crowns : 'Vinci le 3 manche per prendere la corona!';
+    var sv = K.load('corsa-run', null),
+      cb = $('cont');
+    if (sv && ROUNDS[sv.round]) {
+      cb.hidden = false;
+      cb.innerHTML = '▶ Continua la gara<small>Manche ' + (sv.round + 1) + ' · ' + ROUNDS[sv.round].name + '</small>';
+      cb.onclick = function () {
+        restore(sv);
+        $('menu').hidden = true;
+        K.start();
+      };
+    } else cb.hidden = true;
+  }
+  function showMenu() {
+    K.stop();
+    $('end').hidden = true;
+    W = null;
+    renderMenu();
+    $('menu').hidden = false;
+    K.wantMusic = null;
+  }
+  function showEnd(ok, qual, crown) {
+    K.wantMusic = ok ? 'cwin' : null;
+    K.playing = true;
+    K.playing = false;
+    $('endT').textContent = crown ? '👑 HAI VINTO LA CORONA!' : ok ? 'QUALIFICATO! ✔' : 'ELIMINATO! ✖';
+    $('endS').textContent = crown ? 'Sei il campione della Corsa Pazza!' : ok ? 'Passano: ' + qual.map(function (q) {
+      return q.name;
+    }).join(', ') : 'Questa volta non ce l\'hai fatta. Riprova!';
+    $('endNext').hidden = !(ok && !crown);
+    $('endAgain').textContent = ok && !crown ? '◀ Menu' : '🔄 Nuova gara';
+    $('end').hidden = false;
+  }
+  $('endNext').onclick = function () {
+    $('end').hidden = true;
+    startRound(round + 1, true);
+    K.start();
+  };
+  $('endAgain').onclick = function () {
+    if ($('endAgain').textContent.indexOf('Menu') >= 0) {
+      showMenu();
+      return;
+    }
+    $('end').hidden = true;
+    startRound(0);
+    K.start();
+  };
+  $('endMenu').onclick = showMenu;
+  $('go').onclick = function () {
+    K.del('corsa-run');
+    startRound(0);
+    $('menu').hidden = true;
+    K.start();
+  };
+  pick = K.load('corsa-pick', 'tommy');
+  if (!K.CHARS[pick]) pick = 'tommy';
+  K.buttons([{
+    k: 'left',
+    label: '◀',
+    pos: 'bl1 big'
+  }, {
+    k: 'right',
+    label: '▶',
+    pos: 'bl2 big'
+  }, {
+    k: 'a',
+    label: 'SALTA',
+    pos: 'br1 big'
+  }]);
+  K.game = {
+    update: update,
+    draw: draw,
+    save: function save() {
+      var s = snap();
+      return s ? K.save('corsa-run', s) : true;
+    },
+    exit: showMenu
+  };
+  K.initUI();
+  K.run();
+  showMenu();
+  window.__C = {
+    startRound: startRound,
+    update: update,
+    get me() {
+      return me;
+    },
+    get runners() {
+      return runners;
+    },
+    get over() {
+      return over;
+    },
+    get W() {
+      return W;
+    }
+  };
+})();</script>
+</body>
+</html>
