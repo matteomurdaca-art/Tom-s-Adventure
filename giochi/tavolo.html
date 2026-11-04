@@ -903,7 +903,7 @@ var K = function () {
     var st = $('stage');
     var w = Math.max(200, st.clientWidth),
       h = Math.max(150, st.clientHeight);
-    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 2);
+    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 1.5);
     cv.style.width = w + 'px';
     cv.style.height = h + 'px';
     cv.width = Math.round(w * K.dpr);
@@ -2217,8 +2217,12 @@ var K = function () {
   };
 })();
 (function () {
-  var ctx = K.ctx,
-    $ = K.$,
+  K.maxDpr = 1.5;
+  try {
+    K.resize();
+  } catch (e) {}
+  var ctx = K.ctx;
+  var $ = K.$,
     SS = K.S,
     tone = SS.tone,
     rrp = SS.rrp,
@@ -2745,7 +2749,37 @@ var K = function () {
       return p === 0 ? '⚪ bianchi' : '🔴 rossi';
     }
   };
+  var SPC = {};
+  function spr(key, w, h, ox, oy, fn) {
+    var d = K.dpr,
+      kk = key + '|' + d;
+    var c = SPC[kk];
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = Math.ceil(w * d);
+      c.height = Math.ceil(h * d);
+      var x = c.getContext('2d');
+      x.setTransform(d, 0, 0, d, ox * d, oy * d);
+      var o = ctx;
+      ctx = x;
+      var so = SS.use(x);
+      try {
+        fn();
+      } catch (e) {}
+      ctx = o;
+      SS.use(so);
+      SPC[kk] = c;
+    }
+    return c;
+  }
   function disc(x, y, sw, col, king) {
+    var q = Math.round(sw),
+      c = spr('d' + col + (king ? 'k' : '') + q, q * 1.1, q * 1.2, q * .55, q * .75, function () {
+        return disc0(0, 0, q, col, king);
+      });
+    ctx.drawImage(c, x - q * .55, y - q * .75, q * 1.1, q * 1.2);
+  }
+  function disc0(x, y, sw, col, king) {
     var rx = sw * .38,
       ry = rx * .78,
       h = sw * .13,
@@ -3070,9 +3104,10 @@ var K = function () {
     return s;
   }
   var nodes = 0;
+  var DL = 1e15;
   function chSearch(st, d, a, be, ply) {
     nodes++;
-    if (d === 0) return chEval(st);
+    if (d === 0 || nodes % 64 === 0 && performance.now() > DL) return chEval(st);
     var ms = chLegal(st);
     if (!ms.length) return inCheck(st, st.turn) ? -100000 + ply : 0;
     ms.sort(function (x, y) {
@@ -3148,7 +3183,11 @@ var K = function () {
       var bm = ms[0],
         bv = -1e9;
       nodes = 0;
-      var _iterator19 = _createForOfIteratorHelper(shuffle(ms.slice())),
+      DL = performance.now() + (G.lvl === 1 ? 700 : 1400);
+      var ord = shuffle(ms.slice()).sort(function (x, y) {
+        return (y.cap ? VAL[y.cap[1]] : 0) - (x.cap ? VAL[x.cap[1]] : 0);
+      });
+      var _iterator19 = _createForOfIteratorHelper(ord),
         _step19;
       try {
         for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
@@ -3271,6 +3310,13 @@ var K = function () {
     }
   };
   function piece(ty, c, x, y, s) {
+    var q = Math.round(s),
+      im = spr('p' + ty + c + q, q * 1.1, q * 1.5, q * .55, q * 1.05, function () {
+        return piece0(ty, c, 0, 0, q);
+      });
+    ctx.drawImage(im, x - q * .55, y - q * 1.05, q * 1.1, q * 1.5);
+  }
+  function piece0(ty, c, x, y, s) {
     var k = s / 60,
       w = c === 'w';
     var fill = w ? '#f6efe2' : '#4a4458',
@@ -3984,6 +4030,19 @@ var K = function () {
     7: [[.3, .18], [.7, .18], [.5, .34], [.3, .5], [.7, .5], [.3, .82], [.7, .82]]
   };
   function card(c, x, y, w, h, hl) {
+    var q = Math.round(w * 2) / 2,
+      qh = h * q / w;
+    if (hl) {
+      rrp(x - 4, y - 4, w + 8, h + 8, w * .13);
+      ctx.fillStyle = hl;
+      ctx.fill();
+    }
+    var im = spr('c' + c + '_' + q, q + 12, qh + 12, 6, 6, function () {
+      return card0(c, 0, 0, q, qh, null);
+    });
+    ctx.drawImage(im, x - 6, y - 6, q + 12, qh + 12);
+  }
+  function card0(c, x, y, w, h, hl) {
     var v = cv(c),
       s = cs(c),
       col = SCOL(s);
@@ -4394,7 +4453,11 @@ var K = function () {
     }
     if (line) K.text(line, x, yy, size, c);
   }
+  var fcount = 0;
   function draw() {
+    fcount++;
+    var busy = fx.length || G && G.s && (G.s.anim && t - (G.s.anim.t0 != null ? G.s.anim.t0 : G.s.anim.t) < 20 || G.s.pend);
+    if (G && !busy && fcount % 2) return;
     var W = K.W,
       Hh = K.H;
     ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);

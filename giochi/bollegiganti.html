@@ -894,7 +894,7 @@ var K = function () {
     var st = $('stage');
     var w = Math.max(200, st.clientWidth),
       h = Math.max(150, st.clientHeight);
-    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 2);
+    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 1.5);
     cv.style.width = w + 'px';
     cv.style.height = h + 'px';
     cv.width = Math.round(w * K.dpr);
@@ -2956,8 +2956,8 @@ var K = function () {
     SS.edge();
     ctx.fillStyle = '#8a5a32';
     ctx.fill();
-    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
-    ctx.drawImage(bgCanvas(), Math.round(L.ox * K.dpr) / K.dpr * K.dpr, L.oy * K.dpr, VW * sc * K.dpr, VH * sc * K.dpr);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(bgCanvas(), L.ox * K.dpr, L.oy * K.dpr, VW * sc * K.dpr, VH * sc * K.dpr);
     ctx.setTransform(K.dpr * sc, 0, 0, K.dpr * sc, K.dpr * L.ox, K.dpr * L.oy);
     ctx.save();
     ctx.beginPath();

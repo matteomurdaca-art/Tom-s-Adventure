@@ -867,7 +867,7 @@ try {
   function fit() {
     var vw = innerWidth,
       vh = innerHeight,
-      dpr = Math.min(devicePixelRatio || 1, 2);
+      dpr = Math.min(devicePixelRatio || 1, 1);
     var sz = A.h.size ? A.h.size(vw, vh) : [960, 540];
     A.W = sz[0];
     A.H = sz[1];
@@ -1917,13 +1917,11 @@ try {
         if (!b.alive) return;
         var col = b.ex ? COL.x : COL[Math.min(4, b.hp)];
         c.save();
-        c.shadowColor = col[0];
-        c.shadowBlur = b.ex ? 16 : 8;
-        var gr = c.createLinearGradient(0, b.y, 0, b.y + b.h);
-        gr.addColorStop(0, b.flash > 0 ? "#fff" : col[0]);
-        gr.addColorStop(1, b.flash > 0 ? "#ffe" : col[1]);
-        c.fillStyle = gr;
+        c.fillStyle = b.flash > 0 ? "#ffe" : col[1];
         rr(c, b.x, b.y, b.w, b.h, 4);
+        c.fill();
+        c.fillStyle = b.flash > 0 ? "#fff" : col[0];
+        rr(c, b.x, b.y, b.w, b.h * .62, 4);
         c.fill();
         c.restore();
         c.fillStyle = "rgba(255,255,255,.18)";
@@ -1981,8 +1979,6 @@ try {
       });
       var p = _S.pad;
       c.save();
-      c.shadowColor = "#FF8A3A";
-      c.shadowBlur = 18;
       var pg = c.createLinearGradient(0, p.y - p.h / 2, 0, p.y + p.h / 2);
       pg.addColorStop(0, "#FFE0A0");
       pg.addColorStop(1, "#D9692F");
@@ -1998,8 +1994,6 @@ try {
           c.fill();
         });
         c.save();
-        c.shadowColor = "#FFB04A";
-        c.shadowBlur = 18;
         c.fillStyle = b.pl > 0 ? "#9fe8ff" : "#FFF2C8";
         c.beginPath();
         c.arc(b.x, b.y, b.r, 0, 6.283);
@@ -2047,8 +2041,6 @@ try {
       for (var _i8 = 0; _i8 < lives; _i8++) {
         var x = W - (land() ? 220 : 28) - _i8 * 18;
         c.save();
-        c.shadowColor = "#FF7A30";
-        c.shadowBlur = 8;
         c.fillStyle = "#FF9A4A";
         c.beginPath();
         c.arc(x, hy, 6, 0, 6.283);

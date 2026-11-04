@@ -873,7 +873,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   function fit() {
     var vw = innerWidth,
       vh = innerHeight,
-      dpr = Math.min(devicePixelRatio || 1, 2);
+      dpr = Math.min(devicePixelRatio || 1, 1);
     var sz = A.h.size ? A.h.size(vw, vh) : [960, 540];
     A.W = sz[0];
     A.H = sz[1];
