@@ -2581,7 +2581,7 @@ var K = function () {
         _iterator18.f();
       }
     }
-    if (mx) h.face = mx;
+    if (mx) h.face = mx > 0 ? 1 : -1;
     var sp = HH.sp;
     h.x += mx * sp * f;
     h.y += my * sp * .7 * f;
