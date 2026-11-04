@@ -1,0 +1,4127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d1f2b">
+<title>Giochi da tavolo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1f2b;--paper:#f6f7fb;--yel:#f2c230;--blu:#3f86d4;--red:#e0373f;--grn:#4aa35a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#14151d;color:#fff;font-family:'Pixelify Sans',monospace}
+body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#stage{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#cv{position:absolute;top:0;left:0;display:block;touch-action:none}
+#hud{position:absolute;top:6px;right:8px;display:none;z-index:5}
+body.playing #hud{display:flex}
+#hud button{font:700 16px 'Pixelify Sans',monospace;background:rgba(20,21,29,.75);color:#fff;border:2px solid #5d6273;padding:6px 10px;margin-left:6px;cursor:pointer}
+#pad{position:absolute;left:0;right:0;bottom:0;height:0;display:none;z-index:4}
+body.playing #pad{display:block}
+.kb{position:absolute;bottom:14px;width:78px;height:78px;border:3px solid rgba(255,255,255,.7);background:rgba(20,21,29,.45);color:#fff;font:700 30px 'Pixelify Sans',monospace;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;border-radius:14px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.3)}
+.kb.on{background:rgba(242,194,48,.75);color:#1d1f2b}
+.kb small{font-size:12px;display:block}
+.kb.bl1{left:14px} .kb.bl2{left:104px} .kb.bl3{left:194px}
+.kb.br1{right:14px} .kb.br2{right:104px} .kb.br3{right:194px}
+.kb.big.bl2{left:122px} .kb.big.br2{right:122px}
+.kb.blu{left:59px;bottom:104px} .kb.bld{left:59px}
+.kb.big{width:96px;height:96px}
+@media (orientation:landscape) and (min-height:561px){ .kb{bottom:64px} .kb.blu{bottom:154px} }
+@media (max-height:420px){ .kb{width:64px;height:64px;font-size:24px} .kb.bl2{left:88px} .kb.bl3{left:162px} .kb.br2{right:88px} .kb.br3{right:162px} .kb.big{width:76px;height:76px} .kb.big.bl2{left:98px} .kb.big.br2{right:98px} }
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(10,11,18,.72);z-index:10;padding:12px;overflow:auto}
+.ov[hidden],[hidden]{display:none!important}
+.card{background:#f6f7fb;color:#1d1f2b;border:4px solid #14151d;box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:16px 18px;max-width:760px;width:100%;text-align:center;max-height:100%;overflow:auto}
+.card h1{margin:0 0 6px;font-size:34px} .card h2{margin:0 0 8px;font-size:26px}
+.card p{margin:6px 0}
+.go{font:700 20px 'Pixelify Sans',monospace;background:var(--yel);color:#1d1f2b;border:3px solid #14151d;padding:9px 16px;margin:5px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.22),inset 3px 3px 0 rgba(255,255,255,.5)}
+.go.alt{background:#fff} .go:disabled{opacity:.45;cursor:default}
+.go small{display:block;font-size:13px;font-weight:400}
+.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}
+.kchars{display:flex;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.kchar{font:700 15px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:4px;padding:6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;color:#1d1f2b}
+.kchar canvas{width:44px;height:58px;image-rendering:pixelated;image-rendering:crisp-edges}
+.kchar.sel{background:var(--yel)}
+.note{font-size:14px;color:#5d6273}
+#kpnote.ok{color:#2f7d2e;font-weight:700} #kpnote.bad{color:#c62828;font-weight:700}
+#ktoast{position:absolute;left:50%;top:12px;transform:translateX(-50%);-webkit-transform:translateX(-50%);z-index:30;background:#4aa35a;color:#fff;font:700 18px 'Pixelify Sans',monospace;padding:6px 14px;border:3px solid #14151d;pointer-events:none;white-space:nowrap}
+#ktoast.bad{background:#e0373f}
+#kpriv{background:#fff3cd;border:2px solid #e0373f;color:#7a1d22;padding:6px 8px;font-size:14px;margin:6px 0}
+.lvls{display:flex;flex-wrap:wrap;justify-content:center}
+.lvl{font:700 16px 'Pixelify Sans',monospace;width:150px;min-height:92px;margin:5px;padding:8px;border:3px solid #14151d;background:#fff;cursor:pointer;color:#1d1f2b;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lvl b{font-size:26px} .lvl.done{background:#c9f0cf} .lvl.lock{background:#e3e5ec;color:#9aa0b5;cursor:default}
+.lvl small{font-weight:400;font-size:13px}
+a.home{color:#1d1f2b}
+.lvl.tg b{font-size:30px}.lvl.sel,.go.alt.sel{background:var(--yel)!important;color:#1d1f2b}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="hud"><button id="kback" type="button">◀ Indietro</button><button id="kpbtn" type="button">❚❚ Pausa</button></div>
+<div id="pad"></div>
+<div class="ov" id="kpause" hidden><div class="card">
+  <h2>❚❚ Pausa</h2>
+  <p id="kpnote"></p>
+  <div class="row">
+    <button class="go" id="kresume" type="button">▶ Riprendi</button>
+    <button class="go alt" id="ksave" type="button">💾 Salva</button>
+    <button class="go alt" id="ksaveexit" type="button">◀ Salva ed esci</button>
+  </div>
+  <div class="row"><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+  <p class="note">Giochi da tavolo · Sala giochi di Tom · versione 1</p>
+</div></div>
+<div id="ktoast" hidden></div>
+<div class="ov" id="menu"><div class="card">
+  <h1>🎲 Giochi da tavolo</h1>
+  <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
+  <button class="go" id="cont" type="button" hidden></button>
+  <h2>Scegli il gioco</h2>
+  <div class="lvls">
+    <button class="lvl tg" type="button" data-kind="tris"><b>❌⭕</b>Tris<small>tre in fila e vinci</small></button>
+    <button class="lvl tg" type="button" data-kind="dama"><b>⚪🔴</b>Dama<small>regole italiane</small></button>
+    <button class="lvl tg" type="button" data-kind="scacchi"><b>♞</b>Scacchi<small>con arrocco e promozione</small></button>
+    <button class="lvl tg" type="button" data-kind="scopa"><b>🃏</b>Scopa<small>carte italiane, si vince a 11</small></button>
+  </div>
+  <h2>Contro chi giochi?</h2>
+  <div class="row">
+    <button class="go alt tm" type="button" data-mode="cpu" data-lvl="0">🤖 Facile</button>
+    <button class="go alt tm" type="button" data-mode="cpu" data-lvl="1">🤖 Medio</button>
+    <button class="go alt tm" type="button" data-mode="cpu" data-lvl="2">🤖 Difficile</button>
+    <button class="go alt tm" type="button" data-mode="2p" data-lvl="0">👫 In due</button>
+  </div>
+  <button class="go" id="go" type="button">▶ Gioca</button>
+  <p class="note">Tocca un pezzo per vedere dove può andare (i pallini verdi), poi tocca la casella. A Scopa tocca una tua carta e poi le carte da prendere sul tavolo. In due si gioca a turno sullo stesso iPad.</p>
+  <p id="rec" class="note"></p>
+  <div class="row"><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+</div></div>
+
+<script>/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) });
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true });
+  defineProperty(
+    GeneratorFunctionPrototype,
+    "constructor",
+    { value: GeneratorFunction, configurable: true }
+  );
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    defineProperty(this, "_invoke", { value: enqueue });
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per GeneratorResume behavior specified since ES2015:
+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume
+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method;
+    var method = delegate.iterator[methodName];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method, or a missing .next method, always terminate the
+      // yield* loop.
+      context.delegate = null;
+
+      // Note: ["return"] must be used for ES3 parsing compatibility.
+      if (methodName === "throw" && delegate.iterator["return"]) {
+        // If the delegate iterator has a return method, give it a
+        // chance to clean up.
+        context.method = "return";
+        context.arg = undefined;
+        maybeInvokeDelegate(delegate, context);
+
+        if (context.method === "throw") {
+          // If maybeInvokeDelegate(context) changed context.method from
+          // "return" to "throw", let that override the TypeError below.
+          return ContinueSentinel;
+        }
+      }
+      if (methodName !== "return") {
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a '" + methodName + "' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(val) {
+    var object = Object(val);
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable != null) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    throw new TypeError(typeof iterable + " is not iterable");
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+(function(){
+ if(!String.prototype.padStart){String.prototype.padStart=function(n,c){var s=String(this);c=c===undefined?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};}
+ if(!Object.assign){Object.assign=function(t){for(var i=1;i<arguments.length;i++){var s=arguments[i];if(s)for(var k in s)if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k];}return t;};}
+ if(!Array.prototype.findIndex){Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};}
+ if(window.NodeList&&!NodeList.prototype.forEach){NodeList.prototype.forEach=Array.prototype.forEach;}
+ [Element.prototype,Document.prototype,DocumentFragment.prototype].forEach(function(P){ if(!P.append){P.append=function(){for(var i=0;i<arguments.length;i++){var n=arguments[i];this.appendChild(n instanceof Node?n:document.createTextNode(String(n)));}};} });
+ var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+ if(C&&!C.ellipse){C.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){this.save();this.translate(x,y);this.rotate(rot);this.scale(rx,ry);this.arc(0,0,1,a0,a1,ccw);this.restore();};}
+})();
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n2 = 0, F = function F() {}; return { s: F, n: function n() { return _n2 >= r.length ? { done: !0 } : { done: !1, value: r[_n2++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var K = function () {
+  var K = {};
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  K.$ = $;
+  var cv = $('cv'),
+    ctx = cv.getContext('2d');
+  K.cv = cv;
+  K.ctx = ctx;
+  K.W = 800;
+  K.H = 450;
+  K.dpr = 1;
+  function resize() {
+    var st = $('stage');
+    var w = Math.max(200, st.clientWidth),
+      h = Math.max(150, st.clientHeight);
+    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 2);
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+    cv.width = Math.round(w * K.dpr);
+    cv.height = Math.round(h * K.dpr);
+    K.W = w;
+    K.H = h;
+    K.onResize && K.onResize(w, h);
+  }
+  K.resize = resize;
+  var lsw = 0,
+    lsh = 0;
+  addEventListener('resize', resize);
+  addEventListener('orientationchange', function () {
+    setTimeout(resize, 150);
+    setTimeout(resize, 500);
+  });
+  K.keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    a: false,
+    b: false,
+    c: false
+  };
+  var prev = {};
+  K.pressed = function (k) {
+    return K.keys[k] && !prev[k];
+  };
+  K._prev = prev;
+  var BTN = [];
+  K.buttons = function (list) {
+    var pad = $('pad');
+    pad.innerHTML = '';
+    BTN.length = 0;
+    var _iterator = _createForOfIteratorHelper(list),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var b = _step.value;
+        var e = document.createElement('div');
+        e.className = 'kb ' + (b.cls || '') + ' ' + b.pos;
+        e.id = 'kb_' + b.k;
+        e.innerHTML = b.label;
+        pad.appendChild(e);
+        BTN.push({
+          el: e,
+          k: b.k
+        });
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  };
+  function touchKeys(e) {
+    var playing = K.playing && $('kpause').hidden;
+    var st = {};
+    var hit = false;
+    if (playing) for (var i = 0; i < e.touches.length; i++) {
+      var t = e.touches[i];
+      var best = null,
+        bd = 1e9;
+      var _iterator2 = _createForOfIteratorHelper(BTN),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var b = _step2.value;
+          var r = b.el.getBoundingClientRect();
+          if (!r.width || b.el.offsetParent === null) continue;
+          if (t.clientY < r.top - 45 || t.clientY > r.bottom + 200) continue;
+          if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
+          var cx = (r.left + r.right) / 2,
+            cy = (r.top + r.bottom) / 2,
+            dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .3;
+          if (dd < bd) {
+            bd = dd;
+            best = b;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      if (best) {
+        st[best.k] = true;
+        hit = true;
+      }
+    }
+    var _iterator3 = _createForOfIteratorHelper(BTN),
+      _step3;
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var _b = _step3.value;
+        K.keys[_b.k] = !!st[_b.k] || !!kbd[_b.k];
+        _b.el.classList.toggle('on', !!st[_b.k]);
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    if (hit && e.cancelable) e.preventDefault();
+  }
+  ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (ev) {
+    return document.addEventListener(ev, touchKeys, {
+      passive: false
+    });
+  });
+  document.addEventListener('mousedown', function (e) {
+    var b = BTN.find(function (b) {
+      return b.el.contains(e.target);
+    });
+    if (b) {
+      K.keys[b.k] = true;
+      b.el.classList.add('on');
+      var _up = function up() {
+        K.keys[b.k] = !!kbd[b.k];
+        b.el.classList.remove('on');
+        removeEventListener('mouseup', _up);
+      };
+      addEventListener('mouseup', _up);
+    }
+  });
+  var KMAP = {
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    KeyA: 'left',
+    KeyD: 'right',
+    KeyW: 'up',
+    KeyS: 'down',
+    Space: 'a',
+    KeyZ: 'a',
+    KeyK: 'a',
+    KeyX: 'b',
+    KeyL: 'b',
+    Enter: 'b',
+    ShiftLeft: 'b',
+    KeyC: 'c',
+    KeyJ: 'c'
+  };
+  var kbd = {};
+  addEventListener('keydown', function (e) {
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      if (K.playing) K.togglePause();
+      return;
+    }
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = true;
+      K.keys[k] = true;
+      if (K.playing) e.preventDefault();
+    }
+  });
+  addEventListener('keyup', function (e) {
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = false;
+      K.keys[k] = false;
+    }
+  });
+  document.addEventListener('contextmenu', function (e) {
+    if (K.playing) e.preventDefault();
+  });
+  var ac = null;
+  K.soundOn = true;
+  K.musicOn = true;
+  try {
+    if (localStorage.getItem('tomk-sound') === '0') K.soundOn = false;
+    if (localStorage.getItem('tomk-music') === '0') K.musicOn = false;
+  } catch (e) {}
+  function actx() {
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended' && ac.resume) ac.resume();
+    } catch (e) {}
+    return ac;
+  }
+  ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(function (ev) {
+    return document.addEventListener(ev, function () {
+      var c = actx();
+      if (c) {
+        try {
+          var b = c.createBuffer(1, 1, 22050),
+            s = c.createBufferSource();
+          s.buffer = b;
+          s.connect(c.destination);
+          s.start(0);
+        } catch (e) {}
+      }
+    }, {
+      passive: true
+    });
+  });
+  K.beep = function (f, d, type, vol, slide) {
+    if (!K.soundOn) return;
+    var c = actx();
+    if (!c) return;
+    try {
+      var o = c.createOscillator(),
+        g = c.createGain();
+      o.type = type || 'square';
+      o.frequency.value = f;
+      if (slide) o.frequency.linearRampToValueAtTime(Math.max(20, f + slide), c.currentTime + d);
+      g.gain.value = vol || .05;
+      g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + d);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start();
+      o.stop(c.currentTime + d);
+    } catch (e) {}
+  };
+  K.jingle = function (notes, step, type) {
+    return notes.forEach(function (n, i) {
+      return setTimeout(function () {
+        return K.beep(n, .14, type || 'triangle', .06);
+      }, i * (step || 90));
+    });
+  };
+  var NT = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11
+  };
+  var fq = function fq(n) {
+    var m = /^([A-G])(#|b)?(\d)$/.exec(n);
+    if (!m) return 0;
+    var s = NT[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+    return 440 * Math.pow(2, (12 * (+m[3] + 1) + s - 69) / 12);
+  };
+  var parse = function parse(str) {
+    var t = str.split(/\s+/),
+      out = [];
+    for (var i = 0; i < t.length; i++) {
+      if (t[i] === '-') continue;
+      var len = 1;
+      for (var j = i + 1; j < t.length && t[j] === '-'; j++) len++;
+      out.push({
+        step: i,
+        len,
+        f: fq(t[i])
+      });
+    }
+    return {
+      notes: out,
+      steps: t.length
+    };
+  };
+  K.MUS = {};
+  K.addMusic = function (name, m) {
+    m.M = parse(m.mel);
+    m.B = parse(m.bass);
+    m.A = m.arp ? m.arp.split(' ').map(fq) : null;
+    K.MUS[name] = m;
+  };
+  var MZ = {
+    cur: null,
+    next: 0,
+    step: 0,
+    bus: null,
+    echo: null,
+    noise: null
+  };
+  function mzBus() {
+    if (MZ.bus) return true;
+    var c = actx();
+    if (!c) return false;
+    try {
+      MZ.bus = c.createGain();
+      MZ.bus.gain.value = .5;
+      MZ.bus.connect(c.destination);
+      var dl = c.createDelay(),
+        fb = c.createGain(),
+        wet = c.createGain();
+      MZ.echo = c.createGain();
+      dl.delayTime.value = .33;
+      fb.gain.value = .33;
+      wet.gain.value = .45;
+      MZ.echo.connect(MZ.bus);
+      MZ.echo.connect(dl);
+      dl.connect(fb);
+      fb.connect(dl);
+      dl.connect(wet);
+      wet.connect(MZ.bus);
+      var nb = c.createBuffer(1, c.sampleRate * .5, c.sampleRate),
+        d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      MZ.noise = nb;
+    } catch (e) {
+      MZ.bus = null;
+      return false;
+    }
+    return true;
+  }
+  function tone(type, f, t, dur, v, out, bell) {
+    var o = ac.createOscillator(),
+      g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    var a = .008,
+      rel = bell ? dur * 1.6 : Math.min(.08, dur * .4);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + a);
+    if (bell) g.gain.exponentialRampToValueAtTime(.0001, t + rel);else {
+      g.gain.setValueAtTime(v, t + Math.max(a, dur - rel));
+      g.gain.linearRampToValueAtTime(.0001, t + dur);
+    }
+    o.connect(g);
+    g.connect(out);
+    o.start(t);
+    o.stop(t + (bell ? rel : dur) + .05);
+  }
+  function drum(k, t) {
+    if (k === 'k') {
+      var o = ac.createOscillator(),
+        _g = ac.createGain();
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + .12);
+      _g.gain.setValueAtTime(.42, t);
+      _g.gain.exponentialRampToValueAtTime(.001, t + .15);
+      o.connect(_g);
+      _g.connect(MZ.bus);
+      o.start(t);
+      o.stop(t + .16);
+      return;
+    }
+    var s = ac.createBufferSource(),
+      f = ac.createBiquadFilter(),
+      g = ac.createGain();
+    s.buffer = MZ.noise;
+    f.type = 'highpass';
+    f.frequency.value = k === 'h' ? 7000 : 1500;
+    var len = k === 'h' ? .04 : .12;
+    g.gain.setValueAtTime(k === 'h' ? .1 : .2, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + len);
+    s.connect(f);
+    f.connect(g);
+    g.connect(MZ.bus);
+    s.start(t);
+    s.stop(t + len + .02);
+  }
+  function mzStep(m, s, t) {
+    var sd = 60 / m.tempo / 2,
+      out = m.echo ? MZ.echo : MZ.bus;
+    var ms = s % m.M.steps;
+    var _iterator4 = _createForOfIteratorHelper(m.M.notes),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var n = _step4.value;
+        if (n.step === ms) tone(m.lead, n.f, t, n.len * sd * .95, m.lv, out, m.bell);
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
+    }
+    var bs = s % m.B.steps;
+    var _iterator5 = _createForOfIteratorHelper(m.B.notes),
+      _step5;
+    try {
+      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+        var _n = _step5.value;
+        if (_n.step === bs) tone('triangle', _n.f, t, _n.len * sd * .9, .25, MZ.bus);
+      }
+    } catch (err) {
+      _iterator5.e(err);
+    } finally {
+      _iterator5.f();
+    }
+    var dk = m.drums.charAt(s % m.drums.length);
+    if (dk !== '-') drum(dk, t);
+    if (m.A && s % 2 === 0) tone('sine', m.A[s / 2 % m.A.length], t, sd * .9, .05, out, true);
+  }
+  K.wantMusic = null;
+  function musicTick() {
+    var want = K.musicOn && K.playing && $('kpause').hidden ? K.wantMusic : null;
+    if (want !== MZ.cur) {
+      if (MZ.bus) {
+        try {
+          MZ.bus.disconnect();
+        } catch (e) {}
+        MZ.bus = null;
+      }
+      MZ.cur = want;
+      MZ.step = 0;
+      if (want) {
+        if (mzBus()) MZ.next = ac.currentTime + .08;else MZ.cur = null;
+      }
+    }
+    if (!MZ.cur || !MZ.bus || !K.MUS[MZ.cur]) return;
+    var m = K.MUS[MZ.cur],
+      sd = 60 / m.tempo / 2;
+    if (MZ.next < ac.currentTime) MZ.next = ac.currentTime + .02;
+    try {
+      while (MZ.next < ac.currentTime + .15) {
+        mzStep(m, MZ.step, MZ.next);
+        MZ.next += sd;
+        MZ.step++;
+      }
+    } catch (e) {}
+  }
+  K.storageOK = function () {
+    try {
+      localStorage.setItem('tomk-test', '1');
+      var ok = localStorage.getItem('tomk-test') === '1';
+      localStorage.removeItem('tomk-test');
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.load = function (key, def) {
+    try {
+      var v = localStorage.getItem(key);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) {
+      return def;
+    }
+  };
+  K.save = function (key, val) {
+    try {
+      var t = JSON.stringify(val);
+      localStorage.setItem(key, t);
+      return localStorage.getItem(key) === t;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.del = function (key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {}
+  };
+  var toastT = 0;
+  K.toast = function (msg, bad) {
+    var t = $('ktoast');
+    t.textContent = msg;
+    t.className = bad ? 'bad' : '';
+    t.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      t.hidden = true;
+    }, 2000);
+  };
+  K.playing = false;
+  K.game = null;
+  K.start = function () {
+    K.playing = true;
+    $('kpause').hidden = true;
+    document.body.classList.add('playing');
+    last = 0;
+  };
+  K.stop = function () {
+    K.playing = false;
+    document.body.classList.remove('playing');
+    for (var k in K.keys) K.keys[k] = false;
+    BTN.forEach(function (b) {
+      return b.el.classList.remove('on');
+    });
+  };
+  K.togglePause = function () {
+    if (!K.playing) return;
+    if ($('kpause').hidden) {
+      $('kpause').hidden = false;
+      $('kpnote').textContent = '';
+      for (var k in K.keys) K.keys[k] = false;
+      K.game && K.game.save && K.game.save();
+    } else $('kpause').hidden = true;
+  };
+  function saveExit() {
+    var ok = true;
+    if (K.game && K.game.save) ok = K.game.save();
+    K.stop();
+    $('kpause').hidden = true;
+    K.game && K.game.exit && K.game.exit();
+    K.toast(ok ? '💾 Partita salvata: la ritrovi in "Continua"' : '⚠ Partita NON salvata (Navigazione privata)', !ok);
+  }
+  K.saveExit = saveExit;
+  function updToggles() {
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.textContent = K.soundOn ? '🔊 Suono sì' : '🔈 Suono no';
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.textContent = K.musicOn ? '🎵 Musica sì' : '🎵 Musica no';
+    });
+  }
+  K.initUI = function () {
+    $('kback').onclick = saveExit;
+    $('kpbtn').onclick = K.togglePause;
+    $('kresume').onclick = function () {
+      $('kpause').hidden = true;
+      last = 0;
+    };
+    $('ksave').onclick = function () {
+      var ok = K.game && K.game.save ? K.game.save() : false;
+      $('kpnote').textContent = ok ? '✔ Partita salvata' : '⚠ Non salvata: Safari è in Navigazione privata';
+      $('kpnote').className = ok ? 'ok' : 'bad';
+    };
+    $('ksaveexit').onclick = saveExit;
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.onclick = function () {
+        K.soundOn = !K.soundOn;
+        try {
+          localStorage.setItem('tomk-sound', K.soundOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.onclick = function () {
+        K.musicOn = !K.musicOn;
+        try {
+          localStorage.setItem('tomk-music', K.musicOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    updToggles();
+    if (!K.storageOK()) {
+      var w = $('kpriv');
+      if (w) w.hidden = false;
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && K.playing && $('kpause').hidden) K.togglePause();
+    });
+    addEventListener('pagehide', function () {
+      if (K.playing && K.game && K.game.save) K.game.save();
+    });
+  };
+  var last = 0;
+  K.time = 0;
+  function loop(t) {
+    if (window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
+    var st = $('stage'),
+      sw = st.clientWidth,
+      sh = st.clientHeight;
+    if (sw !== lsw || sh !== lsh) {
+      lsw = sw;
+      lsh = sh;
+      resize();
+    }
+    var dt = last ? t - last : 16.67;
+    last = t;
+    var f = Math.min(dt / 16.67, 2.5);
+    var paused = !$('kpause').hidden;
+    if (K.game) {
+      if (K.playing && !paused) {
+        K.time += f;
+        K.game.update(f);
+      } else if (K.game.idle) K.game.idle(f);
+      K.game.draw();
+    }
+    for (var k in K.keys) prev[k] = K.keys[k];
+    musicTick();
+    requestAnimationFrame(loop);
+  }
+  K.run = function () {
+    resize();
+    requestAnimationFrame(loop);
+  };
+  var PAL = {
+    k: '#1d1f2b',
+    w: '#ffffff',
+    W: '#e8ecf4',
+    g: '#9aa0b5',
+    G: '#5d6273',
+    s: '#f2c59a',
+    S: '#d99a6c',
+    h: '#4a2e1c',
+    o: '#f07a2a',
+    O: '#c25a14',
+    r: '#e0373f',
+    R: '#9c1f26',
+    y: '#f2c230',
+    Y: '#c99a00',
+    b: '#3f86d4',
+    B: '#24548f',
+    c: '#9fd3f0',
+    l: '#7cc242',
+    L: '#3d7a1f',
+    n: '#4aa35a',
+    p: '#8a5cc7',
+    P: '#5a3a8a',
+    q: '#e096d2',
+    m: '#9b7653',
+    M: '#6b4a2e',
+    e: '#e8cfa8',
+    d: '#3b3f4f',
+    C: '#c8642a',
+    E: '#e8d2a6',
+    D: '#c9a978'
+  };
+  K.PAL = PAL;
+  var SC = {};
+  K.sprite = function (key, rows, over) {
+    if (SC[key]) return SC[key];
+    var w = Math.max.apply(null, rows.map(function (r) {
+        return r.length;
+      })),
+      h = rows.length,
+      c = document.createElement('canvas');
+    c.width = w + 2;
+    c.height = h + 2;
+    var x = c.getContext('2d');
+    var put = function put(col, dx, dy) {
+      return rows.forEach(function (r, j) {
+        for (var i = 0; i < r.length; i++) {
+          var ch = r[i];
+          if (ch === '.' || ch === ' ') continue;
+          x.fillStyle = col || over && over[ch] || PAL[ch] || '#f0f';
+          x.fillRect(i + dx, j + dy, 1, 1);
+        }
+      });
+    };
+    for (var _i = 0, _arr = [[0, 1], [2, 1], [1, 0], [1, 2]]; _i < _arr.length; _i++) {
+      var _arr$_i = _slicedToArray(_arr[_i], 2),
+        dx = _arr$_i[0],
+        dy = _arr$_i[1];
+      put('#14151d', dx, dy);
+    }
+    put(null, 1, 1);
+    return SC[key] = c;
+  };
+  K.draw = function (c, x, y, U, flip) {
+    var w = c.width * U,
+      h = c.height * U;
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+    if (flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, -w / 2, -h + U, w, h);
+    ctx.restore();
+  };
+  var TOMHEAD = ["..h.h.h...", ".hhhhhhh..", ".hhssssss.", ".hsssswks.", ".ssssssss.", "..sssskss."];
+  var TOMBODY = {
+    stand: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "...d..d...", "..kk..kk.."],
+    walkA: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "..d....d..", ".kk....kk."],
+    walkB: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "....dd....", "....kk...."],
+    jump: ["s..oooo..s", ".soooooos.", "...oooo...", "...dddd...", "..d....d..", ".kk....kk."]
+  };
+  var MILLYHEAD = ["..CCCCC...", ".CCCCCCC..", ".CCssssss.", ".CCsswkss.", ".CCssssss.", ".CC.ssks.."];
+  var MILLYBODY = {
+    stand: ["...pppp...", "..sppppps.", ".pppppppp.", "...s..s...", "..kk..kk.."],
+    walkA: ["...pppp...", "..sppppps.", ".pppppppp.", "..s....s..", ".kk....kk."],
+    walkB: ["...pppp...", "..sppppps.", ".pppppppp.", "....ss....", "....kk...."],
+    jump: ["s..pppp..s", ".spppppps.", ".pppppppp.", "..s....s..", ".kk....kk."]
+  };
+  var PAPHEAD = ["...ssss...", "..sWssss..", ".sssssss..", ".Sssswks..", ".ssssssss.", "..sssskss."];
+  var PAPTOP = ["...bbbb...", "..bbbbbb..", "..bbbbbb..", "..sbbbbs..", "...dddd..."];
+  var PAPLEGS = {
+    stand: ["...d..d...", "...d..d...", "..kk..kk.."],
+    walkA: ["..d....d..", "..d....d..", ".kk....kk."],
+    walkB: ["....dd....", "....dd....", "....kk...."],
+    jump: ["..d....d..", "..d....d..", ".kk....kk."]
+  };
+  var BUNNY = {
+    stand: ["............", ".......EEEE.", "......EEEEEE", "..ww..EEkEEq", ".wEEEEDEEEE.", ".EEEEEEDEE..", ".EEEEEEDE...", "..EE..EE...."],
+    jump: ["......EEEE..", ".....EEEEEE.", "..ww.EEkEEq.", ".wEEEEDEEE..", "EEEEEEEDE...", ".EEEEEEE....", "..E.....E...", "............"]
+  };
+  K.CHARS = {
+    tommy: {
+      name: 'Tommy',
+      col: '#f07a2a'
+    },
+    milly: {
+      name: 'Milly',
+      col: '#8a5cc7'
+    },
+    papone: {
+      name: 'Papone',
+      col: '#3f86d4'
+    },
+    carotino: {
+      name: 'Carotino',
+      col: '#e8d2a6'
+    }
+  };
+  K.CHAR_ORDER = ['tommy', 'milly', 'papone', 'carotino'];
+  K.charS = function (ch, f) {
+    f = f || 'stand';
+    if (ch === 'milly') return K.sprite('milly_' + f, MILLYHEAD.concat(MILLYBODY[f] || MILLYBODY.stand));
+    if (ch === 'papone') return K.sprite('pap_' + f, PAPHEAD.concat(f === 'jump' ? ["s..bbbb..s", ".sbbbbbbs.", "..bbbbbb..", "..bbbbbb..", "...dddd..."] : PAPTOP, PAPLEGS[f] || PAPLEGS.stand));
+    if (ch === 'carotino') return K.sprite('bun_' + (f === 'jump' || f === 'walkA' ? 'jump' : 'stand'), BUNNY[f === 'jump' || f === 'walkA' ? 'jump' : 'stand']);
+    return K.sprite('tom_' + f, TOMHEAD.concat(TOMBODY[f] || TOMBODY.stand));
+  };
+  K.headS = function (ch) {
+    if (ch === 'milly') return K.sprite('mh', MILLYHEAD);
+    if (ch === 'papone') return K.sprite('ph', PAPHEAD);
+    if (ch === 'carotino') return K.sprite('bh', BUNNY.stand.slice(0, 5));
+    return K.sprite('th', TOMHEAD);
+  };
+  K.rect = function (x, y, w, h, c) {
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  };
+  K.text = function (t, x, y, size, col, align, shadow) {
+    ctx.font = '700 ' + size + "px 'Pixelify Sans', monospace";
+    ctx.textAlign = align || 'left';
+    if (shadow !== false) {
+      ctx.fillStyle = 'rgba(20,21,29,.8)';
+      ctx.fillText(t, x + 2, y + 2);
+    }
+    ctx.fillStyle = col || '#fff';
+    ctx.fillText(t, x, y);
+    ctx.textAlign = 'left';
+  };
+  K.rnd = function (i, j, s) {
+    var v = Math.sin(i * 127.1 + (j || 0) * 311.7 + (s || 0) * 74.7) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  K.fmt = function (s) {
+    return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  };
+  K.charPicker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var c = document.createElement('canvas'),
+        s = K.charS(ch, 'stand');
+      c.width = s.width;
+      c.height = s.height;
+      var x = c.getContext('2d');
+      x.drawImage(s, 0, 0);
+      b.appendChild(c);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+  return K;
+}();
+(function () {
+  var S = K.S = {};
+  var c = K.ctx;
+  S.OUT = '#1c1724';
+  S.LW = 2.4;
+  S.use = function (x) {
+    var o = c;
+    c = x;
+    return o;
+  };
+  var TC = {};
+  S.tone = function (h, a) {
+    var k = h + a;
+    var v = TC[k];
+    if (v) return v;
+    var n = parseInt(h.slice(1), 16);
+    var r = n >> 16,
+      g = n >> 8 & 255,
+      b = n & 255;
+    if (a > 0) {
+      r += (255 - r) * a;
+      g += (255 - g) * a;
+      b += (255 - b) * a;
+    } else {
+      r *= 1 + a;
+      g *= 1 + a;
+      b *= 1 + a;
+    }
+    return TC[k] = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')';
+  };
+  var tone = S.tone;
+  S.rrp = function (x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  };
+  S.edge = function (lw) {
+    c.lineWidth = lw || S.LW;
+    c.strokeStyle = S.OUT;
+    c.lineJoin = 'round';
+    c.stroke();
+  };
+  S.part = function (x, y, w, h, r, col) {
+    S.rrp(x, y, w, h, r);
+    S.edge();
+    c.fillStyle = tone(col, -.3);
+    c.fill();
+    S.rrp(x, y, w * .78, h * .94, r);
+    c.fillStyle = col;
+    c.fill();
+    S.rrp(x + w * .14, y + h * .12, Math.max(1.5, w * .15), h * .4, w * .08);
+    c.fillStyle = tone(col, .4);
+    c.fill();
+  };
+  S.orb = function (cx, cy, rx, ry, col) {
+    c.beginPath();
+    c.ellipse(cx, cy, rx, ry, 0, 0, 6.2832);
+    S.edge();
+    c.fillStyle = tone(col, -.28);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx - rx * .13, cy - ry * .13, rx * .84, ry * .84, 0, 0, 6.2832);
+    c.fillStyle = col;
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx - rx * .36, cy - ry * .42, rx * .28, ry * .19, -.6, 0, 6.2832);
+    c.fillStyle = 'rgba(255,255,255,.42)';
+    c.fill();
+  };
+  S.dot = function (cx, cy, r, col) {
+    c.fillStyle = col;
+    c.beginPath();
+    c.arc(cx, cy, r, 0, 6.2832);
+    c.fill();
+  };
+  S.limb = function (x1, y1, x2, y2, w, col) {
+    c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(x1, y1);
+    c.lineTo(x2, y2);
+    c.lineWidth = w + S.LW * 1.3;
+    c.strokeStyle = S.OUT;
+    c.stroke();
+    c.lineWidth = w;
+    c.strokeStyle = col;
+    c.stroke();
+    c.lineWidth = Math.max(1, w * .28);
+    c.strokeStyle = tone(col, .32);
+    c.beginPath();
+    c.moveTo(x1 - w * .2, y1);
+    c.lineTo(x2 - w * .2, y2);
+    c.stroke();
+  };
+  S.shape = function (p, col, noEdge) {
+    c.beginPath();
+    c.moveTo(p[0], p[1]);
+    for (var i = 2; i < p.length; i += 2) c.lineTo(p[i], p[i + 1]);
+    c.closePath();
+    if (!noEdge) S.edge();
+    c.fillStyle = col;
+    c.fill();
+  };
+  S.curve = function (p, col, noEdge) {
+    var n = p.length / 2;
+    c.beginPath();
+    c.moveTo((p[0] + p[2]) / 2, (p[1] + p[3]) / 2);
+    for (var i = 1; i <= n; i++) {
+      var a = i % n * 2,
+        b = (i + 1) % n * 2;
+      c.quadraticCurveTo(p[a], p[a + 1], (p[a] + p[b]) / 2, (p[a + 1] + p[b + 1]) / 2);
+    }
+    c.closePath();
+    if (!noEdge) S.edge();
+    c.fillStyle = col;
+    c.fill();
+  };
+  S.eye = function (x, y, r, pup) {
+    S.dot(x, y, r + 1.1, S.OUT);
+    S.dot(x, y, r, '#ffffff');
+    S.dot(x + r * .3, y + r * .1, r * .58, pup || S.OUT);
+    S.dot(x + r * .05, y - r * .3, r * .26, '#ffffff');
+  };
+  S.glow = function (x, y, r, col) {
+    var g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, col);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  S.shadow = function (x, y, rx, a) {
+    c.fillStyle = 'rgba(20,10,30,' + .16 * (a == null ? 1 : a) + ')';
+    c.beginPath();
+    c.ellipse(x, y, rx * 1.35, rx * .4, 0, 0, 6.2832);
+    c.fill();
+    c.fillStyle = 'rgba(20,10,30,' + .2 * (a == null ? 1 : a) + ')';
+    c.beginPath();
+    c.ellipse(x, y, rx * .85, rx * .25, 0, 0, 6.2832);
+    c.fill();
+  };
+  S.clouds = function (vw, camX, p, gap, night, rnd) {
+    var o = camX * p,
+      i0 = Math.floor((o - 200) / gap),
+      i1 = Math.ceil((o + vw + 200) / gap);
+    c.fillStyle = night ? 'rgba(90,60,110,.5)' : 'rgba(255,255,255,.78)';
+    for (var i = i0; i <= i1; i++) {
+      var r = rnd(i, 7, 3);
+      if (r > .6) continue;
+      var sx = i * gap - o,
+        cy = 28 + r * 70;
+      for (var _i2 = 0, _arr2 = [[0, 0, 22], [22, -8, 26], [46, 0, 20], [22, 6, 24]]; _i2 < _arr2.length; _i2++) {
+        var q = _arr2[_i2];
+        c.beginPath();
+        c.ellipse(sx + q[0], cy + q[1], q[2] * 1.3, q[2] * .7, 0, 0, 6.2832);
+        c.fill();
+      }
+    }
+  };
+  S.kid = function (x, y, face, L, pose) {
+    c.save();
+    c.translate(x, y);
+    c.scale(face * (L.sc || 1), L.sc || 1);
+    if (pose.rot) {
+      c.translate(0, -18);
+      c.rotate(pose.rot);
+      c.translate(0, 18);
+    }
+    var air = pose.air,
+      mv = pose.walk != null,
+      ph = mv ? Math.sin(pose.walk) : 0,
+      s = ph * 5,
+      bob = mv && !air ? -Math.abs(Math.cos(pose.walk)) * 1.2 : 0;
+    if (L.bunny) {
+      var hop = air ? 0 : Math.abs(Math.sin((pose.walk || 0) * 1.2)) * 3;
+      c.translate(0, -hop);
+      S.orb(-13, -12, 4.5, 4.5, '#ffffff');
+      S.orb(-3, -11, 12, 9, L.fur);
+      S.orb(3, -4, 5, 3, S.tone(L.fur, -.1));
+      S.orb(-9, -3, 5, 3, S.tone(L.fur, -.1));
+      S.limb(4, -24, 0 + (air ? -3 : 0), -42, 4.5, L.fur);
+      S.limb(9, -24, 10 + (air ? -2 : 0), -42, 4.5, S.tone(L.fur, .05));
+      S.limb(9, -27, 10, -39, 1.6, '#f2a6c4');
+      S.orb(8, -20, 9, 8.5, L.fur);
+      S.eye(12, -22, 2.2);
+      S.dot(17, -18, 2, '#f07aa8');
+      S.dot(10, -15, 1.8, 'rgba(240,120,160,.45)');
+      c.restore();
+      return;
+    }
+    var tall = L.tall ? 4 : 0,
+      hip = -11 - tall * .5 + bob,
+      top = hip - 14 - tall * .6,
+      hy = top - 8;
+    S.limb(-2, hip, -2 + (air ? -4 : -s * .8), air ? -6 : -3, 5, S.tone(L.pants, -.2));
+    S.orb(-1 + (air ? -4 : -s * .8), air ? -5 : -2, 4.3, 2.7, '#2a2230');
+    S.limb(-4, top + 4, air ? -10 : -5 + s * .7, air ? top - 4 : top + 12, 3.8, S.tone(L.shirt, -.2));
+    S.orb(air ? -10 : -5 + s * .7, air ? top - 4 : top + 12, 2.6, 2.6, L.skin);
+    if (L.style === 'long') S.curve([-9, hy - 4, 6, hy - 6, 4, top + 12, -11, top + 12], L.hair);
+    if (L.style === 'pony') {
+      S.limb(-8, hy - 2, -13, hy + 8 + (mv ? ph * 2 : 0), 4.5, L.hair);
+      S.dot(-8, hy - 1, 2.4, '#f2c230');
+    }
+    S.limb(3, hip, 3 + (air ? 5 : s * .8), air ? -8 : -3, 5, L.pants);
+    S.orb(4 + (air ? 5 : s * .8), air ? -7 : -2, 4.5, 2.8, '#3a3040');
+    if (L.dress) S.curve([-9, hip + 3, -6, top, 6, top, 10, hip + 3], L.shirt);else S.part(-7.5, top, 15, hip - top + 3, 6, L.shirt);
+    if (!L.dress) {
+      S.rrp(-7.5, hip - 3, 15, 3.5, 1.7);
+      c.fillStyle = S.tone(L.pants, -.1);
+      c.fill();
+    }
+    S.orb(1, hy, 9, 9, L.skin);
+    if (L.style === 'bald') {
+      c.beginPath();
+      c.ellipse(-6, hy, 3.4, 5, 0, 0, 6.2832);
+      c.fillStyle = L.hair;
+      c.fill();
+      S.dot(-1, hy - 6, 2.6, 'rgba(255,255,255,.5)');
+    } else {
+      c.beginPath();
+      c.ellipse(0, hy - 3, 9.6, 6.5, 0, Math.PI, 6.2832);
+      c.lineTo(-9.6, hy + 2);
+      c.closePath();
+      S.edge();
+      c.fillStyle = L.hair;
+      c.fill();
+      if (L.style === 'spiky') for (var k = 0; k < 3; k++) S.shape([-7 + k * 5, hy - 7, -4 + k * 5, hy - 15 + k, -1 + k * 5, hy - 8], L.hair);
+      S.dot(-2, hy - 6, 1.6, 'rgba(255,255,255,.35)');
+    }
+    if (L.glasses) {
+      c.lineWidth = 1.3;
+      c.strokeStyle = S.OUT;
+      c.beginPath();
+      c.arc(5, hy, 3.4, 0, 6.2832);
+      c.stroke();
+    }
+    S.eye(5, hy, 2.2, L.eyes);
+    S.dot(3, hy + 4, 1.6, 'rgba(230,100,100,.4)');
+    c.strokeStyle = S.OUT;
+    c.lineWidth = 1.1;
+    c.beginPath();
+    c.arc(6, hy + 3.5, 2, .2, 2.3);
+    c.stroke();
+    if (L.beard) {
+      S.curve([-1, hy + 4, 9, hy + 3, 8, hy + 9, 2, hy + 10], L.beard);
+    }
+    S.limb(4, top + 4, air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 3.8, L.shirt);
+    S.orb(air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 2.7, 2.7, L.skin);
+    c.restore();
+  };
+})();
+(function () {
+  var ctx = K.ctx,
+    $ = K.$,
+    SS = K.S,
+    tone = SS.tone,
+    rrp = SS.rrp,
+    edge = SS.edge,
+    orb = SS.orb,
+    dot = SS.dot,
+    limb = SS.limb,
+    shape = SS.shape,
+    curve = SS.curve,
+    glow = SS.glow;
+  K.addMusic('tavolo', {
+    tempo: 92,
+    lead: 'triangle',
+    lv: .15,
+    echo: true,
+    bell: true,
+    mel: 'C5 - E5 G5 - E5 D5 - C5 - A4 - G4 - - - F4 - A4 C5 - A4 G4 - E4 - G4 - C5 - - -',
+    bass: 'C3 - - - A2 - - - F2 - - - G2 - - -',
+    drums: 'k-------'
+  });
+  var NAMES = {
+    tris: 'Tris',
+    dama: 'Dama',
+    scacchi: 'Scacchi',
+    scopa: 'Scopa'
+  };
+  var LV = ['Facile', 'Medio', 'Difficile'];
+  var G = null,
+    t = 0,
+    btns = [],
+    lay = null,
+    aiT = 0,
+    fx = [];
+  var rnd = function rnd(a) {
+    return a[Math.floor(Math.random() * a.length)];
+  };
+  var shuffle = function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var x = a[i];
+      a[i] = a[j];
+      a[j] = x;
+    }
+    return a;
+  };
+  var isCPU = function isCPU(p) {
+    return G.mode === 'cpu' && p === 1;
+  };
+  function who(p) {
+    if (G.mode === 'cpu') return p === 0 ? 'Tu' : 'Computer';
+    return 'Giocatore ' + (p + 1);
+  }
+  function pop(s, c) {
+    fx.push({
+      s: s,
+      c: c || '#f2c230',
+      l: 90
+    });
+  }
+  var LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+  function trisWin(b) {
+    for (var _i3 = 0, _LINES = LINES; _i3 < _LINES.length; _i3++) {
+      var l = _LINES[_i3];
+      if (b[l[0]] != null && b[l[0]] === b[l[1]] && b[l[1]] === b[l[2]]) return l;
+    }
+    return null;
+  }
+  function trisMM(b, p, me) {
+    var w = trisWin(b);
+    if (w) return b[w[0]] === me ? 10 : -10;
+    if (b.every(function (x) {
+      return x != null;
+    })) return 0;
+    var best = p === me ? -99 : 99;
+    for (var i = 0; i < 9; i++) if (b[i] == null) {
+      b[i] = p;
+      var v = trisMM(b, 1 - p, me) * .9;
+      b[i] = null;
+      best = p === me ? Math.max(best, v) : Math.min(best, v);
+    }
+    return best;
+  }
+  var TRIS = {
+    init() {
+      return {
+        b: [null, null, null, null, null, null, null, null, null]
+      };
+    },
+    ai() {
+      var b = G.s.b,
+        me = G.turn,
+        free = [];
+      for (var i = 0; i < 9; i++) if (b[i] == null) free.push(i);
+      if (G.lvl === 0 && Math.random() < .75) return rnd(free);
+      if (G.lvl <= 1) {
+        for (var _i4 = 0, _arr3 = [me, 1 - me]; _i4 < _arr3.length; _i4++) {
+          var q = _arr3[_i4];
+          var _iterator6 = _createForOfIteratorHelper(free),
+            _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+              var _i5 = _step6.value;
+              b[_i5] = q;
+              var w = trisWin(b);
+              b[_i5] = null;
+              if (w) return _i5;
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
+        }
+        if (b[4] == null && Math.random() < .6) return 4;
+        return rnd(free);
+      }
+      var bi = free[0],
+        bv = -99;
+      var _iterator7 = _createForOfIteratorHelper(shuffle(free.slice())),
+        _step7;
+      try {
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+          var _i6 = _step7.value;
+          b[_i6] = me;
+          var v = trisMM(b, 1 - me, me);
+          b[_i6] = null;
+          if (v > bv) {
+            bv = v;
+            bi = _i6;
+          }
+        }
+      } catch (err) {
+        _iterator7.e(err);
+      } finally {
+        _iterator7.f();
+      }
+      return bi;
+    },
+    play(i) {
+      var s = G.s;
+      if (s.b[i] != null) return false;
+      s.b[i] = G.turn;
+      s.last = i;
+      s.popT = t;
+      K.beep(G.turn ? 520 : 660, .08, 'triangle', .05, 200);
+      var w = trisWin(s.b);
+      if (w) {
+        s.line = w;
+        end(G.turn, 'Tris di ' + who(G.turn) + '!');
+      } else if (s.b.every(function (x) {
+        return x != null;
+      })) end(-1, 'Patta! Nessuno ha fatto tris.');else G.turn = 1 - G.turn;
+      return true;
+    },
+    tap(x, y) {
+      var L = lay,
+        c = Math.floor((x - L.bx) / (L.bs / 3)),
+        r = Math.floor((y - L.by) / (L.bs / 3));
+      if (c < 0 || c > 2 || r < 0 || r > 2) return;
+      TRIS.play(r * 3 + c);
+    },
+    draw() {
+      var L = lay,
+        s = G.s,
+        cs = L.bs / 3;
+      board3D(L.bx, L.by, L.bs, L.bs, '#c99a5e');
+      ctx.lineCap = 'round';
+      for (var k = 1; k < 3; k++) {
+        for (var _i7 = 0, _arr4 = [[L.bx + k * cs, L.by + 12, L.bx + k * cs, L.by + L.bs - 12], [L.bx + 12, L.by + k * cs, L.bx + L.bs - 12, L.by + k * cs]]; _i7 < _arr4.length; _i7++) {
+          var _arr4$_i = _slicedToArray(_arr4[_i7], 4),
+            a = _arr4$_i[0],
+            b = _arr4$_i[1],
+            c2 = _arr4$_i[2],
+            d = _arr4$_i[3];
+          ctx.strokeStyle = 'rgba(70,40,20,.55)';
+          ctx.lineWidth = 7;
+          ctx.beginPath();
+          ctx.moveTo(a, b);
+          ctx.lineTo(c2, d);
+          ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,235,200,.35)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(a + 2, b + 2);
+          ctx.lineTo(c2 + 2, d + 2);
+          ctx.stroke();
+        }
+      }
+      for (var i = 0; i < 9; i++) {
+        if (s.b[i] == null) continue;
+        var cx = L.bx + (i % 3 + .5) * cs,
+          cy = L.by + (Math.floor(i / 3) + .5) * cs,
+          sc = i === s.last ? Math.min(1, (t - s.popT) / 10) : 1,
+          r = cs * .3 * sc;
+        SS.shadow(cx + 4, cy + r * .9, r * .8, .8);
+        if (s.b[i] === 0) {
+          limb(cx - r, cy - r, cx + r, cy + r, cs * .13, '#e0373f');
+          limb(cx + r, cy - r, cx - r, cy + r, cs * .13, '#f0565c');
+        } else {
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, 6.2832);
+          ctx.lineWidth = cs * .13 + 3;
+          ctx.strokeStyle = SS.OUT;
+          ctx.stroke();
+          ctx.lineWidth = cs * .13;
+          ctx.strokeStyle = '#3f86d4';
+          ctx.stroke();
+          ctx.lineWidth = cs * .04;
+          ctx.strokeStyle = 'rgba(255,255,255,.55)';
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 3.6, 5.2);
+          ctx.stroke();
+        }
+      }
+      if (s.line) {
+        var _a = s.line[0],
+          _b2 = s.line[2],
+          p = Math.min(1, (t - s.popT) / 25);
+        var x1 = L.bx + (_a % 3 + .5) * cs,
+          y1 = L.by + (Math.floor(_a / 3) + .5) * cs,
+          x2 = L.bx + (_b2 % 3 + .5) * cs,
+          y2 = L.by + (Math.floor(_b2 / 3) + .5) * cs;
+        ctx.globalAlpha = .85;
+        limb(x1, y1, x1 + (x2 - x1) * p, y1 + (y2 - y1) * p, 8, '#f2c230');
+        ctx.globalAlpha = 1;
+      }
+    },
+    side(p) {
+      return p === 0 ? '❌' : '⭕';
+    }
+  };
+  var own = function own(v, p) {
+      return p === 0 ? v === 1 || v === 2 : v === 3 || v === 4;
+    },
+    isK = function isK(v) {
+      return v === 2 || v === 4;
+    };
+  function damaMoves(b, p) {
+    var caps = [],
+      simple = [],
+      fwd = p === 0 ? -1 : 1;
+    var _loop = function _loop(r) {
+      var _loop2 = function _loop2(c) {
+        var v = b[r * 8 + c];
+        if (!own(v, p)) return 1;
+        var king = isK(v),
+          dirs = king ? [[-1, -1], [-1, 1], [1, -1], [1, 1]] : [[fwd, -1], [fwd, 1]];
+        var _dfs = function dfs(rr, cc, path, taken) {
+          var more = false;
+          for (var _i8 = 0, _dirs = dirs; _i8 < _dirs.length; _i8++) {
+            var _dirs$_i = _slicedToArray(_dirs[_i8], 2),
+              dr = _dirs$_i[0],
+              dc = _dirs$_i[1];
+            var r1 = rr + dr,
+              c1 = cc + dc,
+              r2 = rr + 2 * dr,
+              c2 = cc + 2 * dc;
+            if (r2 < 0 || r2 > 7 || c2 < 0 || c2 > 7) continue;
+            var m = b[r1 * 8 + c1];
+            if (!m || own(m, p) || taken.indexOf(r1 * 8 + c1) >= 0) continue;
+            if (!king && isK(m)) continue;
+            if (b[r2 * 8 + c2] && r2 * 8 + c2 !== r * 8 + c) continue;
+            more = true;
+            var np = path.concat([r2 * 8 + c2]),
+              nt = taken.concat([r1 * 8 + c1]);
+            if (!king && (r2 === 0 || r2 === 7)) caps.push({
+              path: np,
+              caps: nt
+            });else _dfs(r2, c2, np, nt);
+          }
+          if (!more && taken.length) caps.push({
+            path: path,
+            caps: taken
+          });
+        };
+        _dfs(r, c, [r * 8 + c], []);
+        for (var _i9 = 0, _dirs2 = dirs; _i9 < _dirs2.length; _i9++) {
+          var _dirs2$_i = _slicedToArray(_dirs2[_i9], 2),
+            dr = _dirs2$_i[0],
+            dc = _dirs2$_i[1];
+          var r1 = r + dr,
+            c1 = c + dc;
+          if (r1 < 0 || r1 > 7 || c1 < 0 || c1 > 7) continue;
+          if (!b[r1 * 8 + c1]) simple.push({
+            path: [r * 8 + c, r1 * 8 + c1],
+            caps: []
+          });
+        }
+      };
+      for (var c = 0; c < 8; c++) {
+        if (_loop2(c)) continue;
+      }
+    };
+    for (var r = 0; r < 8; r++) {
+      _loop(r);
+    }
+    if (caps.length) {
+      var mx = Math.max.apply(null, caps.map(function (m) {
+        return m.caps.length;
+      }));
+      var best = caps.filter(function (m) {
+        return m.caps.length === mx;
+      });
+      var kc = function kc(m) {
+        return isK(b[m.path[0]]) ? 1 : 0;
+      };
+      var mk = Math.max.apply(null, best.map(kc));
+      best = best.filter(function (m) {
+        return kc(m) === mk;
+      });
+      var kk = function kk(m) {
+        return m.caps.filter(function (i) {
+          return isK(b[i]);
+        }).length;
+      };
+      var mkk = Math.max.apply(null, best.map(kk));
+      return best.filter(function (m) {
+        return kk(m) === mkk;
+      });
+    }
+    return simple;
+  }
+  function damaApply(b, m) {
+    var n = b.slice(),
+      from = m.path[0],
+      to = m.path[m.path.length - 1];
+    var v = n[from];
+    n[from] = 0;
+    var _iterator8 = _createForOfIteratorHelper(m.caps),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var i = _step8.value;
+        n[i] = 0;
+      }
+    } catch (err) {
+      _iterator8.e(err);
+    } finally {
+      _iterator8.f();
+    }
+    var r = Math.floor(to / 8);
+    if (v === 1 && r === 0) v = 2;
+    if (v === 3 && r === 7) v = 4;
+    n[to] = v;
+    return n;
+  }
+  function damaEval(b, p) {
+    var s = 0;
+    for (var i = 0; i < 64; i++) {
+      var v = b[i];
+      if (!v) continue;
+      var r = Math.floor(i / 8),
+        c = i % 8,
+        mine = own(v, p),
+        val = isK(v) ? 170 : 100 + (v === 1 ? (7 - r) * 4 : v === 3 ? r * 4 : 0) + (c > 1 && c < 6 ? 4 : 0);
+      s += mine ? val : -val;
+    }
+    return s;
+  }
+  function damaSearch(b, p, d, a, be) {
+    var ms = damaMoves(b, p);
+    if (!ms.length) return -9999 - d;
+    if (d === 0) return damaEval(b, p);
+    var best = -99999;
+    var _iterator9 = _createForOfIteratorHelper(ms),
+      _step9;
+    try {
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var m = _step9.value;
+        var v = -damaSearch(damaApply(b, m), 1 - p, d - 1, -be, -a);
+        if (v > best) best = v;
+        if (v > a) a = v;
+        if (a >= be) break;
+      }
+    } catch (err) {
+      _iterator9.e(err);
+    } finally {
+      _iterator9.f();
+    }
+    return best;
+  }
+  var DAMA = {
+    init() {
+      var b = new Array(64).fill(0);
+      for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) if ((r + c) % 2 === 1) {
+        if (r < 3) b[r * 8 + c] = 3;else if (r > 4) b[r * 8 + c] = 1;
+      }
+      return {
+        b: b,
+        sel: -1,
+        quiet: 0
+      };
+    },
+    ai() {
+      var s = G.s,
+        ms = damaMoves(s.b, G.turn);
+      if (G.lvl === 0) return rnd(ms);
+      var d = G.lvl === 1 ? 2 : 5;
+      var bm = ms[0],
+        bv = -1e9;
+      var _iterator0 = _createForOfIteratorHelper(shuffle(ms.slice())),
+        _step0;
+      try {
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+          var m = _step0.value;
+          var v = -damaSearch(damaApply(s.b, m), 1 - G.turn, d - 1, -1e9, 1e9);
+          if (v > bv) {
+            bv = v;
+            bm = m;
+          }
+        }
+      } catch (err) {
+        _iterator0.e(err);
+      } finally {
+        _iterator0.f();
+      }
+      return bm;
+    },
+    play(m) {
+      var s = G.s;
+      s.b = damaApply(s.b, m);
+      s.last = m.path.slice();
+      s.sel = -1;
+      s.anim = {
+        m: m,
+        t: t
+      };
+      s.quiet = m.caps.length ? 0 : s.quiet + 1;
+      K.beep(m.caps.length ? 300 : 440, .08, 'square', .05, m.caps.length ? -120 : 100);
+      if (m.caps.length > 1) pop('Presa multipla! ' + m.caps.length + ' pedine', '#f2c230');
+      G.turn = 1 - G.turn;
+      var nx = damaMoves(s.b, G.turn);
+      if (!nx.length) end(1 - G.turn, (G.mode === 'cpu' ? G.turn === 1 ? 'Hai vinto!' : 'Ha vinto il computer!' : 'Vince ' + who(1 - G.turn) + '!') + ' L\'avversario non può più muovere.');else if (s.quiet >= 60) end(-1, 'Patta: troppe mosse senza prese.');
+      return true;
+    },
+    tap(x, y) {
+      var s = G.s,
+        q = sqAt(x, y);
+      if (q < 0) return;
+      var ms = damaMoves(s.b, G.turn);
+      if (s.sel >= 0) {
+        var m = ms.find(function (m) {
+          return m.path[0] === s.sel && m.path[m.path.length - 1] === q;
+        });
+        if (m) {
+          DAMA.play(m);
+          return;
+        }
+      }
+      if (own(s.b[q], G.turn)) {
+        if (ms.some(function (m) {
+          return m.path[0] === q;
+        })) {
+          s.sel = q;
+          K.beep(700, .04, 'triangle', .03);
+        } else {
+          s.sel = -1;
+          if (ms.length && ms[0].caps.length) pop('Devi mangiare! (è obbligatorio)', '#ff8a8a');
+        }
+      } else s.sel = -1;
+    },
+    draw() {
+      var s = G.s,
+        L = lay;
+      boardSquares(L, '#f0dcb4', '#7a4e2e');
+      var ms = G.over || isCPU(G.turn) ? [] : damaMoves(s.b, G.turn);
+      if (s.last) {
+        var _iterator1 = _createForOfIteratorHelper(s.last),
+          _step1;
+        try {
+          for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+            var i = _step1.value;
+            hiSq(L, i, 'rgba(242,194,48,.35)');
+          }
+        } catch (err) {
+          _iterator1.e(err);
+        } finally {
+          _iterator1.f();
+        }
+      }
+      if (s.sel >= 0) {
+        hiSq(L, s.sel, 'rgba(95,208,106,.55)');
+        var _iterator10 = _createForOfIteratorHelper(ms),
+          _step10;
+        try {
+          for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+            var m = _step10.value;
+            if (m.path[0] === s.sel) {
+              var to = m.path[m.path.length - 1];
+              markSq(L, to, m.caps.length ? '#e0373f' : '#5fd06a');
+            }
+          }
+        } catch (err) {
+          _iterator10.e(err);
+        } finally {
+          _iterator10.f();
+        }
+      } else if (ms.length && ms[0].caps.length) {
+        var _iterator11 = _createForOfIteratorHelper(ms),
+          _step11;
+        try {
+          for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+            var _m = _step11.value;
+            hiSq(L, _m.path[0], 'rgba(224,55,63,.3)');
+          }
+        } catch (err) {
+          _iterator11.e(err);
+        } finally {
+          _iterator11.f();
+        }
+      }
+      for (var _i0 = 0; _i0 < 64; _i0++) {
+        var v = s.b[_i0];
+        if (!v) continue;
+        var p = sqXY(L, _i0);
+        disc(p.x, p.y, L.sw, v <= 2 ? 0 : 1, isK(v));
+      }
+    },
+    side(p) {
+      return p === 0 ? '⚪ bianchi' : '🔴 rossi';
+    }
+  };
+  function disc(x, y, sw, col, king) {
+    var rx = sw * .38,
+      ry = rx * .78,
+      h = sw * .13,
+      top = col === 0 ? '#f6efe2' : '#d8433f',
+      sideC = col === 0 ? '#c9bba0' : '#8c1c24';
+    SS.shadow(x + 3, y + ry * .6, rx * .95, .9);
+    for (var k = 0; k < (king ? 2 : 1); k++) {
+      var yy = y - k * h * 1.05;
+      ctx.beginPath();
+      ctx.ellipse(x, yy, rx, ry, 0, 0, Math.PI);
+      ctx.lineTo(x - rx, yy - h);
+      ctx.ellipse(x, yy - h, rx, ry, 0, Math.PI, 0, true);
+      ctx.closePath();
+      edge();
+      ctx.fillStyle = sideC;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(x, yy - h, rx, ry, 0, 0, 6.2832);
+      edge();
+      var g = ctx.createRadialGradient(x - rx * .3, yy - h - ry * .4, 1, x, yy - h, rx);
+      g.addColorStop(0, tone(top, .35));
+      g.addColorStop(1, top);
+      ctx.fillStyle = g;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(x, yy - h, rx * .68, ry * .68, 0, 0, 6.2832);
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(0,0,0,.18)';
+      ctx.stroke();
+    }
+    if (king) {
+      var _yy = y - h * 2.1;
+      curve([x - rx * .45, _yy + ry * .15, x - rx * .5, _yy - ry * .45, x - rx * .2, _yy - ry * .1, x, _yy - ry * .6, x + rx * .2, _yy - ry * .1, x + rx * .5, _yy - ry * .45, x + rx * .45, _yy + ry * .15], '#f2c230');
+    }
+  }
+  var VAL = {
+    P: 100,
+    N: 310,
+    B: 325,
+    R: 500,
+    Q: 900,
+    K: 0
+  };
+  var NO = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]],
+    KO = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
+    BD = [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+    RD = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  var col = function col(x) {
+      return x ? x[0] : null;
+    },
+    typ = function typ(x) {
+      return x ? x[1] : null;
+    };
+  function chInit() {
+    var b = new Array(64).fill(null),
+      back = 'RNBQKBNR';
+    for (var c = 0; c < 8; c++) {
+      b[c] = 'b' + back[c];
+      b[8 + c] = 'bP';
+      b[48 + c] = 'wP';
+      b[56 + c] = 'w' + back[c];
+    }
+    return {
+      b: b,
+      turn: 'w',
+      cs: {
+        wK: 1,
+        wQ: 1,
+        bK: 1,
+        bQ: 1
+      },
+      ep: -1,
+      half: 0
+    };
+  }
+  function attacked(b, sq, by) {
+    var r = Math.floor(sq / 8),
+      c = sq % 8,
+      at = function at(rr, cc) {
+        return rr >= 0 && rr < 8 && cc >= 0 && cc < 8 ? b[rr * 8 + cc] : undefined;
+      };
+    var pd = by === 'w' ? 1 : -1;
+    for (var _i1 = 0, _arr5 = [-1, 1]; _i1 < _arr5.length; _i1++) {
+      var dc = _arr5[_i1];
+      if (at(r + pd, c + dc) === by + 'P') return true;
+    }
+    var _iterator12 = _createForOfIteratorHelper(NO),
+      _step12;
+    try {
+      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+        var _step12$value = _slicedToArray(_step12.value, 2),
+          _dr = _step12$value[0],
+          _dc2 = _step12$value[1];
+        if (at(r + _dr, c + _dc2) === by + 'N') return true;
+      }
+    } catch (err) {
+      _iterator12.e(err);
+    } finally {
+      _iterator12.f();
+    }
+    var _iterator13 = _createForOfIteratorHelper(KO),
+      _step13;
+    try {
+      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+        var _step13$value = _slicedToArray(_step13.value, 2),
+          _dr2 = _step13$value[0],
+          _dc3 = _step13$value[1];
+        if (at(r + _dr2, c + _dc3) === by + 'K') return true;
+      }
+    } catch (err) {
+      _iterator13.e(err);
+    } finally {
+      _iterator13.f();
+    }
+    for (var _i10 = 0, _arr6 = [[BD, 'BQ'], [RD, 'RQ']]; _i10 < _arr6.length; _i10++) {
+      var _arr6$_i = _slicedToArray(_arr6[_i10], 2),
+        dirs = _arr6$_i[0],
+        ts = _arr6$_i[1];
+      var _iterator14 = _createForOfIteratorHelper(dirs),
+        _step14;
+      try {
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+          var _step14$value = _slicedToArray(_step14.value, 2),
+            dr = _step14$value[0],
+            _dc = _step14$value[1];
+          var rr = r + dr,
+            cc = c + _dc;
+          while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) {
+            var x = b[rr * 8 + cc];
+            if (x) {
+              if (x[0] === by && ts.indexOf(x[1]) >= 0) return true;
+              break;
+            }
+            rr += dr;
+            cc += _dc;
+          }
+        }
+      } catch (err) {
+        _iterator14.e(err);
+      } finally {
+        _iterator14.f();
+      }
+    }
+    return false;
+  }
+  function chPseudo(st) {
+    var b = st.b,
+      me = st.turn,
+      en = me === 'w' ? 'b' : 'w',
+      ms = [];
+    var _loop3 = function _loop3(sq) {
+      var x = b[sq];
+      if (!x || x[0] !== me) return 1;
+      var r = Math.floor(sq / 8),
+        c = sq % 8,
+        ty = x[1];
+      var add = function add(to, extra) {
+        var m = {
+          f: sq,
+          t: to,
+          cap: b[to]
+        };
+        if (extra) for (var k in extra) m[k] = extra[k];
+        ms.push(m);
+      };
+      if (ty === 'P') {
+        var d = me === 'w' ? -1 : 1,
+          start = me === 'w' ? 6 : 1,
+          last = me === 'w' ? 0 : 7,
+          r1 = r + d;
+        if (r1 >= 0 && r1 < 8 && !b[r1 * 8 + c]) {
+          add(r1 * 8 + c, r1 === last ? {
+            pr: 'Q'
+          } : null);
+          if (r === start && !b[(r + 2 * d) * 8 + c]) add((r + 2 * d) * 8 + c, {
+            dbl: 1
+          });
+        }
+        for (var _i11 = 0, _arr7 = [-1, 1]; _i11 < _arr7.length; _i11++) {
+          var dc = _arr7[_i11];
+          var cc = c + dc;
+          if (cc < 0 || cc > 7 || r1 < 0 || r1 > 7) continue;
+          var to = r1 * 8 + cc;
+          if (b[to] && b[to][0] === en) add(to, r1 === last ? {
+            pr: 'Q'
+          } : null);else if (to === st.ep) add(to, {
+            ep: 1,
+            cap: en + 'P'
+          });
+        }
+      } else if (ty === 'N' || ty === 'K') {
+        var _iterator15 = _createForOfIteratorHelper(ty === 'N' ? NO : KO),
+          _step15;
+        try {
+          for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+            var _step15$value = _slicedToArray(_step15.value, 2),
+              dr = _step15$value[0],
+              _dc4 = _step15$value[1];
+            var rr = r + dr,
+              _cc = c + _dc4;
+            if (rr < 0 || rr > 7 || _cc < 0 || _cc > 7) continue;
+            var y = b[rr * 8 + _cc];
+            if (!y || y[0] === en) add(rr * 8 + _cc);
+          }
+        } catch (err) {
+          _iterator15.e(err);
+        } finally {
+          _iterator15.f();
+        }
+        if (ty === 'K') {
+          var row = me === 'w' ? 7 : 0;
+          if (sq === row * 8 + 4 && !attacked(b, sq, en)) {
+            if (st.cs[me + 'K'] && !b[row * 8 + 5] && !b[row * 8 + 6] && b[row * 8 + 7] === me + 'R' && !attacked(b, row * 8 + 5, en) && !attacked(b, row * 8 + 6, en)) add(row * 8 + 6, {
+              cas: 'K'
+            });
+            if (st.cs[me + 'Q'] && !b[row * 8 + 3] && !b[row * 8 + 2] && !b[row * 8 + 1] && b[row * 8] === me + 'R' && !attacked(b, row * 8 + 3, en) && !attacked(b, row * 8 + 2, en)) add(row * 8 + 2, {
+              cas: 'Q'
+            });
+          }
+        }
+      } else {
+        var dirs = ty === 'B' ? BD : ty === 'R' ? RD : BD.concat(RD);
+        var _iterator16 = _createForOfIteratorHelper(dirs),
+          _step16;
+        try {
+          for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+            var _step16$value = _slicedToArray(_step16.value, 2),
+              _dr3 = _step16$value[0],
+              _dc5 = _step16$value[1];
+            var _rr = r + _dr3,
+              _cc2 = c + _dc5;
+            while (_rr >= 0 && _rr < 8 && _cc2 >= 0 && _cc2 < 8) {
+              var _y = b[_rr * 8 + _cc2];
+              if (!_y) add(_rr * 8 + _cc2);else {
+                if (_y[0] === en) add(_rr * 8 + _cc2);
+                break;
+              }
+              _rr += _dr3;
+              _cc2 += _dc5;
+            }
+          }
+        } catch (err) {
+          _iterator16.e(err);
+        } finally {
+          _iterator16.f();
+        }
+      }
+    };
+    for (var sq = 0; sq < 64; sq++) {
+      if (_loop3(sq)) continue;
+    }
+    return ms;
+  }
+  function chApply(st, m) {
+    var b = st.b.slice(),
+      me = st.turn,
+      x = b[m.f];
+    b[m.t] = m.pr ? me + m.pr : x;
+    b[m.f] = null;
+    if (m.ep) b[m.t + (me === 'w' ? 8 : -8)] = null;
+    if (m.cas) {
+      var row = me === 'w' ? 7 : 0;
+      if (m.cas === 'K') {
+        b[row * 8 + 5] = b[row * 8 + 7];
+        b[row * 8 + 7] = null;
+      } else {
+        b[row * 8 + 3] = b[row * 8];
+        b[row * 8] = null;
+      }
+    }
+    var cs = {
+      wK: st.cs.wK,
+      wQ: st.cs.wQ,
+      bK: st.cs.bK,
+      bQ: st.cs.bQ
+    };
+    if (x[1] === 'K') {
+      cs[me + 'K'] = 0;
+      cs[me + 'Q'] = 0;
+    }
+    for (var _i12 = 0, _arr8 = [[63, 'wK'], [56, 'wQ'], [7, 'bK'], [0, 'bQ']]; _i12 < _arr8.length; _i12++) {
+      var _arr8$_i = _slicedToArray(_arr8[_i12], 2),
+        sq = _arr8$_i[0],
+        k = _arr8$_i[1];
+      if (m.f === sq || m.t === sq) cs[k] = 0;
+    }
+    return {
+      b: b,
+      turn: me === 'w' ? 'b' : 'w',
+      cs: cs,
+      ep: m.dbl ? (m.f + m.t) / 2 : -1,
+      half: x[1] === 'P' || m.cap ? 0 : st.half + 1
+    };
+  }
+  function kingSq(b, c) {
+    for (var i = 0; i < 64; i++) if (b[i] === c + 'K') return i;
+    return -1;
+  }
+  function inCheck(st, c) {
+    return attacked(st.b, kingSq(st.b, c), c === 'w' ? 'b' : 'w');
+  }
+  function chLegal(st) {
+    return chPseudo(st).filter(function (m) {
+      var n = chApply(st, m);
+      return !inCheck(n, st.turn);
+    });
+  }
+  function chEval(st) {
+    var s = 0;
+    var b = st.b;
+    for (var i = 0; i < 64; i++) {
+      var x = b[i];
+      if (!x) continue;
+      var r = Math.floor(i / 8),
+        c = i % 8,
+        ty = x[1];
+      var v = VAL[ty];
+      var cen = 3.5 - Math.max(Math.abs(3.5 - r), Math.abs(3.5 - c));
+      if (ty === 'P') v += (x[0] === 'w' ? 6 - r : r - 1) * 8 + (c > 1 && c < 6 ? 4 : 0);else if (ty === 'N' || ty === 'B') v += cen * 8;else if (ty === 'Q') v += cen * 2;else if (ty === 'K') v += x[0] === 'w' ? r === 7 ? 10 : 0 : r === 0 ? 10 : 0;
+      s += x[0] === st.turn ? v : -v;
+    }
+    return s;
+  }
+  var nodes = 0;
+  function chSearch(st, d, a, be, ply) {
+    nodes++;
+    if (d === 0) return chEval(st);
+    var ms = chLegal(st);
+    if (!ms.length) return inCheck(st, st.turn) ? -100000 + ply : 0;
+    ms.sort(function (x, y) {
+      return (y.cap ? VAL[y.cap[1]] * 10 - VAL[st.b[y.f][1]] : 0) - (x.cap ? VAL[x.cap[1]] * 10 - VAL[st.b[x.f][1]] : 0);
+    });
+    var best = -1e9;
+    var _iterator17 = _createForOfIteratorHelper(ms),
+      _step17;
+    try {
+      for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+        var m = _step17.value;
+        var v = -chSearch(chApply(st, m), d - 1, -be, -a, ply + 1);
+        if (v > best) best = v;
+        if (v > a) a = v;
+        if (a >= be) break;
+      }
+    } catch (err) {
+      _iterator17.e(err);
+    } finally {
+      _iterator17.f();
+    }
+    return best;
+  }
+  var CHESS = {
+    init() {
+      var s = chInit();
+      s.sel = -1;
+      return s;
+    },
+    ai() {
+      var s = G.s,
+        ms = chLegal(s);
+      if (G.lvl === 0) {
+        var caps = ms.filter(function (m) {
+          return m.cap;
+        });
+        return caps.length && Math.random() < .5 ? rnd(caps) : rnd(ms);
+      }
+      var d = G.lvl === 1 ? 2 : 3;
+      var bm = ms[0],
+        bv = -1e9;
+      nodes = 0;
+      var _iterator18 = _createForOfIteratorHelper(shuffle(ms.slice())),
+        _step18;
+      try {
+        for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+          var m = _step18.value;
+          var v = -chSearch(chApply(s, m), d - 1, -1e9, -bv, 1) + Math.random() * 6;
+          if (v > bv) {
+            bv = v;
+            bm = m;
+          }
+        }
+      } catch (err) {
+        _iterator18.e(err);
+      } finally {
+        _iterator18.f();
+      }
+      return bm;
+    },
+    play(m) {
+      var s = G.s,
+        ns = chApply(s, m);
+      ns.sel = -1;
+      ns.last = [m.f, m.t];
+      ns.anim = {
+        f: m.f,
+        t: m.t,
+        p: ns.b[m.t],
+        t0: t
+      };
+      G.s = ns;
+      K.beep(m.cap ? 280 : 460, .08, 'square', .05, m.cap ? -100 : 80);
+      G.turn = 1 - G.turn;
+      var ms = chLegal(ns),
+        chk = inCheck(ns, ns.turn);
+      if (!ms.length) {
+        if (chk) end(1 - G.turn, 'Scacco matto! ' + (G.mode === 'cpu' ? G.turn === 1 ? 'Hai vinto!' : 'Ha vinto il computer.' : 'Vince ' + who(1 - G.turn) + '!'));else end(-1, 'Stallo: è patta!');
+      } else if (ns.half >= 100) end(-1, 'Patta: 50 mosse senza catture.');else if (chk) pop('Scacco al re!', '#ff8a8a');
+      if (m.pr) pop('Il pedone diventa regina!', '#f2c230');
+      if (m.cas) pop('Arrocco!', '#9fd3f0');
+      return true;
+    },
+    tap(x, y) {
+      var s = G.s,
+        q = sqAt(x, y);
+      if (q < 0) return;
+      var ms = chLegal(s);
+      if (s.sel >= 0) {
+        var m = ms.find(function (m) {
+          return m.f === s.sel && m.t === q;
+        });
+        if (m) {
+          CHESS.play(m);
+          return;
+        }
+      }
+      if (s.b[q] && s.b[q][0] === s.turn && ms.some(function (m) {
+        return m.f === q;
+      })) {
+        s.sel = q;
+        K.beep(700, .04, 'triangle', .03);
+      } else s.sel = -1;
+    },
+    draw() {
+      var s = G.s,
+        L = lay;
+      boardSquares(L, '#f0dcb4', '#9a6a42');
+      if (s.last) {
+        var _iterator19 = _createForOfIteratorHelper(s.last),
+          _step19;
+        try {
+          for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
+            var i = _step19.value;
+            hiSq(L, i, 'rgba(242,194,48,.38)');
+          }
+        } catch (err) {
+          _iterator19.e(err);
+        } finally {
+          _iterator19.f();
+        }
+      }
+      var ks = kingSq(s.b, s.turn);
+      if (ks >= 0 && inCheck(s, s.turn)) hiSq(L, ks, 'rgba(224,55,63,.55)');
+      if (s.sel >= 0 && !G.over) {
+        hiSq(L, s.sel, 'rgba(95,208,106,.55)');
+        var _iterator20 = _createForOfIteratorHelper(chLegal(s)),
+          _step20;
+        try {
+          for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
+            var m = _step20.value;
+            if (m.f === s.sel) markSq(L, m.t, m.cap ? '#e0373f' : '#5fd06a');
+          }
+        } catch (err) {
+          _iterator20.e(err);
+        } finally {
+          _iterator20.f();
+        }
+      }
+      for (var _i13 = 0; _i13 < 64; _i13++) {
+        var x = s.b[_i13];
+        if (!x) continue;
+        var p = sqXY(L, _i13);
+        if (s.anim && s.anim.t === _i13 && t - s.anim.t0 < 14) {
+          var k = (t - s.anim.t0) / 14,
+            f = sqXY(L, s.anim.f);
+          p = {
+            x: f.x + (p.x - f.x) * k,
+            y: f.y + (p.y - f.y) * k - Math.sin(k * Math.PI) * L.sw * .3
+          };
+        }
+        piece(x[1], x[0], p.x, p.y, L.sw);
+      }
+    },
+    side(p) {
+      return p === 0 ? '⬜ bianchi' : '⬛ neri';
+    }
+  };
+  function piece(ty, c, x, y, s) {
+    var k = s / 60,
+      w = c === 'w';
+    var fill = w ? '#f6efe2' : '#4a4458',
+      dark = w ? '#c9bba0' : '#1d1a26',
+      hi = w ? '#ffffff' : '#7a7290';
+    SS.shadow(x + 3, y + s * .3, s * .27, .9);
+    ctx.save();
+    ctx.translate(x, y + s * .3);
+    ctx.scale(k, k);
+    var oLW = SS.LW;
+    SS.LW = 2.6;
+    var g = ctx.createLinearGradient(-20, 0, 20, 0);
+    g.addColorStop(0, hi);
+    g.addColorStop(.35, fill);
+    g.addColorStop(1, dark);
+    var F = function F(p) {
+      curve(p, g);
+    };
+    ctx.beginPath();
+    ctx.ellipse(0, -4, 19, 6, 0, 0, 6.2832);
+    edge();
+    ctx.fillStyle = g;
+    ctx.fill();
+    rrp(-19, -8, 38, 6, 3);
+    ctx.fillStyle = g;
+    ctx.fill();
+    if (ty === 'P') {
+      F([-12, -8, -8, -22, -5, -30, 5, -30, 8, -22, 12, -8]);
+      ctx.beginPath();
+      ctx.ellipse(0, -30, 9, 3.5, 0, 0, 6.2832);
+      edge();
+      ctx.fillStyle = g;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, -40, 9, 0, 6.2832);
+      edge();
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
+    if (ty === 'R') {
+      shape([-13, -8, -11, -38, 11, -38, 13, -8], g);
+      shape([-15, -38, -15, -52, -9, -52, -9, -46, -3, -46, -3, -52, 3, -52, 3, -46, 9, -46, 9, -52, 15, -52, 15, -38], g);
+    }
+    if (ty === 'B') {
+      F([-12, -8, -7, -24, -6, -32, 6, -32, 7, -24, 12, -8]);
+      ctx.beginPath();
+      ctx.ellipse(0, -32, 9, 3, 0, 0, 6.2832);
+      edge();
+      ctx.fillStyle = g;
+      ctx.fill();
+      curve([-9, -36, -8, -48, 0, -60, 8, -48, 9, -36], g);
+      ctx.strokeStyle = dark;
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(-2, -52);
+      ctx.lineTo(4, -44);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, -62, 3.6, 0, 6.2832);
+      edge();
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
+    if (ty === 'N') {
+      shape([-13, -8, -12, -26, -16, -38, -10, -50, -2, -58, 2, -54, 10, -48, 16, -36, 10, -34, 4, -38, 8, -26, 12, -8], g);
+      dot(-4, -46, 2.2, w ? SS.OUT : '#d9d4e8');
+      ctx.strokeStyle = dark;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-2, -56);
+      ctx.quadraticCurveTo(-14, -46, -12, -30);
+      ctx.stroke();
+    }
+    if (ty === 'Q') {
+      F([-13, -8, -7, -28, -10, -46, 10, -46, 7, -28, 13, -8]);
+      shape([-12, -44, -15, -58, -7, -50, 0, -62, 7, -50, 15, -58, 12, -44], g);
+      for (var _i14 = 0, _arr9 = [[-15, -60], [0, -65], [15, -60]]; _i14 < _arr9.length; _i14++) {
+        var _arr9$_i = _slicedToArray(_arr9[_i14], 2),
+          bx = _arr9$_i[0],
+          by = _arr9$_i[1];
+        ctx.beginPath();
+        ctx.arc(bx, by, 3.2, 0, 6.2832);
+        edge();
+        ctx.fillStyle = '#f2c230';
+        ctx.fill();
+      }
+    }
+    if (ty === 'K') {
+      F([-13, -8, -7, -28, -11, -46, 11, -46, 7, -28, 13, -8]);
+      rrp(-12, -52, 24, 8, 3);
+      edge();
+      ctx.fillStyle = g;
+      ctx.fill();
+      rrp(-2.5, -68, 5, 16, 2);
+      edge();
+      ctx.fillStyle = '#f2c230';
+      ctx.fill();
+      rrp(-7, -63, 14, 5, 2);
+      edge();
+      ctx.fillStyle = '#f2c230';
+      ctx.fill();
+    }
+    SS.LW = oLW;
+    ctx.restore();
+  }
+  var SEMI = ['denari', 'coppe', 'spade', 'bastoni'],
+    cv = function cv(c) {
+      return c % 10 + 1;
+    },
+    cs = function cs(c) {
+      return Math.floor(c / 10);
+    };
+  var PRIM = {
+    7: 21,
+    6: 18,
+    1: 16,
+    5: 15,
+    4: 14,
+    3: 13,
+    2: 12,
+    8: 10,
+    9: 10,
+    10: 10
+  };
+  function capOpts(v, table) {
+    var same = table.filter(function (c) {
+      return cv(c) === v;
+    });
+    if (same.length) return same.map(function (c) {
+      return [c];
+    });
+    var res = [],
+      n = table.length;
+    for (var mask = 1; mask < 1 << n; mask++) {
+      var s = 0,
+        set = [];
+      for (var i = 0; i < n; i++) if (mask & 1 << i) {
+        s += cv(table[i]);
+        set.push(table[i]);
+      }
+      if (s === v && set.length > 1) res.push(set);
+    }
+    return res;
+  }
+  function scopaPoints(c0, c1, s0, s1) {
+    var pts = [[], []],
+      P = [0, 0];
+    var cards = [c0, c1];
+    var add = function add(p, txt) {
+      pts[p].push(txt);
+      P[p]++;
+    };
+    if (c0.length !== c1.length) {
+      add(c0.length > c1.length ? 0 : 1, 'Carte (' + Math.max(c0.length, c1.length) + ')');
+    }
+    var d = cards.map(function (cc) {
+      return cc.filter(function (c) {
+        return cs(c) === 0;
+      }).length;
+    });
+    if (d[0] !== d[1]) add(d[0] > d[1] ? 0 : 1, 'Denari (' + Math.max(d[0], d[1]) + ')');
+    var sb = cards.findIndex(function (cc) {
+      return cc.indexOf(6) >= 0;
+    });
+    if (sb >= 0) add(sb, 'Settebello');
+    var pr = cards.map(function (cc) {
+      var tot = 0;
+      var _loop4 = function _loop4(s) {
+          var m = cc.filter(function (c) {
+            return cs(c) === s;
+          }).map(function (c) {
+            return PRIM[cv(c)];
+          });
+          if (!m.length) return {
+            v: 0
+          };
+          tot += Math.max.apply(null, m);
+        },
+        _ret;
+      for (var s = 0; s < 4; s++) {
+        _ret = _loop4(s);
+        if (_ret) return _ret.v;
+      }
+      return tot;
+    });
+    if (pr[0] !== pr[1]) add(pr[0] > pr[1] ? 0 : 1, 'Primiera');
+    for (var p = 0; p < 2; p++) {
+      var n = [s0, s1][p];
+      if (n) {
+        pts[p].push('Scope (' + n + ')');
+        P[p] += n;
+      }
+    }
+    return {
+      pts: pts,
+      P: P
+    };
+  }
+  var SCOPA = {
+    init(keep) {
+      var s = {
+        deck: shuffle(Array.from({
+          length: 40
+        }, function (x, i) {
+          return i;
+        })),
+        hands: [[], []],
+        table: [],
+        caps: [[], []],
+        scope: [0, 0],
+        last: -1,
+        score: keep ? keep.score : [0, 0],
+        hand: keep ? keep.hand + 1 : 1,
+        sel: -1,
+        pend: null,
+        show: null,
+        hide: G && G.mode === '2p'
+      };
+      s.table = s.deck.splice(0, 4);
+      while (s.table.filter(function (c) {
+        return cv(c) === 10;
+      }).length >= 3) {
+        s.deck = shuffle(s.deck.concat(s.table));
+        s.table = s.deck.splice(0, 4);
+      }
+      s.hands[0] = s.deck.splice(0, 3);
+      s.hands[1] = s.deck.splice(0, 3);
+      return s;
+    },
+    moves(p) {
+      var s = G.s,
+        out = [];
+      var _iterator21 = _createForOfIteratorHelper(s.hands[p]),
+        _step21;
+      try {
+        for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
+          var c = _step21.value;
+          var o = capOpts(cv(c), s.table);
+          if (o.length) {
+            var _iterator22 = _createForOfIteratorHelper(o),
+              _step22;
+            try {
+              for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
+                var set = _step22.value;
+                out.push({
+                  c: c,
+                  set: set
+                });
+              }
+            } catch (err) {
+              _iterator22.e(err);
+            } finally {
+              _iterator22.f();
+            }
+          } else out.push({
+            c: c,
+            set: null
+          });
+        }
+      } catch (err) {
+        _iterator21.e(err);
+      } finally {
+        _iterator21.f();
+      }
+      return out;
+    },
+    score(m, p, risk) {
+      var s = G.s;
+      var v = 0;
+      if (m.set) {
+        var all = m.set.concat([m.c]);
+        v += all.length * 1.2 + all.filter(function (c) {
+          return cs(c) === 0;
+        }).length * 1.6 + all.filter(function (c) {
+          return cv(c) === 7;
+        }).length * 2.5 + (all.indexOf(6) >= 0 ? 12 : 0);
+        var rest = s.table.filter(function (c) {
+          return m.set.indexOf(c) < 0;
+        });
+        if (!rest.length && !(s.deck.length === 0 && s.hands[0].length + s.hands[1].length === 1)) v += 14;else if (risk) {
+          var sum = rest.reduce(function (a, c) {
+            return a + cv(c);
+          }, 0);
+          if (sum <= 10) v -= risk * (rest.length === 1 ? 1.4 : 1);
+        }
+      } else {
+        v -= cv(m.c) * .15 + (cs(m.c) === 0 ? 1.2 : 0) + (cv(m.c) === 7 ? 3 : 0) + (m.c === 6 ? 9 : 0);
+        if (risk) {
+          var _sum = s.table.reduce(function (a, c) {
+            return a + cv(c);
+          }, 0) + cv(m.c);
+          if (_sum <= 10) v -= risk;
+        }
+      }
+      return v + Math.random() * .3;
+    },
+    ai() {
+      var ms = SCOPA.moves(G.turn);
+      if (G.lvl === 0) return rnd(ms);
+      var bm = ms[0],
+        bv = -1e9;
+      var _iterator23 = _createForOfIteratorHelper(ms),
+        _step23;
+      try {
+        for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
+          var m = _step23.value;
+          var v = SCOPA.score(m, G.turn, G.lvl === 2 ? 6 : 0);
+          if (v > bv) {
+            bv = v;
+            bm = m;
+          }
+        }
+      } catch (err) {
+        _iterator23.e(err);
+      } finally {
+        _iterator23.f();
+      }
+      return bm;
+    },
+    play(m) {
+      var s = G.s;
+      if (s.pend) return false;
+      var h = s.hands[G.turn];
+      h.splice(h.indexOf(m.c), 1);
+      s.sel = -1;
+      s.pend = {
+        p: G.turn,
+        c: m.c,
+        set: m.set,
+        t: 0
+      };
+      K.beep(520, .06, 'triangle', .04, 60);
+      return true;
+    },
+    resolve() {
+      var s = G.s,
+        P = s.pend;
+      s.pend = null;
+      var p = P.p;
+      if (P.set) {
+        s.table = s.table.filter(function (c) {
+          return P.set.indexOf(c) < 0;
+        });
+        s.caps[p] = s.caps[p].concat(P.set, [P.c]);
+        s.last = p;
+        var lastPlay = s.deck.length === 0 && s.hands[0].length === 0 && s.hands[1].length === 0;
+        if (!s.table.length && !lastPlay) {
+          s.scope[p]++;
+          pop('SCOPA di ' + who(p) + '!', '#f2c230');
+          K.jingle([523, 659, 784, 1046], 70);
+        } else K.beep(330, .1, 'square', .05, -80);
+      } else s.table.push(P.c);
+      if (!s.hands[0].length && !s.hands[1].length) {
+        if (s.deck.length) {
+          s.hands[0] = s.deck.splice(0, 3);
+          s.hands[1] = s.deck.splice(0, 3);
+        } else {
+          if (s.table.length && s.last >= 0) {
+            s.caps[s.last] = s.caps[s.last].concat(s.table);
+            s.table = [];
+          }
+          var r = scopaPoints(s.caps[0], s.caps[1], s.scope[0], s.scope[1]);
+          s.score[0] += r.P[0];
+          s.score[1] += r.P[1];
+          s.show = r;
+          G.turn = -1;
+          if ((s.score[0] >= 11 || s.score[1] >= 11) && s.score[0] !== s.score[1]) {
+            var w = s.score[0] > s.score[1] ? 0 : 1;
+            end(w, (G.mode === 'cpu' ? w === 0 ? 'Hai vinto la partita a Scopa!' : 'Il computer vince la partita.' : 'Vince ' + who(w) + '!') + ' ' + s.score[0] + ' a ' + s.score[1]);
+          }
+          return;
+        }
+      }
+      G.turn = 1 - p;
+      if (G.mode === '2p') s.hide = true;
+    },
+    tap(x, y) {
+      var s = G.s;
+      if (s.show) {
+        if (!G.over) {
+          var sc = {
+            score: s.score,
+            hand: s.hand
+          };
+          G.s = SCOPA.init(sc);
+          G.turn = s.hand % 2;
+          if (G.mode === '2p') G.s.hide = true;
+        }
+        return;
+      }
+      if (s.hide) {
+        s.hide = false;
+        return;
+      }
+      if (s.pend) return;
+      var me = G.turn,
+        hand = s.hands[me],
+        L = lay;
+      for (var i = 0; i < hand.length; i++) {
+        var r = handRect(L, i, hand.length, 0);
+        if (x > r.x && x < r.x + r.w && y > r.y - 14 && y < r.y + r.h) {
+          var opts = capOpts(cv(hand[i]), s.table);
+          if (s.sel === hand[i]) {
+            SCOPA.play(opts.length ? {
+              c: hand[i],
+              set: SCOPA.bestOpt(opts)
+            } : {
+              c: hand[i],
+              set: null
+            });
+            return;
+          }
+          s.sel = hand[i];
+          s.opts = opts;
+          K.beep(700, .04, 'triangle', .03);
+          if (opts.length === 1 && opts[0].length === 1) {}
+          return;
+        }
+      }
+      if (s.sel >= 0) {
+        var _loop5 = function _loop5(_i15) {
+            var r = tableRect(L, _i15, s.table.length);
+            if (x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h) {
+              var _opts = s.opts || [];
+              var o = _opts.filter(function (o) {
+                return o.indexOf(s.table[_i15]) >= 0;
+              });
+              if (o.length) {
+                SCOPA.play({
+                  c: s.sel,
+                  set: SCOPA.bestOpt(o)
+                });
+              } else if (!_opts.length) {
+                SCOPA.play({
+                  c: s.sel,
+                  set: null
+                });
+              } else pop('Con questa carta devi prendere!', '#ff8a8a');
+              return {
+                v: void 0
+              };
+            }
+          },
+          _ret2;
+        for (var _i15 = 0; _i15 < s.table.length; _i15++) {
+          _ret2 = _loop5(_i15);
+          if (_ret2) return _ret2.v;
+        }
+        if (!(s.opts || []).length && y > L.ty && y < L.ty + L.th) {
+          SCOPA.play({
+            c: s.sel,
+            set: null
+          });
+          return;
+        }
+      }
+    },
+    bestOpt(o) {
+      return o.slice().sort(function (a, b) {
+        return SCOPA.score({
+          c: G.s.sel >= 0 ? G.s.sel : 0,
+          set: b
+        }, G.turn, 0) - SCOPA.score({
+          c: G.s.sel >= 0 ? G.s.sel : 0,
+          set: a
+        }, G.turn, 0);
+      })[0];
+    },
+    draw() {
+      var s = G.s,
+        L = lay;
+      felt(L);
+      var me = G.mode === '2p' ? Math.max(0, G.turn) : 0,
+        op = 1 - me;
+      var dx = L.fx + 16,
+        dy = L.ty + L.th / 2 - L.ch / 2;
+      for (var k = 0; k < Math.min(6, Math.ceil(s.deck.length / 6)); k++) cardBack(dx + k * 1.5, dy - k * 1.5, L.cw, L.ch);
+      if (s.deck.length) K.text(String(s.deck.length), dx + L.cw / 2 + 8, dy + L.ch + 18, 15, '#fff', 'center');
+      for (var _i16 = 0, _arr0 = [[op, L.fy + 12], [me, L.fy + L.fh - L.ch * .55 - 12]]; _i16 < _arr0.length; _i16++) {
+        var _arr0$_i = _slicedToArray(_arr0[_i16], 2),
+          p = _arr0$_i[0],
+          yy = _arr0$_i[1];
+        var n = s.caps[p].length,
+          px = L.fx + L.fw - L.cw - 18;
+        for (var _k = 0; _k < Math.min(8, Math.ceil(n / 5)); _k++) cardBack(px + _k * 1.2, yy - _k * 1.2, L.cw, L.ch * .55, true);
+        K.text((p === me && G.mode === 'cpu' ? 'Le tue prese: ' : who(p) + ': ') + n + (s.scope[p] ? ' · scope ' + s.scope[p] : ''), px + L.cw, yy + L.ch * .55 + 16, 13, '#fff', 'right');
+      }
+      var oh = s.hands[op];
+      for (var i = 0; i < oh.length; i++) {
+        var r = handRect(L, i, oh.length, 1);
+        cardBack(r.x, r.y, r.w, r.h);
+      }
+      var hl = s.sel >= 0 ? s.opts || [] : [];
+      var _loop6 = function _loop6() {
+        var r = tableRect(L, _i17, s.table.length),
+          c = s.table[_i17];
+        var inP = s.pend && s.pend.set && s.pend.set.indexOf(c) >= 0,
+          can = hl.some(function (o) {
+            return o.indexOf(c) >= 0;
+          });
+        card(c, r.x, r.y - (inP ? 8 : 0), r.w, r.h, inP ? '#f2c230' : can ? '#5fd06a' : null);
+      };
+      for (var _i17 = 0; _i17 < s.table.length; _i17++) {
+        _loop6();
+      }
+      if (s.pend) {
+        var pr = s.pend.p === me ? handRect(L, 1, 3, 0) : handRect(L, 1, 3, 1),
+          _k2 = Math.min(1, s.pend.t / 14),
+          tx = L.fx + L.fw / 2 - L.cw / 2,
+          ty = L.ty + L.th / 2 - L.ch / 2;
+        card(s.pend.c, pr.x + (tx - pr.x) * _k2, pr.y + (ty - pr.y) * _k2, L.cw, L.ch, '#f2c230');
+      }
+      var mh = s.hands[me];
+      if (!s.hide) for (var _i18 = 0; _i18 < mh.length; _i18++) {
+        var _r = handRect(L, _i18, mh.length, 0),
+          c = mh[_i18];
+        card(c, _r.x, _r.y - (s.sel === c ? 18 : 0), _r.w, _r.h, s.sel === c ? '#5fd06a' : null);
+      } else for (var _i19 = 0; _i19 < mh.length; _i19++) {
+        var _r2 = handRect(L, _i19, mh.length, 0);
+        cardBack(_r2.x, _r2.y, _r2.w, _r2.h);
+      }
+      if (s.hide && !s.show) {
+        ovBox('Tocca a ' + who(G.turn), 'Passa l\'iPad e tocca lo schermo per vedere le tue carte');
+      }
+      if (s.show) {
+        var _r3 = s.show;
+        ovBox('Fine smazzata ' + s.hand, null, [who(0) + ': ' + (_r3.pts[0].join(', ') || 'niente') + '  → +' + _r3.P[0], who(1) + ': ' + (_r3.pts[1].join(', ') || 'niente') + '  → +' + _r3.P[1], 'Punteggio: ' + s.score[0] + ' a ' + s.score[1] + ' (si vince a 11)', G.over ? '' : 'Tocca per la prossima smazzata']);
+      }
+    },
+    side(p) {
+      return '';
+    }
+  };
+  function felt(L) {
+    rrp(L.fx - 10, L.fy - 10, L.fw + 20, L.fh + 20, 22);
+    edge();
+    var wg = ctx.createLinearGradient(0, L.fy - 10, 0, L.fy + L.fh + 10);
+    wg.addColorStop(0, '#a8743f');
+    wg.addColorStop(1, '#6b4423');
+    ctx.fillStyle = wg;
+    ctx.fill();
+    rrp(L.fx, L.fy, L.fw, L.fh, 16);
+    var g = ctx.createRadialGradient(L.fx + L.fw / 2, L.fy + L.fh / 2, 20, L.fx + L.fw / 2, L.fy + L.fh / 2, Math.max(L.fw, L.fh) * .7);
+    g.addColorStop(0, '#2f9a5a');
+    g.addColorStop(1, '#1d6b3c');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255,255,255,.12)';
+    rrp(L.fx + 8, L.fy + 8, L.fw - 16, L.fh - 16, 12);
+    ctx.stroke();
+  }
+  function handRect(L, i, n, who) {
+    var gap = L.cw * 1.12,
+      x0 = L.fx + L.fw / 2 - (n * gap - (gap - L.cw)) / 2;
+    return {
+      x: x0 + i * gap,
+      y: who === 0 ? L.fy + L.fh - L.ch - 14 : L.fy + 14,
+      w: L.cw,
+      h: L.ch
+    };
+  }
+  function tableRect(L, i, n) {
+    var per = Math.max(4, Math.min(n, Math.floor((L.fw - L.cw * 2.6) / (L.cw * 1.1)))),
+      rows = Math.ceil(n / per),
+      row = Math.floor(i / per),
+      inRow = Math.min(per, n - row * per),
+      k = i % per,
+      gap = L.cw * 1.1,
+      sc = rows > 1 ? .82 : 1,
+      w = L.cw * sc,
+      h = L.ch * sc;
+    var x0 = L.fx + L.fw / 2 - (inRow * gap * sc - (gap * sc - w)) / 2,
+      y0 = L.ty + L.th / 2 - rows * h * 1.06 / 2 + row * h * 1.06;
+    return {
+      x: x0 + k * gap * sc,
+      y: y0,
+      w: w,
+      h: h
+    };
+  }
+  function cardBack(x, y, w, h, flat) {
+    SS.shadow(x + w / 2 + 3, y + h - 2, w * .42, .6);
+    rrp(x, y, w, h, w * .1);
+    edge(2);
+    ctx.fillStyle = '#b8312f';
+    ctx.fill();
+    rrp(x + w * .1, y + w * .1, w * .8, h - w * .2, w * .06);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255,230,180,.7)';
+    ctx.stroke();
+    if (!flat) {
+      ctx.save();
+      rrp(x + w * .1, y + w * .1, w * .8, h - w * .2, w * .06);
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(255,230,180,.35)';
+      ctx.lineWidth = 1.5;
+      for (var k = -h; k < w + h; k += 8) {
+        ctx.beginPath();
+        ctx.moveTo(x + k, y);
+        ctx.lineTo(x + k + h, y + h);
+        ctx.moveTo(x + k + h, y);
+        ctx.lineTo(x + k, y + h);
+        ctx.stroke();
+      }
+      ctx.restore();
+      dot(x + w / 2, y + h / 2, w * .16, '#f2c230');
+    }
+  }
+  function suit(s, x, y, r) {
+    var o = SS.LW;
+    SS.LW = Math.max(1.4, r * .16);
+    if (s === 0) {
+      orb(x, y, r, r, '#e8b52a');
+      ctx.beginPath();
+      ctx.arc(x, y, r * .6, 0, 6.2832);
+      ctx.lineWidth = Math.max(1, r * .14);
+      ctx.strokeStyle = '#a87a10';
+      ctx.stroke();
+      dot(x, y, r * .22, '#c0392b');
+    }
+    if (s === 1) {
+      curve([x - r, y - r * .7, x + r, y - r * .7, x + r * .6, y + r * .1, x, y + r * .25, x - r * .6, y + r * .1], '#d8433f');
+      limb(x, y + r * .2, x, y + r * .7, r * .25, '#e8b52a');
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * .8, r * .55, r * .2, 0, 0, 6.2832);
+      SS.edge();
+      ctx.fillStyle = '#e8b52a';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(x, y - r * .7, r, r * .22, 0, 0, 6.2832);
+      ctx.fillStyle = '#8c1c24';
+      ctx.fill();
+    }
+    if (s === 2) {
+      shape([x - r * .16, y - r * .1, x + r * .16, y - r * .1, x + r * .16, y - r * 1.05, x, y - r * 1.3, x - r * .16, y - r * 1.05], '#d9dde4');
+      limb(x - r * .55, y, x + r * .55, y, r * .22, '#3f86d4');
+      limb(x, y, x, y + r * .6, r * .24, '#6b4a2e');
+      dot(x, y + r * .75, r * .18, '#e8b52a');
+    }
+    if (s === 3) {
+      limb(x - r * .3, y + r * .9, x + r * .3, y - r * .9, r * .42, '#8a5a32');
+      dot(x - r * .05, y + r * .1, r * .12, '#5d4030');
+      dot(x + r * .12, y - r * .4, r * .12, '#5d4030');
+      curve([x + r * .25, y - r * .7, x + r * .8, y - r * .95, x + r * .55, y - r * .45], '#4aa35a');
+    }
+    SS.LW = o;
+  }
+  var PIPS = {
+    1: [[.5, .5]],
+    2: [[.5, .28], [.5, .72]],
+    3: [[.5, .22], [.5, .5], [.5, .78]],
+    4: [[.3, .28], [.7, .28], [.3, .72], [.7, .72]],
+    5: [[.3, .25], [.7, .25], [.5, .5], [.3, .75], [.7, .75]],
+    6: [[.3, .22], [.7, .22], [.3, .5], [.7, .5], [.3, .78], [.7, .78]],
+    7: [[.3, .2], [.7, .2], [.5, .36], [.3, .52], [.7, .52], [.3, .8], [.7, .8]]
+  };
+  function card(c, x, y, w, h, hl) {
+    var v = cv(c),
+      s = cs(c);
+    SS.shadow(x + w / 2 + 3, y + h - 2, w * .42, .7);
+    if (hl) {
+      rrp(x - 4, y - 4, w + 8, h + 8, w * .13);
+      ctx.fillStyle = hl;
+      ctx.fill();
+    }
+    rrp(x, y, w, h, w * .1);
+    edge(2);
+    var g = ctx.createLinearGradient(x, y, x + w, y + h);
+    g.addColorStop(0, '#fffaf0');
+    g.addColorStop(1, '#efe2c4');
+    ctx.fillStyle = g;
+    ctx.fill();
+    var colN = ['#b8860b', '#c0392b', '#3f6fb0', '#4a7a2a'][s];
+    K.text(String(v), x + w * .1, y + w * .3, Math.round(w * .26), colN, 'left', false);
+    var ix = x + w * .12,
+      iy = y + h * .14,
+      iw = w * .76,
+      ih = h * .76;
+    if (v <= 7) {
+      var r = w * (v === 1 ? .24 : v <= 3 ? .13 : .11);
+      var _iterator24 = _createForOfIteratorHelper(PIPS[v]),
+        _step24;
+      try {
+        for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
+          var _step24$value = _slicedToArray(_step24.value, 2),
+            px = _step24$value[0],
+            py = _step24$value[1];
+          suit(s, ix + px * iw, iy + py * ih, r);
+        }
+      } catch (err) {
+        _iterator24.e(err);
+      } finally {
+        _iterator24.f();
+      }
+      if (c === 6) {
+        K.text('★', x + w * .84, y + w * .3, Math.round(w * .2), '#e0373f', 'center', false);
+      }
+    } else figure(v, s, x + w / 2, y + h * .62, w * .9);
+    K.text(v === 8 ? 'Fante' : v === 9 ? 'Cavallo' : v === 10 ? 'Re' : '', x + w / 2, y + h - w * .08, Math.round(w * .15), '#5d4030', 'center', false);
+  }
+  function figure(v, s, x, y, w) {
+    var k = w / 60;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(k, k);
+    var o = SS.LW;
+    SS.LW = 2;
+    if (v === 9) {
+      curve([-14, 20, -12, -4, -4, -18, 6, -26, 18, -22, 20, -14, 10, -12, 6, 0, 10, 20], '#9a6a3a');
+      curve([-6, -16, -14, -6, -16, 10, -10, -2], '#4a2e1c');
+      SS.eye(8, -18, 2.2);
+      dot(17, -15, 1.4, SS.OUT);
+      shape([0, -24, 3, -34, 6, -25], '#9a6a3a');
+      suit(s, -14, -24, 7);
+    } else {
+      var king = v === 10,
+        cl = king ? '#8a5cc7' : '#3f86d4';
+      curve([-14, 22, -12, 0, -6, -6, 6, -6, 12, 0, 14, 22], cl);
+      orb(0, -14, 9, 9, '#f4c9a0');
+      SS.eye(4, -15, 1.8);
+      if (king) {
+        curve([-6, -10, 8, -10, 6, -2, 0, 0, -5, -3], '#e8ecf4');
+        shape([-8, -21, -7, -30, -3, -25, 0, -32, 3, -25, 7, -30, 8, -21], '#f2c230');
+      } else {
+        ctx.beginPath();
+        ctx.ellipse(0, -20, 11, 5, 0, Math.PI, 6.2832);
+        ctx.closePath();
+        SS.edge();
+        ctx.fillStyle = '#c0392b';
+        ctx.fill();
+        curve([6, -24, 16, -34, 10, -22], '#f2c230');
+      }
+      suit(s, 13, 4, 8);
+    }
+    SS.LW = o;
+    ctx.restore();
+  }
+  var KINDS = {
+    tris: TRIS,
+    dama: DAMA,
+    scacchi: CHESS,
+    scopa: SCOPA
+  };
+  function layout() {
+    var W = K.W,
+      Hh = K.H,
+      top = 54,
+      land = W > Hh * 1.05,
+      PW = land ? Math.min(300, W * .3) : W - 20;
+    var L = {
+      land: land,
+      W: W,
+      H: Hh
+    };
+    if (land) {
+      L.px = W - PW - 12;
+      L.py = top;
+      L.pw = PW;
+      L.ph = Hh - top - 14;
+      L.ax = 12;
+      L.ay = top;
+      L.aw = W - PW - 36;
+      L.ah = Hh - top - 14;
+    } else {
+      L.ax = 10;
+      L.ay = top;
+      L.aw = W - 20;
+      L.ah = Hh - top - 190;
+      L.px = 10;
+      L.py = L.ay + L.ah + 10;
+      L.pw = W - 20;
+      L.ph = 170;
+    }
+    if (G && G.kind === 'scopa') {
+      L.fx = L.ax + 10;
+      L.fy = L.ay + 10;
+      L.fw = L.aw - 20;
+      L.fh = L.ah - 20;
+      L.cw = Math.min(L.fw / 7.2, L.fh / 4.2 / 1.55);
+      L.ch = L.cw * 1.55;
+      L.ty = L.fy + L.ch + 30;
+      L.th = L.fh - 2 * L.ch - 60;
+    } else {
+      var n = G && G.kind === 'tris' ? 3 : 8,
+        sq = G && G.kind === 'tris' ? 1 : .86;
+      var bw = Math.min(L.aw - 30, (L.ah - 30) / sq);
+      L.bs = bw;
+      L.sw = bw / n;
+      L.sh = L.sw * sq;
+      L.bx = L.ax + (L.aw - bw) / 2;
+      L.by = L.ay + (L.ah - bw * sq) / 2;
+      L.bh = bw * sq;
+      L.n = n;
+    }
+    return L;
+  }
+  function board3D(x, y, w, h, c) {
+    var d = Math.max(10, w * .035);
+    SS.shadow(x + w / 2, y + h + d + 6, w * .42, 1.2);
+    rrp(x - 14, y - 14 + d, w + 28, h + 28, 18);
+    ctx.fillStyle = tone(c, -.45);
+    ctx.fill();
+    rrp(x - 14, y - 14, w + 28, h + 28, 18);
+    edge();
+    var g = ctx.createLinearGradient(0, y - 14, 0, y + h + 14);
+    g.addColorStop(0, tone(c, .12));
+    g.addColorStop(1, tone(c, -.2));
+    ctx.fillStyle = g;
+    ctx.fill();
+    rrp(x - 8, y - 8, w + 16, h + 16, 12);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255,255,255,.25)';
+    ctx.stroke();
+  }
+  function boardSquares(L, light, dark) {
+    board3D(L.bx, L.by, L.bs, L.bh, '#8a5a32');
+    for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) {
+      var x = L.bx + c * L.sw,
+        y = L.by + r * L.sh;
+      ctx.fillStyle = (r + c) % 2 ? dark : light;
+      ctx.fillRect(x, y, L.sw + .5, L.sh + .5);
+    }
+    var g = ctx.createLinearGradient(L.bx, L.by, L.bx + L.bs, L.by + L.bh);
+    g.addColorStop(0, 'rgba(255,255,255,.14)');
+    g.addColorStop(1, 'rgba(0,0,0,.18)');
+    ctx.fillStyle = g;
+    ctx.fillRect(L.bx, L.by, L.bs, L.bh);
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = SS.OUT;
+    ctx.strokeRect(L.bx, L.by, L.bs, L.bh);
+  }
+  function sqXY(L, i) {
+    var r = Math.floor(i / 8),
+      c = i % 8;
+    return {
+      x: L.bx + (c + .5) * L.sw,
+      y: L.by + (r + .5) * L.sh
+    };
+  }
+  function sqAt(x, y) {
+    var L = lay,
+      c = Math.floor((x - L.bx) / L.sw),
+      r = Math.floor((y - L.by) / L.sh);
+    return c < 0 || c > 7 || r < 0 || r > 7 ? -1 : r * 8 + c;
+  }
+  function hiSq(L, i, cl) {
+    var r = Math.floor(i / 8),
+      c = i % 8;
+    ctx.fillStyle = cl;
+    ctx.fillRect(L.bx + c * L.sw, L.by + r * L.sh, L.sw, L.sh);
+  }
+  function markSq(L, i, cl) {
+    var p = sqXY(L, i);
+    ctx.globalAlpha = .85;
+    dot(p.x, p.y, L.sw * .16 + Math.sin(t * .15) * 2, cl);
+    ctx.globalAlpha = 1;
+  }
+  function ovBox(title, sub, lines) {
+    var L = lay,
+      w = Math.min(L.aw - 20, 560),
+      lh = 24,
+      h = 70 + (lines ? lines.length * lh : 0) + (sub ? 24 : 0),
+      x = L.ax + (L.aw - w) / 2,
+      y = L.ay + (L.ah - h) / 2;
+    rrp(x, y, w, h, 16);
+    ctx.fillStyle = 'rgba(20,16,30,.88)';
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#f2c230';
+    ctx.stroke();
+    K.text(title, x + w / 2, y + 38, 24, '#f2c230', 'center');
+    var yy = y + 66;
+    if (sub) {
+      K.text(sub, x + w / 2, yy, 15, '#fff', 'center');
+      yy += 26;
+    }
+    if (lines) {
+      var _iterator25 = _createForOfIteratorHelper(lines),
+        _step25;
+      try {
+        for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
+          var l = _step25.value;
+          K.text(l, x + w / 2, yy, 15, '#fff', 'center');
+          yy += lh;
+        }
+      } catch (err) {
+        _iterator25.e(err);
+      } finally {
+        _iterator25.f();
+      }
+    }
+  }
+  function button(id, label, x, y, w, h, col) {
+    rrp(x, y + 4, w, h, 12);
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.fill();
+    rrp(x, y, w, h, 12);
+    edge(2);
+    ctx.fillStyle = col || '#f2c230';
+    ctx.fill();
+    rrp(x + 6, y + 4, w - 12, h * .3, 6);
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    ctx.fill();
+    K.text(label, x + w / 2, y + h / 2 + 6, 16, '#1c1724', 'center', false);
+    btns.push({
+      id: id,
+      x: x,
+      y: y,
+      w: w,
+      h: h
+    });
+  }
+  function panel() {
+    var L = lay,
+      x = L.px,
+      y = L.py,
+      w = L.pw,
+      h = L.ph;
+    rrp(x, y, w, h, 16);
+    ctx.fillStyle = 'rgba(20,16,30,.72)';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255,255,255,.2)';
+    ctx.stroke();
+    var K2 = KINDS[G.kind];
+    var yy = y + 32;
+    K.text(NAMES[G.kind], x + 16, yy, 22, '#f2c230');
+    yy += 24;
+    K.text(G.mode === 'cpu' ? 'contro il computer · ' + LV[G.lvl] : 'in due sullo stesso iPad', x + 16, yy, 13, '#c7ccd8');
+    yy += 30;
+    if (G.kind === 'scopa') {
+      var s = G.s;
+      K.text(who(0) + ': ' + s.score[0] + ' punti', x + 16, yy, 17, '#fff');
+      yy += 24;
+      K.text(who(1) + ': ' + s.score[1] + ' punti', x + 16, yy, 17, '#fff');
+      yy += 22;
+      K.text('smazzata ' + s.hand + ' · si vince a 11', x + 16, yy, 13, '#c7ccd8');
+      yy += 28;
+    } else {
+      for (var _i20 = 0, _arr1 = [0, 1]; _i20 < _arr1.length; _i20++) {
+        var p = _arr1[_i20];
+        K.text(who(p) + ' ' + K2.side(p), x + 16, yy, 16, G.turn === p && !G.over ? '#5fd06a' : '#fff');
+        yy += 24;
+      }
+      yy += 6;
+    }
+    var st = G.over ? G.over.msg : G.turn < 0 ? '' : isCPU(G.turn) ? 'Il computer pensa…' : G.mode === 'cpu' ? 'Tocca a te!' : 'Tocca a ' + who(G.turn) + '!';
+    if (G.kind === 'scopa' && !G.over && G.s.sel >= 0 && !G.s.pend) st = (G.s.opts || []).length ? 'Tocca le carte verdi da prendere, oppure ritocca la tua carta.' : 'Nessuna presa: ritocca la carta (o il tavolo) per lasciarla giù.';
+    wrap(st, x + 16, yy, w - 32, 17, G.over ? '#f2c230' : '#ffe48a');
+    yy += L.land ? 60 : 34;
+    if (L.land) {
+      button('again', G.over ? '🔄 Rivincita' : '🔄 Ricomincia', x + 16, y + h - 62, w - 32, 46, G.over ? '#f2c230' : '#d9dde4');
+    } else button('again', G.over ? '🔄 Rivincita' : '🔄 Ricomincia', x + w - 180, y + 16, 164, 42, G.over ? '#f2c230' : '#d9dde4');
+  }
+  function wrap(s, x, y, w, size, c) {
+    ctx.font = '700 ' + size + "px 'Pixelify Sans', monospace";
+    var words = s.split(' ');
+    var line = '',
+      yy = y;
+    var _iterator26 = _createForOfIteratorHelper(words),
+      _step26;
+    try {
+      for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
+        var wd = _step26.value;
+        var tst = line ? line + ' ' + wd : wd;
+        if (ctx.measureText(tst).width > w && line) {
+          K.text(line, x, yy, size, c);
+          line = wd;
+          yy += size + 5;
+        } else line = tst;
+      }
+    } catch (err) {
+      _iterator26.e(err);
+    } finally {
+      _iterator26.f();
+    }
+    if (line) K.text(line, x, yy, size, c);
+  }
+  function draw() {
+    var W = K.W,
+      Hh = K.H;
+    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    var g = ctx.createLinearGradient(0, 0, 0, Hh);
+    g.addColorStop(0, '#3a2a4a');
+    g.addColorStop(1, '#1d1626');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, Hh);
+    ctx.globalAlpha = .06;
+    for (var i = 0; i < 14; i++) {
+      dot(i * 173 % W, i * 97 % Hh, 60 + i % 4 * 30, '#ffffff');
+    }
+    ctx.globalAlpha = 1;
+    if (!G) return;
+    lay = layout();
+    btns = [];
+    KINDS[G.kind].draw();
+    panel();
+    var _iterator27 = _createForOfIteratorHelper(fx),
+      _step27;
+    try {
+      for (_iterator27.s(); !(_step27 = _iterator27.n()).done;) {
+        var f = _step27.value;
+        ctx.globalAlpha = Math.min(1, f.l / 20);
+        K.text(f.s, lay.ax + lay.aw / 2, lay.ay + lay.ah * .18 - (90 - f.l) * .3, 26, f.c, 'center');
+      }
+    } catch (err) {
+      _iterator27.e(err);
+    } finally {
+      _iterator27.f();
+    }
+    ctx.globalAlpha = 1;
+    if (G.over && G.kind !== 'scopa' && t - G.over.t > 30 && t - G.over.t < 300) {
+      ovBox(G.over.msg.split('!')[0] + '!', null, null);
+    }
+  }
+  function update(f) {
+    t += f;
+    var _iterator28 = _createForOfIteratorHelper(fx),
+      _step28;
+    try {
+      for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
+        var q = _step28.value;
+        q.l -= f;
+      }
+    } catch (err) {
+      _iterator28.e(err);
+    } finally {
+      _iterator28.f();
+    }
+    fx = fx.filter(function (q) {
+      return q.l > 0;
+    });
+    if (!G || G.over) return;
+    if (G.kind === 'scopa' && G.s.pend) {
+      G.s.pend.t += f;
+      if (G.s.pend.t > (G.s.pend.set ? 48 : 30)) SCOPA.resolve();
+      return;
+    }
+    if (G.turn >= 0 && isCPU(G.turn)) {
+      aiT += f;
+      if (aiT > (G.kind === 'scopa' ? 40 : 30)) {
+        aiT = 0;
+        var m = KINDS[G.kind].ai();
+        if (m != null) KINDS[G.kind].play(m);
+      }
+    } else aiT = 0;
+  }
+  function end(w, msg) {
+    G.over = {
+      w: w,
+      msg: msg,
+      t: t
+    };
+    K.del('tavolo-run');
+    if (G.mode === 'cpu' && w === 0) {
+      PROG[G.kind] = (PROG[G.kind] || 0) + 1;
+      K.save('tavolo-prog', PROG);
+      K.jingle([523, 659, 784, 1046, 1318], 100);
+      K.wantMusic = null;
+    } else if (w >= 0) K.jingle([392, 330, 262], 140);else K.jingle([440, 440], 120);
+  }
+  function tapAt(x, y) {
+    if (!G || !K.playing || !$('kpause').hidden) return;
+    var _iterator29 = _createForOfIteratorHelper(btns),
+      _step29;
+    try {
+      for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
+        var b = _step29.value;
+        if (x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h) {
+          if (b.id === 'again') newGame(G.kind, G.mode, G.lvl);
+          return;
+        }
+      }
+    } catch (err) {
+      _iterator29.e(err);
+    } finally {
+      _iterator29.f();
+    }
+    if (G.over) return;
+    if (G.turn < 0 && G.kind !== 'scopa') return;
+    if (isCPU(G.turn) && !(G.kind === 'scopa' && G.s.show)) return;
+    KINDS[G.kind].tap(x, y);
+  }
+  var cv0 = K.cv;
+  var lastTouch = 0;
+  cv0.addEventListener('touchstart', function (e) {
+    var r = cv0.getBoundingClientRect(),
+      tt = e.changedTouches[0];
+    lastTouch = Date.now();
+    tapAt(tt.clientX - r.left, tt.clientY - r.top);
+    if (e.cancelable) e.preventDefault();
+  }, {
+    passive: false
+  });
+  cv0.addEventListener('mousedown', function (e) {
+    if (Date.now() - lastTouch < 600) return;
+    var r = cv0.getBoundingClientRect();
+    tapAt(e.clientX - r.left, e.clientY - r.top);
+  });
+  var PROG = K.load('tavolo-prog', {});
+  var pick = {
+    kind: 'tris',
+    mode: 'cpu',
+    lvl: 0
+  };
+  var sp = K.load('tavolo-pick', null);
+  if (sp && KINDS[sp.kind]) pick = sp;
+  function newGame(kind, mode, lvl) {
+    G = {
+      kind: kind,
+      mode: mode,
+      lvl: lvl,
+      turn: 0,
+      over: null
+    };
+    G.s = KINDS[kind].init();
+    if (kind === 'scopa' && mode === '2p') G.s.hide = true;
+    aiT = 0;
+    fx = [];
+    K.wantMusic = 'tavolo';
+  }
+  function renderMenu() {
+    document.querySelectorAll('[data-kind]').forEach(function (b) {
+      b.classList.toggle('sel', b.getAttribute('data-kind') === pick.kind);
+      b.onclick = function () {
+        pick.kind = b.getAttribute('data-kind');
+        K.save('tavolo-pick', pick);
+        renderMenu();
+      };
+    });
+    document.querySelectorAll('[data-mode]').forEach(function (b) {
+      var m = b.getAttribute('data-mode'),
+        l = +b.getAttribute('data-lvl');
+      b.classList.toggle('sel', pick.mode === m && (m === '2p' || pick.lvl === l));
+      b.onclick = function () {
+        pick.mode = m;
+        if (m === 'cpu') pick.lvl = l;
+        K.save('tavolo-pick', pick);
+        renderMenu();
+      };
+    });
+    var wins = Object.keys(NAMES).filter(function (k) {
+      return PROG[k];
+    }).map(function (k) {
+      return NAMES[k] + ' ' + PROG[k];
+    });
+    $('rec').textContent = wins.length ? '🏆 Vittorie contro il computer: ' + wins.join(' · ') : '';
+    var sv = K.load('tavolo-run', null),
+      cb = $('cont');
+    if (sv && sv.kind && KINDS[sv.kind]) {
+      cb.hidden = false;
+      cb.innerHTML = '▶ Continua la partita<small>' + NAMES[sv.kind] + ' · ' + (sv.mode === 'cpu' ? 'contro il computer (' + LV[sv.lvl] + ')' : 'in due') + '</small>';
+      cb.onclick = function () {
+        G = sv;
+        G.over = null;
+        if (G.s) {
+          G.s.sel = -1;
+          if (G.s.pend) SCOPA.resolve();
+        }
+        aiT = 0;
+        fx = [];
+        $('menu').hidden = true;
+        K.wantMusic = 'tavolo';
+        K.start();
+      };
+    } else cb.hidden = true;
+  }
+  $('go').onclick = function () {
+    K.del('tavolo-run');
+    newGame(pick.kind, pick.mode, pick.lvl);
+    $('menu').hidden = true;
+    K.start();
+  };
+  function showMenu() {
+    K.stop();
+    G = null;
+    renderMenu();
+    $('menu').hidden = false;
+    K.wantMusic = null;
+  }
+  K.buttons([]);
+  K.game = {
+    update: update,
+    draw: draw,
+    save: function save() {
+      if (!G || G.over) return true;
+      var c = JSON.parse(JSON.stringify(G));
+      return K.save('tavolo-run', c);
+    },
+    exit: showMenu
+  };
+  K.initUI();
+  K.run();
+  showMenu();
+  window.__T = {
+    get G() {
+      return G;
+    },
+    newGame: newGame,
+    tapAt: tapAt,
+    update: update,
+    KINDS: KINDS,
+    chLegal: chLegal,
+    chApply: chApply,
+    damaMoves: damaMoves,
+    get lay() {
+      return lay;
+    },
+    set lay(v) {
+      lay = v;
+    },
+    layout: layout,
+    capOpts: capOpts,
+    scopaPoints: scopaPoints
+  };
+})();</script>
+</body>
+</html>
