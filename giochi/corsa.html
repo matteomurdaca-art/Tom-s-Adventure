@@ -89,6 +89,10 @@ a.home{color:#1d1f2b}
   <h1 id="endT"></h1><p id="endS"></p>
   <div class="row"><button class="go" id="endNext" type="button">Prossima manche ▶</button><button class="go alt" id="endAgain" type="button">🔄 Nuova gara</button><button class="go alt" id="endMenu" type="button">◀ Menu</button></div>
 </div></div>
+<div class="ov" id="fell" hidden style="background:rgba(10,11,18,.45)"><div class="card">
+  <h1>💦 Sei caduto in acqua!</h1><p>Cosa vuoi fare?</p>
+  <div class="row"><button class="go" id="fRetry" type="button">🔄 Rigioca subito</button><button class="go alt" id="fWatch" type="button">👀 Guarda come finisce</button></div>
+</div></div>
 
 <script>/**
  * Copyright (c) 2014-present, Facebook, Inc.
@@ -2206,6 +2210,9 @@ var K = function () {
     }
   }
   function startRound(r, keepField) {
+    fellAsked = false;
+    watching = false;
+    if ($('fell')) $('fell').hidden = true;
     round = r;
     R = ROUNDS[r];
     course(R.kind, r);
@@ -2259,7 +2266,9 @@ var K = function () {
     K.wantMusic = R.mus;
     countdown = 3.2;
   }
-  var countdown = 0;
+  var countdown = 0,
+    fellAsked = false,
+    watching = false;
   var ov = function ov(a, b) {
     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   };
@@ -2813,6 +2822,12 @@ var K = function () {
     }
   }
   function update(f) {
+    if (me && me.out && !fellAsked && !over) {
+      fellAsked = true;
+      setTimeout(function () {
+        if (me && me.out && !over && K.playing) $('fell').hidden = false;
+      }, 800);
+    }
     if (banner) {
       banner.t -= f;
       if (banner.t <= 0) banner = null;
@@ -3587,7 +3602,7 @@ var K = function () {
       K.text(banner.s, Wd / 2, Hd * .22, 34, '#fff', 'center');
       K.text(banner.s2, Wd / 2, Hd * .22 + 30, 20, '#ffe48a', 'center');
     }
-    if (me.out) K.text('Sei caduto in acqua! Guarda come finisce…', Wd / 2, Hd * .3, 22, '#fff', 'center');
+    if (me.out && watching) K.text('👀 Stai guardando come finisce…', Wd / 2, 92, 18, '#fff', 'center');
     if (over) K.text(R.kind === 'race' ? 'MANCHE FINITA!' : 'TEMPO SCADUTO!', Wd / 2, Hd * .35, 40, '#f2c230', 'center');
   }
   function kidPicker(box, cur, onPick) {
@@ -3687,6 +3702,7 @@ var K = function () {
     K.wantMusic = null;
   }
   function showEnd(ok, qual, crown) {
+    $('fell').hidden = true;
     K.wantMusic = ok ? 'cwin' : null;
     K.playing = true;
     K.playing = false;
@@ -3713,6 +3729,15 @@ var K = function () {
     K.start();
   };
   $('endMenu').onclick = showMenu;
+  $('fWatch').onclick = function () {
+    $('fell').hidden = true;
+    watching = true;
+  };
+  $('fRetry').onclick = function () {
+    $('fell').hidden = true;
+    startRound(round, true);
+    K.start();
+  };
   $('go').onclick = function () {
     K.del('corsa-run');
     startRound(0);
