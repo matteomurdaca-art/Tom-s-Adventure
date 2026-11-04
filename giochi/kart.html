@@ -1890,7 +1890,7 @@ var K = function () {
 (function () {
   var ctx = K.ctx,
     $ = K.$;
-  K.maxDpr = 1.5;
+  K.maxDpr = 1;
   var VER = '1';
   var SEG = 200,
     ROADW = 2000,
@@ -1899,7 +1899,7 @@ var K = function () {
     FOV = 100,
     DEPTH = 1 / Math.tan(FOV / 2 * Math.PI / 180),
     PZ = CAMH * DEPTH;
-  var DRAW = 150;
+  var DRAW = 120;
   var MAXSP = SEG * 60,
     ACCEL = MAXSP / 5,
     DECEL = -MAXSP / 5,
@@ -2686,6 +2686,10 @@ var K = function () {
       l2 = w2 / 32;
     ctx.fillStyle = TH.grass[c];
     ctx.fillRect(0, y2, w, y1 - y2 + 1);
+    if (y1 - y2 < 2.5 && !s.start) {
+      poly(x1 - w1 - r1, y1, x1 + w1 + r1, y1, x2 + w2 + r2, y2, x2 - w2 - r2, y2, TH.road[c]);
+      return;
+    }
     poly(x1 - w1 - r1, y1, x1 - w1, y1, x2 - w2, y2, x2 - w2 - r2, y2, TH.rumble[c]);
     poly(x1 + w1 + r1, y1, x1 + w1, y1, x2 + w2, y2, x2 + w2 + r2, y2, TH.rumble[c]);
     poly(x1 - w1, y1, x1 + w1, y1, x2 + w2, y2, x2 - w2, y2, s.start ? Math.floor(s.index) % 2 ? '#ffffff' : '#1d1f2b' : TH.road[c]);
@@ -2706,25 +2710,40 @@ var K = function () {
       }
     }
   }
+  var BGP = 3080,
+    BGC = {};
   function bgLayer(W, H, col, yb, amp, f, seed, kind) {
-    var off = skyOff * f * W,
-      st = 8,
-      shift = (off % st + st) % st;
-    ctx.fillStyle = col;
-    for (var i = -1; i < W / st + 2; i++) {
-      var sx = i * st - shift,
-        wx = sx + off;
-      var h = void 0;
-      if (kind === 'peak') {
-        var t = ((wx / 140 + seed) % 2 + 2) % 2;
-        h = amp * (.3 + .7 * (1 - Math.abs(t - 1)));
-      } else if (kind === 'castle') {
-        var m = ((wx + seed * 50) % 220 + 220) % 220;
-        h = m < 40 ? amp * 1.5 + (m % 14 < 7 ? 8 : 0) : amp * .5 + (Math.floor(wx / 12) % 2 ? 6 : 0);
-      } else h = amp * (.55 + .3 * Math.sin(wx * .006 + seed) + .15 * Math.sin(wx * .021 + seed * 2));
-      h = Math.round(h / 4) * 4;
-      ctx.fillRect(sx, yb - h, st, h + 2);
+    var key = col + kind + seed + '_' + Math.round(yb) + '_' + Math.round(amp);
+    var S = BGC[key];
+    if (!S) {
+      var top = Math.max(0, Math.floor(yb - amp * 1.6 - 14)),
+        c = document.createElement('canvas');
+      c.width = BGP;
+      c.height = Math.ceil(yb + 3 - top);
+      var x = c.getContext('2d');
+      x.fillStyle = col;
+      for (var sx = 0; sx < BGP; sx += 8) {
+        var wx = sx,
+          a = wx / BGP * 6.2832;
+        var h = void 0;
+        if (kind === 'peak') {
+          var t = ((wx / 140 + seed) % 2 + 2) % 2;
+          h = amp * (.3 + .7 * (1 - Math.abs(t - 1)));
+        } else if (kind === 'castle') {
+          var m = ((wx + seed * 50) % 220 + 220) % 220;
+          h = m < 40 ? amp * 1.5 + (m % 14 < 7 ? 8 : 0) : amp * .5 + (Math.floor(wx / 12) % 2 ? 6 : 0);
+        } else h = amp * (.55 + .3 * Math.sin(a * 3 + seed) + .15 * Math.sin(a * 10 + seed * 2));
+        h = Math.round(h / 4) * 4;
+        x.fillRect(sx, yb - h - top, 8, h + 3);
+      }
+      S = BGC[key] = {
+        c: c,
+        top: top
+      };
     }
+    var off = (skyOff * f * W % BGP + BGP) % BGP;
+    ctx.drawImage(S.c, -off, S.top);
+    if (BGP - off < W) ctx.drawImage(S.c, BGP - off, S.top);
   }
   var SPR = {};
   function sprOf(k) {
@@ -2784,20 +2803,19 @@ var K = function () {
     var dw = scale * worldW * w / 2,
       U = dw / c.width,
       dh = c.height * U;
-    if (dw < 1) return;
+    if (dw < 2) return;
     var top = sy - dh;
     var vis = dh;
     if (clip != null && clip < sy) vis = Math.max(0, dh - (sy - clip));
-    if (vis <= 0) return;
-    ctx.save();
-    ctx.imageSmoothingEnabled = false;
+    if (vis < 1) return;
     if (flip) {
+      ctx.save();
       ctx.translate(sx, 0);
       ctx.scale(-1, 1);
       sx = 0;
     }
-    ctx.drawImage(c, 0, 0, c.width, c.height * (vis / dh), sx - dw / 2, top, dw, vis);
-    ctx.restore();
+    ctx.drawImage(c, 0, 0, c.width, Math.max(1, c.height * (vis / dh)), sx - dw / 2, top, dw, vis);
+    if (flip) ctx.restore();
   }
   function draw() {
     var W = K.W,
@@ -3060,6 +3078,29 @@ var K = function () {
       ctx.fillRect(0, 0, W, H);
     }
     hud(W, H);
+    perf();
+  }
+  var PF = {
+    n: 0,
+    s: 0,
+    last: 0
+  };
+  function perf() {
+    var now = performance.now();
+    if (PF.last) {
+      var dt = now - PF.last;
+      if (dt < 250) {
+        PF.s += dt;
+        PF.n++;
+      }
+    }
+    PF.last = now;
+    if (PF.n >= 90) {
+      var avg = PF.s / PF.n;
+      PF.n = 0;
+      PF.s = 0;
+      if (avg > 24 && DRAW > 70) DRAW -= 25;
+    }
   }
   function drawBanner(sx, sy, rw, sc, W, clip) {
     var h = sc * 1600 * W / 2,
