@@ -908,12 +908,14 @@ var K = function () {
     up: false,
     down: false,
     a: false,
-    b: false
+    b: false,
+    c: false
   };
   var prev = {};
   K.pressed = function (k) {
     return K.keys[k] && !prev[k];
   };
+  K._prev = prev;
   var BTN = [];
   K.buttons = function (list) {
     var pad = $('pad');
@@ -1025,7 +1027,9 @@ var K = function () {
     KeyX: 'b',
     KeyL: 'b',
     Enter: 'b',
-    ShiftLeft: 'b'
+    ShiftLeft: 'b',
+    KeyC: 'c',
+    KeyJ: 'c'
   };
   var kbd = {};
   addEventListener('keydown', function (e) {
