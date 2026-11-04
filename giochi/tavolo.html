@@ -54,6 +54,13 @@ body.playing #pad{display:block}
 .lvl b{font-size:26px} .lvl.done{background:#c9f0cf} .lvl.lock{background:#e3e5ec;color:#9aa0b5;cursor:default}
 .lvl small{font-weight:400;font-size:13px}
 a.home{color:#1d1f2b}
+.kplayers{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;margin:4px 0 8px}
+.kpl{font:700 17px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:3px;padding:6px 10px;cursor:pointer;color:#1d1f2b}
+.kpl.sel{background:var(--yel)} .kpl.add{background:#e9f6ea}
+.kplin{font:700 18px 'Pixelify Sans',monospace;border:3px solid #14151d;padding:6px 8px;margin:3px;width:180px}
+.kbh{margin:10px 0 4px;font-size:20px}
+.kbt{border-collapse:collapse;margin:4px auto 8px;font:700 16px 'Pixelify Sans',monospace;min-width:280px}
+.kbt th,.kbt td{border:2px solid #14151d;padding:4px 10px;background:#fff} .kbt th{background:#e3e5ec} .kbt tr.first td{background:#fff3c4}
 .lvl.tg b{font-size:30px}.lvl.sel,.go.alt.sel{background:var(--yel)!important;color:#1d1f2b}
 </style>
 </head>
@@ -73,10 +80,14 @@ a.home{color:#1d1f2b}
   <p class="note">Giochi da tavolo · Sala giochi di Tom · versione 1</p>
 </div></div>
 <div id="ktoast" hidden></div>
+<div class="ov" id="kboard" hidden style="z-index:20"><div class="card"></div></div>
 <div class="ov" id="menu"><div class="card">
   <h1>🎲 Giochi da tavolo</h1>
   <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
   <button class="go" id="cont" type="button" hidden></button>
+  <h2>Chi gioca?</h2>
+  <div id="players"></div>
+  <div id="p2box" hidden><h2>Giocatore 2</h2><div id="players2"></div></div>
   <h2>Scegli il gioco</h2>
   <div class="lvls">
     <button class="lvl tg" type="button" data-kind="tris"><b>❌⭕</b>Tris<small>tre in fila e vinci</small></button>
@@ -94,7 +105,7 @@ a.home{color:#1d1f2b}
   <button class="go" id="go" type="button">▶ Gioca</button>
   <p class="note">Tocca un pezzo per vedere dove può andare (i pallini verdi), poi tocca la casella. A Scopa tocca una tua carta e poi le carte da prendere sul tavolo. In due si gioca a turno sullo stesso iPad.</p>
   <p id="rec" class="note"></p>
-  <div class="row"><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+  <div class="row"><button class="go alt" id="boardBtn" type="button">🏆 Classifica</button><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
 </div></div>
 
 <script>/**
@@ -1894,6 +1905,194 @@ var K = function () {
   };
 })();
 (function () {
+  var $ = K.$;
+  K.players = function () {
+    var l = K.load('sala-players', null);
+    if (!Array.isArray(l)) {
+      l = ['Tommy', 'Milly', 'Papone'];
+      var tn = K.load('tom-name', null);
+      if (typeof tn === 'string' && tn && l.indexOf(tn) < 0) l.unshift(tn);
+    }
+    return l;
+  };
+  K.player = function (slot) {
+    var all = K.players();
+    var p = K.load('sala-player' + (slot || ''), null);
+    if (all.indexOf(p) < 0) p = all[slot ? 1 : 0] || all[0];
+    return p;
+  };
+  K.setPlayer = function (slot, name) {
+    K.save('sala-player' + (slot || ''), name);
+  };
+  function addName(n) {
+    n = String(n || '').replace(/\s+/g, ' ').trim().slice(0, 14);
+    if (!n) return null;
+    var l = K.players();
+    var ex = l.find(function (x) {
+      return x.toLowerCase() === n.toLowerCase();
+    });
+    if (ex) return ex;
+    l.push(n);
+    K.save('sala-players', l.slice(-16));
+    return n;
+  }
+  K.playerPicker = function (box, slot, onPick) {
+    var cur = K.player(slot);
+    box.innerHTML = '';
+    box.className = 'kplayers';
+    K.players().forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kpl' + (n === cur ? ' sel' : '');
+      b.textContent = (n === cur ? '✔ ' : '') + n;
+      b.onclick = function () {
+        K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        onPick && onPick(n);
+      };
+      box.appendChild(b);
+    });
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'kpl add';
+    add.textContent = '➕ Nuovo';
+    add.onclick = function () {
+      box.innerHTML = '';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.maxLength = 14;
+      inp.placeholder = 'Scrivi il nome';
+      inp.className = 'kplin';
+      var ok = document.createElement('button');
+      ok.type = 'button';
+      ok.className = 'kpl sel';
+      ok.textContent = 'OK';
+      var no = document.createElement('button');
+      no.type = 'button';
+      no.className = 'kpl';
+      no.textContent = 'Annulla';
+      var done = function done() {
+        var n = addName(inp.value);
+        if (n) K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        if (n && onPick) onPick(n);
+      };
+      ok.onclick = done;
+      no.onclick = function () {
+        return K.playerPicker(box, slot, onPick);
+      };
+      inp.onkeydown = function (e) {
+        if (e.key === 'Enter') done();
+      };
+      box.appendChild(inp);
+      box.appendChild(ok);
+      box.appendChild(no);
+      setTimeout(function () {
+        try {
+          inp.focus();
+        } catch (e) {}
+      }, 50);
+    };
+    box.appendChild(add);
+  };
+  K.addScore = function (game, name, add) {
+    if (!name) return;
+    var B = K.load('sala-board', {});
+    var G = B[game] = B[game] || {};
+    var r = G[name] = G[name] || {
+      pts: 0
+    };
+    for (var k in add) {
+      if (k === 'best') {
+        r.best = r.best || {};
+        for (var b in add.best) {
+          var v = add.best[b];
+          if (r.best[b] == null || v < r.best[b]) r.best[b] = v;
+        }
+      } else r[k] = (r[k] || 0) + add[k];
+    }
+    r.last = Date.now();
+    K.save('sala-board', B);
+  };
+  K.boardOf = function (game) {
+    var G = (K.load('sala-board', {}) || {})[game] || {};
+    return Object.keys(G).map(function (n) {
+      return Object.assign({
+        name: n
+      }, G[n]);
+    }).sort(function (a, b) {
+      return (b.pts || 0) - (a.pts || 0) || (b.last || 0) - (a.last || 0);
+    });
+  };
+  var esc = function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;'
+      }[c];
+    });
+  };
+  K.showBoard = function (title, sections, note) {
+    var h = '<h2>🏆 ' + esc(title) + '</h2>';
+    var _iterator6 = _createForOfIteratorHelper(sections),
+      _step6;
+    try {
+      var _loop = function _loop() {
+        var s = _step6.value;
+        if (s.title) h += '<h3 class="kbh">' + esc(s.title) + '</h3>';
+        if (!s.rows.length) {
+          h += '<p class="note">' + esc(s.empty || 'Ancora nessun punteggio: gioca una partita!') + '</p>';
+          return 1;
+        }
+        h += '<table class="kbt"><tr>' + (s.norank ? '' : '<th>#</th>') + s.cols.map(function (c) {
+          return '<th>' + esc(c.h) + '</th>';
+        }).join('') + '</tr>';
+        s.rows.forEach(function (r, i) {
+          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1) + '</td>') + s.cols.map(function (c) {
+            return '<td>' + esc(c.f(r)) + '</td>';
+          }).join('') + '</tr>';
+        });
+        h += '</table>';
+      };
+      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+        if (_loop()) continue;
+      }
+    } catch (err) {
+      _iterator6.e(err);
+    } finally {
+      _iterator6.f();
+    }
+    if (note) h += '<p class="note">' + esc(note) + '</p>';
+    h += '<div class="row"><button class="go" id="kbclose" type="button">Chiudi</button><button class="go alt" id="kbreset" type="button">🗑 Azzera classifica</button></div>';
+    var ov = $('kboard');
+    ov.querySelector('.card').innerHTML = h;
+    ov.hidden = false;
+    $('kbclose').onclick = function () {
+      ov.hidden = true;
+    };
+    $('kbreset').onclick = function () {
+      var b = $('kbreset');
+      if (b.dataset.sure) {
+        var B = K.load('sala-board', {});
+        (sections.games || []).forEach(function (g) {
+          return delete B[g];
+        });
+        K.save('sala-board', B);
+        ov.hidden = true;
+        K.toast('Classifica azzerata');
+      } else {
+        b.dataset.sure = '1';
+        b.textContent = 'Sicuro? Tocca ancora';
+      }
+    };
+  };
+  K.fmtT = function (s) {
+    return Math.floor(s / 60) + ':' + ('0' + Math.floor(s) % 60).slice(-2) + '.' + Math.floor(s % 1 * 10);
+  };
+})();
+(function () {
   var ctx = K.ctx,
     $ = K.$,
     SS = K.S,
@@ -1945,6 +2144,7 @@ var K = function () {
     return G.mode === 'cpu' && p === 1;
   };
   function who(p) {
+    if (G.names && G.names[p]) return G.names[p];
     if (G.mode === 'cpu') return p === 0 ? 'Tu' : 'Computer';
     return 'Giocatore ' + (p + 1);
   }
@@ -1993,20 +2193,20 @@ var K = function () {
       if (G.lvl <= 1) {
         for (var _i4 = 0, _arr3 = [me, 1 - me]; _i4 < _arr3.length; _i4++) {
           var q = _arr3[_i4];
-          var _iterator6 = _createForOfIteratorHelper(free),
-            _step6;
+          var _iterator7 = _createForOfIteratorHelper(free),
+            _step7;
           try {
-            for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
-              var _i5 = _step6.value;
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+              var _i5 = _step7.value;
               b[_i5] = q;
               var w = trisWin(b);
               b[_i5] = null;
               if (w) return _i5;
             }
           } catch (err) {
-            _iterator6.e(err);
+            _iterator7.e(err);
           } finally {
-            _iterator6.f();
+            _iterator7.f();
           }
         }
         if (b[4] == null && Math.random() < .6) return 4;
@@ -2014,11 +2214,11 @@ var K = function () {
       }
       var bi = free[0],
         bv = -99;
-      var _iterator7 = _createForOfIteratorHelper(shuffle(free.slice())),
-        _step7;
+      var _iterator8 = _createForOfIteratorHelper(shuffle(free.slice())),
+        _step8;
       try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
-          var _i6 = _step7.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+          var _i6 = _step8.value;
           b[_i6] = me;
           var v = trisMM(b, 1 - me, me);
           b[_i6] = null;
@@ -2028,9 +2228,9 @@ var K = function () {
           }
         }
       } catch (err) {
-        _iterator7.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator7.f();
+        _iterator8.f();
       }
       return bi;
     },
@@ -2137,8 +2337,8 @@ var K = function () {
     var caps = [],
       simple = [],
       fwd = p === 0 ? -1 : 1;
-    var _loop = function _loop(r) {
-      var _loop2 = function _loop2(c) {
+    var _loop2 = function _loop2(r) {
+      var _loop3 = function _loop3(c) {
         var v = b[r * 8 + c];
         if (!own(v, p)) return 1;
         var king = isK(v),
@@ -2186,11 +2386,11 @@ var K = function () {
         }
       };
       for (var c = 0; c < 8; c++) {
-        if (_loop2(c)) continue;
+        if (_loop3(c)) continue;
       }
     };
     for (var r = 0; r < 8; r++) {
-      _loop(r);
+      _loop2(r);
     }
     if (caps.length) {
       var mx = Math.max.apply(null, caps.map(function (m) {
@@ -2224,17 +2424,17 @@ var K = function () {
       to = m.path[m.path.length - 1];
     var v = n[from];
     n[from] = 0;
-    var _iterator8 = _createForOfIteratorHelper(m.caps),
-      _step8;
+    var _iterator9 = _createForOfIteratorHelper(m.caps),
+      _step9;
     try {
-      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
-        var i = _step8.value;
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var i = _step9.value;
         n[i] = 0;
       }
     } catch (err) {
-      _iterator8.e(err);
+      _iterator9.e(err);
     } finally {
-      _iterator8.f();
+      _iterator9.f();
     }
     var r = Math.floor(to / 8);
     if (v === 1 && r === 0) v = 2;
@@ -2260,20 +2460,20 @@ var K = function () {
     if (!ms.length) return -9999 - d;
     if (d === 0) return damaEval(b, p);
     var best = -99999;
-    var _iterator9 = _createForOfIteratorHelper(ms),
-      _step9;
+    var _iterator0 = _createForOfIteratorHelper(ms),
+      _step0;
     try {
-      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
-        var m = _step9.value;
+      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+        var m = _step0.value;
         var v = -damaSearch(damaApply(b, m), 1 - p, d - 1, -be, -a);
         if (v > best) best = v;
         if (v > a) a = v;
         if (a >= be) break;
       }
     } catch (err) {
-      _iterator9.e(err);
+      _iterator0.e(err);
     } finally {
-      _iterator9.f();
+      _iterator0.f();
     }
     return best;
   }
@@ -2296,11 +2496,11 @@ var K = function () {
       var d = G.lvl === 1 ? 2 : 5;
       var bm = ms[0],
         bv = -1e9;
-      var _iterator0 = _createForOfIteratorHelper(shuffle(ms.slice())),
-        _step0;
+      var _iterator1 = _createForOfIteratorHelper(shuffle(ms.slice())),
+        _step1;
       try {
-        for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
-          var m = _step0.value;
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+          var m = _step1.value;
           var v = -damaSearch(damaApply(s.b, m), 1 - G.turn, d - 1, -1e9, 1e9);
           if (v > bv) {
             bv = v;
@@ -2308,9 +2508,9 @@ var K = function () {
           }
         }
       } catch (err) {
-        _iterator0.e(err);
+        _iterator1.e(err);
       } finally {
-        _iterator0.f();
+        _iterator1.f();
       }
       return bm;
     },
@@ -2366,48 +2566,48 @@ var K = function () {
       boardSquares(L, '#f0dcb4', '#7a4e2e');
       var ms = G.over || isCPU(G.turn) ? [] : damaMoves(s.b, G.turn);
       if (s.last) {
-        var _iterator1 = _createForOfIteratorHelper(s.last),
-          _step1;
-        try {
-          for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
-            var i = _step1.value;
-            hiSq(L, i, 'rgba(242,194,48,.35)');
-          }
-        } catch (err) {
-          _iterator1.e(err);
-        } finally {
-          _iterator1.f();
-        }
-      }
-      if (s.sel >= 0) {
-        hiSq(L, s.sel, 'rgba(95,208,106,.55)');
-        var _iterator10 = _createForOfIteratorHelper(ms),
+        var _iterator10 = _createForOfIteratorHelper(s.last),
           _step10;
         try {
           for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
-            var m = _step10.value;
-            if (m.path[0] === s.sel) {
-              var to = m.path[m.path.length - 1];
-              markSq(L, to, m.caps.length ? '#e0373f' : '#5fd06a');
-            }
+            var i = _step10.value;
+            hiSq(L, i, 'rgba(242,194,48,.35)');
           }
         } catch (err) {
           _iterator10.e(err);
         } finally {
           _iterator10.f();
         }
-      } else if (ms.length && ms[0].caps.length) {
+      }
+      if (s.sel >= 0) {
+        hiSq(L, s.sel, 'rgba(95,208,106,.55)');
         var _iterator11 = _createForOfIteratorHelper(ms),
           _step11;
         try {
           for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
-            var _m = _step11.value;
-            hiSq(L, _m.path[0], 'rgba(224,55,63,.3)');
+            var m = _step11.value;
+            if (m.path[0] === s.sel) {
+              var to = m.path[m.path.length - 1];
+              markSq(L, to, m.caps.length ? '#e0373f' : '#5fd06a');
+            }
           }
         } catch (err) {
           _iterator11.e(err);
         } finally {
           _iterator11.f();
+        }
+      } else if (ms.length && ms[0].caps.length) {
+        var _iterator12 = _createForOfIteratorHelper(ms),
+          _step12;
+        try {
+          for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+            var _m = _step12.value;
+            hiSq(L, _m.path[0], 'rgba(224,55,63,.3)');
+          }
+        } catch (err) {
+          _iterator12.e(err);
+        } finally {
+          _iterator12.f();
         }
       }
       for (var _i0 = 0; _i0 < 64; _i0++) {
@@ -2508,45 +2708,45 @@ var K = function () {
       var dc = _arr5[_i1];
       if (at(r + pd, c + dc) === by + 'P') return true;
     }
-    var _iterator12 = _createForOfIteratorHelper(NO),
-      _step12;
-    try {
-      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
-        var _step12$value = _slicedToArray(_step12.value, 2),
-          _dr = _step12$value[0],
-          _dc2 = _step12$value[1];
-        if (at(r + _dr, c + _dc2) === by + 'N') return true;
-      }
-    } catch (err) {
-      _iterator12.e(err);
-    } finally {
-      _iterator12.f();
-    }
-    var _iterator13 = _createForOfIteratorHelper(KO),
+    var _iterator13 = _createForOfIteratorHelper(NO),
       _step13;
     try {
       for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
         var _step13$value = _slicedToArray(_step13.value, 2),
-          _dr2 = _step13$value[0],
-          _dc3 = _step13$value[1];
-        if (at(r + _dr2, c + _dc3) === by + 'K') return true;
+          _dr = _step13$value[0],
+          _dc2 = _step13$value[1];
+        if (at(r + _dr, c + _dc2) === by + 'N') return true;
       }
     } catch (err) {
       _iterator13.e(err);
     } finally {
       _iterator13.f();
     }
+    var _iterator14 = _createForOfIteratorHelper(KO),
+      _step14;
+    try {
+      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+        var _step14$value = _slicedToArray(_step14.value, 2),
+          _dr2 = _step14$value[0],
+          _dc3 = _step14$value[1];
+        if (at(r + _dr2, c + _dc3) === by + 'K') return true;
+      }
+    } catch (err) {
+      _iterator14.e(err);
+    } finally {
+      _iterator14.f();
+    }
     for (var _i10 = 0, _arr6 = [[BD, 'BQ'], [RD, 'RQ']]; _i10 < _arr6.length; _i10++) {
       var _arr6$_i = _slicedToArray(_arr6[_i10], 2),
         dirs = _arr6$_i[0],
         ts = _arr6$_i[1];
-      var _iterator14 = _createForOfIteratorHelper(dirs),
-        _step14;
+      var _iterator15 = _createForOfIteratorHelper(dirs),
+        _step15;
       try {
-        for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
-          var _step14$value = _slicedToArray(_step14.value, 2),
-            dr = _step14$value[0],
-            _dc = _step14$value[1];
+        for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+          var _step15$value = _slicedToArray(_step15.value, 2),
+            dr = _step15$value[0],
+            _dc = _step15$value[1];
           var rr = r + dr,
             cc = c + _dc;
           while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) {
@@ -2560,9 +2760,9 @@ var K = function () {
           }
         }
       } catch (err) {
-        _iterator14.e(err);
+        _iterator15.e(err);
       } finally {
-        _iterator14.f();
+        _iterator15.f();
       }
     }
     return false;
@@ -2572,7 +2772,7 @@ var K = function () {
       me = st.turn,
       en = me === 'w' ? 'b' : 'w',
       ms = [];
-    var _loop3 = function _loop3(sq) {
+    var _loop4 = function _loop4(sq) {
       var x = b[sq];
       if (!x || x[0] !== me) return 1;
       var r = Math.floor(sq / 8),
@@ -2613,13 +2813,13 @@ var K = function () {
           });
         }
       } else if (ty === 'N' || ty === 'K') {
-        var _iterator15 = _createForOfIteratorHelper(ty === 'N' ? NO : KO),
-          _step15;
+        var _iterator16 = _createForOfIteratorHelper(ty === 'N' ? NO : KO),
+          _step16;
         try {
-          for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
-            var _step15$value = _slicedToArray(_step15.value, 2),
-              dr = _step15$value[0],
-              _dc4 = _step15$value[1];
+          for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+            var _step16$value = _slicedToArray(_step16.value, 2),
+              dr = _step16$value[0],
+              _dc4 = _step16$value[1];
             var rr = r + dr,
               _cc = c + _dc4;
             if (rr < 0 || rr > 7 || _cc < 0 || _cc > 7) continue;
@@ -2627,9 +2827,9 @@ var K = function () {
             if (!y || y[0] === en) add(rr * 8 + _cc);
           }
         } catch (err) {
-          _iterator15.e(err);
+          _iterator16.e(err);
         } finally {
-          _iterator15.f();
+          _iterator16.f();
         }
         if (ty === 'K') {
           var row = me === 'w' ? 7 : 0;
@@ -2644,13 +2844,13 @@ var K = function () {
         }
       } else {
         var dirs = ty === 'B' ? BD : ty === 'R' ? RD : BD.concat(RD);
-        var _iterator16 = _createForOfIteratorHelper(dirs),
-          _step16;
+        var _iterator17 = _createForOfIteratorHelper(dirs),
+          _step17;
         try {
-          for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
-            var _step16$value = _slicedToArray(_step16.value, 2),
-              _dr3 = _step16$value[0],
-              _dc5 = _step16$value[1];
+          for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+            var _step17$value = _slicedToArray(_step17.value, 2),
+              _dr3 = _step17$value[0],
+              _dc5 = _step17$value[1];
             var _rr = r + _dr3,
               _cc2 = c + _dc5;
             while (_rr >= 0 && _rr < 8 && _cc2 >= 0 && _cc2 < 8) {
@@ -2664,14 +2864,14 @@ var K = function () {
             }
           }
         } catch (err) {
-          _iterator16.e(err);
+          _iterator17.e(err);
         } finally {
-          _iterator16.f();
+          _iterator17.f();
         }
       }
     };
     for (var sq = 0; sq < 64; sq++) {
-      if (_loop3(sq)) continue;
+      if (_loop4(sq)) continue;
     }
     return ms;
   }
@@ -2755,20 +2955,20 @@ var K = function () {
       return (y.cap ? VAL[y.cap[1]] * 10 - VAL[st.b[y.f][1]] : 0) - (x.cap ? VAL[x.cap[1]] * 10 - VAL[st.b[x.f][1]] : 0);
     });
     var best = -1e9;
-    var _iterator17 = _createForOfIteratorHelper(ms),
-      _step17;
+    var _iterator18 = _createForOfIteratorHelper(ms),
+      _step18;
     try {
-      for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
-        var m = _step17.value;
+      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+        var m = _step18.value;
         var v = -chSearch(chApply(st, m), d - 1, -be, -a, ply + 1);
         if (v > best) best = v;
         if (v > a) a = v;
         if (a >= be) break;
       }
     } catch (err) {
-      _iterator17.e(err);
+      _iterator18.e(err);
     } finally {
-      _iterator17.f();
+      _iterator18.f();
     }
     return best;
   }
@@ -2824,11 +3024,11 @@ var K = function () {
       var bm = ms[0],
         bv = -1e9;
       nodes = 0;
-      var _iterator18 = _createForOfIteratorHelper(shuffle(ms.slice())),
-        _step18;
+      var _iterator19 = _createForOfIteratorHelper(shuffle(ms.slice())),
+        _step19;
       try {
-        for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
-          var m = _step18.value;
+        for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
+          var m = _step19.value;
           var v = -chSearch(chApply(s, m), d - 1, -1e9, -bv, 1) + Math.random() * 6;
           if (v > bv) {
             bv = v;
@@ -2836,9 +3036,9 @@ var K = function () {
           }
         }
       } catch (err) {
-        _iterator18.e(err);
+        _iterator19.e(err);
       } finally {
-        _iterator18.f();
+        _iterator19.f();
       }
       return bm;
     },
@@ -2897,34 +3097,34 @@ var K = function () {
         L = lay;
       boardSquares(L, '#f0dcb4', '#9a6a42');
       if (s.last) {
-        var _iterator19 = _createForOfIteratorHelper(s.last),
-          _step19;
+        var _iterator20 = _createForOfIteratorHelper(s.last),
+          _step20;
         try {
-          for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
-            var i = _step19.value;
+          for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
+            var i = _step20.value;
             hiSq(L, i, 'rgba(242,194,48,.38)');
           }
         } catch (err) {
-          _iterator19.e(err);
+          _iterator20.e(err);
         } finally {
-          _iterator19.f();
+          _iterator20.f();
         }
       }
       var ks = kingSq(s.b, s.turn);
       if (ks >= 0 && inCheck(s, s.turn)) hiSq(L, ks, 'rgba(224,55,63,.55)');
       if (s.sel >= 0 && !G.over) {
         hiSq(L, s.sel, 'rgba(95,208,106,.55)');
-        var _iterator20 = _createForOfIteratorHelper(chLegal(s)),
-          _step20;
+        var _iterator21 = _createForOfIteratorHelper(chLegal(s)),
+          _step21;
         try {
-          for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
-            var m = _step20.value;
+          for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
+            var m = _step21.value;
             if (m.f === s.sel) markSq(L, m.t, m.cap ? '#e0373f' : '#5fd06a');
           }
         } catch (err) {
-          _iterator20.e(err);
+          _iterator21.e(err);
         } finally {
-          _iterator20.f();
+          _iterator21.f();
         }
       }
       for (var _i13 = 0; _i13 < 64; _i13++) {
@@ -3114,7 +3314,7 @@ var K = function () {
     if (sb >= 0) add(sb, 'Settebello');
     var pr = cards.map(function (cc) {
       var tot = 0;
-      var _loop4 = function _loop4(s) {
+      var _loop5 = function _loop5(s) {
           var m = cc.filter(function (c) {
             return cs(c) === s;
           }).map(function (c) {
@@ -3127,7 +3327,7 @@ var K = function () {
         },
         _ret;
       for (var s = 0; s < 4; s++) {
-        _ret = _loop4(s);
+        _ret = _loop5(s);
         if (_ret) return _ret.v;
       }
       return tot;
@@ -3179,27 +3379,27 @@ var K = function () {
     moves(p) {
       var s = G.s,
         out = [];
-      var _iterator21 = _createForOfIteratorHelper(s.hands[p]),
-        _step21;
+      var _iterator22 = _createForOfIteratorHelper(s.hands[p]),
+        _step22;
       try {
-        for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
-          var c = _step21.value;
+        for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
+          var c = _step22.value;
           var o = capOpts(cv(c), s.table);
           if (o.length) {
-            var _iterator22 = _createForOfIteratorHelper(o),
-              _step22;
+            var _iterator23 = _createForOfIteratorHelper(o),
+              _step23;
             try {
-              for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
-                var set = _step22.value;
+              for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
+                var set = _step23.value;
                 out.push({
                   c: c,
                   set: set
                 });
               }
             } catch (err) {
-              _iterator22.e(err);
+              _iterator23.e(err);
             } finally {
-              _iterator22.f();
+              _iterator23.f();
             }
           } else out.push({
             c: c,
@@ -3207,9 +3407,9 @@ var K = function () {
           });
         }
       } catch (err) {
-        _iterator21.e(err);
+        _iterator22.e(err);
       } finally {
-        _iterator21.f();
+        _iterator22.f();
       }
       return out;
     },
@@ -3248,11 +3448,11 @@ var K = function () {
       if (G.lvl === 0) return rnd(ms);
       var bm = ms[0],
         bv = -1e9;
-      var _iterator23 = _createForOfIteratorHelper(ms),
-        _step23;
+      var _iterator24 = _createForOfIteratorHelper(ms),
+        _step24;
       try {
-        for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
-          var m = _step23.value;
+        for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
+          var m = _step24.value;
           var v = SCOPA.score(m, G.turn, G.lvl === 2 ? 6 : 0);
           if (v > bv) {
             bv = v;
@@ -3260,9 +3460,9 @@ var K = function () {
           }
         }
       } catch (err) {
-        _iterator23.e(err);
+        _iterator24.e(err);
       } finally {
-        _iterator23.f();
+        _iterator24.f();
       }
       return bm;
     },
@@ -3367,7 +3567,7 @@ var K = function () {
         }
       }
       if (s.sel >= 0) {
-        var _loop5 = function _loop5(_i15) {
+        var _loop6 = function _loop6(_i15) {
             var r = tableRect(L, _i15, s.table.length);
             if (x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h) {
               var _opts = s.opts || [];
@@ -3392,7 +3592,7 @@ var K = function () {
           },
           _ret2;
         for (var _i15 = 0; _i15 < s.table.length; _i15++) {
-          _ret2 = _loop5(_i15);
+          _ret2 = _loop6(_i15);
           if (_ret2) return _ret2.v;
         }
         if (!(s.opts || []).length && y > L.ty && y < L.ty + L.th) {
@@ -3440,7 +3640,7 @@ var K = function () {
         cardBack(r.x, r.y, r.w, r.h);
       }
       var hl = s.sel >= 0 ? s.opts || [] : [];
-      var _loop6 = function _loop6() {
+      var _loop7 = function _loop7() {
         var r = tableRect(L, _i17, s.table.length),
           c = s.table[_i17];
         var inP = s.pend && s.pend.set && s.pend.set.indexOf(c) >= 0,
@@ -3450,7 +3650,7 @@ var K = function () {
         card(c, r.x, r.y - (inP ? 8 : 0), r.w, r.h, inP ? '#f2c230' : can ? '#5fd06a' : null);
       };
       for (var _i17 = 0; _i17 < s.table.length; _i17++) {
-        _loop6();
+        _loop7();
       }
       if (s.pend) {
         var pr = s.pend.p === me ? handRect(L, 1, 3, 0) : handRect(L, 1, 3, 1),
@@ -3688,19 +3888,19 @@ var K = function () {
       ih = h * .7;
     if (v === 1) suit(s, x + w / 2, y + h / 2, w * .27);else if (v <= 7) {
       var r = w * (v <= 3 ? .13 : .1);
-      var _iterator24 = _createForOfIteratorHelper(PIPS[v]),
-        _step24;
+      var _iterator25 = _createForOfIteratorHelper(PIPS[v]),
+        _step25;
       try {
-        for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
-          var _step24$value = _slicedToArray(_step24.value, 2),
-            px = _step24$value[0],
-            py = _step24$value[1];
+        for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
+          var _step25$value = _slicedToArray(_step25.value, 2),
+            px = _step25$value[0],
+            py = _step25$value[1];
           suit(s, ix + px * iw, iy + py * ih, r);
         }
       } catch (err) {
-        _iterator24.e(err);
+        _iterator25.e(err);
       } finally {
-        _iterator24.f();
+        _iterator25.f();
       }
     } else figure(v, s, x + w / 2, y + h * .58, w * .66);
     if (c === 6) ctext('settebello', x + w / 2, y + h * .955, w * .115, '#b07a00', 'center');else if (v > 7) ctext(v === 8 ? 'Fante' : v === 9 ? 'Cavallo' : 'Re', x + w / 2, y + h * .955, w * .13, '#5d4030', 'center');
@@ -3907,18 +4107,18 @@ var K = function () {
       yy += 26;
     }
     if (lines) {
-      var _iterator25 = _createForOfIteratorHelper(lines),
-        _step25;
+      var _iterator26 = _createForOfIteratorHelper(lines),
+        _step26;
       try {
-        for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
-          var l = _step25.value;
+        for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
+          var l = _step26.value;
           K.text(l, x + w / 2, yy, 15, '#fff', 'center');
           yy += lh;
         }
       } catch (err) {
-        _iterator25.e(err);
+        _iterator26.e(err);
       } finally {
-        _iterator25.f();
+        _iterator26.f();
       }
     }
   }
@@ -4003,7 +4203,7 @@ var K = function () {
         w: [],
         b: []
       };
-      var _loop7 = function _loop7() {
+      var _loop8 = function _loop8() {
         var c = _arr11[_i22];
         var arr = lost[c].slice().sort(function (a, b2) {
           return VAL[b2] - VAL[a];
@@ -4019,7 +4219,7 @@ var K = function () {
         yy += sz * 1.5 * Math.max(1, Math.ceil(arr.length / 8)) + 12;
       };
       for (var _i22 = 0, _arr11 = ['w', 'b']; _i22 < _arr11.length; _i22++) {
-        _loop7();
+        _loop8();
       }
     } else {
       var _lost = s.lost || [0, 0];
@@ -4051,11 +4251,11 @@ var K = function () {
     var words = s.split(' ');
     var line = '',
       yy = y;
-    var _iterator26 = _createForOfIteratorHelper(words),
-      _step26;
+    var _iterator27 = _createForOfIteratorHelper(words),
+      _step27;
     try {
-      for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
-        var wd = _step26.value;
+      for (_iterator27.s(); !(_step27 = _iterator27.n()).done;) {
+        var wd = _step27.value;
         var tst = line ? line + ' ' + wd : wd;
         if (ctx.measureText(tst).width > w && line) {
           K.text(line, x, yy, size, c);
@@ -4064,9 +4264,9 @@ var K = function () {
         } else line = tst;
       }
     } catch (err) {
-      _iterator26.e(err);
+      _iterator27.e(err);
     } finally {
-      _iterator26.f();
+      _iterator27.f();
     }
     if (line) K.text(line, x, yy, size, c);
   }
@@ -4090,18 +4290,18 @@ var K = function () {
     btns = [];
     KINDS[G.kind].draw();
     panel();
-    var _iterator27 = _createForOfIteratorHelper(fx),
-      _step27;
+    var _iterator28 = _createForOfIteratorHelper(fx),
+      _step28;
     try {
-      for (_iterator27.s(); !(_step27 = _iterator27.n()).done;) {
-        var f = _step27.value;
+      for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
+        var f = _step28.value;
         ctx.globalAlpha = Math.min(1, f.l / 20);
         K.text(f.s, lay.ax + lay.aw / 2, lay.ay + lay.ah * .18 - (90 - f.l) * .3, 26, f.c, 'center');
       }
     } catch (err) {
-      _iterator27.e(err);
+      _iterator28.e(err);
     } finally {
-      _iterator27.f();
+      _iterator28.f();
     }
     ctx.globalAlpha = 1;
     if (G.over && G.kind !== 'scopa' && t - G.over.t > 30 && t - G.over.t < 300) {
@@ -4110,17 +4310,17 @@ var K = function () {
   }
   function update(f) {
     t += f;
-    var _iterator28 = _createForOfIteratorHelper(fx),
-      _step28;
+    var _iterator29 = _createForOfIteratorHelper(fx),
+      _step29;
     try {
-      for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
-        var q = _step28.value;
+      for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
+        var q = _step29.value;
         q.l -= f;
       }
     } catch (err) {
-      _iterator28.e(err);
+      _iterator29.e(err);
     } finally {
-      _iterator28.f();
+      _iterator29.f();
     }
     fx = fx.filter(function (q) {
       return q.l > 0;
@@ -4147,6 +4347,22 @@ var K = function () {
       t: t
     };
     K.del('tavolo-run');
+    var nm = G.names || [K.player(0), 'Computer'],
+      kk = G.kind;
+    if (G.mode === 'cpu') {
+      var a = {
+        pts: w === 0 ? 3 * (G.lvl + 1) : w < 0 ? 1 : 0
+      };
+      a[kk + (w === 0 ? 'V' : w < 0 ? 'P' : 'S')] = 1;
+      K.addScore('tavolo', nm[0], a);
+    } else for (var _i24 = 0, _arr13 = [0, 1]; _i24 < _arr13.length; _i24++) {
+      var p = _arr13[_i24];
+      var _a2 = {
+        pts: w === p ? 3 : w < 0 ? 1 : 0
+      };
+      _a2[kk + (w === p ? 'V' : w < 0 ? 'P' : 'S')] = 1;
+      K.addScore('tavolo', nm[p], _a2);
+    }
     if (G.mode === 'cpu' && w === 0) {
       PROG[G.kind] = (PROG[G.kind] || 0) + 1;
       K.save('tavolo-prog', PROG);
@@ -4156,20 +4372,20 @@ var K = function () {
   }
   function tapAt(x, y) {
     if (!G || !K.playing || !$('kpause').hidden) return;
-    var _iterator29 = _createForOfIteratorHelper(btns),
-      _step29;
+    var _iterator30 = _createForOfIteratorHelper(btns),
+      _step30;
     try {
-      for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
-        var b = _step29.value;
+      for (_iterator30.s(); !(_step30 = _iterator30.n()).done;) {
+        var b = _step30.value;
         if (x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h) {
           if (b.id === 'again') newGame(G.kind, G.mode, G.lvl);
           return;
         }
       }
     } catch (err) {
-      _iterator29.e(err);
+      _iterator30.e(err);
     } finally {
-      _iterator29.f();
+      _iterator30.f();
     }
     if (G.over) return;
     if (G.turn < 0 && G.kind !== 'scopa') return;
@@ -4201,12 +4417,16 @@ var K = function () {
   var sp = K.load('tavolo-pick', null);
   if (sp && KINDS[sp.kind]) pick = sp;
   function newGame(kind, mode, lvl) {
+    var n0 = K.player(0),
+      n1 = mode === '2p' ? K.player(1) : 'Computer';
+    if (n1 === n0) n1 = n0 + ' 2';
     G = {
       kind: kind,
       mode: mode,
       lvl: lvl,
       turn: 0,
-      over: null
+      over: null,
+      names: [n0, n1]
     };
     G.s = KINDS[kind].init();
     if (kind === 'scopa' && mode === '2p') G.s.hide = true;
@@ -4215,6 +4435,9 @@ var K = function () {
     K.wantMusic = 'tavolo';
   }
   function renderMenu() {
+    K.playerPicker($('players'), 0);
+    K.playerPicker($('players2'), 1);
+    $('p2box').hidden = pick.mode !== '2p';
     document.querySelectorAll('[data-kind]').forEach(function (b) {
       b.classList.toggle('sel', b.getAttribute('data-kind') === pick.kind);
       b.onclick = function () {
@@ -4265,6 +4488,41 @@ var K = function () {
     newGame(pick.kind, pick.mode, pick.lvl);
     $('menu').hidden = true;
     K.start();
+  };
+  $('boardBtn').onclick = function () {
+    var vps = function vps(k) {
+      return function (r) {
+        return (r[k + 'V'] || 0) + '-' + (r[k + 'P'] || 0) + '-' + (r[k + 'S'] || 0);
+      };
+    };
+    var sec = [{
+      cols: [{
+        h: 'Giocatore',
+        f: function f(r) {
+          return r.name;
+        }
+      }, {
+        h: 'Punti',
+        f: function f(r) {
+          return r.pts || 0;
+        }
+      }, {
+        h: 'Tris',
+        f: vps('tris')
+      }, {
+        h: 'Dama',
+        f: vps('dama')
+      }, {
+        h: 'Scacchi',
+        f: vps('scacchi')
+      }, {
+        h: 'Scopa',
+        f: vps('scopa')
+      }],
+      rows: K.boardOf('tavolo')
+    }];
+    sec.games = ['tavolo'];
+    K.showBoard('Classifica Giochi da tavolo', sec, 'Numeri: vinte-pari-perse. Vittoria contro il computer: 3 punti (Facile), 6 (Medio), 9 (Difficile) · in due: 3 punti · patta 1.');
   };
   function showMenu() {
     K.stop();

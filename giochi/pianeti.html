@@ -54,6 +54,13 @@ body.playing #pad{display:block}
 .lvl b{font-size:26px} .lvl.done{background:#c9f0cf} .lvl.lock{background:#e3e5ec;color:#9aa0b5;cursor:default}
 .lvl small{font-weight:400;font-size:13px}
 a.home{color:#1d1f2b}
+.kplayers{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;margin:4px 0 8px}
+.kpl{font:700 17px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:3px;padding:6px 10px;cursor:pointer;color:#1d1f2b}
+.kpl.sel{background:var(--yel)} .kpl.add{background:#e9f6ea}
+.kplin{font:700 18px 'Pixelify Sans',monospace;border:3px solid #14151d;padding:6px 8px;margin:3px;width:180px}
+.kbh{margin:10px 0 4px;font-size:20px}
+.kbt{border-collapse:collapse;margin:4px auto 8px;font:700 16px 'Pixelify Sans',monospace;min-width:280px}
+.kbt th,.kbt td{border:2px solid #14151d;padding:4px 10px;background:#fff} .kbt th{background:#e3e5ec} .kbt tr.first td{background:#fff3c4}
 
 </style>
 </head>
@@ -73,6 +80,7 @@ a.home{color:#1d1f2b}
   <p class="note">Tom tra i Pianeti · Sala giochi di Tom · versione 1</p>
 </div></div>
 <div id="ktoast" hidden></div>
+<div class="ov" id="kboard" hidden style="z-index:20"><div class="card"></div></div>
 <div class="ov" id="menu"><div class="card">
   <h1>🪐 Tom tra i Pianeti</h1>
   <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
@@ -1886,6 +1894,194 @@ var K = function () {
   };
 })();
 (function () {
+  var $ = K.$;
+  K.players = function () {
+    var l = K.load('sala-players', null);
+    if (!Array.isArray(l)) {
+      l = ['Tommy', 'Milly', 'Papone'];
+      var tn = K.load('tom-name', null);
+      if (typeof tn === 'string' && tn && l.indexOf(tn) < 0) l.unshift(tn);
+    }
+    return l;
+  };
+  K.player = function (slot) {
+    var all = K.players();
+    var p = K.load('sala-player' + (slot || ''), null);
+    if (all.indexOf(p) < 0) p = all[slot ? 1 : 0] || all[0];
+    return p;
+  };
+  K.setPlayer = function (slot, name) {
+    K.save('sala-player' + (slot || ''), name);
+  };
+  function addName(n) {
+    n = String(n || '').replace(/\s+/g, ' ').trim().slice(0, 14);
+    if (!n) return null;
+    var l = K.players();
+    var ex = l.find(function (x) {
+      return x.toLowerCase() === n.toLowerCase();
+    });
+    if (ex) return ex;
+    l.push(n);
+    K.save('sala-players', l.slice(-16));
+    return n;
+  }
+  K.playerPicker = function (box, slot, onPick) {
+    var cur = K.player(slot);
+    box.innerHTML = '';
+    box.className = 'kplayers';
+    K.players().forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kpl' + (n === cur ? ' sel' : '');
+      b.textContent = (n === cur ? '✔ ' : '') + n;
+      b.onclick = function () {
+        K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        onPick && onPick(n);
+      };
+      box.appendChild(b);
+    });
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'kpl add';
+    add.textContent = '➕ Nuovo';
+    add.onclick = function () {
+      box.innerHTML = '';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.maxLength = 14;
+      inp.placeholder = 'Scrivi il nome';
+      inp.className = 'kplin';
+      var ok = document.createElement('button');
+      ok.type = 'button';
+      ok.className = 'kpl sel';
+      ok.textContent = 'OK';
+      var no = document.createElement('button');
+      no.type = 'button';
+      no.className = 'kpl';
+      no.textContent = 'Annulla';
+      var done = function done() {
+        var n = addName(inp.value);
+        if (n) K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        if (n && onPick) onPick(n);
+      };
+      ok.onclick = done;
+      no.onclick = function () {
+        return K.playerPicker(box, slot, onPick);
+      };
+      inp.onkeydown = function (e) {
+        if (e.key === 'Enter') done();
+      };
+      box.appendChild(inp);
+      box.appendChild(ok);
+      box.appendChild(no);
+      setTimeout(function () {
+        try {
+          inp.focus();
+        } catch (e) {}
+      }, 50);
+    };
+    box.appendChild(add);
+  };
+  K.addScore = function (game, name, add) {
+    if (!name) return;
+    var B = K.load('sala-board', {});
+    var G = B[game] = B[game] || {};
+    var r = G[name] = G[name] || {
+      pts: 0
+    };
+    for (var k in add) {
+      if (k === 'best') {
+        r.best = r.best || {};
+        for (var b in add.best) {
+          var v = add.best[b];
+          if (r.best[b] == null || v < r.best[b]) r.best[b] = v;
+        }
+      } else r[k] = (r[k] || 0) + add[k];
+    }
+    r.last = Date.now();
+    K.save('sala-board', B);
+  };
+  K.boardOf = function (game) {
+    var G = (K.load('sala-board', {}) || {})[game] || {};
+    return Object.keys(G).map(function (n) {
+      return Object.assign({
+        name: n
+      }, G[n]);
+    }).sort(function (a, b) {
+      return (b.pts || 0) - (a.pts || 0) || (b.last || 0) - (a.last || 0);
+    });
+  };
+  var esc = function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;'
+      }[c];
+    });
+  };
+  K.showBoard = function (title, sections, note) {
+    var h = '<h2>🏆 ' + esc(title) + '</h2>';
+    var _iterator6 = _createForOfIteratorHelper(sections),
+      _step6;
+    try {
+      var _loop = function _loop() {
+        var s = _step6.value;
+        if (s.title) h += '<h3 class="kbh">' + esc(s.title) + '</h3>';
+        if (!s.rows.length) {
+          h += '<p class="note">' + esc(s.empty || 'Ancora nessun punteggio: gioca una partita!') + '</p>';
+          return 1;
+        }
+        h += '<table class="kbt"><tr>' + (s.norank ? '' : '<th>#</th>') + s.cols.map(function (c) {
+          return '<th>' + esc(c.h) + '</th>';
+        }).join('') + '</tr>';
+        s.rows.forEach(function (r, i) {
+          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1) + '</td>') + s.cols.map(function (c) {
+            return '<td>' + esc(c.f(r)) + '</td>';
+          }).join('') + '</tr>';
+        });
+        h += '</table>';
+      };
+      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+        if (_loop()) continue;
+      }
+    } catch (err) {
+      _iterator6.e(err);
+    } finally {
+      _iterator6.f();
+    }
+    if (note) h += '<p class="note">' + esc(note) + '</p>';
+    h += '<div class="row"><button class="go" id="kbclose" type="button">Chiudi</button><button class="go alt" id="kbreset" type="button">🗑 Azzera classifica</button></div>';
+    var ov = $('kboard');
+    ov.querySelector('.card').innerHTML = h;
+    ov.hidden = false;
+    $('kbclose').onclick = function () {
+      ov.hidden = true;
+    };
+    $('kbreset').onclick = function () {
+      var b = $('kbreset');
+      if (b.dataset.sure) {
+        var B = K.load('sala-board', {});
+        (sections.games || []).forEach(function (g) {
+          return delete B[g];
+        });
+        K.save('sala-board', B);
+        ov.hidden = true;
+        K.toast('Classifica azzerata');
+      } else {
+        b.dataset.sure = '1';
+        b.textContent = 'Sicuro? Tocca ancora';
+      }
+    };
+  };
+  K.fmtT = function (s) {
+    return Math.floor(s / 60) + ':' + ('0' + Math.floor(s) % 60).slice(-2) + '.' + Math.floor(s % 1 * 10);
+  };
+})();
+(function () {
   var ctx = K.ctx,
     $ = K.$;
   var G = .42,
@@ -2395,7 +2591,7 @@ var K = function () {
         to: s.pad
       });
     });
-    var _loop = function _loop() {
+    var _loop2 = function _loop2() {
       var _moonSpec$_i = _slicedToArray(_moonSpec[_i3], 2),
         n = _moonSpec$_i[0],
         ms = _moonSpec$_i[1];
@@ -2442,7 +2638,7 @@ var K = function () {
       });
     };
     for (var _i3 = 0, _moonSpec = moonSpec; _i3 < _moonSpec.length; _i3++) {
-      _loop();
+      _loop2();
     }
     moons(0);
     pl = {
@@ -2474,11 +2670,11 @@ var K = function () {
     return A <= S;
   }
   function moons(f) {
-    var _iterator6 = _createForOfIteratorHelper(planets),
-      _step6;
+    var _iterator7 = _createForOfIteratorHelper(planets),
+      _step7;
     try {
-      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
-        var P = _step6.value;
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        var P = _step7.value;
         if (P.orbit) {
           var o = P.orbit,
             C = planets[o.p];
@@ -2496,9 +2692,9 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator6.e(err);
+      _iterator7.e(err);
     } finally {
-      _iterator6.f();
+      _iterator7.f();
     }
   }
   var onP = function onP(P, a, h) {
@@ -2510,11 +2706,11 @@ var K = function () {
   function nearest(x, y) {
     var best = null,
       bd = 1e9;
-    var _iterator7 = _createForOfIteratorHelper(planets),
-      _step7;
+    var _iterator8 = _createForOfIteratorHelper(planets),
+      _step8;
     try {
-      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
-        var P = _step7.value;
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var P = _step8.value;
         var d = Math.hypot(x - P.x, y - P.y) - P.r;
         if (d < bd) {
           bd = d;
@@ -2522,9 +2718,9 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator7.e(err);
+      _iterator8.e(err);
     } finally {
-      _iterator7.f();
+      _iterator8.f();
     }
     return [best, bd];
   }
@@ -2604,33 +2800,33 @@ var K = function () {
     levelT += f / 60;
     moons(f);
     if (boss && boss.alive) bossStep(f);
-    var _iterator8 = _createForOfIteratorHelper(foes),
-      _step8;
+    var _iterator9 = _createForOfIteratorHelper(foes),
+      _step9;
     try {
-      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
-        var e = _step8.value;
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var e = _step9.value;
         if (e.alive) {
           e.a += e.w * f;
         }
       }
     } catch (err) {
-      _iterator8.e(err);
+      _iterator9.e(err);
     } finally {
-      _iterator8.f();
+      _iterator9.f();
     }
-    var _iterator9 = _createForOfIteratorHelper(parts),
-      _step9;
+    var _iterator0 = _createForOfIteratorHelper(parts),
+      _step0;
     try {
-      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
-        var _q2 = _step9.value;
+      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+        var _q2 = _step0.value;
         _q2.x += _q2.vx * f;
         _q2.y += _q2.vy * f;
         _q2.l -= f;
       }
     } catch (err) {
-      _iterator9.e(err);
+      _iterator0.e(err);
     } finally {
-      _iterator9.f();
+      _iterator0.f();
     }
     parts = parts.filter(function (q) {
       return q.l > 0;
@@ -2718,11 +2914,11 @@ var K = function () {
     }
     pl.on = false;
     pl.ground = null;
-    var _iterator0 = _createForOfIteratorHelper(planets),
-      _step0;
+    var _iterator1 = _createForOfIteratorHelper(planets),
+      _step1;
     try {
-      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
-        var _Q = _step0.value;
+      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+        var _Q = _step1.value;
         var dx = pl.x - _Q.x,
           dy = pl.y - _Q.y,
           _dd = Math.hypot(dx, dy);
@@ -2746,15 +2942,15 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator0.e(err);
+      _iterator1.e(err);
     } finally {
-      _iterator0.f();
+      _iterator1.f();
     }
-    var _iterator1 = _createForOfIteratorHelper(pads),
-      _step1;
+    var _iterator10 = _createForOfIteratorHelper(pads),
+      _step10;
     try {
-      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
-        var pd = _step1.value;
+      for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+        var pd = _step10.value;
         var _Q2 = planets[pd.p],
           _q3 = onP(_Q2, pd.a, 0);
         if (pl.on && pl.ground === _Q2 && Math.hypot(pl.x - _q3.x, pl.y - _q3.y) < 26 && pl.fly <= 0) {
@@ -2775,17 +2971,17 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator1.e(err);
+      _iterator10.e(err);
     } finally {
-      _iterator1.f();
+      _iterator10.f();
     }
     var bx = pl.x + ux * 18,
       by = pl.y + uy * 18;
-    var _iterator10 = _createForOfIteratorHelper(gems),
-      _step10;
+    var _iterator11 = _createForOfIteratorHelper(gems),
+      _step11;
     try {
-      for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
-        var g = _step10.value;
+      for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+        var g = _step11.value;
         if (!g.got) {
           var _q4 = onP(planets[g.p], g.a, g.h);
           if (Math.hypot(_q4.x - bx, _q4.y - by) < 28) {
@@ -2797,9 +2993,9 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator10.e(err);
+      _iterator11.e(err);
     } finally {
-      _iterator10.f();
+      _iterator11.f();
     }
     flags.forEach(function (fl, i) {
       if (i > cp) {
@@ -2815,11 +3011,11 @@ var K = function () {
         }
       }
     });
-    var _iterator11 = _createForOfIteratorHelper(foes),
-      _step11;
+    var _iterator12 = _createForOfIteratorHelper(foes),
+      _step12;
     try {
-      for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
-        var _e = _step11.value;
+      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+        var _e = _step12.value;
         if (_e.alive) {
           var _Q3 = planets[_e.p],
             _q5 = onP(_Q3, _e.a, _e.h + (_e.t === 'met' ? 0 : 12));
@@ -2840,9 +3036,9 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator11.e(err);
+      _iterator12.e(err);
     } finally {
-      _iterator11.f();
+      _iterator12.f();
     }
     if (boss && boss.alive) {
       var Q = planets[boss.p],
@@ -2972,19 +3168,19 @@ var K = function () {
     ctx.save();
     ctx.translate(W / 2, H / 2);
     ctx.rotate(cam.rot * .35);
-    var _iterator12 = _createForOfIteratorHelper(stars),
-      _step12;
+    var _iterator13 = _createForOfIteratorHelper(stars),
+      _step13;
     try {
-      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
-        var s = _step12.value;
+      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+        var s = _step13.value;
         var tw = Math.floor(K.time / 12 + s.t) % 9 === 0;
         ctx.fillStyle = tw ? '#ffe48a' : '#ffffff';
         ctx.fillRect(Math.round(s.x * R - cam.x * .05 % R), Math.round(s.y * R - cam.y * .05 % R), s.s, s.s);
       }
     } catch (err) {
-      _iterator12.e(err);
+      _iterator13.e(err);
     } finally {
-      _iterator12.f();
+      _iterator13.f();
     }
     ctx.globalAlpha = .25;
     ctx.fillStyle = '#e096d2';
@@ -3052,18 +3248,18 @@ var K = function () {
         ctx.fill();
       }
     }
-    var _iterator13 = _createForOfIteratorHelper(P.deco),
-      _step13;
+    var _iterator14 = _createForOfIteratorHelper(P.deco),
+      _step14;
     try {
-      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
-        var d = _step13.value;
+      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+        var d = _step14.value;
         var _q6 = onP(P, d.a, -2);
         drawAt(spr(d.k), _q6.x, _q6.y, d.a, 3);
       }
     } catch (err) {
-      _iterator13.e(err);
+      _iterator14.e(err);
     } finally {
-      _iterator13.f();
+      _iterator14.f();
     }
   }
   function draw() {
@@ -3089,11 +3285,11 @@ var K = function () {
     ctx.strokeStyle = 'rgba(255,255,255,.12)';
     ctx.lineWidth = 2;
     ctx.setLineDash([4, 10]);
-    var _iterator14 = _createForOfIteratorHelper(planets),
-      _step14;
+    var _iterator15 = _createForOfIteratorHelper(planets),
+      _step15;
     try {
-      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
-        var _P = _step14.value;
+      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+        var _P = _step15.value;
         if (_P.orbit) {
           var C = planets[_P.orbit.p];
           ctx.beginPath();
@@ -3102,16 +3298,16 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator14.e(err);
+      _iterator15.e(err);
     } finally {
-      _iterator14.f();
+      _iterator15.f();
     }
     ctx.setLineDash([]);
-    var _iterator15 = _createForOfIteratorHelper(pads),
-      _step15;
+    var _iterator16 = _createForOfIteratorHelper(pads),
+      _step16;
     try {
-      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
-        var pd = _step15.value;
+      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+        var pd = _step16.value;
         var _Q4 = planets[pd.p],
           T = planets[pd.to],
           _q7 = onP(_Q4, pd.a, 0);
@@ -3125,27 +3321,27 @@ var K = function () {
         ctx.setLineDash([]);
       }
     } catch (err) {
-      _iterator15.e(err);
-    } finally {
-      _iterator15.f();
-    }
-    var _iterator16 = _createForOfIteratorHelper(planets),
-      _step16;
-    try {
-      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
-        var _P2 = _step16.value;
-        drawPlanet(_P2);
-      }
-    } catch (err) {
       _iterator16.e(err);
     } finally {
       _iterator16.f();
     }
-    var _iterator17 = _createForOfIteratorHelper(pads),
+    var _iterator17 = _createForOfIteratorHelper(planets),
       _step17;
     try {
       for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
-        var _pd = _step17.value;
+        var _P2 = _step17.value;
+        drawPlanet(_P2);
+      }
+    } catch (err) {
+      _iterator17.e(err);
+    } finally {
+      _iterator17.f();
+    }
+    var _iterator18 = _createForOfIteratorHelper(pads),
+      _step18;
+    try {
+      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+        var _pd = _step18.value;
         var _Q5 = planets[_pd.p],
           _q8 = onP(_Q5, _pd.a, 0);
         drawAt(spr('pad'), _q8.x, _q8.y, _pd.a, 4);
@@ -3162,9 +3358,9 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator17.e(err);
+      _iterator18.e(err);
     } finally {
-      _iterator17.f();
+      _iterator18.f();
     }
     flags.forEach(function (fl, i) {
       var Q = planets[fl.p],
@@ -3178,11 +3374,11 @@ var K = function () {
         ctx.fill();
       }
     });
-    var _iterator18 = _createForOfIteratorHelper(gems),
-      _step18;
+    var _iterator19 = _createForOfIteratorHelper(gems),
+      _step19;
     try {
-      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
-        var gm = _step18.value;
+      for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
+        var gm = _step19.value;
         if (!gm.got) {
           var _Q6 = planets[gm.p],
             b = Math.sin(K.time * .08 + gm.a * 3) * 4,
@@ -3191,15 +3387,15 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator18.e(err);
+      _iterator19.e(err);
     } finally {
-      _iterator18.f();
+      _iterator19.f();
     }
-    var _iterator19 = _createForOfIteratorHelper(foes),
-      _step19;
+    var _iterator20 = _createForOfIteratorHelper(foes),
+      _step20;
     try {
-      for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
-        var e = _step19.value;
+      for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
+        var e = _step20.value;
         if (e.alive) {
           var _Q7 = planets[e.p],
             _q0 = onP(_Q7, e.a, e.h);
@@ -3219,9 +3415,9 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator19.e(err);
+      _iterator20.e(err);
     } finally {
-      _iterator19.f();
+      _iterator20.f();
     }
     if (boss && boss.alive) {
       var Q = planets[boss.p],
@@ -3240,19 +3436,19 @@ var K = function () {
       drawAt(K.charS(pick, fr), pl.x, pl.y, a, 3, pl.face < 0);
       ctx.restore();
     }
-    var _iterator20 = _createForOfIteratorHelper(parts),
-      _step20;
+    var _iterator21 = _createForOfIteratorHelper(parts),
+      _step21;
     try {
-      for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
-        var _q1 = _step20.value;
+      for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
+        var _q1 = _step21.value;
         ctx.globalAlpha = Math.max(0, _q1.l / 50);
         ctx.fillStyle = _q1.c;
         ctx.fillRect(_q1.x - 3, _q1.y - 3, 6, 6);
       }
     } catch (err) {
-      _iterator20.e(err);
+      _iterator21.e(err);
     } finally {
-      _iterator20.f();
+      _iterator21.f();
     }
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -3395,19 +3591,19 @@ var K = function () {
       e.alive = s.foes[i] !== false;
     });
     var k = 0;
-    var _iterator21 = _createForOfIteratorHelper(planets),
-      _step21;
+    var _iterator22 = _createForOfIteratorHelper(planets),
+      _step22;
     try {
-      for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
-        var P = _step21.value;
+      for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
+        var P = _step22.value;
         if (P.orbit && s.moons && s.moons[k] != null) {
           P.orbit.t = s.moons[k++];
         }
       }
     } catch (err) {
-      _iterator21.e(err);
+      _iterator22.e(err);
     } finally {
-      _iterator21.f();
+      _iterator22.f();
     }
     moons(0);
     if (boss && s.boss != null) {
