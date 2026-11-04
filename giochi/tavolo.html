@@ -1324,9 +1324,42 @@ var K = function () {
       return false;
     }
   };
+  var PER = /-(run|prog|pick)$/;
+  function raw(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+  function who() {
+    try {
+      var p = JSON.parse(raw('sala-player') || 'null');
+      return typeof p === 'string' ? p : '';
+    } catch (e) {
+      return '';
+    }
+  }
+  function firstPlayer() {
+    try {
+      var l = JSON.parse(raw('sala-players') || 'null');
+      if (Array.isArray(l) && l.length) return l[0];
+    } catch (e) {}
+    try {
+      var n = JSON.parse(raw('tom-name') || 'null');
+      if (n) return n;
+    } catch (e) {}
+    return 'Tommy';
+  }
+  function pkey(key) {
+    if (!PER.test(key)) return key;
+    var p = who() || firstPlayer();
+    return key + '@' + p;
+  }
   K.load = function (key, def) {
     try {
-      var v = localStorage.getItem(key);
+      var v = localStorage.getItem(pkey(key));
+      if (v == null && PER.test(key) && (who() || firstPlayer()) === firstPlayer()) v = localStorage.getItem(key);
       return v == null ? def : JSON.parse(v);
     } catch (e) {
       return def;
@@ -1334,16 +1367,19 @@ var K = function () {
   };
   K.save = function (key, val) {
     try {
-      var t = JSON.stringify(val);
-      localStorage.setItem(key, t);
-      return localStorage.getItem(key) === t;
+      var t = JSON.stringify(val),
+        kk = pkey(key);
+      localStorage.setItem(kk, t);
+      if (kk !== key && (who() || firstPlayer()) === firstPlayer()) localStorage.removeItem(key);
+      return localStorage.getItem(kk) === t;
     } catch (e) {
       return false;
     }
   };
   K.del = function (key) {
     try {
-      localStorage.removeItem(key);
+      localStorage.removeItem(pkey(key));
+      if (PER.test(key) && (who() || firstPlayer()) === firstPlayer()) localStorage.removeItem(key);
     } catch (e) {}
   };
   var toastT = 0;
@@ -1996,6 +2032,11 @@ var K = function () {
     return n;
   }
   K.playerPicker = function (box, slot, onPick) {
+    if (!onPick && !slot) onPick = function onPick() {
+      try {
+        location.reload();
+      } catch (e) {}
+    };
     var cur = K.player(slot);
     box.innerHTML = '';
     box.className = 'kplayers';
@@ -2151,6 +2192,25 @@ var K = function () {
         b.textContent = 'Sicuro? Tocca ancora';
       }
     };
+  };
+  K.ensurePlayers = function () {
+    var box = $('players');
+    if (box) return box;
+    var card = document.querySelector('#menu .card');
+    if (!card) return null;
+    var h1 = card.querySelector('h1');
+    var h = document.createElement('h2');
+    h.textContent = 'Chi gioca?';
+    box = document.createElement('div');
+    box.id = 'players';
+    if (h1 && h1.nextSibling) {
+      card.insertBefore(box, h1.nextSibling);
+      card.insertBefore(h, box);
+    } else {
+      card.appendChild(h);
+      card.appendChild(box);
+    }
+    return box;
   };
   K.fmtT = function (s) {
     return Math.floor(s / 60) + ':' + ('0' + Math.floor(s) % 60).slice(-2) + '.' + Math.floor(s % 1 * 10);
@@ -4500,7 +4560,7 @@ var K = function () {
   }
   function renderMenu() {
     K.playerPicker($('players'), 0);
-    K.playerPicker($('players2'), 1);
+    K.playerPicker($('players2'), 1, function () {});
     $('p2box').hidden = pick.mode !== '2p';
     document.querySelectorAll('[data-kind]').forEach(function (b) {
       b.classList.toggle('sel', b.getAttribute('data-kind') === pick.kind);

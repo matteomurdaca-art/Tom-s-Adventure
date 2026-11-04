@@ -821,7 +821,15 @@ try {
   var cv = $("c"),
     cx = cv.getContext("2d"),
     stage = $("stage");
-  var PREF = "emb-";
+  var PLYR = function () {
+    try {
+      var p = JSON.parse(localStorage.getItem("sala-player") || "null");
+      return typeof p === "string" && p ? p : "";
+    } catch (e) {
+      return "";
+    }
+  }();
+  var PREF = "emb-" + (PLYR ? PLYR + "@" : "");
   var A = {
     W: 960,
     H: 540,
@@ -2095,7 +2103,7 @@ try {
       return !!A.store("save");
     };
     A.h.menuInfo = function () {
-      return best ? "Record: " + best + " punti" : "";
+      return (PLYR ? "👤 " + PLYR + " · " : "") + (best ? "Record: " + best + " punti" : "Nuova partita");
     };
     A.h.isPlaying = function () {
       return A.state === "play" && !!_S && !_S.over;

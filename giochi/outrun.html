@@ -827,7 +827,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var cv = $("c"),
     cx = cv.getContext("2d"),
     stage = $("stage");
-  var PREF = "lnt-";
+  var PLYR = function () {
+    try {
+      var p = JSON.parse(localStorage.getItem("sala-player") || "null");
+      return typeof p === "string" && p ? p : "";
+    } catch (e) {
+      return "";
+    }
+  }();
+  var PREF = "lnt-" + (PLYR ? PLYR + "@" : "");
   var A = {
     W: 960,
     H: 540,
@@ -2914,7 +2922,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return !!s && s.x > 600;
     };
     A.h.menuInfo = function () {
-      return best ? "Record: " + best + " punti" : "";
+      return (PLYR ? "👤 " + PLYR + " · " : "") + (best ? "Record: " + best + " punti" : "Nuova partita");
     };
     A.h.isPlaying = function () {
       return A.state === "play" && !!_R && !_R.dead && _R.cd <= 0;
