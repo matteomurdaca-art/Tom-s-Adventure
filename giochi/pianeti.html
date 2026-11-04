@@ -1892,6 +1892,65 @@ var K = function () {
     S.orb(air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 2.7, 2.7, L.skin);
     c.restore();
   };
+  S.LOOK = {
+    tommy: {
+      shirt: '#f07a2a',
+      pants: '#3b4a6b',
+      hair: '#4a2e1c',
+      skin: '#f4c9a0',
+      style: 'spiky'
+    },
+    milly: {
+      shirt: '#8a5cc7',
+      pants: '#5a3a8a',
+      hair: '#c8642a',
+      skin: '#f4c9a0',
+      style: 'long',
+      dress: true
+    },
+    papone: {
+      shirt: '#3f86d4',
+      pants: '#3b3f4f',
+      hair: '#8a6a4f',
+      skin: '#efc19a',
+      style: 'bald',
+      tall: true,
+      beard: '#8a6a4f'
+    },
+    carotino: {
+      bunny: true,
+      fur: '#efe2c4'
+    }
+  };
+  S.picker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var cv = document.createElement('canvas');
+      cv.width = 88;
+      cv.height = 116;
+      var x = cv.getContext('2d');
+      x.scale(2, 2);
+      var o = S.use(x);
+      try {
+        S.kid(22, 56, 1, S.LOOK[ch], {
+          walk: null,
+          air: false
+        });
+      } catch (e) {}
+      S.use(o);
+      b.appendChild(cv);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
 })();
 (function () {
   var $ = K.$;
@@ -1992,11 +2051,16 @@ var K = function () {
       pts: 0
     };
     for (var k in add) {
-      if (k === 'best') {
+      if (k === 'max') {
+        r.max = r.max || {};
+        for (var b in add.max) {
+          if (r.max[b] == null || add.max[b] > r.max[b]) r.max[b] = add.max[b];
+        }
+      } else if (k === 'best') {
         r.best = r.best || {};
-        for (var b in add.best) {
-          var v = add.best[b];
-          if (r.best[b] == null || v < r.best[b]) r.best[b] = v;
+        for (var _b2 in add.best) {
+          var v = add.best[_b2];
+          if (r.best[_b2] == null || v < r.best[_b2]) r.best[_b2] = v;
         }
       } else r[k] = (r[k] || 0) + add[k];
     }

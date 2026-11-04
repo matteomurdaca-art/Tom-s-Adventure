@@ -1,0 +1,3247 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d1f2b">
+<title>Tommy e le Bolle Giganti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1f2b;--paper:#f6f7fb;--yel:#f2c230;--blu:#3f86d4;--red:#e0373f;--grn:#4aa35a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#14151d;color:#fff;font-family:'Pixelify Sans',monospace}
+body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#stage{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#cv{position:absolute;top:0;left:0;display:block;touch-action:none}
+#hud{position:absolute;top:6px;right:8px;display:none;z-index:5}
+body.playing #hud{display:flex}
+#hud button{font:700 16px 'Pixelify Sans',monospace;background:rgba(20,21,29,.75);color:#fff;border:2px solid #5d6273;padding:6px 10px;margin-left:6px;cursor:pointer}
+#pad{position:absolute;left:0;right:0;bottom:0;height:0;display:none;z-index:4}
+body.playing #pad{display:block}
+.kb{position:absolute;bottom:14px;width:78px;height:78px;border:3px solid rgba(255,255,255,.7);background:rgba(20,21,29,.45);color:#fff;font:700 30px 'Pixelify Sans',monospace;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;border-radius:14px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.3)}
+.kb.on{background:rgba(242,194,48,.75);color:#1d1f2b}
+.kb small{font-size:12px;display:block}
+.kb.bl1{left:14px} .kb.bl2{left:104px} .kb.bl3{left:194px}
+.kb.br1{right:14px} .kb.br2{right:104px} .kb.br3{right:194px}
+.kb.big.bl2{left:122px} .kb.big.br2{right:122px}
+.kb.blu{left:59px;bottom:104px} .kb.bld{left:59px}
+.kb.big{width:96px;height:96px}
+@media (orientation:landscape) and (min-height:561px){ .kb{bottom:64px} .kb.blu{bottom:154px} }
+@media (max-height:420px){ .kb{width:64px;height:64px;font-size:24px} .kb.bl2{left:88px} .kb.bl3{left:162px} .kb.br2{right:88px} .kb.br3{right:162px} .kb.big{width:76px;height:76px} .kb.big.bl2{left:98px} .kb.big.br2{right:98px} }
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(10,11,18,.72);z-index:10;padding:12px;overflow:auto}
+.ov[hidden],[hidden]{display:none!important}
+.card{background:#f6f7fb;color:#1d1f2b;border:4px solid #14151d;box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:16px 18px;max-width:760px;width:100%;text-align:center;max-height:100%;overflow:auto}
+.card h1{margin:0 0 6px;font-size:34px} .card h2{margin:0 0 8px;font-size:26px}
+.card p{margin:6px 0}
+.go{font:700 20px 'Pixelify Sans',monospace;background:var(--yel);color:#1d1f2b;border:3px solid #14151d;padding:9px 16px;margin:5px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.22),inset 3px 3px 0 rgba(255,255,255,.5)}
+.go.alt{background:#fff} .go:disabled{opacity:.45;cursor:default}
+.go small{display:block;font-size:13px;font-weight:400}
+.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}
+.kchars{display:flex;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.kchar{font:700 15px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:4px;padding:6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;color:#1d1f2b}
+.kchar canvas{width:44px;height:58px;image-rendering:pixelated;image-rendering:crisp-edges}
+.kchar.sel{background:var(--yel)}
+.note{font-size:14px;color:#5d6273}
+#kpnote.ok{color:#2f7d2e;font-weight:700} #kpnote.bad{color:#c62828;font-weight:700}
+#ktoast{position:absolute;left:50%;top:12px;transform:translateX(-50%);-webkit-transform:translateX(-50%);z-index:30;background:#4aa35a;color:#fff;font:700 18px 'Pixelify Sans',monospace;padding:6px 14px;border:3px solid #14151d;pointer-events:none;white-space:nowrap}
+#ktoast.bad{background:#e0373f}
+#kpriv{background:#fff3cd;border:2px solid #e0373f;color:#7a1d22;padding:6px 8px;font-size:14px;margin:6px 0}
+.lvls{display:flex;flex-wrap:wrap;justify-content:center}
+.lvl{font:700 16px 'Pixelify Sans',monospace;width:150px;min-height:92px;margin:5px;padding:8px;border:3px solid #14151d;background:#fff;cursor:pointer;color:#1d1f2b;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lvl b{font-size:26px} .lvl.done{background:#c9f0cf} .lvl.lock{background:#e3e5ec;color:#9aa0b5;cursor:default}
+.lvl small{font-weight:400;font-size:13px}
+a.home{color:#1d1f2b}
+.kplayers{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;margin:4px 0 8px}
+.kpl{font:700 17px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:3px;padding:6px 10px;cursor:pointer;color:#1d1f2b}
+.kpl.sel{background:var(--yel)} .kpl.add{background:#e9f6ea}
+.kplin{font:700 18px 'Pixelify Sans',monospace;border:3px solid #14151d;padding:6px 8px;margin:3px;width:180px}
+.kbh{margin:10px 0 4px;font-size:20px}
+.kbt{border-collapse:collapse;margin:4px auto 8px;font:700 16px 'Pixelify Sans',monospace;min-width:280px}
+.kbt th,.kbt td{border:2px solid #14151d;padding:4px 10px;background:#fff} .kbt th{background:#e3e5ec} .kbt tr.first td{background:#fff3c4}
+
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="hud"><button id="kback" type="button">◀ Indietro</button><button id="kpbtn" type="button">❚❚ Pausa</button></div>
+<div id="pad"></div>
+<div class="ov" id="kpause" hidden><div class="card">
+  <h2>❚❚ Pausa</h2>
+  <p id="kpnote"></p>
+  <div class="row">
+    <button class="go" id="kresume" type="button">▶ Riprendi</button>
+    <button class="go alt" id="ksave" type="button">💾 Salva</button>
+    <button class="go alt" id="ksaveexit" type="button">◀ Salva ed esci</button>
+  </div>
+  <div class="row"><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+  <p class="note">Tommy e le Bolle Giganti · Sala giochi di Tom · versione 1</p>
+</div></div>
+<div id="ktoast" hidden></div>
+<div class="ov" id="kboard" hidden style="z-index:20"><div class="card"></div></div>
+<div class="ov" id="menu"><div class="card">
+  <h1>🎈 Tommy e le Bolle Giganti</h1>
+  <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
+  <button class="go" id="cont" type="button" hidden></button>
+  <h2>Chi gioca?</h2>
+  <div id="players"></div>
+  <h2>Chi spara il rampino?</h2>
+  <div class="kchars" id="chars"></div>
+  <h2>Scegli il livello</h2>
+  <div class="lvls" id="levels"></div>
+  <p class="note">◀ ▶ per muoverti, 🎯 per sparare il rampino verso l'alto. Ogni bolla colpita si divide in due bolle più piccole; le più piccine spariscono. Non farti toccare dalle bolle! Nei regali: ⇈ doppio rampino · ✱ rampino che si attacca · ⏱ tempo fermo · 🛡 scudo · 🍒 punti. Le lastre di vetro si rompono col rampino.</p>
+  <div class="row"><button class="go alt" id="boardBtn" type="button">🏆 Classifica</button><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+</div></div>
+<div class="ov" id="end" hidden><div class="card">
+  <h1 id="endT"></h1><p id="endS"></p>
+  <div class="row"><button class="go" id="endAgain" type="button">🔄 Rigioca</button><button class="go alt" id="endMenu" type="button">◀ Menu</button></div>
+</div></div>
+
+<script>/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) });
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true });
+  defineProperty(
+    GeneratorFunctionPrototype,
+    "constructor",
+    { value: GeneratorFunction, configurable: true }
+  );
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    defineProperty(this, "_invoke", { value: enqueue });
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per GeneratorResume behavior specified since ES2015:
+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume
+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method;
+    var method = delegate.iterator[methodName];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method, or a missing .next method, always terminate the
+      // yield* loop.
+      context.delegate = null;
+
+      // Note: ["return"] must be used for ES3 parsing compatibility.
+      if (methodName === "throw" && delegate.iterator["return"]) {
+        // If the delegate iterator has a return method, give it a
+        // chance to clean up.
+        context.method = "return";
+        context.arg = undefined;
+        maybeInvokeDelegate(delegate, context);
+
+        if (context.method === "throw") {
+          // If maybeInvokeDelegate(context) changed context.method from
+          // "return" to "throw", let that override the TypeError below.
+          return ContinueSentinel;
+        }
+      }
+      if (methodName !== "return") {
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a '" + methodName + "' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(val) {
+    var object = Object(val);
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable != null) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    throw new TypeError(typeof iterable + " is not iterable");
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+(function(){
+ if(!String.prototype.padStart){String.prototype.padStart=function(n,c){var s=String(this);c=c===undefined?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};}
+ if(!Object.assign){Object.assign=function(t){for(var i=1;i<arguments.length;i++){var s=arguments[i];if(s)for(var k in s)if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k];}return t;};}
+ if(!Array.prototype.findIndex){Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};}
+ if(window.NodeList&&!NodeList.prototype.forEach){NodeList.prototype.forEach=Array.prototype.forEach;}
+ [Element.prototype,Document.prototype,DocumentFragment.prototype].forEach(function(P){ if(!P.append){P.append=function(){for(var i=0;i<arguments.length;i++){var n=arguments[i];this.appendChild(n instanceof Node?n:document.createTextNode(String(n)));}};} });
+ var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+ if(C&&!C.ellipse){C.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){this.save();this.translate(x,y);this.rotate(rot);this.scale(rx,ry);this.arc(0,0,1,a0,a1,ccw);this.restore();};}
+})();
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n2 = 0, F = function F() {}; return { s: F, n: function n() { return _n2 >= r.length ? { done: !0 } : { done: !1, value: r[_n2++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var K = function () {
+  var K = {};
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  K.$ = $;
+  var cv = $('cv'),
+    ctx = cv.getContext('2d');
+  K.cv = cv;
+  K.ctx = ctx;
+  K.W = 800;
+  K.H = 450;
+  K.dpr = 1;
+  function resize() {
+    var st = $('stage');
+    var w = Math.max(200, st.clientWidth),
+      h = Math.max(150, st.clientHeight);
+    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 2);
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+    cv.width = Math.round(w * K.dpr);
+    cv.height = Math.round(h * K.dpr);
+    K.W = w;
+    K.H = h;
+    K.onResize && K.onResize(w, h);
+  }
+  K.resize = resize;
+  var lsw = 0,
+    lsh = 0;
+  addEventListener('resize', resize);
+  addEventListener('orientationchange', function () {
+    setTimeout(resize, 150);
+    setTimeout(resize, 500);
+  });
+  K.keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    a: false,
+    b: false,
+    c: false
+  };
+  var prev = {};
+  K.pressed = function (k) {
+    return K.keys[k] && !prev[k];
+  };
+  K._prev = prev;
+  var BTN = [];
+  K.buttons = function (list) {
+    var pad = $('pad');
+    pad.innerHTML = '';
+    BTN.length = 0;
+    var _iterator = _createForOfIteratorHelper(list),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var b = _step.value;
+        var e = document.createElement('div');
+        e.className = 'kb ' + (b.cls || '') + ' ' + b.pos;
+        e.id = 'kb_' + b.k;
+        e.innerHTML = b.label;
+        pad.appendChild(e);
+        BTN.push({
+          el: e,
+          k: b.k
+        });
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  };
+  function touchKeys(e) {
+    var playing = K.playing && $('kpause').hidden;
+    var st = {};
+    var hit = false;
+    if (playing) for (var i = 0; i < e.touches.length; i++) {
+      var t = e.touches[i];
+      var best = null,
+        bd = 1e9;
+      var _iterator2 = _createForOfIteratorHelper(BTN),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var b = _step2.value;
+          var r = b.el.getBoundingClientRect();
+          if (!r.width || b.el.offsetParent === null) continue;
+          if (t.clientY < r.top - 45 || t.clientY > r.bottom + 200) continue;
+          if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
+          var cx = (r.left + r.right) / 2,
+            cy = (r.top + r.bottom) / 2,
+            dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .3;
+          if (dd < bd) {
+            bd = dd;
+            best = b;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      if (best) {
+        st[best.k] = true;
+        hit = true;
+      }
+    }
+    var _iterator3 = _createForOfIteratorHelper(BTN),
+      _step3;
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var _b = _step3.value;
+        K.keys[_b.k] = !!st[_b.k] || !!kbd[_b.k];
+        _b.el.classList.toggle('on', !!st[_b.k]);
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    if (hit && e.cancelable) e.preventDefault();
+  }
+  ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (ev) {
+    return document.addEventListener(ev, touchKeys, {
+      passive: false
+    });
+  });
+  document.addEventListener('mousedown', function (e) {
+    var b = BTN.find(function (b) {
+      return b.el.contains(e.target);
+    });
+    if (b) {
+      K.keys[b.k] = true;
+      b.el.classList.add('on');
+      var _up = function up() {
+        K.keys[b.k] = !!kbd[b.k];
+        b.el.classList.remove('on');
+        removeEventListener('mouseup', _up);
+      };
+      addEventListener('mouseup', _up);
+    }
+  });
+  var KMAP = {
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    KeyA: 'left',
+    KeyD: 'right',
+    KeyW: 'up',
+    KeyS: 'down',
+    Space: 'a',
+    KeyZ: 'a',
+    KeyK: 'a',
+    KeyX: 'b',
+    KeyL: 'b',
+    Enter: 'b',
+    ShiftLeft: 'b',
+    KeyC: 'c',
+    KeyJ: 'c'
+  };
+  var kbd = {};
+  addEventListener('keydown', function (e) {
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      if (K.playing) K.togglePause();
+      return;
+    }
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = true;
+      K.keys[k] = true;
+      if (K.playing) e.preventDefault();
+    }
+  });
+  addEventListener('keyup', function (e) {
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = false;
+      K.keys[k] = false;
+    }
+  });
+  document.addEventListener('contextmenu', function (e) {
+    if (K.playing) e.preventDefault();
+  });
+  var ac = null;
+  K.soundOn = true;
+  K.musicOn = true;
+  try {
+    if (localStorage.getItem('tomk-sound') === '0') K.soundOn = false;
+    if (localStorage.getItem('tomk-music') === '0') K.musicOn = false;
+  } catch (e) {}
+  function actx() {
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended' && ac.resume) ac.resume();
+    } catch (e) {}
+    return ac;
+  }
+  ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(function (ev) {
+    return document.addEventListener(ev, function () {
+      var c = actx();
+      if (c) {
+        try {
+          var b = c.createBuffer(1, 1, 22050),
+            s = c.createBufferSource();
+          s.buffer = b;
+          s.connect(c.destination);
+          s.start(0);
+        } catch (e) {}
+      }
+    }, {
+      passive: true
+    });
+  });
+  K.beep = function (f, d, type, vol, slide) {
+    if (!K.soundOn) return;
+    var c = actx();
+    if (!c) return;
+    try {
+      var o = c.createOscillator(),
+        g = c.createGain();
+      o.type = type || 'square';
+      o.frequency.value = f;
+      if (slide) o.frequency.linearRampToValueAtTime(Math.max(20, f + slide), c.currentTime + d);
+      g.gain.value = vol || .05;
+      g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + d);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start();
+      o.stop(c.currentTime + d);
+    } catch (e) {}
+  };
+  K.jingle = function (notes, step, type) {
+    return notes.forEach(function (n, i) {
+      return setTimeout(function () {
+        return K.beep(n, .14, type || 'triangle', .06);
+      }, i * (step || 90));
+    });
+  };
+  var NT = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11
+  };
+  var fq = function fq(n) {
+    var m = /^([A-G])(#|b)?(\d)$/.exec(n);
+    if (!m) return 0;
+    var s = NT[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+    return 440 * Math.pow(2, (12 * (+m[3] + 1) + s - 69) / 12);
+  };
+  var parse = function parse(str) {
+    var t = str.split(/\s+/),
+      out = [];
+    for (var i = 0; i < t.length; i++) {
+      if (t[i] === '-') continue;
+      var len = 1;
+      for (var j = i + 1; j < t.length && t[j] === '-'; j++) len++;
+      out.push({
+        step: i,
+        len,
+        f: fq(t[i])
+      });
+    }
+    return {
+      notes: out,
+      steps: t.length
+    };
+  };
+  K.MUS = {};
+  K.addMusic = function (name, m) {
+    m.M = parse(m.mel);
+    m.B = parse(m.bass);
+    m.A = m.arp ? m.arp.split(' ').map(fq) : null;
+    K.MUS[name] = m;
+  };
+  var MZ = {
+    cur: null,
+    next: 0,
+    step: 0,
+    bus: null,
+    echo: null,
+    noise: null
+  };
+  function mzBus() {
+    if (MZ.bus) return true;
+    var c = actx();
+    if (!c) return false;
+    try {
+      MZ.bus = c.createGain();
+      MZ.bus.gain.value = .5;
+      MZ.bus.connect(c.destination);
+      var dl = c.createDelay(),
+        fb = c.createGain(),
+        wet = c.createGain();
+      MZ.echo = c.createGain();
+      dl.delayTime.value = .33;
+      fb.gain.value = .33;
+      wet.gain.value = .45;
+      MZ.echo.connect(MZ.bus);
+      MZ.echo.connect(dl);
+      dl.connect(fb);
+      fb.connect(dl);
+      dl.connect(wet);
+      wet.connect(MZ.bus);
+      var nb = c.createBuffer(1, c.sampleRate * .5, c.sampleRate),
+        d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      MZ.noise = nb;
+    } catch (e) {
+      MZ.bus = null;
+      return false;
+    }
+    return true;
+  }
+  function tone(type, f, t, dur, v, out, bell) {
+    var o = ac.createOscillator(),
+      g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    var a = .008,
+      rel = bell ? dur * 1.6 : Math.min(.08, dur * .4);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + a);
+    if (bell) g.gain.exponentialRampToValueAtTime(.0001, t + rel);else {
+      g.gain.setValueAtTime(v, t + Math.max(a, dur - rel));
+      g.gain.linearRampToValueAtTime(.0001, t + dur);
+    }
+    o.connect(g);
+    g.connect(out);
+    o.start(t);
+    o.stop(t + (bell ? rel : dur) + .05);
+  }
+  function drum(k, t) {
+    if (k === 'k') {
+      var o = ac.createOscillator(),
+        _g = ac.createGain();
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + .12);
+      _g.gain.setValueAtTime(.42, t);
+      _g.gain.exponentialRampToValueAtTime(.001, t + .15);
+      o.connect(_g);
+      _g.connect(MZ.bus);
+      o.start(t);
+      o.stop(t + .16);
+      return;
+    }
+    var s = ac.createBufferSource(),
+      f = ac.createBiquadFilter(),
+      g = ac.createGain();
+    s.buffer = MZ.noise;
+    f.type = 'highpass';
+    f.frequency.value = k === 'h' ? 7000 : 1500;
+    var len = k === 'h' ? .04 : .12;
+    g.gain.setValueAtTime(k === 'h' ? .1 : .2, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + len);
+    s.connect(f);
+    f.connect(g);
+    g.connect(MZ.bus);
+    s.start(t);
+    s.stop(t + len + .02);
+  }
+  function mzStep(m, s, t) {
+    var sd = 60 / m.tempo / 2,
+      out = m.echo ? MZ.echo : MZ.bus;
+    var ms = s % m.M.steps;
+    var _iterator4 = _createForOfIteratorHelper(m.M.notes),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var n = _step4.value;
+        if (n.step === ms) tone(m.lead, n.f, t, n.len * sd * .95, m.lv, out, m.bell);
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
+    }
+    var bs = s % m.B.steps;
+    var _iterator5 = _createForOfIteratorHelper(m.B.notes),
+      _step5;
+    try {
+      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+        var _n = _step5.value;
+        if (_n.step === bs) tone('triangle', _n.f, t, _n.len * sd * .9, .25, MZ.bus);
+      }
+    } catch (err) {
+      _iterator5.e(err);
+    } finally {
+      _iterator5.f();
+    }
+    var dk = m.drums.charAt(s % m.drums.length);
+    if (dk !== '-') drum(dk, t);
+    if (m.A && s % 2 === 0) tone('sine', m.A[s / 2 % m.A.length], t, sd * .9, .05, out, true);
+  }
+  K.wantMusic = null;
+  function musicTick() {
+    var want = K.musicOn && K.playing && $('kpause').hidden ? K.wantMusic : null;
+    if (want !== MZ.cur) {
+      if (MZ.bus) {
+        try {
+          MZ.bus.disconnect();
+        } catch (e) {}
+        MZ.bus = null;
+      }
+      MZ.cur = want;
+      MZ.step = 0;
+      if (want) {
+        if (mzBus()) MZ.next = ac.currentTime + .08;else MZ.cur = null;
+      }
+    }
+    if (!MZ.cur || !MZ.bus || !K.MUS[MZ.cur]) return;
+    var m = K.MUS[MZ.cur],
+      sd = 60 / m.tempo / 2;
+    if (MZ.next < ac.currentTime) MZ.next = ac.currentTime + .02;
+    try {
+      while (MZ.next < ac.currentTime + .15) {
+        mzStep(m, MZ.step, MZ.next);
+        MZ.next += sd;
+        MZ.step++;
+      }
+    } catch (e) {}
+  }
+  K.storageOK = function () {
+    try {
+      localStorage.setItem('tomk-test', '1');
+      var ok = localStorage.getItem('tomk-test') === '1';
+      localStorage.removeItem('tomk-test');
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.load = function (key, def) {
+    try {
+      var v = localStorage.getItem(key);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) {
+      return def;
+    }
+  };
+  K.save = function (key, val) {
+    try {
+      var t = JSON.stringify(val);
+      localStorage.setItem(key, t);
+      return localStorage.getItem(key) === t;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.del = function (key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {}
+  };
+  var toastT = 0;
+  K.toast = function (msg, bad) {
+    var t = $('ktoast');
+    t.textContent = msg;
+    t.className = bad ? 'bad' : '';
+    t.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      t.hidden = true;
+    }, 2000);
+  };
+  K.playing = false;
+  K.game = null;
+  K.start = function () {
+    K.playing = true;
+    $('kpause').hidden = true;
+    document.body.classList.add('playing');
+    last = 0;
+  };
+  K.stop = function () {
+    K.playing = false;
+    document.body.classList.remove('playing');
+    for (var k in K.keys) K.keys[k] = false;
+    BTN.forEach(function (b) {
+      return b.el.classList.remove('on');
+    });
+  };
+  K.togglePause = function () {
+    if (!K.playing) return;
+    if ($('kpause').hidden) {
+      $('kpause').hidden = false;
+      $('kpnote').textContent = '';
+      for (var k in K.keys) K.keys[k] = false;
+      K.game && K.game.save && K.game.save();
+    } else $('kpause').hidden = true;
+  };
+  function saveExit() {
+    var ok = true;
+    if (K.game && K.game.save) ok = K.game.save();
+    K.stop();
+    $('kpause').hidden = true;
+    K.game && K.game.exit && K.game.exit();
+    K.toast(ok ? '💾 Partita salvata: la ritrovi in "Continua"' : '⚠ Partita NON salvata (Navigazione privata)', !ok);
+  }
+  K.saveExit = saveExit;
+  function updToggles() {
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.textContent = K.soundOn ? '🔊 Suono sì' : '🔈 Suono no';
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.textContent = K.musicOn ? '🎵 Musica sì' : '🎵 Musica no';
+    });
+  }
+  K.initUI = function () {
+    $('kback').onclick = saveExit;
+    $('kpbtn').onclick = K.togglePause;
+    $('kresume').onclick = function () {
+      $('kpause').hidden = true;
+      last = 0;
+    };
+    $('ksave').onclick = function () {
+      var ok = K.game && K.game.save ? K.game.save() : false;
+      $('kpnote').textContent = ok ? '✔ Partita salvata' : '⚠ Non salvata: Safari è in Navigazione privata';
+      $('kpnote').className = ok ? 'ok' : 'bad';
+    };
+    $('ksaveexit').onclick = saveExit;
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.onclick = function () {
+        K.soundOn = !K.soundOn;
+        try {
+          localStorage.setItem('tomk-sound', K.soundOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.onclick = function () {
+        K.musicOn = !K.musicOn;
+        try {
+          localStorage.setItem('tomk-music', K.musicOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    updToggles();
+    if (!K.storageOK()) {
+      var w = $('kpriv');
+      if (w) w.hidden = false;
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && K.playing && $('kpause').hidden) K.togglePause();
+    });
+    addEventListener('pagehide', function () {
+      if (K.playing && K.game && K.game.save) K.game.save();
+    });
+  };
+  var last = 0;
+  K.time = 0;
+  function loop(t) {
+    if (window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
+    var st = $('stage'),
+      sw = st.clientWidth,
+      sh = st.clientHeight;
+    if (sw !== lsw || sh !== lsh) {
+      lsw = sw;
+      lsh = sh;
+      resize();
+    }
+    var dt = last ? t - last : 16.67;
+    last = t;
+    var f = Math.min(dt / 16.67, 2.5);
+    var paused = !$('kpause').hidden;
+    if (K.game) {
+      if (K.playing && !paused) {
+        K.time += f;
+        K.game.update(f);
+      } else if (K.game.idle) K.game.idle(f);
+      K.game.draw();
+    }
+    for (var k in K.keys) prev[k] = K.keys[k];
+    musicTick();
+    requestAnimationFrame(loop);
+  }
+  K.run = function () {
+    resize();
+    requestAnimationFrame(loop);
+  };
+  var PAL = {
+    k: '#1d1f2b',
+    w: '#ffffff',
+    W: '#e8ecf4',
+    g: '#9aa0b5',
+    G: '#5d6273',
+    s: '#f2c59a',
+    S: '#d99a6c',
+    h: '#4a2e1c',
+    o: '#f07a2a',
+    O: '#c25a14',
+    r: '#e0373f',
+    R: '#9c1f26',
+    y: '#f2c230',
+    Y: '#c99a00',
+    b: '#3f86d4',
+    B: '#24548f',
+    c: '#9fd3f0',
+    l: '#7cc242',
+    L: '#3d7a1f',
+    n: '#4aa35a',
+    p: '#8a5cc7',
+    P: '#5a3a8a',
+    q: '#e096d2',
+    m: '#9b7653',
+    M: '#6b4a2e',
+    e: '#e8cfa8',
+    d: '#3b3f4f',
+    C: '#c8642a',
+    E: '#e8d2a6',
+    D: '#c9a978'
+  };
+  K.PAL = PAL;
+  var SC = {};
+  K.sprite = function (key, rows, over) {
+    if (SC[key]) return SC[key];
+    var w = Math.max.apply(null, rows.map(function (r) {
+        return r.length;
+      })),
+      h = rows.length,
+      c = document.createElement('canvas');
+    c.width = w + 2;
+    c.height = h + 2;
+    var x = c.getContext('2d');
+    var put = function put(col, dx, dy) {
+      return rows.forEach(function (r, j) {
+        for (var i = 0; i < r.length; i++) {
+          var ch = r[i];
+          if (ch === '.' || ch === ' ') continue;
+          x.fillStyle = col || over && over[ch] || PAL[ch] || '#f0f';
+          x.fillRect(i + dx, j + dy, 1, 1);
+        }
+      });
+    };
+    for (var _i = 0, _arr = [[0, 1], [2, 1], [1, 0], [1, 2]]; _i < _arr.length; _i++) {
+      var _arr$_i = _slicedToArray(_arr[_i], 2),
+        dx = _arr$_i[0],
+        dy = _arr$_i[1];
+      put('#14151d', dx, dy);
+    }
+    put(null, 1, 1);
+    return SC[key] = c;
+  };
+  K.draw = function (c, x, y, U, flip) {
+    var w = c.width * U,
+      h = c.height * U;
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+    if (flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, -w / 2, -h + U, w, h);
+    ctx.restore();
+  };
+  var TOMHEAD = ["..h.h.h...", ".hhhhhhh..", ".hhssssss.", ".hsssswks.", ".ssssssss.", "..sssskss."];
+  var TOMBODY = {
+    stand: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "...d..d...", "..kk..kk.."],
+    walkA: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "..d....d..", ".kk....kk."],
+    walkB: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "....dd....", "....kk...."],
+    jump: ["s..oooo..s", ".soooooos.", "...oooo...", "...dddd...", "..d....d..", ".kk....kk."]
+  };
+  var MILLYHEAD = ["..CCCCC...", ".CCCCCCC..", ".CCssssss.", ".CCsswkss.", ".CCssssss.", ".CC.ssks.."];
+  var MILLYBODY = {
+    stand: ["...pppp...", "..sppppps.", ".pppppppp.", "...s..s...", "..kk..kk.."],
+    walkA: ["...pppp...", "..sppppps.", ".pppppppp.", "..s....s..", ".kk....kk."],
+    walkB: ["...pppp...", "..sppppps.", ".pppppppp.", "....ss....", "....kk...."],
+    jump: ["s..pppp..s", ".spppppps.", ".pppppppp.", "..s....s..", ".kk....kk."]
+  };
+  var PAPHEAD = ["...ssss...", "..sWssss..", ".sssssss..", ".Sssswks..", ".ssssssss.", "..sssskss."];
+  var PAPTOP = ["...bbbb...", "..bbbbbb..", "..bbbbbb..", "..sbbbbs..", "...dddd..."];
+  var PAPLEGS = {
+    stand: ["...d..d...", "...d..d...", "..kk..kk.."],
+    walkA: ["..d....d..", "..d....d..", ".kk....kk."],
+    walkB: ["....dd....", "....dd....", "....kk...."],
+    jump: ["..d....d..", "..d....d..", ".kk....kk."]
+  };
+  var BUNNY = {
+    stand: ["............", ".......EEEE.", "......EEEEEE", "..ww..EEkEEq", ".wEEEEDEEEE.", ".EEEEEEDEE..", ".EEEEEEDE...", "..EE..EE...."],
+    jump: ["......EEEE..", ".....EEEEEE.", "..ww.EEkEEq.", ".wEEEEDEEE..", "EEEEEEEDE...", ".EEEEEEE....", "..E.....E...", "............"]
+  };
+  K.CHARS = {
+    tommy: {
+      name: 'Tommy',
+      col: '#f07a2a'
+    },
+    milly: {
+      name: 'Milly',
+      col: '#8a5cc7'
+    },
+    papone: {
+      name: 'Papone',
+      col: '#3f86d4'
+    },
+    carotino: {
+      name: 'Carotino',
+      col: '#e8d2a6'
+    }
+  };
+  K.CHAR_ORDER = ['tommy', 'milly', 'papone', 'carotino'];
+  K.charS = function (ch, f) {
+    f = f || 'stand';
+    if (ch === 'milly') return K.sprite('milly_' + f, MILLYHEAD.concat(MILLYBODY[f] || MILLYBODY.stand));
+    if (ch === 'papone') return K.sprite('pap_' + f, PAPHEAD.concat(f === 'jump' ? ["s..bbbb..s", ".sbbbbbbs.", "..bbbbbb..", "..bbbbbb..", "...dddd..."] : PAPTOP, PAPLEGS[f] || PAPLEGS.stand));
+    if (ch === 'carotino') return K.sprite('bun_' + (f === 'jump' || f === 'walkA' ? 'jump' : 'stand'), BUNNY[f === 'jump' || f === 'walkA' ? 'jump' : 'stand']);
+    return K.sprite('tom_' + f, TOMHEAD.concat(TOMBODY[f] || TOMBODY.stand));
+  };
+  K.headS = function (ch) {
+    if (ch === 'milly') return K.sprite('mh', MILLYHEAD);
+    if (ch === 'papone') return K.sprite('ph', PAPHEAD);
+    if (ch === 'carotino') return K.sprite('bh', BUNNY.stand.slice(0, 5));
+    return K.sprite('th', TOMHEAD);
+  };
+  K.rect = function (x, y, w, h, c) {
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  };
+  K.text = function (t, x, y, size, col, align, shadow) {
+    ctx.font = '700 ' + size + "px 'Pixelify Sans', monospace";
+    ctx.textAlign = align || 'left';
+    if (shadow !== false) {
+      ctx.fillStyle = 'rgba(20,21,29,.8)';
+      ctx.fillText(t, x + 2, y + 2);
+    }
+    ctx.fillStyle = col || '#fff';
+    ctx.fillText(t, x, y);
+    ctx.textAlign = 'left';
+  };
+  K.rnd = function (i, j, s) {
+    var v = Math.sin(i * 127.1 + (j || 0) * 311.7 + (s || 0) * 74.7) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  K.fmt = function (s) {
+    return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  };
+  K.charPicker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var c = document.createElement('canvas'),
+        s = K.charS(ch, 'stand');
+      c.width = s.width;
+      c.height = s.height;
+      var x = c.getContext('2d');
+      x.drawImage(s, 0, 0);
+      b.appendChild(c);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+  return K;
+}();
+(function () {
+  var S = K.S = {};
+  var c = K.ctx;
+  S.OUT = '#1c1724';
+  S.LW = 2.4;
+  S.use = function (x) {
+    var o = c;
+    c = x;
+    return o;
+  };
+  var TC = {};
+  S.tone = function (h, a) {
+    var k = h + a;
+    var v = TC[k];
+    if (v) return v;
+    var n = parseInt(h.slice(1), 16);
+    var r = n >> 16,
+      g = n >> 8 & 255,
+      b = n & 255;
+    if (a > 0) {
+      r += (255 - r) * a;
+      g += (255 - g) * a;
+      b += (255 - b) * a;
+    } else {
+      r *= 1 + a;
+      g *= 1 + a;
+      b *= 1 + a;
+    }
+    return TC[k] = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')';
+  };
+  var tone = S.tone;
+  S.rrp = function (x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  };
+  S.edge = function (lw) {
+    c.lineWidth = lw || S.LW;
+    c.strokeStyle = S.OUT;
+    c.lineJoin = 'round';
+    c.stroke();
+  };
+  S.part = function (x, y, w, h, r, col) {
+    S.rrp(x, y, w, h, r);
+    S.edge();
+    c.fillStyle = tone(col, -.3);
+    c.fill();
+    S.rrp(x, y, w * .78, h * .94, r);
+    c.fillStyle = col;
+    c.fill();
+    S.rrp(x + w * .14, y + h * .12, Math.max(1.5, w * .15), h * .4, w * .08);
+    c.fillStyle = tone(col, .4);
+    c.fill();
+  };
+  S.orb = function (cx, cy, rx, ry, col) {
+    c.beginPath();
+    c.ellipse(cx, cy, rx, ry, 0, 0, 6.2832);
+    S.edge();
+    c.fillStyle = tone(col, -.28);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx - rx * .13, cy - ry * .13, rx * .84, ry * .84, 0, 0, 6.2832);
+    c.fillStyle = col;
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx - rx * .36, cy - ry * .42, rx * .28, ry * .19, -.6, 0, 6.2832);
+    c.fillStyle = 'rgba(255,255,255,.42)';
+    c.fill();
+  };
+  S.dot = function (cx, cy, r, col) {
+    c.fillStyle = col;
+    c.beginPath();
+    c.arc(cx, cy, r, 0, 6.2832);
+    c.fill();
+  };
+  S.limb = function (x1, y1, x2, y2, w, col) {
+    c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(x1, y1);
+    c.lineTo(x2, y2);
+    c.lineWidth = w + S.LW * 1.3;
+    c.strokeStyle = S.OUT;
+    c.stroke();
+    c.lineWidth = w;
+    c.strokeStyle = col;
+    c.stroke();
+    c.lineWidth = Math.max(1, w * .28);
+    c.strokeStyle = tone(col, .32);
+    c.beginPath();
+    c.moveTo(x1 - w * .2, y1);
+    c.lineTo(x2 - w * .2, y2);
+    c.stroke();
+  };
+  S.shape = function (p, col, noEdge) {
+    c.beginPath();
+    c.moveTo(p[0], p[1]);
+    for (var i = 2; i < p.length; i += 2) c.lineTo(p[i], p[i + 1]);
+    c.closePath();
+    if (!noEdge) S.edge();
+    c.fillStyle = col;
+    c.fill();
+  };
+  S.curve = function (p, col, noEdge) {
+    var n = p.length / 2;
+    c.beginPath();
+    c.moveTo((p[0] + p[2]) / 2, (p[1] + p[3]) / 2);
+    for (var i = 1; i <= n; i++) {
+      var a = i % n * 2,
+        b = (i + 1) % n * 2;
+      c.quadraticCurveTo(p[a], p[a + 1], (p[a] + p[b]) / 2, (p[a + 1] + p[b + 1]) / 2);
+    }
+    c.closePath();
+    if (!noEdge) S.edge();
+    c.fillStyle = col;
+    c.fill();
+  };
+  S.eye = function (x, y, r, pup) {
+    S.dot(x, y, r + 1.1, S.OUT);
+    S.dot(x, y, r, '#ffffff');
+    S.dot(x + r * .3, y + r * .1, r * .58, pup || S.OUT);
+    S.dot(x + r * .05, y - r * .3, r * .26, '#ffffff');
+  };
+  S.glow = function (x, y, r, col) {
+    var g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, col);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  S.shadow = function (x, y, rx, a) {
+    c.fillStyle = 'rgba(20,10,30,' + .16 * (a == null ? 1 : a) + ')';
+    c.beginPath();
+    c.ellipse(x, y, rx * 1.35, rx * .4, 0, 0, 6.2832);
+    c.fill();
+    c.fillStyle = 'rgba(20,10,30,' + .2 * (a == null ? 1 : a) + ')';
+    c.beginPath();
+    c.ellipse(x, y, rx * .85, rx * .25, 0, 0, 6.2832);
+    c.fill();
+  };
+  S.clouds = function (vw, camX, p, gap, night, rnd) {
+    var o = camX * p,
+      i0 = Math.floor((o - 200) / gap),
+      i1 = Math.ceil((o + vw + 200) / gap);
+    c.fillStyle = night ? 'rgba(90,60,110,.5)' : 'rgba(255,255,255,.78)';
+    for (var i = i0; i <= i1; i++) {
+      var r = rnd(i, 7, 3);
+      if (r > .6) continue;
+      var sx = i * gap - o,
+        cy = 28 + r * 70;
+      for (var _i2 = 0, _arr2 = [[0, 0, 22], [22, -8, 26], [46, 0, 20], [22, 6, 24]]; _i2 < _arr2.length; _i2++) {
+        var q = _arr2[_i2];
+        c.beginPath();
+        c.ellipse(sx + q[0], cy + q[1], q[2] * 1.3, q[2] * .7, 0, 0, 6.2832);
+        c.fill();
+      }
+    }
+  };
+  S.kid = function (x, y, face, L, pose) {
+    c.save();
+    c.translate(x, y);
+    c.scale(face * (L.sc || 1), L.sc || 1);
+    if (pose.rot) {
+      c.translate(0, -18);
+      c.rotate(pose.rot);
+      c.translate(0, 18);
+    }
+    var air = pose.air,
+      mv = pose.walk != null,
+      ph = mv ? Math.sin(pose.walk) : 0,
+      s = ph * 5,
+      bob = mv && !air ? -Math.abs(Math.cos(pose.walk)) * 1.2 : 0;
+    if (L.bunny) {
+      var hop = air ? 0 : Math.abs(Math.sin((pose.walk || 0) * 1.2)) * 3;
+      c.translate(0, -hop);
+      S.orb(-13, -12, 4.5, 4.5, '#ffffff');
+      S.orb(-3, -11, 12, 9, L.fur);
+      S.orb(3, -4, 5, 3, S.tone(L.fur, -.1));
+      S.orb(-9, -3, 5, 3, S.tone(L.fur, -.1));
+      S.limb(4, -24, 0 + (air ? -3 : 0), -42, 4.5, L.fur);
+      S.limb(9, -24, 10 + (air ? -2 : 0), -42, 4.5, S.tone(L.fur, .05));
+      S.limb(9, -27, 10, -39, 1.6, '#f2a6c4');
+      S.orb(8, -20, 9, 8.5, L.fur);
+      S.eye(12, -22, 2.2);
+      S.dot(17, -18, 2, '#f07aa8');
+      S.dot(10, -15, 1.8, 'rgba(240,120,160,.45)');
+      c.restore();
+      return;
+    }
+    var tall = L.tall ? 4 : 0,
+      hip = -11 - tall * .5 + bob,
+      top = hip - 14 - tall * .6,
+      hy = top - 8;
+    S.limb(-2, hip, -2 + (air ? -4 : -s * .8), air ? -6 : -3, 5, S.tone(L.pants, -.2));
+    S.orb(-1 + (air ? -4 : -s * .8), air ? -5 : -2, 4.3, 2.7, '#2a2230');
+    S.limb(-4, top + 4, air ? -10 : -5 + s * .7, air ? top - 4 : top + 12, 3.8, S.tone(L.shirt, -.2));
+    S.orb(air ? -10 : -5 + s * .7, air ? top - 4 : top + 12, 2.6, 2.6, L.skin);
+    if (L.style === 'long') S.curve([-9, hy - 4, 6, hy - 6, 4, top + 12, -11, top + 12], L.hair);
+    if (L.style === 'pony') {
+      S.limb(-8, hy - 2, -13, hy + 8 + (mv ? ph * 2 : 0), 4.5, L.hair);
+      S.dot(-8, hy - 1, 2.4, '#f2c230');
+    }
+    S.limb(3, hip, 3 + (air ? 5 : s * .8), air ? -8 : -3, 5, L.pants);
+    S.orb(4 + (air ? 5 : s * .8), air ? -7 : -2, 4.5, 2.8, '#3a3040');
+    if (L.dress) S.curve([-9, hip + 3, -6, top, 6, top, 10, hip + 3], L.shirt);else S.part(-7.5, top, 15, hip - top + 3, 6, L.shirt);
+    if (!L.dress) {
+      S.rrp(-7.5, hip - 3, 15, 3.5, 1.7);
+      c.fillStyle = S.tone(L.pants, -.1);
+      c.fill();
+    }
+    S.orb(1, hy, 9, 9, L.skin);
+    if (L.style === 'bald') {
+      c.beginPath();
+      c.ellipse(-6, hy, 3.4, 5, 0, 0, 6.2832);
+      c.fillStyle = L.hair;
+      c.fill();
+      S.dot(-1, hy - 6, 2.6, 'rgba(255,255,255,.5)');
+    } else {
+      c.beginPath();
+      c.ellipse(0, hy - 3, 9.6, 6.5, 0, Math.PI, 6.2832);
+      c.lineTo(-9.6, hy + 2);
+      c.closePath();
+      S.edge();
+      c.fillStyle = L.hair;
+      c.fill();
+      if (L.style === 'spiky') for (var k = 0; k < 3; k++) S.shape([-7 + k * 5, hy - 7, -4 + k * 5, hy - 15 + k, -1 + k * 5, hy - 8], L.hair);
+      S.dot(-2, hy - 6, 1.6, 'rgba(255,255,255,.35)');
+    }
+    if (L.glasses) {
+      c.lineWidth = 1.3;
+      c.strokeStyle = S.OUT;
+      c.beginPath();
+      c.arc(5, hy, 3.4, 0, 6.2832);
+      c.stroke();
+    }
+    S.eye(5, hy, 2.2, L.eyes);
+    S.dot(3, hy + 4, 1.6, 'rgba(230,100,100,.4)');
+    c.strokeStyle = S.OUT;
+    c.lineWidth = 1.1;
+    c.beginPath();
+    c.arc(6, hy + 3.5, 2, .2, 2.3);
+    c.stroke();
+    if (L.beard) {
+      S.curve([-1, hy + 4, 9, hy + 3, 8, hy + 9, 2, hy + 10], L.beard);
+    }
+    S.limb(4, top + 4, air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 3.8, L.shirt);
+    S.orb(air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 2.7, 2.7, L.skin);
+    c.restore();
+  };
+  S.LOOK = {
+    tommy: {
+      shirt: '#f07a2a',
+      pants: '#3b4a6b',
+      hair: '#4a2e1c',
+      skin: '#f4c9a0',
+      style: 'spiky'
+    },
+    milly: {
+      shirt: '#8a5cc7',
+      pants: '#5a3a8a',
+      hair: '#c8642a',
+      skin: '#f4c9a0',
+      style: 'long',
+      dress: true
+    },
+    papone: {
+      shirt: '#3f86d4',
+      pants: '#3b3f4f',
+      hair: '#8a6a4f',
+      skin: '#efc19a',
+      style: 'bald',
+      tall: true,
+      beard: '#8a6a4f'
+    },
+    carotino: {
+      bunny: true,
+      fur: '#efe2c4'
+    }
+  };
+  S.picker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var cv = document.createElement('canvas');
+      cv.width = 88;
+      cv.height = 116;
+      var x = cv.getContext('2d');
+      x.scale(2, 2);
+      var o = S.use(x);
+      try {
+        S.kid(22, 56, 1, S.LOOK[ch], {
+          walk: null,
+          air: false
+        });
+      } catch (e) {}
+      S.use(o);
+      b.appendChild(cv);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+})();
+(function () {
+  var $ = K.$;
+  K.players = function () {
+    var l = K.load('sala-players', null);
+    if (!Array.isArray(l)) {
+      l = ['Tommy', 'Milly', 'Papone'];
+      var tn = K.load('tom-name', null);
+      if (typeof tn === 'string' && tn && l.indexOf(tn) < 0) l.unshift(tn);
+    }
+    return l;
+  };
+  K.player = function (slot) {
+    var all = K.players();
+    var p = K.load('sala-player' + (slot || ''), null);
+    if (all.indexOf(p) < 0) p = all[slot ? 1 : 0] || all[0];
+    return p;
+  };
+  K.setPlayer = function (slot, name) {
+    K.save('sala-player' + (slot || ''), name);
+  };
+  function addName(n) {
+    n = String(n || '').replace(/\s+/g, ' ').trim().slice(0, 14);
+    if (!n) return null;
+    var l = K.players();
+    var ex = l.find(function (x) {
+      return x.toLowerCase() === n.toLowerCase();
+    });
+    if (ex) return ex;
+    l.push(n);
+    K.save('sala-players', l.slice(-16));
+    return n;
+  }
+  K.playerPicker = function (box, slot, onPick) {
+    var cur = K.player(slot);
+    box.innerHTML = '';
+    box.className = 'kplayers';
+    K.players().forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kpl' + (n === cur ? ' sel' : '');
+      b.textContent = (n === cur ? '✔ ' : '') + n;
+      b.onclick = function () {
+        K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        onPick && onPick(n);
+      };
+      box.appendChild(b);
+    });
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'kpl add';
+    add.textContent = '➕ Nuovo';
+    add.onclick = function () {
+      box.innerHTML = '';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.maxLength = 14;
+      inp.placeholder = 'Scrivi il nome';
+      inp.className = 'kplin';
+      var ok = document.createElement('button');
+      ok.type = 'button';
+      ok.className = 'kpl sel';
+      ok.textContent = 'OK';
+      var no = document.createElement('button');
+      no.type = 'button';
+      no.className = 'kpl';
+      no.textContent = 'Annulla';
+      var done = function done() {
+        var n = addName(inp.value);
+        if (n) K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        if (n && onPick) onPick(n);
+      };
+      ok.onclick = done;
+      no.onclick = function () {
+        return K.playerPicker(box, slot, onPick);
+      };
+      inp.onkeydown = function (e) {
+        if (e.key === 'Enter') done();
+      };
+      box.appendChild(inp);
+      box.appendChild(ok);
+      box.appendChild(no);
+      setTimeout(function () {
+        try {
+          inp.focus();
+        } catch (e) {}
+      }, 50);
+    };
+    box.appendChild(add);
+  };
+  K.addScore = function (game, name, add) {
+    if (!name) return;
+    var B = K.load('sala-board', {});
+    var G = B[game] = B[game] || {};
+    var r = G[name] = G[name] || {
+      pts: 0
+    };
+    for (var k in add) {
+      if (k === 'max') {
+        r.max = r.max || {};
+        for (var b in add.max) {
+          if (r.max[b] == null || add.max[b] > r.max[b]) r.max[b] = add.max[b];
+        }
+      } else if (k === 'best') {
+        r.best = r.best || {};
+        for (var _b2 in add.best) {
+          var v = add.best[_b2];
+          if (r.best[_b2] == null || v < r.best[_b2]) r.best[_b2] = v;
+        }
+      } else r[k] = (r[k] || 0) + add[k];
+    }
+    r.last = Date.now();
+    K.save('sala-board', B);
+  };
+  K.boardOf = function (game) {
+    var G = (K.load('sala-board', {}) || {})[game] || {};
+    return Object.keys(G).map(function (n) {
+      return Object.assign({
+        name: n
+      }, G[n]);
+    }).sort(function (a, b) {
+      return (b.pts || 0) - (a.pts || 0) || (b.last || 0) - (a.last || 0);
+    });
+  };
+  var esc = function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;'
+      }[c];
+    });
+  };
+  K.showBoard = function (title, sections, note) {
+    var h = '<h2>🏆 ' + esc(title) + '</h2>';
+    var _iterator6 = _createForOfIteratorHelper(sections),
+      _step6;
+    try {
+      var _loop = function _loop() {
+        var s = _step6.value;
+        if (s.title) h += '<h3 class="kbh">' + esc(s.title) + '</h3>';
+        if (!s.rows.length) {
+          h += '<p class="note">' + esc(s.empty || 'Ancora nessun punteggio: gioca una partita!') + '</p>';
+          return 1;
+        }
+        h += '<table class="kbt"><tr>' + (s.norank ? '' : '<th>#</th>') + s.cols.map(function (c) {
+          return '<th>' + esc(c.h) + '</th>';
+        }).join('') + '</tr>';
+        s.rows.forEach(function (r, i) {
+          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1) + '</td>') + s.cols.map(function (c) {
+            return '<td>' + esc(c.f(r)) + '</td>';
+          }).join('') + '</tr>';
+        });
+        h += '</table>';
+      };
+      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+        if (_loop()) continue;
+      }
+    } catch (err) {
+      _iterator6.e(err);
+    } finally {
+      _iterator6.f();
+    }
+    if (note) h += '<p class="note">' + esc(note) + '</p>';
+    h += '<div class="row"><button class="go" id="kbclose" type="button">Chiudi</button><button class="go alt" id="kbreset" type="button">🗑 Azzera classifica</button></div>';
+    var ov = $('kboard');
+    ov.querySelector('.card').innerHTML = h;
+    ov.hidden = false;
+    $('kbclose').onclick = function () {
+      ov.hidden = true;
+    };
+    $('kbreset').onclick = function () {
+      var b = $('kbreset');
+      if (b.dataset.sure) {
+        var B = K.load('sala-board', {});
+        (sections.games || []).forEach(function (g) {
+          return delete B[g];
+        });
+        K.save('sala-board', B);
+        ov.hidden = true;
+        K.toast('Classifica azzerata');
+      } else {
+        b.dataset.sure = '1';
+        b.textContent = 'Sicuro? Tocca ancora';
+      }
+    };
+  };
+  K.fmtT = function (s) {
+    return Math.floor(s / 60) + ':' + ('0' + Math.floor(s) % 60).slice(-2) + '.' + Math.floor(s % 1 * 10);
+  };
+})();
+(function () {
+  var ctx = K.ctx,
+    $ = K.$,
+    SS = K.S;
+  K.addMusic('bg1', {
+    tempo: 132,
+    lead: 'square',
+    lv: .08,
+    mel: 'C5 E5 G5 E5 A5 - G5 - F5 A5 C6 A5 G5 - E5 - D5 F5 A5 F5 G5 - E5 C5 D5 - G4 - C5 - - -',
+    bass: 'C3 G2 C3 G2 F2 C3 F2 C3 D3 A2 G2 D3 C3 G2 C3 -',
+    drums: 'k-hsk-hs'
+  });
+  K.addMusic('bg2', {
+    tempo: 120,
+    lead: 'triangle',
+    lv: .2,
+    mel: 'A4 C5 E5 - D5 C5 A4 - G4 B4 D5 - C5 B4 G4 - A4 C5 E5 - G5 F5 E5 D5 C5 - A4 - - - - -',
+    bass: 'A2 - E3 - G2 - D3 - F2 - C3 - E2 - B2 -',
+    drums: 'k-h-s-h-'
+  });
+  K.addMusic('bgwin', {
+    tempo: 130,
+    lead: 'square',
+    lv: .09,
+    mel: 'C5 E5 G5 C6 - G5 C6 - - - - - - - - -',
+    bass: 'C3 - - - G2 - - - C3 - - - - - - -',
+    drums: 'k---k---'
+  });
+  var VW = 640,
+    VH = 360,
+    FY = 322,
+    G = .16,
+    RAD = [9, 15, 24, 36],
+    HGT = [78, 110, 150, 196],
+    PTS = [150, 100, 75, 50];
+  var THEMES = [{
+    name: 'prato',
+    sky: ['#4aa8f5', '#d4f0ff'],
+    far: '#8fd18a',
+    near: '#5fb04a',
+    floor: ['#8a6a4a', '#7d5f42'],
+    deco: 'tree'
+  }, {
+    name: 'spiaggia',
+    sky: ['#2f9ae8', '#fff0c4'],
+    far: '#3f86d4',
+    near: '#e8c87a',
+    floor: ['#e5cd8e', '#dcc282'],
+    deco: 'palm'
+  }, {
+    name: 'neve',
+    sky: ['#86c4ee', '#f4fbff'],
+    far: '#c9dff1',
+    near: '#e3f1fb',
+    floor: ['#c9d6e6', '#bccbdc'],
+    deco: 'pine'
+  }, {
+    name: 'giungla',
+    sky: ['#3f7f6c', '#c4ecc8'],
+    far: '#2f6b46',
+    near: '#4f8a3e',
+    floor: ['#6b5a3a', '#615134'],
+    deco: 'palm'
+  }, {
+    name: 'castello',
+    sky: ['#2a1d3a', '#8e4f6e'],
+    far: '#3a2f4a',
+    near: '#4a4058',
+    floor: ['#5f6476', '#555a6b'],
+    deco: 'tower'
+  }];
+  var COL = ['#e0373f', '#3f86d4', '#4aa35a', '#f07a2a', '#8a5cc7'];
+  var LEVELS = [{
+    b: [[3, 160, 1]],
+    k: []
+  }, {
+    b: [[3, 160, 1], [2, 480, -1]],
+    k: []
+  }, {
+    b: [[3, 320, 1]],
+    k: [[170, 150, 90, 16, 'muro'], [380, 150, 90, 16, 'muro']]
+  }, {
+    b: [[3, 150, 1], [3, 490, -1]],
+    k: [[220, 120, 200, 16, 'vetro']]
+  }, {
+    b: [[2, 100, 1], [2, 250, -1], [2, 400, 1], [2, 550, -1]],
+    k: [[0, 180, 120, 16, 'muro'], [520, 180, 120, 16, 'muro']]
+  }, {
+    b: [[1, 80, 1], [1, 180, -1], [1, 280, 1], [1, 380, -1], [1, 480, 1], [1, 580, -1]],
+    k: [[120, 100, 400, 16, 'vetro']]
+  }, {
+    b: [[3, 160, 1], [3, 480, -1], [1, 320, 1]],
+    k: [[60, 160, 80, 16, 'muro'], [500, 160, 80, 16, 'muro'], [280, 210, 80, 16, 'vetro']]
+  }, {
+    b: [[3, 320, -1], [2, 120, 1]],
+    k: [[100, 220, 70, 16, 'muro'], [220, 170, 70, 16, 'muro'], [350, 120, 70, 16, 'muro'], [470, 170, 70, 16, 'muro']]
+  }, {
+    b: [[3, 120, 1], [3, 320, -1], [3, 520, 1]],
+    k: []
+  }, {
+    b: [[2, 80, 1], [2, 560, -1], [3, 320, 1]],
+    k: [[0, 140, 280, 16, 'vetro'], [360, 140, 280, 16, 'vetro']]
+  }, {
+    b: [[3, 160, 1], [3, 480, -1], [2, 320, 1], [2, 100, -1]],
+    k: [[250, 90, 140, 16, 'muro']]
+  }, {
+    b: [[3, 100, 1], [3, 540, -1]],
+    k: [[150, 200, 60, 16, 'vetro'], [290, 200, 60, 16, 'vetro'], [430, 200, 60, 16, 'vetro'], [220, 120, 200, 16, 'muro']]
+  }, {
+    b: [[1, 60, 1], [1, 140, 1], [1, 220, 1], [1, 300, 1], [1, 380, -1], [1, 460, -1], [1, 540, -1], [3, 320, 1]],
+    k: []
+  }, {
+    b: [[3, 120, 1], [3, 320, -1], [3, 520, 1], [2, 220, -1]],
+    k: [[0, 110, 160, 16, 'muro'], [480, 110, 160, 16, 'muro'], [260, 180, 120, 16, 'vetro']]
+  }, {
+    b: [[3, 100, 1], [3, 250, -1], [3, 400, 1], [3, 550, -1]],
+    k: [[200, 130, 240, 16, 'vetro']]
+  }];
+  var POW = ['doppio', 'colla', 'tempo', 'scudo', 'frutta', 'frutta'];
+  var PNAME = {
+    doppio: 'DOPPIO RAMPINO',
+    colla: 'RAMPINO APPICCICOSO',
+    tempo: 'TEMPO FERMO',
+    scudo: 'SCUDO',
+    frutta: '+500'
+  };
+  var lv = 0,
+    balls = [],
+    blocks = [],
+    ropes = [],
+    items = [],
+    parts = [],
+    texts = [],
+    P = null,
+    score = 0,
+    lvScore = 0,
+    lives = 3,
+    time = 100,
+    state = 'menu',
+    t = 0,
+    freeze = 0,
+    msg = null,
+    pick = 'tommy',
+    player = '',
+    shootT = 0,
+    endT = 0,
+    gen = 0;
+  function startLevel(i) {
+    gen++;
+    lv = i;
+    var L = LEVELS[i];
+    var ci = i % COL.length;
+    balls = L.b.map(function (b) {
+      return {
+        s: b[0],
+        x: b[1],
+        y: 120 - b[0] * 8,
+        vx: 1.15 * b[2],
+        vy: 0,
+        c: ci
+      };
+    });
+    blocks = L.k.map(function (k) {
+      return {
+        x: k[0],
+        y: k[1],
+        w: k[2],
+        h: k[3],
+        kind: k[4]
+      };
+    });
+    ropes = [];
+    items = [];
+    parts = [];
+    texts = [];
+    freeze = 0;
+    time = 120;
+    state = 'play';
+    lvScore = 0;
+    P = {
+      x: VW / 2,
+      face: 1,
+      walk: 0,
+      inv: 90,
+      shield: false,
+      doppio: false,
+      colla: false
+    };
+    msg = {
+      t: 120,
+      s: 'Livello ' + (i + 1),
+      s2: 'spara il rampino con 🎯'
+    };
+    bgKey = null;
+    K.wantMusic = i % 2 ? 'bg2' : 'bg1';
+  }
+  function vb(s) {
+    return -Math.sqrt(2 * G * HGT[s]);
+  }
+  function split(b, i) {
+    balls.splice(i, 1);
+    score += PTS[b.s];
+    lvScore += PTS[b.s];
+    texts.push({
+      x: b.x,
+      y: b.y,
+      s: '+' + PTS[b.s],
+      l: 40
+    });
+    for (var k = 0; k < 8; k++) parts.push({
+      x: b.x,
+      y: b.y,
+      vx: (Math.random() - .5) * 4,
+      vy: (Math.random() - .5) * 4,
+      l: 24,
+      c: COL[b.c]
+    });
+    K.beep(300 + (3 - b.s) * 180, .08, 'square', .05, 200);
+    if (b.s > 0) {
+      var ns = b.s - 1;
+      balls.push({
+        s: ns,
+        x: b.x - 4,
+        y: b.y,
+        vx: -1.15,
+        vy: -3.4,
+        c: b.c
+      }, {
+        s: ns,
+        x: b.x + 4,
+        y: b.y,
+        vx: 1.15,
+        vy: -3.4,
+        c: b.c
+      });
+    }
+    if (Math.random() < .17) items.push({
+      k: POW[Math.floor(Math.random() * POW.length)],
+      x: b.x,
+      y: b.y,
+      vy: 0,
+      l: 420
+    });
+    if (!balls.length) clearLevel();
+  }
+  function clearLevel() {
+    state = 'clear';
+    var bonus = Math.ceil(time) * 10;
+    score += bonus;
+    lvScore += bonus;
+    msg = {
+      t: 150,
+      s: 'LIVELLO SUPERATO!',
+      s2: 'bonus tempo +' + bonus
+    };
+    K.addScore('bollegiganti', player, {
+      pts: lvScore,
+      livelli: 1,
+      max: {
+        record: score,
+        livello: lv + 1
+      }
+    });
+    lvScore = 0;
+    PROG.open = Math.max(PROG.open, Math.min(LEVELS.length - 1, lv + 1));
+    PROG.done[lv] = true;
+    K.save('bollegiganti-prog', PROG);
+    K.wantMusic = 'bgwin';
+    K.jingle([523, 659, 784, 1046], 100);
+    endT = 150;
+  }
+  function hurt() {
+    if (P.inv > 0 || state !== 'play') return;
+    if (P.shield) {
+      P.shield = false;
+      P.inv = 90;
+      K.beep(500, .2, 'triangle', .05, -200);
+      texts.push({
+        x: P.x,
+        y: FY - 60,
+        s: 'scudo!',
+        l: 50
+      });
+      return;
+    }
+    state = 'hit';
+    lives--;
+    endT = 110;
+    K.beep(160, .5, 'sawtooth', .06, -120);
+  }
+  function update(f) {
+    t += f;
+    if (msg) {
+      msg.t -= f;
+      if (msg.t <= 0) msg = null;
+    }
+    var _iterator7 = _createForOfIteratorHelper(parts),
+      _step7;
+    try {
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        var q = _step7.value;
+        q.x += q.vx * f;
+        q.y += q.vy * f;
+        q.l -= f;
+      }
+    } catch (err) {
+      _iterator7.e(err);
+    } finally {
+      _iterator7.f();
+    }
+    parts = parts.filter(function (q) {
+      return q.l > 0;
+    });
+    var _iterator8 = _createForOfIteratorHelper(texts),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var _q = _step8.value;
+        _q.y -= .5 * f;
+        _q.l -= f;
+      }
+    } catch (err) {
+      _iterator8.e(err);
+    } finally {
+      _iterator8.f();
+    }
+    texts = texts.filter(function (q) {
+      return q.l > 0;
+    });
+    if (state === 'hit' || state === 'clear') {
+      endT -= f;
+      if (endT <= 0) {
+        if (state === 'clear') {
+          if (lv < LEVELS.length - 1) {
+            startLevel(lv + 1);
+            saveRun();
+          } else {
+            state = 'done';
+            K.del('bollegiganti-run');
+            showEnd(true);
+          }
+        } else if (lives > 0) {
+          var sc = score;
+          startLevel(lv);
+          score = sc;
+          msg = {
+            t: 110,
+            s: 'Ancora ' + lives + (lives === 1 ? ' vita' : ' vite') + '!',
+            s2: 'riprova il livello ' + (lv + 1)
+          };
+        } else {
+          state = 'over';
+          K.addScore('bollegiganti', player, {
+            pts: lvScore,
+            max: {
+              record: score,
+              livello: lv + 1
+            }
+          });
+          lvScore = 0;
+          K.del('bollegiganti-run');
+          showEnd(false);
+        }
+      }
+      return;
+    }
+    if (state !== 'play') return;
+    time -= f / 60;
+    if (time <= 0) {
+      time = 0;
+      P.inv = 0;
+      P.shield = false;
+      hurt();
+      msg = {
+        t: 90,
+        s: 'Tempo scaduto!'
+      };
+      return;
+    }
+    var mx = (K.keys.right ? 1 : 0) - (K.keys.left ? 1 : 0);
+    P.x += mx * 2.7 * f;
+    P.x = Math.max(12, Math.min(VW - 12, P.x));
+    if (mx) {
+      P.face = mx;
+      P.walk += f * .2;
+    }
+    if (P.inv > 0) P.inv -= f;
+    if (shootT > 0) shootT -= f;
+    if (K.pressed('a') && ropes.filter(function (r) {
+      return !r.stuck;
+    }).length < (P.doppio ? 2 : 1) && ropes.length < (P.doppio ? 2 : 1) + 1) {
+      ropes.push({
+        x: P.x + P.face * 3,
+        tip: FY - 30,
+        stuck: 0
+      });
+      shootT = 10;
+      K.beep(820, .06, 'square', .04, -300);
+    }
+    var _iterator9 = _createForOfIteratorHelper(ropes),
+      _step9;
+    try {
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var _r = _step9.value;
+        if (_r.stuck > 0) {
+          _r.stuck -= f;
+          if (_r.stuck <= 0) _r.dead = true;
+          continue;
+        }
+        _r.tip -= 8.5 * f;
+        var stop = _r.tip <= 0;
+        if (stop) _r.tip = 0;
+        var _iterator11 = _createForOfIteratorHelper(blocks),
+          _step11;
+        try {
+          for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+            var _k = _step11.value;
+            if (!_k.dead && _r.x > _k.x && _r.x < _k.x + _k.w && _r.tip <= _k.y + _k.h && _r.tip > _k.y - 8) {
+              stop = true;
+              _r.tip = _k.y + _k.h;
+              if (_k.kind === 'vetro') {
+                _k.dead = true;
+                for (var _i3 = 0; _i3 < 10; _i3++) parts.push({
+                  x: _k.x + Math.random() * _k.w,
+                  y: _k.y + 8,
+                  vx: (Math.random() - .5) * 3,
+                  vy: Math.random() * 2,
+                  l: 30,
+                  c: '#bfe8ff'
+                });
+                score += 50;
+                lvScore += 50;
+                K.beep(1200, .1, 'triangle', .05, -600);
+                _r.dead = true;
+              }
+              break;
+            }
+          }
+        } catch (err) {
+          _iterator11.e(err);
+        } finally {
+          _iterator11.f();
+        }
+        if (stop && !_r.dead) {
+          if (P.colla) {
+            _r.stuck = 150;
+          } else _r.dead = true;
+        }
+      }
+    } catch (err) {
+      _iterator9.e(err);
+    } finally {
+      _iterator9.f();
+    }
+    blocks = blocks.filter(function (k) {
+      return !k.dead;
+    });
+    if (freeze > 0) freeze -= f;
+    for (var i = balls.length - 1; i >= 0; i--) {
+      var b = balls[i],
+        rr = RAD[b.s];
+      if (freeze <= 0) {
+        b.vy += G * f;
+        b.x += b.vx * f;
+        b.y += b.vy * f;
+        if (b.y + rr >= FY) {
+          b.y = FY - rr;
+          b.vy = vb(b.s);
+        }
+        if (b.y - rr < 0) {
+          b.y = rr;
+          b.vy = Math.abs(b.vy);
+        }
+        if (b.x - rr < 0) {
+          b.x = rr;
+          b.vx = Math.abs(b.vx);
+        }
+        if (b.x + rr > VW) {
+          b.x = VW - rr;
+          b.vx = -Math.abs(b.vx);
+        }
+        var _iterator0 = _createForOfIteratorHelper(blocks),
+          _step0;
+        try {
+          for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+            var k = _step0.value;
+            var nx = Math.max(k.x, Math.min(b.x, k.x + k.w)),
+              ny = Math.max(k.y, Math.min(b.y, k.y + k.h)),
+              dx = b.x - nx,
+              dy = b.y - ny,
+              d = Math.hypot(dx, dy);
+            if (d < rr) {
+              if (d < .01) {
+                b.vy = -b.vy;
+                continue;
+              }
+              var ux = dx / d,
+                uy = dy / d;
+              b.x = nx + ux * rr;
+              b.y = ny + uy * rr;
+              var dot = b.vx * ux + b.vy * uy;
+              if (dot < 0) {
+                if (Math.abs(uy) > Math.abs(ux)) {
+                  b.vy = uy < 0 ? Math.min(-Math.abs(b.vy), vb(b.s) * .85) : Math.abs(b.vy);
+                } else b.vx = -b.vx;
+              }
+            }
+          }
+        } catch (err) {
+          _iterator0.e(err);
+        } finally {
+          _iterator0.f();
+        }
+      }
+      var hit = false;
+      var _iterator1 = _createForOfIteratorHelper(ropes),
+        _step1;
+      try {
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+          var r = _step1.value;
+          if (r.dead) continue;
+          if (Math.abs(b.x - r.x) < rr + 5 && b.y + rr > r.tip) {
+            r.dead = true;
+            hit = true;
+            break;
+          }
+        }
+      } catch (err) {
+        _iterator1.e(err);
+      } finally {
+        _iterator1.f();
+      }
+      if (hit) {
+        split(b, i);
+        if (state !== 'play') return;
+        continue;
+      }
+      var px = Math.max(P.x - 8, Math.min(b.x, P.x + 8)),
+        py = Math.max(FY - 34, Math.min(b.y, FY));
+      if (Math.hypot(b.x - px, b.y - py) < rr - 2) hurt();
+    }
+    ropes = ropes.filter(function (r) {
+      return !r.dead;
+    });
+    var _iterator10 = _createForOfIteratorHelper(items),
+      _step10;
+    try {
+      for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+        var it = _step10.value;
+        if (it.y < FY - 12) {
+          it.vy += .15 * f;
+          it.y += it.vy * f;
+          if (it.y > FY - 12) it.y = FY - 12;
+        }
+        it.l -= f;
+        if (Math.abs(it.x - P.x) < 18 && it.y > FY - 50) {
+          it.l = 0;
+          K.jingle([660, 880], 60);
+          texts.push({
+            x: P.x,
+            y: FY - 70,
+            s: PNAME[it.k],
+            l: 60
+          });
+          if (it.k === 'doppio') P.doppio = true;else if (it.k === 'colla') P.colla = true;else if (it.k === 'tempo') freeze = 260;else if (it.k === 'scudo') P.shield = true;else {
+            score += 500;
+            lvScore += 500;
+          }
+        }
+      }
+    } catch (err) {
+      _iterator10.e(err);
+    } finally {
+      _iterator10.f();
+    }
+    items = items.filter(function (i) {
+      return i.l > 0;
+    });
+  }
+  var L = {},
+    bgC = null,
+    bgKey = null;
+  function layout() {
+    var W = K.W,
+      H = K.H,
+      land = W > H;
+    var sc = Math.min((W - 16) / VW, (H - (land ? 150 : 240)) / VH);
+    L = {
+      sc: sc,
+      ox: (W - VW * sc) / 2,
+      oy: land ? 52 : Math.max(60, (H - VH * sc) / 2 - 40)
+    };
+  }
+  function bgCanvas() {
+    var th = THEMES[Math.floor(lv / 3) % THEMES.length],
+      s = L.sc * K.dpr,
+      key = lv + '_' + s.toFixed(2);
+    if (bgKey === key && bgC) return bgC;
+    var c = bgC || document.createElement('canvas');
+    c.width = Math.ceil(VW * s);
+    c.height = Math.ceil(VH * s);
+    var x = c.getContext('2d');
+    x.setTransform(s, 0, 0, s, 0, 0);
+    var o = SS.use(x);
+    var g = x.createLinearGradient(0, 0, 0, FY);
+    g.addColorStop(0, th.sky[0]);
+    g.addColorStop(1, th.sky[1]);
+    x.fillStyle = g;
+    x.fillRect(0, 0, VW, VH);
+    SS.glow(VW * .82, 52, 70, th.name === 'castello' ? 'rgba(246,231,196,.35)' : 'rgba(255,244,200,.7)');
+    SS.dot(VW * .82, 52, 20, th.name === 'castello' ? '#f6e7c4' : '#fff6d4');
+    x.fillStyle = 'rgba(255,255,255,' + (th.name === 'castello' ? .12 : .7) + ')';
+    for (var i = 0; i < 4; i++) {
+      for (var _i4 = 0, _arr3 = [[0, 0, 20], [20, -7, 24], [42, 0, 18]]; _i4 < _arr3.length; _i4++) {
+        var q = _arr3[_i4];
+        x.beginPath();
+        x.ellipse(60 + i * 160 + q[0], 50 + i % 2 * 30 + q[1], q[2] * 1.3, q[2] * .7, 0, 0, 6.2832);
+        x.fill();
+      }
+    }
+    for (var _i5 = 0, _arr4 = [[FY - 40, 70, th.far, .008], [FY - 10, 40, th.near, .017]]; _i5 < _arr4.length; _i5++) {
+      var _arr4$_i = _slicedToArray(_arr4[_i5], 4),
+        base = _arr4$_i[0],
+        amp = _arr4$_i[1],
+        col = _arr4$_i[2],
+        fr = _arr4$_i[3];
+      x.beginPath();
+      x.moveTo(0, FY);
+      for (var xx = 0; xx <= VW; xx += 16) x.lineTo(xx, base - amp * (.5 + .35 * Math.sin(xx * fr + lv) + .15 * Math.sin(xx * fr * 3)));
+      x.lineTo(VW, FY);
+      x.closePath();
+      x.fillStyle = col;
+      x.fill();
+    }
+    for (var _i6 = 0; _i6 < 5; _i6++) {
+      var dx = 40 + _i6 * 140 + lv * 37 % 60,
+        yb = FY - 4;
+      if (th.deco === 'tree') {
+        SS.part(dx - 4, yb - 40, 8, 40, 3, '#6b4a2e');
+        SS.orb(dx, yb - 52, 20, 18, '#4aa35a');
+      }
+      if (th.deco === 'palm') {
+        SS.limb(dx, yb, dx + 6, yb - 60, 5, '#8a5a32');
+        for (var _i7 = 0, _arr5 = [-2.6, -2, -1.2, -.5]; _i7 < _arr5.length; _i7++) {
+          var a = _arr5[_i7];
+          SS.limb(dx + 6, yb - 60, dx + 6 + Math.cos(a) * 26, yb - 60 + Math.sin(a) * 14 + 8, 4, '#3f9a3a');
+        }
+      }
+      if (th.deco === 'pine') {
+        SS.part(dx - 3, yb - 16, 6, 16, 2, '#6b4a2e');
+        SS.shape([dx - 20, yb - 14, dx, yb - 60, dx + 20, yb - 14], '#3f8a5a');
+        SS.shape([dx - 10, yb - 40, dx, yb - 62, dx + 10, yb - 40], '#f4fbff');
+      }
+      if (th.deco === 'tower') {
+        SS.rrp(dx - 14, yb - 80, 28, 80, 2);
+        SS.edge();
+        x.fillStyle = '#4a4058';
+        x.fill();
+        SS.shape([dx - 18, yb - 80, dx, yb - 104, dx + 18, yb - 80], '#5a2a52');
+        SS.rrp(dx - 4, yb - 60, 8, 12, 4);
+        x.fillStyle = '#ffcf6a';
+        x.fill();
+      }
+    }
+    var fg = x.createLinearGradient(0, FY, 0, VH);
+    fg.addColorStop(0, th.floor[0]);
+    fg.addColorStop(1, SS.tone(th.floor[0], -.25));
+    x.fillStyle = fg;
+    x.fillRect(0, FY, VW, VH - FY);
+    x.strokeStyle = 'rgba(20,10,30,.25)';
+    x.lineWidth = 1.2;
+    for (var _i8 = -6; _i8 <= 16; _i8++) {
+      var xa = VW / 2 + (_i8 * 48 - VW / 2) * .85,
+        xb = VW / 2 + (_i8 * 48 - VW / 2) * 1.15;
+      x.beginPath();
+      x.moveTo(xa, FY);
+      x.lineTo(xb, VH);
+      x.stroke();
+    }
+    for (var _i9 = 0, _arr6 = [FY + 10, FY + 24]; _i9 < _arr6.length; _i9++) {
+      var yy = _arr6[_i9];
+      x.beginPath();
+      x.moveTo(0, yy);
+      x.lineTo(VW, yy);
+      x.stroke();
+    }
+    x.fillStyle = '#1c1724';
+    x.fillRect(0, FY - 1, VW, 2.5);
+    SS.use(o);
+    bgC = c;
+    bgKey = key;
+    return c;
+  }
+  var BSP = {};
+  function ballSpr(c, s) {
+    var k = c + '_' + s;
+    if (BSP[k]) return BSP[k];
+    var r = RAD[s],
+      sc = 4,
+      n = (r + 3) * 2 * sc,
+      cv = document.createElement('canvas');
+    cv.width = n;
+    cv.height = n;
+    var x = cv.getContext('2d');
+    x.scale(sc, sc);
+    x.translate(r + 3, r + 3);
+    var col = COL[c],
+      g = x.createRadialGradient(-r * .35, -r * .4, r * .12, 0, 0, r);
+    g.addColorStop(0, SS.tone(col, .6));
+    g.addColorStop(.55, col);
+    g.addColorStop(1, SS.tone(col, -.4));
+    x.beginPath();
+    x.arc(0, 0, r, 0, 6.2832);
+    x.fillStyle = g;
+    x.fill();
+    x.lineWidth = 2;
+    x.strokeStyle = '#1c1724';
+    x.stroke();
+    x.beginPath();
+    x.ellipse(-r * .38, -r * .42, r * .3, r * .17, -.6, 0, 6.2832);
+    x.fillStyle = 'rgba(255,255,255,.8)';
+    x.fill();
+    x.beginPath();
+    x.arc(r * .32, r * .3, r * .1, 0, 6.2832);
+    x.fillStyle = 'rgba(255,255,255,.4)';
+    x.fill();
+    return BSP[k] = cv;
+  }
+  function draw() {
+    var W = K.W,
+      H = K.H;
+    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#2a2440');
+    g.addColorStop(1, '#151020');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    if (state === 'menu') return;
+    layout();
+    var sc = L.sc;
+    ctx.setTransform(K.dpr * sc, 0, 0, K.dpr * sc, K.dpr * L.ox, K.dpr * L.oy);
+    SS.rrp(-10, -10 + 8, VW + 20, VH + 20, 14);
+    ctx.fillStyle = '#0c0a14';
+    ctx.fill();
+    SS.rrp(-10, -10, VW + 20, VH + 20, 14);
+    SS.edge();
+    ctx.fillStyle = '#8a5a32';
+    ctx.fill();
+    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
+    ctx.drawImage(bgCanvas(), Math.round(L.ox * K.dpr) / K.dpr * K.dpr, L.oy * K.dpr, VW * sc * K.dpr, VH * sc * K.dpr);
+    ctx.setTransform(K.dpr * sc, 0, 0, K.dpr * sc, K.dpr * L.ox, K.dpr * L.oy);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, VW, VH);
+    ctx.clip();
+    var _iterator12 = _createForOfIteratorHelper(blocks),
+      _step12;
+    try {
+      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+        var k = _step12.value;
+        if (k.kind === 'vetro') {
+          SS.rrp(k.x, k.y, k.w, k.h, 4);
+          SS.edge(2);
+          ctx.fillStyle = 'rgba(191,232,255,.75)';
+          ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,.7)';
+          ctx.fillRect(k.x + 4, k.y + 3, k.w * .4, 3);
+        } else {
+          SS.rrp(k.x, k.y + 4, k.w, k.h, 4);
+          ctx.fillStyle = 'rgba(0,0,0,.3)';
+          ctx.fill();
+          SS.part(k.x, k.y, k.w, k.h, 4, '#a8774c');
+        }
+      }
+    } catch (err) {
+      _iterator12.e(err);
+    } finally {
+      _iterator12.f();
+    }
+    var _iterator13 = _createForOfIteratorHelper(balls),
+      _step13;
+    try {
+      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+        var b = _step13.value;
+        var rr = RAD[b.s],
+          hgt = FY - (b.y + rr);
+        SS.shadow(b.x, FY + 4, rr * Math.max(.3, 1 - hgt / 260), Math.max(.25, 1 - hgt / 300));
+      }
+    } catch (err) {
+      _iterator13.e(err);
+    } finally {
+      _iterator13.f();
+    }
+    SS.shadow(P.x, FY + 3, 14, 1);
+    var _iterator14 = _createForOfIteratorHelper(ropes),
+      _step14;
+    try {
+      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+        var r = _step14.value;
+        ctx.strokeStyle = '#5d6273';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (var y = FY; y > r.tip; y -= 6) {
+          var xx = r.x + (Math.floor(y / 6) % 2 ? 2 : -2);
+          if (y === FY) ctx.moveTo(xx, y);else ctx.lineTo(xx, y);
+        }
+        ctx.stroke();
+        SS.shape([r.x - 5, r.tip + 8, r.x, r.tip - 4, r.x + 5, r.tip + 8], r.stuck > 0 ? '#f2c230' : '#d9dde4');
+      }
+    } catch (err) {
+      _iterator14.e(err);
+    } finally {
+      _iterator14.f();
+    }
+    var _iterator15 = _createForOfIteratorHelper(items),
+      _step15;
+    try {
+      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+        var it = _step15.value;
+        if (it.l < 90 && Math.floor(t / 5) % 2) continue;
+        var ic = {
+          doppio: '⇈',
+          colla: '✱',
+          tempo: '⏱',
+          scudo: '🛡',
+          frutta: '🍒'
+        }[it.k];
+        SS.orb(it.x, it.y, 12, 12, it.k === 'frutta' ? '#ffd0d0' : '#fff3c4');
+        K.text(ic, it.x, it.y + 5, 14, '#1c1724', 'center', false);
+      }
+    } catch (err) {
+      _iterator15.e(err);
+    } finally {
+      _iterator15.f();
+    }
+    if (!(P.inv > 0 && Math.floor(P.inv / 5) % 2 && state === 'play')) {
+      var L2 = SS.LOOK[pick];
+      SS.kid(P.x, FY, P.face, L2, {
+        walk: (K.keys.left || K.keys.right) && state === 'play' ? P.walk * 2.4 : null,
+        air: shootT > 0,
+        rot: state === 'hit' ? Math.min(1.4, (110 - endT) * .05) : 0
+      });
+      if (P.shield) {
+        ctx.globalAlpha = .3;
+        SS.dot(P.x, FY - 22, 28, '#9fd3f0');
+        ctx.globalAlpha = 1;
+      }
+    }
+    var _iterator16 = _createForOfIteratorHelper(balls),
+      _step16;
+    try {
+      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+        var _b3 = _step16.value;
+        var _rr = RAD[_b3.s],
+          c = ballSpr(_b3.c, _b3.s),
+          w = (_rr + 3) * 2;
+        if (freeze > 0 && freeze < 60 && Math.floor(t / 4) % 2) ctx.globalAlpha = .6;
+        ctx.drawImage(c, _b3.x - w / 2, _b3.y - w / 2, w, w);
+        ctx.globalAlpha = 1;
+      }
+    } catch (err) {
+      _iterator16.e(err);
+    } finally {
+      _iterator16.f();
+    }
+    if (freeze > 0) {
+      ctx.fillStyle = 'rgba(159,211,240,.15)';
+      ctx.fillRect(0, 0, VW, VH);
+    }
+    var _iterator17 = _createForOfIteratorHelper(parts),
+      _step17;
+    try {
+      for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+        var q = _step17.value;
+        ctx.globalAlpha = Math.max(0, q.l / 24);
+        SS.dot(q.x, q.y, 2.5, q.c);
+      }
+    } catch (err) {
+      _iterator17.e(err);
+    } finally {
+      _iterator17.f();
+    }
+    ctx.globalAlpha = 1;
+    var _iterator18 = _createForOfIteratorHelper(texts),
+      _step18;
+    try {
+      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+        var _q2 = _step18.value;
+        ctx.globalAlpha = Math.min(1, _q2.l / 20);
+        K.text(_q2.s, _q2.x, _q2.y, 14, '#fff', 'center');
+      }
+    } catch (err) {
+      _iterator18.e(err);
+    } finally {
+      _iterator18.f();
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
+    hud(W, H);
+  }
+  function hud(W, H) {
+    SS.rrp(8, 8, Math.min(W - 200, 420), 40, 12);
+    ctx.fillStyle = 'rgba(20,16,30,.75)';
+    ctx.fill();
+    K.text('Liv. ' + (lv + 1), 18, 34, 16, '#f2c230');
+    K.text('Punti ' + score, 90, 34, 16, '#fff');
+    var hx = 230;
+    for (var i = 0; i < lives; i++) {
+      K.text('♥', hx, 34, 18, '#ff6b6b');
+      hx += 18;
+    }
+    K.text('⏱ ' + Math.ceil(time), hx + 12, 34, 16, time < 15 ? '#ff8a8a' : '#c7ccd8');
+    var pw = (P && P.doppio ? '⇈ ' : '') + (P && P.colla ? '✱ ' : '') + (P && P.shield ? '🛡' : '');
+    if (pw) K.text(pw, hx + 70, 34, 16, '#9fd3f0');
+    if (msg) {
+      K.text(msg.s, W / 2, L.oy + VH * L.sc * .4, 32, '#fff', 'center');
+      if (msg.s2) K.text(msg.s2, W / 2, L.oy + VH * L.sc * .4 + 28, 18, '#ffe48a', 'center');
+    }
+    if (state === 'hit') K.text('Ahia! Ti ha preso una bolla!', W / 2, L.oy + VH * L.sc * .3, 24, '#ff8a8a', 'center');
+  }
+  var PROG = K.load('bollegiganti-prog', {
+    open: 0,
+    done: {}
+  });
+  if (!PROG.done) PROG.done = {};
+  function saveRun() {
+    K.save('bollegiganti-run', {
+      lv: lv,
+      score: score,
+      lives: lives,
+      pick: pick,
+      player: player
+    });
+  }
+  function startGame(i) {
+    score = 0;
+    lives = 3;
+    player = K.player(0);
+    P = null;
+    startLevel(i);
+    saveRun();
+    $('menu').hidden = true;
+    $('end').hidden = true;
+    K.start();
+  }
+  function renderMenu() {
+    K.playerPicker($('players'), 0);
+    SS.picker($('chars'), pick, function (ch) {
+      pick = ch;
+      K.save('bollegiganti-pick', ch);
+      renderMenu();
+    });
+    var box = $('levels');
+    box.innerHTML = '';
+    LEVELS.forEach(function (l, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      var open = i <= PROG.open;
+      b.className = 'lvl' + (PROG.done[i] ? ' done' : '') + (open ? '' : ' lock');
+      b.innerHTML = '<b>' + (i + 1) + '</b>' + ['Il prato', 'La spiaggia', 'La neve', 'La giungla', 'Il castello'][Math.floor(i / 3) % 5] + '<small>' + (open ? l.b.length + (l.b.length === 1 ? ' bolla' : ' bolle') : '🔒') + '</small>';
+      b.onclick = function () {
+        if (open) {
+          K.del('bollegiganti-run');
+          startGame(i);
+        }
+      };
+      box.appendChild(b);
+    });
+    var sv = K.load('bollegiganti-run', null),
+      cb = $('cont');
+    if (sv && LEVELS[sv.lv]) {
+      cb.hidden = false;
+      cb.innerHTML = '▶ Continua<small>Livello ' + (sv.lv + 1) + ' · ' + sv.score + ' punti · ' + (sv.player || '') + '</small>';
+      cb.onclick = function () {
+        score = sv.score;
+        lives = sv.lives;
+        pick = sv.pick || pick;
+        player = sv.player || K.player(0);
+        P = null;
+        startLevel(sv.lv);
+        $('menu').hidden = true;
+        K.start();
+      };
+    } else cb.hidden = true;
+  }
+  function showMenu() {
+    K.stop();
+    $('end').hidden = true;
+    state = 'menu';
+    renderMenu();
+    $('menu').hidden = false;
+    K.wantMusic = null;
+  }
+  function showEnd(ok) {
+    K.stop();
+    $('endT').textContent = ok ? '🏆 HAI SCOPPIATO TUTTE LE BOLLE!' : 'Fine partita';
+    $('endS').textContent = player + ': ' + score + ' punti · arrivato al livello ' + (lv + 1);
+    $('end').hidden = false;
+  }
+  $('endAgain').onclick = function () {
+    startGame(ok1());
+  };
+  var ok1 = function ok1() {
+    return state === 'done' ? 0 : lv;
+  };
+  $('endMenu').onclick = showMenu;
+  $('boardBtn').onclick = function () {
+    var sec = [{
+      cols: [{
+        h: 'Giocatore',
+        f: function f(r) {
+          return r.name;
+        }
+      }, {
+        h: 'Punti',
+        f: function f(r) {
+          return r.pts || 0;
+        }
+      }, {
+        h: 'Record',
+        f: function f(r) {
+          return r.max && r.max.record || 0;
+        }
+      }, {
+        h: 'Livello',
+        f: function f(r) {
+          return r.max && r.max.livello || 0;
+        }
+      }],
+      rows: K.boardOf('bollegiganti')
+    }];
+    sec.games = ['bollegiganti'];
+    K.showBoard('Classifica Bolle Giganti', sec, 'Bolle piccole valgono di più: 50 · 75 · 100 · 150 punti, più il bonus del tempo');
+  };
+  pick = K.load('bollegiganti-pick', 'tommy');
+  if (!K.CHARS[pick]) pick = 'tommy';
+  K.buttons([{
+    k: 'left',
+    label: '◀',
+    pos: 'bl1 big'
+  }, {
+    k: 'right',
+    label: '▶',
+    pos: 'bl2 big'
+  }, {
+    k: 'a',
+    label: '🎯<small>RAMPINO</small>',
+    pos: 'br1 big'
+  }]);
+  K.game = {
+    update: update,
+    draw: draw,
+    save: function save() {
+      if (state === 'play' || state === 'hit' || state === 'clear') return K.save('bollegiganti-run', {
+        lv: state === 'clear' ? Math.min(LEVELS.length - 1, lv + 1) : lv,
+        score: score,
+        lives: lives,
+        pick: pick,
+        player: player
+      });
+      return true;
+    },
+    exit: showMenu
+  };
+  K.initUI();
+  K.run();
+  showMenu();
+  window.__G = {
+    startGame: startGame,
+    update: update,
+    get balls() {
+      return balls;
+    },
+    get P() {
+      return P;
+    },
+    get state() {
+      return state;
+    },
+    get ropes() {
+      return ropes;
+    },
+    get lv() {
+      return lv;
+    },
+    get score() {
+      return score;
+    },
+    get lives() {
+      return lives;
+    },
+    LEVELS: LEVELS
+  };
+})();</script>
+</body>
+</html>
