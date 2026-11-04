@@ -2316,6 +2316,9 @@ var K = function () {
     },
     play(m) {
       var s = G.s;
+      s.log = (s.log || []).concat([m.path.map(sqn).join(m.caps.length ? 'x' : '-')]);
+      if (!s.lost) s.lost = [0, 0];
+      s.lost[1 - G.turn] += m.caps.length;
       s.b = damaApply(s.b, m);
       s.last = m.path.slice();
       s.sel = -1;
@@ -2769,6 +2772,39 @@ var K = function () {
     }
     return best;
   }
+  var FILES = 'abcdefgh',
+    sqn = function sqn(i) {
+      return FILES[i % 8] + (8 - Math.floor(i / 8));
+    },
+    ITN = {
+      K: 'R',
+      Q: 'D',
+      R: 'T',
+      B: 'A',
+      N: 'C',
+      P: ''
+    };
+  function chNote(st, m, ns) {
+    if (m.cas) return m.cas === 'K' ? '0-0' : '0-0-0';
+    var ty = st.b[m.f][1];
+    var n = ITN[ty];
+    if (ty !== 'P') {
+      var oth = chLegal(st).filter(function (o) {
+        return o.t === m.t && o.f !== m.f && st.b[o.f] === st.b[m.f];
+      });
+      if (oth.length) n += oth.some(function (o) {
+        return o.f % 8 === m.f % 8;
+      }) ? String(8 - Math.floor(m.f / 8)) : FILES[m.f % 8];
+    }
+    if (m.cap) {
+      if (ty === 'P') n += FILES[m.f % 8];
+      n += 'x';
+    }
+    n += sqn(m.t);
+    if (m.pr) n += '=D';
+    if (inCheck(ns, ns.turn)) n += chLegal(ns).length ? '+' : '#';
+    return n;
+  }
   var CHESS = {
     init() {
       var s = chInit();
@@ -2811,6 +2847,12 @@ var K = function () {
         ns = chApply(s, m);
       ns.sel = -1;
       ns.last = [m.f, m.t];
+      ns.log = (s.log || []).concat([chNote(s, m, ns)]);
+      ns.lost = {
+        w: ((s.lost || {}).w || []).slice(),
+        b: ((s.lost || {}).b || []).slice()
+      };
+      if (m.cap) ns.lost[m.cap[0]].push(m.cap[1]);
       ns.anim = {
         f: m.f,
         t: m.t,
@@ -3749,11 +3791,12 @@ var K = function () {
       L.ax = 10;
       L.ay = top;
       L.aw = W - 20;
-      L.ah = Hh - top - 190;
+      var ph = G && (G.kind === 'scacchi' || G.kind === 'dama') ? 230 : 170;
+      L.ah = Hh - top - ph - 20;
       L.px = 10;
       L.py = L.ay + L.ah + 10;
       L.pw = W - 20;
-      L.ph = 170;
+      L.ph = ph;
     }
     if (G && G.kind === 'scopa') {
       L.fx = L.ax + 10;
@@ -3812,6 +3855,11 @@ var K = function () {
     ctx.lineWidth = 2.5;
     ctx.strokeStyle = SS.OUT;
     ctx.strokeRect(L.bx, L.by, L.bs, L.bh);
+    var fz = Math.max(10, Math.min(13, L.sw * .2));
+    for (var i = 0; i < 8; i++) {
+      ctext(FILES[i], L.bx + (i + .5) * L.sw, L.by + L.bh + fz + 1, fz, 'rgba(255,240,210,.9)', 'center');
+      ctext(String(8 - i), L.bx - 7, L.by + (i + .5) * L.sh + fz * .35, fz, 'rgba(255,240,210,.9)', 'center');
+    }
   }
   function sqXY(L, i) {
     var r = Math.floor(i / 8),
@@ -3931,10 +3979,72 @@ var K = function () {
     var st = G.over ? G.over.msg : G.turn < 0 ? '' : isCPU(G.turn) ? 'Il computer pensa…' : G.mode === 'cpu' ? 'Tocca a te!' : 'Tocca a ' + who(G.turn) + '!';
     if (G.kind === 'scopa' && !G.over && G.s.sel >= 0 && !G.s.pend) st = (G.s.opts || []).length ? 'Tocca le carte verdi da prendere, oppure ritocca la tua carta.' : 'Nessuna presa: ritocca la carta (o il tavolo) per lasciarla giù.';
     wrap(st, x + 16, yy, w - 32, 17, G.over ? '#f2c230' : '#ffe48a');
-    yy += L.land ? 60 : 34;
+    yy += L.land ? 52 : 34;
+    if (G.kind === 'scacchi' || G.kind === 'dama') notes(L, x, y, w, h, yy);
     if (L.land) {
       button('again', G.over ? '🔄 Rivincita' : '🔄 Ricomincia', x + 16, y + h - 62, w - 32, 46, G.over ? '#f2c230' : '#d9dde4');
-    } else button('again', G.over ? '🔄 Rivincita' : '🔄 Ricomincia', x + w - 180, y + 16, 164, 42, G.over ? '#f2c230' : '#d9dde4');
+    } else button('again', G.over ? '🔄 Rivincita' : '🔄 Ricomincia', x + w - 180, y + h - 56, 164, 42, G.over ? '#f2c230' : '#d9dde4');
+  }
+  function notes(L, x, y, w, h, yy) {
+    var s = G.s,
+      log = s.log || [];
+    var nx = x + 16;
+    if (!L.land) {
+      nx = x + w * .5;
+      yy = y + 30;
+    }
+    var lastBy = (log.length - 1) % 2;
+    ctext('Ultima mossa:', nx, yy, 15, '#c7ccd8');
+    yy += 22;
+    ctext(log.length ? who(lastBy) + ' → ' + log[log.length - 1] : '—', nx, yy, 19, '#ffffff');
+    yy += 30;
+    if (G.kind === 'scacchi') {
+      var lost = s.lost || {
+        w: [],
+        b: []
+      };
+      var _loop7 = function _loop7() {
+        var c = _arr11[_i22];
+        var arr = lost[c].slice().sort(function (a, b2) {
+          return VAL[b2] - VAL[a];
+        });
+        ctext('Mangiati ai ' + (c === 'w' ? 'bianchi' : 'neri') + ': ' + arr.length, nx, yy, 15, '#ffe48a');
+        yy += 18;
+        var sz = Math.min(26, (L.land ? w - 40 : w * .5 - 30) / 8.5);
+        arr.forEach(function (ty, i) {
+          var px = nx + 12 + i % 8 * sz,
+            py = yy + sz * .55 + Math.floor(i / 8) * sz * 1.5;
+          piece(ty, c, px, py, sz * 1.45);
+        });
+        yy += sz * 1.5 * Math.max(1, Math.ceil(arr.length / 8)) + 12;
+      };
+      for (var _i22 = 0, _arr11 = ['w', 'b']; _i22 < _arr11.length; _i22++) {
+        _loop7();
+      }
+    } else {
+      var _lost = s.lost || [0, 0];
+      ctext('Pedine mangiate:', nx, yy, 15, '#ffe48a');
+      yy += 24;
+      for (var _i23 = 0, _arr12 = [0, 1]; _i23 < _arr12.length; _i23++) {
+        var p = _arr12[_i23];
+        disc(nx + 12, yy, 22, p, false);
+        ctext((p === 0 ? 'bianchi: ' : 'rossi: ') + _lost[p], nx + 30, yy + 2, 16, '#ffffff');
+        yy += 26;
+      }
+    }
+    if (!L.land) return;
+    yy += 6;
+    ctext('Mosse', x + 16, yy, 15, '#c7ccd8');
+    yy += 6;
+    var rows = Math.ceil(log.length / 2),
+      room = Math.floor((y + h - 80 - yy) / 20);
+    if (room < 1) return;
+    for (var r = Math.max(0, rows - room); r < rows; r++) {
+      yy += 20;
+      ctext(r + 1 + '.', x + 16, yy, 14, '#9aa0b5');
+      ctext(log[r * 2] || '', x + 50, yy, 14, r * 2 === log.length - 1 ? '#f2c230' : '#ffffff');
+      ctext(log[r * 2 + 1] || '', x + 50 + (w - 66) / 2, yy, 14, r * 2 + 1 === log.length - 1 ? '#f2c230' : '#ffffff');
+    }
   }
   function wrap(s, x, y, w, size, c) {
     ctx.font = '700 ' + size + "px 'Pixelify Sans', monospace";
