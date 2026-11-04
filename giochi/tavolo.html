@@ -82,7 +82,7 @@ a.home{color:#1d1f2b}
     <button class="lvl tg" type="button" data-kind="tris"><b>❌⭕</b>Tris<small>tre in fila e vinci</small></button>
     <button class="lvl tg" type="button" data-kind="dama"><b>⚪🔴</b>Dama<small>regole italiane</small></button>
     <button class="lvl tg" type="button" data-kind="scacchi"><b>♞</b>Scacchi<small>con arrocco e promozione</small></button>
-    <button class="lvl tg" type="button" data-kind="scopa"><b>🃏</b>Scopa<small>carte italiane, si vince a 11</small></button>
+    <button class="lvl tg" type="button" data-kind="scopa"><b>🃏</b>Scopa<small>carte napoletane, si vince a 11</small></button>
   </div>
   <h2>Contro chi giochi?</h2>
   <div class="row">
@@ -3382,7 +3382,7 @@ var K = function () {
       var dx = L.fx + 16,
         dy = L.ty + L.th / 2 - L.ch / 2;
       for (var k = 0; k < Math.min(6, Math.ceil(s.deck.length / 6)); k++) cardBack(dx + k * 1.5, dy - k * 1.5, L.cw, L.ch);
-      if (s.deck.length) K.text(String(s.deck.length), dx + L.cw / 2 + 8, dy + L.ch + 18, 15, '#fff', 'center');
+      if (s.deck.length) ctext(String(s.deck.length) + ' carte', dx + L.cw / 2 + 4, dy + L.ch + 22, 16, '#fff', 'center');
       for (var _i16 = 0, _arr0 = [[op, L.fy + 12], [me, L.fy + L.fh - L.ch * .55 - 12]]; _i16 < _arr0.length; _i16++) {
         var _arr0$_i = _slicedToArray(_arr0[_i16], 2),
           p = _arr0$_i[0],
@@ -3390,7 +3390,7 @@ var K = function () {
         var n = s.caps[p].length,
           px = L.fx + L.fw - L.cw - 18;
         for (var _k = 0; _k < Math.min(8, Math.ceil(n / 5)); _k++) cardBack(px + _k * 1.2, yy - _k * 1.2, L.cw, L.ch * .55, true);
-        K.text((p === me && G.mode === 'cpu' ? 'Le tue prese: ' : who(p) + ': ') + n + (s.scope[p] ? ' · scope ' + s.scope[p] : ''), px + L.cw, yy + L.ch * .55 + 16, 13, '#fff', 'right');
+        ctext((p === me && G.mode === 'cpu' ? 'Le tue prese: ' : who(p) + ': ') + n + (s.scope[p] ? ' · scope ' + s.scope[p] : ''), px + L.cw, yy + L.ch * .55 + 20, 15, '#fff', 'right');
       }
       var oh = s.hands[op];
       for (var i = 0; i < oh.length; i++) {
@@ -3514,57 +3514,113 @@ var K = function () {
       dot(x + w / 2, y + h / 2, w * .16, '#f2c230');
     }
   }
+  var CF = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+  function ctext(s, x, y, size, col, align) {
+    ctx.font = '800 ' + Math.round(size) + 'px ' + CF;
+    ctx.textAlign = align || 'left';
+    ctx.fillStyle = col;
+    ctx.fillText(s, x, y);
+    ctx.textAlign = 'left';
+  }
+  var SCOL = function SCOL(s) {
+    return ['#b07a00', '#c0282f', '#2856a8', '#2f7a2a'][s];
+  };
   function suit(s, x, y, r) {
     var o = SS.LW;
-    SS.LW = Math.max(1.4, r * .16);
+    SS.LW = Math.max(1.2, r * .13);
     if (s === 0) {
-      orb(x, y, r, r, '#e8b52a');
       ctx.beginPath();
-      ctx.arc(x, y, r * .6, 0, 6.2832);
-      ctx.lineWidth = Math.max(1, r * .14);
-      ctx.strokeStyle = '#a87a10';
-      ctx.stroke();
-      dot(x, y, r * .22, '#c0392b');
-    }
-    if (s === 1) {
-      curve([x - r, y - r * .7, x + r, y - r * .7, x + r * .6, y + r * .1, x, y + r * .25, x - r * .6, y + r * .1], '#d8433f');
-      limb(x, y + r * .2, x, y + r * .7, r * .25, '#e8b52a');
-      ctx.beginPath();
-      ctx.ellipse(x, y + r * .8, r * .55, r * .2, 0, 0, 6.2832);
+      ctx.arc(x, y, r, 0, 6.2832);
       SS.edge();
-      ctx.fillStyle = '#e8b52a';
+      var g = ctx.createRadialGradient(x - r * .35, y - r * .35, r * .1, x, y, r);
+      g.addColorStop(0, '#ffe27a');
+      g.addColorStop(1, '#d99a10');
+      ctx.fillStyle = g;
       ctx.fill();
       ctx.beginPath();
-      ctx.ellipse(x, y - r * .7, r, r * .22, 0, 0, 6.2832);
-      ctx.fillStyle = '#8c1c24';
+      ctx.arc(x, y, r * .78, 0, 6.2832);
+      ctx.lineWidth = Math.max(1, r * .09);
+      ctx.strokeStyle = '#a87000';
+      ctx.stroke();
+      dot(x, y, r * .5, '#c0282f');
+      for (var k = 0; k < 8; k++) {
+        var a = k * Math.PI / 4;
+        ctx.beginPath();
+        ctx.ellipse(x + Math.cos(a) * r * .3, y + Math.sin(a) * r * .3, r * .14, r * .07, a, 0, 6.2832);
+        ctx.fillStyle = '#f6d04a';
+        ctx.fill();
+      }
+      dot(x, y, r * .13, '#f6d04a');
+    }
+    if (s === 1) {
+      ctx.beginPath();
+      ctx.moveTo(x - r * .85, y - r * .75);
+      ctx.quadraticCurveTo(x - r * .85, y + r * .15, x, y + r * .2);
+      ctx.quadraticCurveTo(x + r * .85, y + r * .15, x + r * .85, y - r * .75);
+      ctx.closePath();
+      SS.edge();
+      var _g2 = ctx.createLinearGradient(x - r, 0, x + r, 0);
+      _g2.addColorStop(0, '#ffe27a');
+      _g2.addColorStop(1, '#c98a10');
+      ctx.fillStyle = _g2;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(x, y - r * .75, r * .85, r * .2, 0, 0, 6.2832);
+      SS.edge();
+      ctx.fillStyle = '#c0282f';
+      ctx.fill();
+      rrp(x - r * .12, y + r * .15, r * .24, r * .5, r * .1);
+      ctx.fillStyle = '#d99a10';
+      ctx.fill();
+      dot(x, y + r * .4, r * .17, '#c0282f');
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * .8, r * .5, r * .17, 0, 0, 6.2832);
+      SS.edge();
+      ctx.fillStyle = '#d99a10';
       ctx.fill();
     }
     if (s === 2) {
-      shape([x - r * .16, y - r * .1, x + r * .16, y - r * .1, x + r * .16, y - r * 1.05, x, y - r * 1.3, x - r * .16, y - r * 1.05], '#d9dde4');
-      limb(x - r * .55, y, x + r * .55, y, r * .22, '#3f86d4');
-      limb(x, y, x, y + r * .6, r * .24, '#6b4a2e');
-      dot(x, y + r * .75, r * .18, '#e8b52a');
+      ctx.beginPath();
+      ctx.moveTo(x - r * .13, y - r * .2);
+      ctx.quadraticCurveTo(x - r * .25, y - r * .85, x + r * .12, y - r * 1.25);
+      ctx.quadraticCurveTo(x + r * .18, y - r * .7, x + r * .13, y - r * .2);
+      ctx.closePath();
+      SS.edge();
+      ctx.fillStyle = '#4f86d8';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.6)';
+      ctx.lineWidth = Math.max(1, r * .06);
+      ctx.beginPath();
+      ctx.moveTo(x - r * .04, y - r * .3);
+      ctx.quadraticCurveTo(x - r * .12, y - r * .8, x + r * .08, y - r * 1.1);
+      ctx.stroke();
+      limb(x - r * .5, y - r * .15, x + r * .5, y - r * .15, r * .17, '#e0a820');
+      limb(x, y - r * .1, x, y + r * .55, r * .2, '#c0282f');
+      dot(x, y + r * .72, r * .17, '#e0a820');
     }
     if (s === 3) {
-      limb(x - r * .3, y + r * .9, x + r * .3, y - r * .9, r * .42, '#8a5a32');
-      dot(x - r * .05, y + r * .1, r * .12, '#5d4030');
-      dot(x + r * .12, y - r * .4, r * .12, '#5d4030');
-      curve([x + r * .25, y - r * .7, x + r * .8, y - r * .95, x + r * .55, y - r * .45], '#4aa35a');
+      limb(x - r * .28, y + r * .95, x + r * .28, y - r * .95, r * .36, '#6aa336');
+      limb(x - r * .18, y + r * .6, x + r * .18, y - r * .6, r * .12, '#c0282f');
+      for (var _i20 = 0, _arr1 = [-.45, .05, .55]; _i20 < _arr1.length; _i20++) {
+        var q = _arr1[_i20];
+        dot(x + q * r * .3, y - q * r * .9, r * .13, '#3f6a24');
+      }
+      curve([x + r * .2, y - r * .55, x + r * .7, y - r * .85, x + r * .45, y - r * .35], '#4aa35a');
     }
     SS.LW = o;
   }
   var PIPS = {
-    1: [[.5, .5]],
-    2: [[.5, .28], [.5, .72]],
-    3: [[.5, .22], [.5, .5], [.5, .78]],
-    4: [[.3, .28], [.7, .28], [.3, .72], [.7, .72]],
-    5: [[.3, .25], [.7, .25], [.5, .5], [.3, .75], [.7, .75]],
-    6: [[.3, .22], [.7, .22], [.3, .5], [.7, .5], [.3, .78], [.7, .78]],
-    7: [[.3, .2], [.7, .2], [.5, .36], [.3, .52], [.7, .52], [.3, .8], [.7, .8]]
+    2: [[.5, .2], [.5, .8]],
+    3: [[.5, .2], [.5, .5], [.5, .8]],
+    4: [[.3, .2], [.7, .2], [.3, .8], [.7, .8]],
+    5: [[.3, .2], [.7, .2], [.5, .5], [.3, .8], [.7, .8]],
+    6: [[.3, .2], [.7, .2], [.3, .5], [.7, .5], [.3, .8], [.7, .8]],
+    7: [[.3, .18], [.7, .18], [.5, .34], [.3, .5], [.7, .5], [.3, .82], [.7, .82]]
   };
   function card(c, x, y, w, h, hl) {
     var v = cv(c),
-      s = cs(c);
+      s = cs(c),
+      col = SCOL(s);
     SS.shadow(x + w / 2 + 3, y + h - 2, w * .42, .7);
     if (hl) {
       rrp(x - 4, y - 4, w + 8, h + 8, w * .13);
@@ -3574,18 +3630,22 @@ var K = function () {
     rrp(x, y, w, h, w * .1);
     edge(2);
     var g = ctx.createLinearGradient(x, y, x + w, y + h);
-    g.addColorStop(0, '#fffaf0');
-    g.addColorStop(1, '#efe2c4');
+    g.addColorStop(0, '#fffdf6');
+    g.addColorStop(1, '#f3ead6');
     ctx.fillStyle = g;
     ctx.fill();
-    var colN = ['#b8860b', '#c0392b', '#3f6fb0', '#4a7a2a'][s];
-    K.text(String(v), x + w * .1, y + w * .3, Math.round(w * .26), colN, 'left', false);
-    var ix = x + w * .12,
-      iy = y + h * .14,
-      iw = w * .76,
-      ih = h * .76;
-    if (v <= 7) {
-      var r = w * (v === 1 ? .24 : v <= 3 ? .13 : .11);
+    rrp(x + w * .05, y + w * .05, w * .9, h - w * .1, w * .07);
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = 'rgba(176,122,0,.45)';
+    ctx.stroke();
+    var fs = w * .28;
+    ctext(String(v), x + w * .17, y + fs * 1.05, fs, col, 'center');
+    var ix = x + w * .17,
+      iy = y + h * .16,
+      iw = w * .66,
+      ih = h * .7;
+    if (v === 1) suit(s, x + w / 2, y + h / 2, w * .27);else if (v <= 7) {
+      var r = w * (v <= 3 ? .13 : .1);
       var _iterator24 = _createForOfIteratorHelper(PIPS[v]),
         _step24;
       try {
@@ -3600,11 +3660,8 @@ var K = function () {
       } finally {
         _iterator24.f();
       }
-      if (c === 6) {
-        K.text('★', x + w * .84, y + w * .3, Math.round(w * .2), '#e0373f', 'center', false);
-      }
-    } else figure(v, s, x + w / 2, y + h * .62, w * .9);
-    K.text(v === 8 ? 'Fante' : v === 9 ? 'Cavallo' : v === 10 ? 'Re' : '', x + w / 2, y + h - w * .08, Math.round(w * .15), '#5d4030', 'center', false);
+    } else figure(v, s, x + w / 2, y + h * .58, w * .66);
+    if (c === 6) ctext('settebello', x + w / 2, y + h * .955, w * .115, '#b07a00', 'center');else if (v > 7) ctext(v === 8 ? 'Fante' : v === 9 ? 'Cavallo' : 'Re', x + w / 2, y + h * .955, w * .13, '#5d4030', 'center');
   }
   function figure(v, s, x, y, w) {
     var k = w / 60;
@@ -3613,32 +3670,51 @@ var K = function () {
     ctx.scale(k, k);
     var o = SS.LW;
     SS.LW = 2;
+    var robe = ['#d99a10', '#c0282f', '#2856a8', '#2f7a2a'][s],
+      robe2 = s === 0 ? '#c0282f' : '#f2c230';
+    var held = function held() {
+      ctx.save();
+      ctx.translate(15, 2);
+      ctx.scale(1 / k, 1 / k);
+      suit(s, 0, 0, w * .15);
+      ctx.restore();
+    };
     if (v === 9) {
-      curve([-14, 20, -12, -4, -4, -18, 6, -26, 18, -22, 20, -14, 10, -12, 6, 0, 10, 20], '#9a6a3a');
-      curve([-6, -16, -14, -6, -16, 10, -10, -2], '#4a2e1c');
-      SS.eye(8, -18, 2.2);
-      dot(17, -15, 1.4, SS.OUT);
-      shape([0, -24, 3, -34, 6, -25], '#9a6a3a');
-      suit(s, -14, -24, 7);
+      curve([-20, 26, -18, 8, -8, -2, 10, -6, 20, -4, 24, 4, 16, 6, 12, 26], '#a8743f');
+      curve([14, -6, 22, -22, 30, -18, 26, -6], '#a8743f');
+      SS.eye(24, -15, 1.6);
+      curve([12, -8, 16, -22, 10, -14], '#4a2e1c');
+      curve([-8, -2, -6, -20, 4, -20, 6, -2], robe);
+      orb(-1, -28, 7.5, 8, '#f6cfa8');
+      SS.eye(2, -29, 1.5);
+      ctx.beginPath();
+      ctx.ellipse(-1, -33, 8.5, 4, 0, Math.PI, 6.2832);
+      ctx.closePath();
+      SS.edge();
+      ctx.fillStyle = robe2;
+      ctx.fill();
+      held();
     } else {
-      var king = v === 10,
-        cl = king ? '#8a5cc7' : '#3f86d4';
-      curve([-14, 22, -12, 0, -6, -6, 6, -6, 12, 0, 14, 22], cl);
-      orb(0, -14, 9, 9, '#f4c9a0');
+      var king = v === 10;
+      curve([-16, 26, -13, 2, -6, -5, 6, -5, 13, 2, 16, 26], robe);
+      shape([-4, -5, 4, -5, 6, 26, -6, 26], robe2, true);
+      orb(0, -14, 9, 9.5, '#f6cfa8');
       SS.eye(4, -15, 1.8);
+      dot(2, -10, 1.3, 'rgba(220,90,90,.5)');
       if (king) {
-        curve([-6, -10, 8, -10, 6, -2, 0, 0, -5, -3], '#e8ecf4');
-        shape([-8, -21, -7, -30, -3, -25, 0, -32, 3, -25, 7, -30, 8, -21], '#f2c230');
+        curve([-6, -10, 8, -10, 7, 0, 0, 4, -5, -1], '#f4f4f4');
+        shape([-9, -21, -8, -32, -4, -26, 0, -34, 4, -26, 8, -32, 9, -21], '#f2c230');
+        dot(0, -27, 1.6, '#c0282f');
       } else {
         ctx.beginPath();
-        ctx.ellipse(0, -20, 11, 5, 0, Math.PI, 6.2832);
+        ctx.ellipse(0, -21, 11, 5, 0, Math.PI, 6.2832);
         ctx.closePath();
         SS.edge();
-        ctx.fillStyle = '#c0392b';
+        ctx.fillStyle = robe2;
         ctx.fill();
-        curve([6, -24, 16, -34, 10, -22], '#f2c230');
+        curve([6, -25, 17, -35, 11, -22], '#ffffff');
       }
-      suit(s, 13, 4, 8);
+      held();
     }
     SS.LW = o;
     ctx.restore();
@@ -3845,8 +3921,8 @@ var K = function () {
       K.text('smazzata ' + s.hand + ' · si vince a 11', x + 16, yy, 13, '#c7ccd8');
       yy += 28;
     } else {
-      for (var _i20 = 0, _arr1 = [0, 1]; _i20 < _arr1.length; _i20++) {
-        var p = _arr1[_i20];
+      for (var _i21 = 0, _arr10 = [0, 1]; _i21 < _arr10.length; _i21++) {
+        var p = _arr10[_i21];
         K.text(who(p) + ' ' + K2.side(p), x + 16, yy, 16, G.turn === p && !G.over ? '#5fd06a' : '#fff');
         yy += 24;
       }
@@ -4119,6 +4195,7 @@ var K = function () {
       lay = v;
     },
     layout: layout,
+    card: card,
     capOpts: capOpts,
     scopaPoints: scopaPoints
   };
