@@ -2736,11 +2736,15 @@ var K = function () {
     score += 1000;
     K.jingle([523, 659, 784, 1046, 1318], 110);
     if (si === STAGES.length - 1) {
+      var vw = K.W / scale();
       princess = {
-        x: hero.x + 80,
+        x: hero.x + (hero.x > camX + vw / 2 ? -90 : 90),
         y: hero.y,
         t: 0
       };
+      hero.face = princess.x > hero.x ? 1 : -1;
+      hero.down = 0;
+      hero.stun = 0;
     }
     PROG.best = Math.max(PROG.best || 0, score);
     if (PROG.open < si + 1 && si + 1 < STAGES.length) PROG.open = si + 1;
