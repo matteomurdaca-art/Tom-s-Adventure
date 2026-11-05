@@ -1,17 +1,30 @@
 {
-  "name": "L'avventura di Tom",
-  "short_name": "Tom",
-  "description": "Un videogioco nato dai disegni di un bambino di 7 anni.",
+  "name": "Sala di Tom",
+  "short_name": "Sala di Tom",
+  "description": "La sala giochi di Tommy: tanti giochi nati dai suoi disegni.",
   "lang": "it",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "any",
-  "background_color": "#f6f7fb",
-  "theme_color": "#5fb04a",
+  "background_color": "#1d1f2b",
+  "theme_color": "#2b1d5c",
   "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
