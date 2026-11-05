@@ -1,0 +1,3136 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d1f2b">
+<title>Il Bruco Mangione</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1f2b;--paper:#f6f7fb;--yel:#f2c230;--blu:#3f86d4;--red:#e0373f;--grn:#4aa35a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#14151d;color:#fff;font-family:'Pixelify Sans',monospace}
+body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#stage{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#cv{position:absolute;top:0;left:0;display:block;touch-action:none}
+#hud{position:absolute;top:6px;right:8px;display:none;z-index:5}
+body.playing #hud{display:flex}
+#hud button{font:700 16px 'Pixelify Sans',monospace;background:rgba(20,21,29,.75);color:#fff;border:2px solid #5d6273;padding:6px 10px;margin-left:6px;cursor:pointer}
+#pad{position:absolute;left:0;right:0;bottom:0;height:0;display:none;z-index:4}
+body.playing #pad{display:block}
+.kb{position:absolute;bottom:14px;width:78px;height:78px;border:3px solid rgba(255,255,255,.7);background:rgba(20,21,29,.45);color:#fff;font:700 30px 'Pixelify Sans',monospace;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;border-radius:14px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.3)}
+.kb.on{background:rgba(242,194,48,.75);color:#1d1f2b}
+.kb small{font-size:12px;display:block}
+.kb.bl1{left:14px} .kb.bl2{left:104px} .kb.bl3{left:194px}
+.kb.br1{right:14px} .kb.br2{right:104px} .kb.br3{right:194px}
+.kb.big.bl2{left:122px} .kb.big.br2{right:122px}
+.kb.blu{left:59px;bottom:104px} .kb.bld{left:59px}
+.kb.big{width:96px;height:96px}
+@media (orientation:landscape) and (min-height:561px){ .kb{bottom:64px} .kb.blu{bottom:154px} }
+@media (max-height:420px){ .kb{width:64px;height:64px;font-size:24px} .kb.bl2{left:88px} .kb.bl3{left:162px} .kb.br2{right:88px} .kb.br3{right:162px} .kb.big{width:76px;height:76px} .kb.big.bl2{left:98px} .kb.big.br2{right:98px} }
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(10,11,18,.72);z-index:10;padding:12px;overflow:auto}
+.ov[hidden],[hidden]{display:none!important}
+.card{background:#f6f7fb;color:#1d1f2b;border:4px solid #14151d;box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:16px 18px;max-width:760px;width:100%;text-align:center;max-height:100%;overflow:auto}
+.card h1{margin:0 0 6px;font-size:34px} .card h2{margin:0 0 8px;font-size:26px}
+.card p{margin:6px 0}
+.go{font:700 20px 'Pixelify Sans',monospace;background:var(--yel);color:#1d1f2b;border:3px solid #14151d;padding:9px 16px;margin:5px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.22),inset 3px 3px 0 rgba(255,255,255,.5)}
+.go.alt{background:#fff} .go:disabled{opacity:.45;cursor:default}
+.go small{display:block;font-size:13px;font-weight:400}
+.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}
+.kchars{display:flex;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.kchar{font:700 15px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:4px;padding:6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;color:#1d1f2b}
+.kchar canvas{width:44px;height:58px;image-rendering:pixelated;image-rendering:crisp-edges}
+.kchar.sel{background:var(--yel)}
+.note{font-size:14px;color:#5d6273}
+#kpnote.ok{color:#2f7d2e;font-weight:700} #kpnote.bad{color:#c62828;font-weight:700}
+#ktoast{position:absolute;left:50%;top:12px;transform:translateX(-50%);-webkit-transform:translateX(-50%);z-index:30;background:#4aa35a;color:#fff;font:700 18px 'Pixelify Sans',monospace;padding:6px 14px;border:3px solid #14151d;pointer-events:none;white-space:nowrap}
+#ktoast.bad{background:#e0373f}
+#kpriv{background:#fff3cd;border:2px solid #e0373f;color:#7a1d22;padding:6px 8px;font-size:14px;margin:6px 0}
+.lvls{display:flex;flex-wrap:wrap;justify-content:center}
+.lvl{font:700 16px 'Pixelify Sans',monospace;width:150px;min-height:92px;margin:5px;padding:8px;border:3px solid #14151d;background:#fff;cursor:pointer;color:#1d1f2b;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lvl b{font-size:26px} .lvl.done{background:#c9f0cf} .lvl.lock{background:#e3e5ec;color:#9aa0b5;cursor:default}
+.lvl small{font-weight:400;font-size:13px}
+a.home{color:#1d1f2b}
+.kplayers{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;margin:4px 0 8px}
+.kpl{font:700 17px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:3px;padding:6px 10px;cursor:pointer;color:#1d1f2b}
+.kpl.sel{background:var(--yel)} .kpl.add{background:#e9f6ea}
+.kplin{font:700 18px 'Pixelify Sans',monospace;border:3px solid #14151d;padding:6px 8px;margin:3px;width:180px}
+.kbh{margin:10px 0 4px;font-size:20px}
+.kbt{border-collapse:collapse;margin:4px auto 8px;font:700 16px 'Pixelify Sans',monospace;min-width:280px}
+.kbt th,.kbt td{border:2px solid #14151d;padding:4px 10px;background:#fff} .kbt th{background:#e3e5ec} .kbt tr.first td{background:#fff3c4}
+.kb.dl{left:10px;bottom:74px}.kb.dr{left:150px;bottom:74px}.kb.du{left:80px;bottom:140px}.kb.dd{left:80px;bottom:8px}.kb.dl,.kb.dr,.kb.du,.kb.dd{width:68px;height:68px}@media (max-height:420px){.kb.dl,.kb.dr,.kb.du,.kb.dd{width:56px;height:56px}.kb.dl{left:8px;bottom:62px}.kb.dr{left:124px;bottom:62px}.kb.du{left:66px;bottom:118px}.kb.dd{left:66px;bottom:6px}}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="hud"><button id="kback" type="button">◀ Indietro</button><button id="kpbtn" type="button">❚❚ Pausa</button></div>
+<div id="pad"></div>
+<div class="ov" id="kpause" hidden><div class="card">
+  <h2>❚❚ Pausa</h2>
+  <p id="kpnote"></p>
+  <div class="row">
+    <button class="go" id="kresume" type="button">▶ Riprendi</button>
+    <button class="go alt" id="ksave" type="button">💾 Salva</button>
+    <button class="go alt" id="ksaveexit" type="button">◀ Salva ed esci</button>
+  </div>
+  <div class="row"><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+  <p class="note">Il Bruco Mangione · Sala giochi di Tom · versione 1</p>
+</div></div>
+<div id="ktoast" hidden></div>
+<div class="ov" id="kboard" hidden style="z-index:20"><div class="card"></div></div>
+<div class="ov" id="menu"><div class="card">
+  <h1>🐛 Il Bruco Mangione</h1>
+  <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
+  <button class="go" id="cont" type="button" hidden></button>
+  <h2>Chi gioca?</h2>
+  <div id="players"></div>
+  <p id="rec" class="note"></p>
+  <button class="go" id="go" type="button">▶ Nuova partita</button>
+  <h2>Oppure scegli il giardino</h2>
+  <div class="lvls" id="levels"></div>
+  <p class="note">Guida il bruco con le frecce oppure scorrendo il dito: mangia la frutta per diventare sempre più lungo! Non sbattere contro i sassi, la siepe o la tua stessa coda. Le ⭐ valgono tanti punti ma spariscono presto.</p>
+  <div class="row"><button class="go alt" id="boardBtn" type="button">🏆 Classifica</button><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+</div></div>
+<div class="ov" id="end" hidden><div class="card">
+  <h1 id="endT"></h1><p id="endS"></p>
+  <div class="row"><button class="go alt" id="endAgain" type="button">🔄 Rigioca</button><button class="go alt" id="endMenu" type="button">◀ Menu</button></div>
+</div></div>
+
+<script>/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) });
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true });
+  defineProperty(
+    GeneratorFunctionPrototype,
+    "constructor",
+    { value: GeneratorFunction, configurable: true }
+  );
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    defineProperty(this, "_invoke", { value: enqueue });
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per GeneratorResume behavior specified since ES2015:
+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume
+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method;
+    var method = delegate.iterator[methodName];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method, or a missing .next method, always terminate the
+      // yield* loop.
+      context.delegate = null;
+
+      // Note: ["return"] must be used for ES3 parsing compatibility.
+      if (methodName === "throw" && delegate.iterator["return"]) {
+        // If the delegate iterator has a return method, give it a
+        // chance to clean up.
+        context.method = "return";
+        context.arg = undefined;
+        maybeInvokeDelegate(delegate, context);
+
+        if (context.method === "throw") {
+          // If maybeInvokeDelegate(context) changed context.method from
+          // "return" to "throw", let that override the TypeError below.
+          return ContinueSentinel;
+        }
+      }
+      if (methodName !== "return") {
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a '" + methodName + "' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(val) {
+    var object = Object(val);
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable != null) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    throw new TypeError(typeof iterable + " is not iterable");
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+(function(){
+ if(!String.prototype.padStart){String.prototype.padStart=function(n,c){var s=String(this);c=c===undefined?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};}
+ if(!Object.assign){Object.assign=function(t){for(var i=1;i<arguments.length;i++){var s=arguments[i];if(s)for(var k in s)if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k];}return t;};}
+ if(!Array.prototype.findIndex){Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};}
+ if(window.NodeList&&!NodeList.prototype.forEach){NodeList.prototype.forEach=Array.prototype.forEach;}
+ [Element.prototype,Document.prototype,DocumentFragment.prototype].forEach(function(P){ if(!P.append){P.append=function(){for(var i=0;i<arguments.length;i++){var n=arguments[i];this.appendChild(n instanceof Node?n:document.createTextNode(String(n)));}};} });
+ var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+ if(C&&!C.ellipse){C.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){this.save();this.translate(x,y);this.rotate(rot);this.scale(rx,ry);this.arc(0,0,1,a0,a1,ccw);this.restore();};}
+})();
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n2 = 0, F = function F() {}; return { s: F, n: function n() { return _n2 >= r.length ? { done: !0 } : { done: !1, value: r[_n2++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var K = function () {
+  var K = {};
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  K.$ = $;
+  var cv = $('cv'),
+    ctx = cv.getContext('2d');
+  K.cv = cv;
+  K.ctx = ctx;
+  K.W = 800;
+  K.H = 450;
+  K.dpr = 1;
+  function resize() {
+    var st = $('stage');
+    var w = Math.max(200, st.clientWidth),
+      h = Math.max(150, st.clientHeight);
+    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 1.5);
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+    cv.width = Math.round(w * K.dpr);
+    cv.height = Math.round(h * K.dpr);
+    K.W = w;
+    K.H = h;
+    K.onResize && K.onResize(w, h);
+  }
+  K.resize = resize;
+  var lsw = 0,
+    lsh = 0;
+  addEventListener('resize', resize);
+  addEventListener('orientationchange', function () {
+    setTimeout(resize, 150);
+    setTimeout(resize, 500);
+  });
+  K.keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    a: false,
+    b: false,
+    c: false
+  };
+  var prev = {};
+  K.pressed = function (k) {
+    return K.keys[k] && !prev[k];
+  };
+  K._prev = prev;
+  var BTN = [];
+  K.buttons = function (list) {
+    var pad = $('pad');
+    pad.innerHTML = '';
+    BTN.length = 0;
+    var _iterator = _createForOfIteratorHelper(list),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var b = _step.value;
+        var e = document.createElement('div');
+        e.className = 'kb ' + (b.cls || '') + ' ' + b.pos;
+        e.id = 'kb_' + b.k;
+        e.innerHTML = b.label;
+        pad.appendChild(e);
+        BTN.push({
+          el: e,
+          k: b.k
+        });
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  };
+  function touchKeys(e) {
+    var playing = K.playing && $('kpause').hidden;
+    var st = {};
+    var hit = false;
+    if (playing) for (var i = 0; i < e.touches.length; i++) {
+      var t = e.touches[i];
+      var best = null,
+        bd = 1e9;
+      var _iterator2 = _createForOfIteratorHelper(BTN),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var b = _step2.value;
+          var r = b.el.getBoundingClientRect();
+          if (!r.width || b.el.offsetParent === null) continue;
+          if (t.clientY < r.top - 45 || t.clientY > r.bottom + 200) continue;
+          if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
+          var cx = (r.left + r.right) / 2,
+            cy = (r.top + r.bottom) / 2,
+            dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .3;
+          if (dd < bd) {
+            bd = dd;
+            best = b;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      if (best) {
+        st[best.k] = true;
+        hit = true;
+      }
+    }
+    var _iterator3 = _createForOfIteratorHelper(BTN),
+      _step3;
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var _b = _step3.value;
+        K.keys[_b.k] = !!st[_b.k] || !!kbd[_b.k];
+        _b.el.classList.toggle('on', !!st[_b.k]);
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    if (hit && e.cancelable) e.preventDefault();
+  }
+  ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (ev) {
+    return document.addEventListener(ev, touchKeys, {
+      passive: false
+    });
+  });
+  document.addEventListener('mousedown', function (e) {
+    var b = BTN.find(function (b) {
+      return b.el.contains(e.target);
+    });
+    if (b) {
+      K.keys[b.k] = true;
+      b.el.classList.add('on');
+      var _up = function up() {
+        K.keys[b.k] = !!kbd[b.k];
+        b.el.classList.remove('on');
+        removeEventListener('mouseup', _up);
+      };
+      addEventListener('mouseup', _up);
+    }
+  });
+  var KMAP = {
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    KeyA: 'left',
+    KeyD: 'right',
+    KeyW: 'up',
+    KeyS: 'down',
+    Space: 'a',
+    KeyZ: 'a',
+    KeyK: 'a',
+    KeyX: 'b',
+    KeyL: 'b',
+    Enter: 'b',
+    ShiftLeft: 'b',
+    KeyC: 'c',
+    KeyJ: 'c'
+  };
+  var kbd = {};
+  addEventListener('keydown', function (e) {
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      if (K.playing) K.togglePause();
+      return;
+    }
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = true;
+      K.keys[k] = true;
+      if (K.playing) e.preventDefault();
+    }
+  });
+  addEventListener('keyup', function (e) {
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = false;
+      K.keys[k] = false;
+    }
+  });
+  document.addEventListener('contextmenu', function (e) {
+    if (K.playing) e.preventDefault();
+  });
+  var ac = null;
+  K.soundOn = true;
+  K.musicOn = true;
+  try {
+    if (localStorage.getItem('tomk-sound') === '0') K.soundOn = false;
+    if (localStorage.getItem('tomk-music') === '0') K.musicOn = false;
+  } catch (e) {}
+  function actx() {
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended' && ac.resume) ac.resume();
+    } catch (e) {}
+    return ac;
+  }
+  ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(function (ev) {
+    return document.addEventListener(ev, function () {
+      var c = actx();
+      if (c) {
+        try {
+          var b = c.createBuffer(1, 1, 22050),
+            s = c.createBufferSource();
+          s.buffer = b;
+          s.connect(c.destination);
+          s.start(0);
+        } catch (e) {}
+      }
+    }, {
+      passive: true
+    });
+  });
+  K.beep = function (f, d, type, vol, slide) {
+    if (!K.soundOn) return;
+    var c = actx();
+    if (!c) return;
+    try {
+      var o = c.createOscillator(),
+        g = c.createGain();
+      o.type = type || 'square';
+      o.frequency.value = f;
+      if (slide) o.frequency.linearRampToValueAtTime(Math.max(20, f + slide), c.currentTime + d);
+      g.gain.value = vol || .05;
+      g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + d);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start();
+      o.stop(c.currentTime + d);
+    } catch (e) {}
+  };
+  K.jingle = function (notes, step, type) {
+    return notes.forEach(function (n, i) {
+      return setTimeout(function () {
+        return K.beep(n, .14, type || 'triangle', .06);
+      }, i * (step || 90));
+    });
+  };
+  var NT = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11
+  };
+  var fq = function fq(n) {
+    var m = /^([A-G])(#|b)?(\d)$/.exec(n);
+    if (!m) return 0;
+    var s = NT[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+    return 440 * Math.pow(2, (12 * (+m[3] + 1) + s - 69) / 12);
+  };
+  var parse = function parse(str) {
+    var t = str.split(/\s+/),
+      out = [];
+    for (var i = 0; i < t.length; i++) {
+      if (t[i] === '-') continue;
+      var len = 1;
+      for (var j = i + 1; j < t.length && t[j] === '-'; j++) len++;
+      out.push({
+        step: i,
+        len,
+        f: fq(t[i])
+      });
+    }
+    return {
+      notes: out,
+      steps: t.length
+    };
+  };
+  K.MUS = {};
+  K.addMusic = function (name, m) {
+    m.M = parse(m.mel);
+    m.B = parse(m.bass);
+    m.A = m.arp ? m.arp.split(' ').map(fq) : null;
+    K.MUS[name] = m;
+  };
+  var MZ = {
+    cur: null,
+    next: 0,
+    step: 0,
+    bus: null,
+    echo: null,
+    noise: null
+  };
+  function mzBus() {
+    if (MZ.bus) return true;
+    var c = actx();
+    if (!c) return false;
+    try {
+      MZ.bus = c.createGain();
+      MZ.bus.gain.value = .5;
+      MZ.bus.connect(c.destination);
+      var dl = c.createDelay(),
+        fb = c.createGain(),
+        wet = c.createGain();
+      MZ.echo = c.createGain();
+      dl.delayTime.value = .33;
+      fb.gain.value = .33;
+      wet.gain.value = .45;
+      MZ.echo.connect(MZ.bus);
+      MZ.echo.connect(dl);
+      dl.connect(fb);
+      fb.connect(dl);
+      dl.connect(wet);
+      wet.connect(MZ.bus);
+      var nb = c.createBuffer(1, c.sampleRate * .5, c.sampleRate),
+        d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      MZ.noise = nb;
+    } catch (e) {
+      MZ.bus = null;
+      return false;
+    }
+    return true;
+  }
+  function tone(type, f, t, dur, v, out, bell) {
+    var o = ac.createOscillator(),
+      g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    var a = .008,
+      rel = bell ? dur * 1.6 : Math.min(.08, dur * .4);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + a);
+    if (bell) g.gain.exponentialRampToValueAtTime(.0001, t + rel);else {
+      g.gain.setValueAtTime(v, t + Math.max(a, dur - rel));
+      g.gain.linearRampToValueAtTime(.0001, t + dur);
+    }
+    o.connect(g);
+    g.connect(out);
+    o.start(t);
+    o.stop(t + (bell ? rel : dur) + .05);
+  }
+  function drum(k, t) {
+    if (k === 'k') {
+      var o = ac.createOscillator(),
+        _g = ac.createGain();
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + .12);
+      _g.gain.setValueAtTime(.42, t);
+      _g.gain.exponentialRampToValueAtTime(.001, t + .15);
+      o.connect(_g);
+      _g.connect(MZ.bus);
+      o.start(t);
+      o.stop(t + .16);
+      return;
+    }
+    var s = ac.createBufferSource(),
+      f = ac.createBiquadFilter(),
+      g = ac.createGain();
+    s.buffer = MZ.noise;
+    f.type = 'highpass';
+    f.frequency.value = k === 'h' ? 7000 : 1500;
+    var len = k === 'h' ? .04 : .12;
+    g.gain.setValueAtTime(k === 'h' ? .1 : .2, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + len);
+    s.connect(f);
+    f.connect(g);
+    g.connect(MZ.bus);
+    s.start(t);
+    s.stop(t + len + .02);
+  }
+  function mzStep(m, s, t) {
+    var sd = 60 / m.tempo / 2,
+      out = m.echo ? MZ.echo : MZ.bus;
+    var ms = s % m.M.steps;
+    var _iterator4 = _createForOfIteratorHelper(m.M.notes),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var n = _step4.value;
+        if (n.step === ms) tone(m.lead, n.f, t, n.len * sd * .95, m.lv, out, m.bell);
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
+    }
+    var bs = s % m.B.steps;
+    var _iterator5 = _createForOfIteratorHelper(m.B.notes),
+      _step5;
+    try {
+      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+        var _n = _step5.value;
+        if (_n.step === bs) tone('triangle', _n.f, t, _n.len * sd * .9, .25, MZ.bus);
+      }
+    } catch (err) {
+      _iterator5.e(err);
+    } finally {
+      _iterator5.f();
+    }
+    var dk = m.drums.charAt(s % m.drums.length);
+    if (dk !== '-') drum(dk, t);
+    if (m.A && s % 2 === 0) tone('sine', m.A[s / 2 % m.A.length], t, sd * .9, .05, out, true);
+  }
+  K.wantMusic = null;
+  function musicTick() {
+    var want = K.musicOn && K.playing && $('kpause').hidden ? K.wantMusic : null;
+    if (want !== MZ.cur) {
+      if (MZ.bus) {
+        try {
+          MZ.bus.disconnect();
+        } catch (e) {}
+        MZ.bus = null;
+      }
+      MZ.cur = want;
+      MZ.step = 0;
+      if (want) {
+        if (mzBus()) MZ.next = ac.currentTime + .08;else MZ.cur = null;
+      }
+    }
+    if (!MZ.cur || !MZ.bus || !K.MUS[MZ.cur]) return;
+    var m = K.MUS[MZ.cur],
+      sd = 60 / m.tempo / 2;
+    if (MZ.next < ac.currentTime) MZ.next = ac.currentTime + .02;
+    try {
+      while (MZ.next < ac.currentTime + .15) {
+        mzStep(m, MZ.step, MZ.next);
+        MZ.next += sd;
+        MZ.step++;
+      }
+    } catch (e) {}
+  }
+  K.storageOK = function () {
+    try {
+      localStorage.setItem('tomk-test', '1');
+      var ok = localStorage.getItem('tomk-test') === '1';
+      localStorage.removeItem('tomk-test');
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  };
+  var PER = /-(run|prog|pick)$/;
+  function raw(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+  function who() {
+    try {
+      var p = JSON.parse(raw('sala-player') || 'null');
+      return typeof p === 'string' ? p : '';
+    } catch (e) {
+      return '';
+    }
+  }
+  function firstPlayer() {
+    try {
+      var l = JSON.parse(raw('sala-players') || 'null');
+      if (Array.isArray(l) && l.length) return l[0];
+    } catch (e) {}
+    try {
+      var n = JSON.parse(raw('tom-name') || 'null');
+      if (n) return n;
+    } catch (e) {}
+    return 'Tommy';
+  }
+  function pkey(key) {
+    if (!PER.test(key)) return key;
+    var p = who() || firstPlayer();
+    return key + '@' + p;
+  }
+  K.load = function (key, def) {
+    try {
+      var v = localStorage.getItem(pkey(key));
+      if (v == null && PER.test(key) && (who() || firstPlayer()) === firstPlayer()) v = localStorage.getItem(key);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) {
+      return def;
+    }
+  };
+  K.save = function (key, val) {
+    try {
+      var t = JSON.stringify(val),
+        kk = pkey(key);
+      localStorage.setItem(kk, t);
+      if (kk !== key && (who() || firstPlayer()) === firstPlayer()) localStorage.removeItem(key);
+      return localStorage.getItem(kk) === t;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.del = function (key) {
+    try {
+      localStorage.removeItem(pkey(key));
+      if (PER.test(key) && (who() || firstPlayer()) === firstPlayer()) localStorage.removeItem(key);
+    } catch (e) {}
+  };
+  var toastT = 0;
+  K.toast = function (msg, bad) {
+    var t = $('ktoast');
+    t.textContent = msg;
+    t.className = bad ? 'bad' : '';
+    t.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      t.hidden = true;
+    }, 2000);
+  };
+  K.playing = false;
+  K.game = null;
+  K.start = function () {
+    K.playing = true;
+    $('kpause').hidden = true;
+    document.body.classList.add('playing');
+    last = 0;
+  };
+  K.stop = function () {
+    K.playing = false;
+    document.body.classList.remove('playing');
+    for (var k in K.keys) K.keys[k] = false;
+    BTN.forEach(function (b) {
+      return b.el.classList.remove('on');
+    });
+  };
+  K.togglePause = function () {
+    if (!K.playing) return;
+    if ($('kpause').hidden) {
+      $('kpause').hidden = false;
+      $('kpnote').textContent = '';
+      for (var k in K.keys) K.keys[k] = false;
+      K.game && K.game.save && K.game.save();
+    } else $('kpause').hidden = true;
+  };
+  function saveExit() {
+    var ok = true;
+    if (K.game && K.game.save) ok = K.game.save();
+    K.stop();
+    $('kpause').hidden = true;
+    K.game && K.game.exit && K.game.exit();
+    K.toast(ok ? '💾 Partita salvata: la ritrovi in "Continua"' : '⚠ Partita NON salvata (Navigazione privata)', !ok);
+  }
+  K.saveExit = saveExit;
+  function updToggles() {
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.textContent = K.soundOn ? '🔊 Suono sì' : '🔈 Suono no';
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.textContent = K.musicOn ? '🎵 Musica sì' : '🎵 Musica no';
+    });
+  }
+  K.initUI = function () {
+    $('kback').onclick = saveExit;
+    $('kpbtn').onclick = K.togglePause;
+    $('kresume').onclick = function () {
+      $('kpause').hidden = true;
+      last = 0;
+    };
+    $('ksave').onclick = function () {
+      var ok = K.game && K.game.save ? K.game.save() : false;
+      $('kpnote').textContent = ok ? '✔ Partita salvata' : '⚠ Non salvata: Safari è in Navigazione privata';
+      $('kpnote').className = ok ? 'ok' : 'bad';
+    };
+    $('ksaveexit').onclick = saveExit;
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.onclick = function () {
+        K.soundOn = !K.soundOn;
+        try {
+          localStorage.setItem('tomk-sound', K.soundOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.onclick = function () {
+        K.musicOn = !K.musicOn;
+        try {
+          localStorage.setItem('tomk-music', K.musicOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    updToggles();
+    if (!K.storageOK()) {
+      var w = $('kpriv');
+      if (w) w.hidden = false;
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && K.playing && $('kpause').hidden) K.togglePause();
+    });
+    addEventListener('pagehide', function () {
+      if (K.playing && K.game && K.game.save) K.game.save();
+    });
+  };
+  var last = 0;
+  K.time = 0;
+  function loop(t) {
+    if (window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
+    var st = $('stage'),
+      sw = st.clientWidth,
+      sh = st.clientHeight;
+    if (sw !== lsw || sh !== lsh) {
+      lsw = sw;
+      lsh = sh;
+      resize();
+    }
+    var dt = last ? t - last : 16.67;
+    last = t;
+    var f = Math.min(dt / 16.67, 2.5);
+    var paused = !$('kpause').hidden;
+    if (K.game) {
+      if (K.playing && !paused) {
+        K.time += f;
+        K.game.update(f);
+      } else if (K.game.idle) K.game.idle(f);
+      K.game.draw();
+    }
+    for (var k in K.keys) prev[k] = K.keys[k];
+    musicTick();
+    requestAnimationFrame(loop);
+  }
+  K.run = function () {
+    resize();
+    requestAnimationFrame(loop);
+  };
+  var PAL = {
+    k: '#1d1f2b',
+    w: '#ffffff',
+    W: '#e8ecf4',
+    g: '#9aa0b5',
+    G: '#5d6273',
+    s: '#f2c59a',
+    S: '#d99a6c',
+    h: '#4a2e1c',
+    o: '#f07a2a',
+    O: '#c25a14',
+    r: '#e0373f',
+    R: '#9c1f26',
+    y: '#f2c230',
+    Y: '#c99a00',
+    b: '#3f86d4',
+    B: '#24548f',
+    c: '#9fd3f0',
+    l: '#7cc242',
+    L: '#3d7a1f',
+    n: '#4aa35a',
+    p: '#8a5cc7',
+    P: '#5a3a8a',
+    q: '#e096d2',
+    m: '#9b7653',
+    M: '#6b4a2e',
+    e: '#e8cfa8',
+    d: '#3b3f4f',
+    C: '#c8642a',
+    E: '#e8d2a6',
+    D: '#c9a978'
+  };
+  K.PAL = PAL;
+  var SC = {};
+  K.sprite = function (key, rows, over) {
+    if (SC[key]) return SC[key];
+    var w = Math.max.apply(null, rows.map(function (r) {
+        return r.length;
+      })),
+      h = rows.length,
+      c = document.createElement('canvas');
+    c.width = w + 2;
+    c.height = h + 2;
+    var x = c.getContext('2d');
+    var put = function put(col, dx, dy) {
+      return rows.forEach(function (r, j) {
+        for (var i = 0; i < r.length; i++) {
+          var ch = r[i];
+          if (ch === '.' || ch === ' ') continue;
+          x.fillStyle = col || over && over[ch] || PAL[ch] || '#f0f';
+          x.fillRect(i + dx, j + dy, 1, 1);
+        }
+      });
+    };
+    for (var _i = 0, _arr = [[0, 1], [2, 1], [1, 0], [1, 2]]; _i < _arr.length; _i++) {
+      var _arr$_i = _slicedToArray(_arr[_i], 2),
+        dx = _arr$_i[0],
+        dy = _arr$_i[1];
+      put('#14151d', dx, dy);
+    }
+    put(null, 1, 1);
+    return SC[key] = c;
+  };
+  K.draw = function (c, x, y, U, flip) {
+    var w = c.width * U,
+      h = c.height * U;
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+    if (flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, -w / 2, -h + U, w, h);
+    ctx.restore();
+  };
+  var TOMHEAD = ["..h.h.h...", ".hhhhhhh..", ".hhssssss.", ".hsssswks.", ".ssssssss.", "..sssskss."];
+  var TOMBODY = {
+    stand: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "...d..d...", "..kk..kk.."],
+    walkA: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "..d....d..", ".kk....kk."],
+    walkB: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "....dd....", "....kk...."],
+    jump: ["s..oooo..s", ".soooooos.", "...oooo...", "...dddd...", "..d....d..", ".kk....kk."]
+  };
+  var MILLYHEAD = ["..CCCCC...", ".CCCCCCC..", ".CCssssss.", ".CCsswkss.", ".CCssssss.", ".CC.ssks.."];
+  var MILLYBODY = {
+    stand: ["...pppp...", "..sppppps.", ".pppppppp.", "...s..s...", "..kk..kk.."],
+    walkA: ["...pppp...", "..sppppps.", ".pppppppp.", "..s....s..", ".kk....kk."],
+    walkB: ["...pppp...", "..sppppps.", ".pppppppp.", "....ss....", "....kk...."],
+    jump: ["s..pppp..s", ".spppppps.", ".pppppppp.", "..s....s..", ".kk....kk."]
+  };
+  var PAPHEAD = ["...ssss...", "..sWssss..", ".sssssss..", ".Sssswks..", ".ssssssss.", "..sssskss."];
+  var PAPTOP = ["...bbbb...", "..bbbbbb..", "..bbbbbb..", "..sbbbbs..", "...dddd..."];
+  var PAPLEGS = {
+    stand: ["...d..d...", "...d..d...", "..kk..kk.."],
+    walkA: ["..d....d..", "..d....d..", ".kk....kk."],
+    walkB: ["....dd....", "....dd....", "....kk...."],
+    jump: ["..d....d..", "..d....d..", ".kk....kk."]
+  };
+  var BUNNY = {
+    stand: ["............", ".......EEEE.", "......EEEEEE", "..ww..EEkEEq", ".wEEEEDEEEE.", ".EEEEEEDEE..", ".EEEEEEDE...", "..EE..EE...."],
+    jump: ["......EEEE..", ".....EEEEEE.", "..ww.EEkEEq.", ".wEEEEDEEE..", "EEEEEEEDE...", ".EEEEEEE....", "..E.....E...", "............"]
+  };
+  K.CHARS = {
+    tommy: {
+      name: 'Tommy',
+      col: '#f07a2a'
+    },
+    milly: {
+      name: 'Milly',
+      col: '#8a5cc7'
+    },
+    papone: {
+      name: 'Papone',
+      col: '#3f86d4'
+    },
+    carotino: {
+      name: 'Carotino',
+      col: '#e8d2a6'
+    }
+  };
+  K.CHAR_ORDER = ['tommy', 'milly', 'papone', 'carotino'];
+  K.charS = function (ch, f) {
+    f = f || 'stand';
+    if (ch === 'milly') return K.sprite('milly_' + f, MILLYHEAD.concat(MILLYBODY[f] || MILLYBODY.stand));
+    if (ch === 'papone') return K.sprite('pap_' + f, PAPHEAD.concat(f === 'jump' ? ["s..bbbb..s", ".sbbbbbbs.", "..bbbbbb..", "..bbbbbb..", "...dddd..."] : PAPTOP, PAPLEGS[f] || PAPLEGS.stand));
+    if (ch === 'carotino') return K.sprite('bun_' + (f === 'jump' || f === 'walkA' ? 'jump' : 'stand'), BUNNY[f === 'jump' || f === 'walkA' ? 'jump' : 'stand']);
+    return K.sprite('tom_' + f, TOMHEAD.concat(TOMBODY[f] || TOMBODY.stand));
+  };
+  K.headS = function (ch) {
+    if (ch === 'milly') return K.sprite('mh', MILLYHEAD);
+    if (ch === 'papone') return K.sprite('ph', PAPHEAD);
+    if (ch === 'carotino') return K.sprite('bh', BUNNY.stand.slice(0, 5));
+    return K.sprite('th', TOMHEAD);
+  };
+  K.rect = function (x, y, w, h, c) {
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  };
+  K.text = function (t, x, y, size, col, align, shadow) {
+    ctx.font = '700 ' + size + "px 'Pixelify Sans', monospace";
+    ctx.textAlign = align || 'left';
+    if (shadow !== false) {
+      ctx.fillStyle = 'rgba(20,21,29,.8)';
+      ctx.fillText(t, x + 2, y + 2);
+    }
+    ctx.fillStyle = col || '#fff';
+    ctx.fillText(t, x, y);
+    ctx.textAlign = 'left';
+  };
+  K.rnd = function (i, j, s) {
+    var v = Math.sin(i * 127.1 + (j || 0) * 311.7 + (s || 0) * 74.7) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  K.fmt = function (s) {
+    return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  };
+  K.charPicker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var c = document.createElement('canvas'),
+        s = K.charS(ch, 'stand');
+      c.width = s.width;
+      c.height = s.height;
+      var x = c.getContext('2d');
+      x.drawImage(s, 0, 0);
+      b.appendChild(c);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+  return K;
+}();
+(function () {
+  var S = K.S = {};
+  var c = K.ctx;
+  S.OUT = '#1c1724';
+  S.LW = 2.4;
+  S.use = function (x) {
+    var o = c;
+    c = x;
+    return o;
+  };
+  var TC = {};
+  S.tone = function (h, a) {
+    var k = h + a;
+    var v = TC[k];
+    if (v) return v;
+    var n = parseInt(h.slice(1), 16);
+    var r = n >> 16,
+      g = n >> 8 & 255,
+      b = n & 255;
+    if (a > 0) {
+      r += (255 - r) * a;
+      g += (255 - g) * a;
+      b += (255 - b) * a;
+    } else {
+      r *= 1 + a;
+      g *= 1 + a;
+      b *= 1 + a;
+    }
+    return TC[k] = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')';
+  };
+  var tone = S.tone;
+  S.rrp = function (x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  };
+  S.edge = function (lw) {
+    c.lineWidth = lw || S.LW;
+    c.strokeStyle = S.OUT;
+    c.lineJoin = 'round';
+    c.stroke();
+  };
+  S.part = function (x, y, w, h, r, col) {
+    S.rrp(x, y, w, h, r);
+    S.edge();
+    c.fillStyle = tone(col, -.3);
+    c.fill();
+    S.rrp(x, y, w * .78, h * .94, r);
+    c.fillStyle = col;
+    c.fill();
+    S.rrp(x + w * .14, y + h * .12, Math.max(1.5, w * .15), h * .4, w * .08);
+    c.fillStyle = tone(col, .4);
+    c.fill();
+  };
+  S.orb = function (cx, cy, rx, ry, col) {
+    c.beginPath();
+    c.ellipse(cx, cy, rx, ry, 0, 0, 6.2832);
+    S.edge();
+    c.fillStyle = tone(col, -.28);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx - rx * .13, cy - ry * .13, rx * .84, ry * .84, 0, 0, 6.2832);
+    c.fillStyle = col;
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx - rx * .36, cy - ry * .42, rx * .28, ry * .19, -.6, 0, 6.2832);
+    c.fillStyle = 'rgba(255,255,255,.42)';
+    c.fill();
+  };
+  S.dot = function (cx, cy, r, col) {
+    c.fillStyle = col;
+    c.beginPath();
+    c.arc(cx, cy, r, 0, 6.2832);
+    c.fill();
+  };
+  S.limb = function (x1, y1, x2, y2, w, col) {
+    c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(x1, y1);
+    c.lineTo(x2, y2);
+    c.lineWidth = w + S.LW * 1.3;
+    c.strokeStyle = S.OUT;
+    c.stroke();
+    c.lineWidth = w;
+    c.strokeStyle = col;
+    c.stroke();
+    c.lineWidth = Math.max(1, w * .28);
+    c.strokeStyle = tone(col, .32);
+    c.beginPath();
+    c.moveTo(x1 - w * .2, y1);
+    c.lineTo(x2 - w * .2, y2);
+    c.stroke();
+  };
+  S.shape = function (p, col, noEdge) {
+    c.beginPath();
+    c.moveTo(p[0], p[1]);
+    for (var i = 2; i < p.length; i += 2) c.lineTo(p[i], p[i + 1]);
+    c.closePath();
+    if (!noEdge) S.edge();
+    c.fillStyle = col;
+    c.fill();
+  };
+  S.curve = function (p, col, noEdge) {
+    var n = p.length / 2;
+    c.beginPath();
+    c.moveTo((p[0] + p[2]) / 2, (p[1] + p[3]) / 2);
+    for (var i = 1; i <= n; i++) {
+      var a = i % n * 2,
+        b = (i + 1) % n * 2;
+      c.quadraticCurveTo(p[a], p[a + 1], (p[a] + p[b]) / 2, (p[a + 1] + p[b + 1]) / 2);
+    }
+    c.closePath();
+    if (!noEdge) S.edge();
+    c.fillStyle = col;
+    c.fill();
+  };
+  S.eye = function (x, y, r, pup) {
+    S.dot(x, y, r + 1.1, S.OUT);
+    S.dot(x, y, r, '#ffffff');
+    S.dot(x + r * .3, y + r * .1, r * .58, pup || S.OUT);
+    S.dot(x + r * .05, y - r * .3, r * .26, '#ffffff');
+  };
+  S.glow = function (x, y, r, col) {
+    var g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, col);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  S.shadow = function (x, y, rx, a) {
+    c.fillStyle = 'rgba(20,10,30,' + .16 * (a == null ? 1 : a) + ')';
+    c.beginPath();
+    c.ellipse(x, y, rx * 1.35, rx * .4, 0, 0, 6.2832);
+    c.fill();
+    c.fillStyle = 'rgba(20,10,30,' + .2 * (a == null ? 1 : a) + ')';
+    c.beginPath();
+    c.ellipse(x, y, rx * .85, rx * .25, 0, 0, 6.2832);
+    c.fill();
+  };
+  S.clouds = function (vw, camX, p, gap, night, rnd) {
+    var o = camX * p,
+      i0 = Math.floor((o - 200) / gap),
+      i1 = Math.ceil((o + vw + 200) / gap);
+    c.fillStyle = night ? 'rgba(90,60,110,.5)' : 'rgba(255,255,255,.78)';
+    for (var i = i0; i <= i1; i++) {
+      var r = rnd(i, 7, 3);
+      if (r > .6) continue;
+      var sx = i * gap - o,
+        cy = 28 + r * 70;
+      for (var _i2 = 0, _arr2 = [[0, 0, 22], [22, -8, 26], [46, 0, 20], [22, 6, 24]]; _i2 < _arr2.length; _i2++) {
+        var q = _arr2[_i2];
+        c.beginPath();
+        c.ellipse(sx + q[0], cy + q[1], q[2] * 1.3, q[2] * .7, 0, 0, 6.2832);
+        c.fill();
+      }
+    }
+  };
+  S.kid = function (x, y, face, L, pose) {
+    c.save();
+    c.translate(x, y);
+    c.scale(face * (L.sc || 1), L.sc || 1);
+    if (pose.rot) {
+      c.translate(0, -18);
+      c.rotate(pose.rot);
+      c.translate(0, 18);
+    }
+    var air = pose.air,
+      mv = pose.walk != null,
+      ph = mv ? Math.sin(pose.walk) : 0,
+      s = ph * 5,
+      bob = mv && !air ? -Math.abs(Math.cos(pose.walk)) * 1.2 : 0;
+    if (L.bunny) {
+      var hop = air ? 0 : Math.abs(Math.sin((pose.walk || 0) * 1.2)) * 3;
+      c.translate(0, -hop);
+      S.orb(-13, -12, 4.5, 4.5, '#ffffff');
+      S.orb(-3, -11, 12, 9, L.fur);
+      S.orb(3, -4, 5, 3, S.tone(L.fur, -.1));
+      S.orb(-9, -3, 5, 3, S.tone(L.fur, -.1));
+      S.limb(4, -24, 0 + (air ? -3 : 0), -42, 4.5, L.fur);
+      S.limb(9, -24, 10 + (air ? -2 : 0), -42, 4.5, S.tone(L.fur, .05));
+      S.limb(9, -27, 10, -39, 1.6, '#f2a6c4');
+      S.orb(8, -20, 9, 8.5, L.fur);
+      S.eye(12, -22, 2.2);
+      S.dot(17, -18, 2, '#f07aa8');
+      S.dot(10, -15, 1.8, 'rgba(240,120,160,.45)');
+      c.restore();
+      return;
+    }
+    var tall = L.tall ? 4 : 0,
+      hip = -11 - tall * .5 + bob,
+      top = hip - 14 - tall * .6,
+      hy = top - 8;
+    S.limb(-2, hip, -2 + (air ? -4 : -s * .8), air ? -6 : -3, 5, S.tone(L.pants, -.2));
+    S.orb(-1 + (air ? -4 : -s * .8), air ? -5 : -2, 4.3, 2.7, '#2a2230');
+    S.limb(-4, top + 4, air ? -10 : -5 + s * .7, air ? top - 4 : top + 12, 3.8, S.tone(L.shirt, -.2));
+    S.orb(air ? -10 : -5 + s * .7, air ? top - 4 : top + 12, 2.6, 2.6, L.skin);
+    if (L.style === 'long') S.curve([-9, hy - 4, 6, hy - 6, 4, top + 12, -11, top + 12], L.hair);
+    if (L.style === 'pony') {
+      S.limb(-8, hy - 2, -13, hy + 8 + (mv ? ph * 2 : 0), 4.5, L.hair);
+      S.dot(-8, hy - 1, 2.4, '#f2c230');
+    }
+    S.limb(3, hip, 3 + (air ? 5 : s * .8), air ? -8 : -3, 5, L.pants);
+    S.orb(4 + (air ? 5 : s * .8), air ? -7 : -2, 4.5, 2.8, '#3a3040');
+    if (L.dress) S.curve([-9, hip + 3, -6, top, 6, top, 10, hip + 3], L.shirt);else S.part(-7.5, top, 15, hip - top + 3, 6, L.shirt);
+    if (!L.dress) {
+      S.rrp(-7.5, hip - 3, 15, 3.5, 1.7);
+      c.fillStyle = S.tone(L.pants, -.1);
+      c.fill();
+    }
+    S.orb(1, hy, 9, 9, L.skin);
+    if (L.style === 'bald') {
+      c.beginPath();
+      c.ellipse(-6, hy, 3.4, 5, 0, 0, 6.2832);
+      c.fillStyle = L.hair;
+      c.fill();
+      S.dot(-1, hy - 6, 2.6, 'rgba(255,255,255,.5)');
+    } else {
+      c.beginPath();
+      c.ellipse(0, hy - 3, 9.6, 6.5, 0, Math.PI, 6.2832);
+      c.lineTo(-9.6, hy + 2);
+      c.closePath();
+      S.edge();
+      c.fillStyle = L.hair;
+      c.fill();
+      if (L.style === 'spiky') for (var k = 0; k < 3; k++) S.shape([-7 + k * 5, hy - 7, -4 + k * 5, hy - 15 + k, -1 + k * 5, hy - 8], L.hair);
+      S.dot(-2, hy - 6, 1.6, 'rgba(255,255,255,.35)');
+    }
+    if (L.glasses) {
+      c.lineWidth = 1.3;
+      c.strokeStyle = S.OUT;
+      c.beginPath();
+      c.arc(5, hy, 3.4, 0, 6.2832);
+      c.stroke();
+    }
+    S.eye(5, hy, 2.2, L.eyes);
+    S.dot(3, hy + 4, 1.6, 'rgba(230,100,100,.4)');
+    c.strokeStyle = S.OUT;
+    c.lineWidth = 1.1;
+    c.beginPath();
+    c.arc(6, hy + 3.5, 2, .2, 2.3);
+    c.stroke();
+    if (L.beard) {
+      S.curve([-1, hy + 4, 9, hy + 3, 8, hy + 9, 2, hy + 10], L.beard);
+    }
+    S.limb(4, top + 4, air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 3.8, L.shirt);
+    S.orb(air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 2.7, 2.7, L.skin);
+    c.restore();
+  };
+  S.LOOK = {
+    tommy: {
+      shirt: '#f07a2a',
+      pants: '#3b4a6b',
+      hair: '#4a2e1c',
+      skin: '#f4c9a0',
+      style: 'spiky'
+    },
+    milly: {
+      shirt: '#8a5cc7',
+      pants: '#5a3a8a',
+      hair: '#c8642a',
+      skin: '#f4c9a0',
+      style: 'long',
+      dress: true
+    },
+    papone: {
+      shirt: '#3f86d4',
+      pants: '#3b3f4f',
+      hair: '#8a6a4f',
+      skin: '#efc19a',
+      style: 'bald',
+      tall: true,
+      beard: '#8a6a4f'
+    },
+    carotino: {
+      bunny: true,
+      fur: '#efe2c4'
+    }
+  };
+  S.picker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var cv = document.createElement('canvas');
+      cv.width = 88;
+      cv.height = 116;
+      var x = cv.getContext('2d');
+      x.scale(2, 2);
+      var o = S.use(x);
+      try {
+        S.kid(22, 56, 1, S.LOOK[ch], {
+          walk: null,
+          air: false
+        });
+      } catch (e) {}
+      S.use(o);
+      b.appendChild(cv);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+})();
+(function () {
+  var $ = K.$;
+  K.players = function () {
+    var l = K.load('sala-players', null);
+    if (!Array.isArray(l)) {
+      l = ['Tommy', 'Milly', 'Papone'];
+      var tn = K.load('tom-name', null);
+      if (typeof tn === 'string' && tn && l.indexOf(tn) < 0) l.unshift(tn);
+    }
+    return l;
+  };
+  K.player = function (slot) {
+    var all = K.players();
+    var p = K.load('sala-player' + (slot || ''), null);
+    if (all.indexOf(p) < 0) p = all[slot ? 1 : 0] || all[0];
+    return p;
+  };
+  K.setPlayer = function (slot, name) {
+    K.save('sala-player' + (slot || ''), name);
+  };
+  function addName(n) {
+    n = String(n || '').replace(/\s+/g, ' ').trim().slice(0, 14);
+    if (!n) return null;
+    var l = K.players();
+    var ex = l.find(function (x) {
+      return x.toLowerCase() === n.toLowerCase();
+    });
+    if (ex) return ex;
+    l.push(n);
+    K.save('sala-players', l.slice(-16));
+    return n;
+  }
+  K.playerPicker = function (box, slot, onPick) {
+    if (!onPick && !slot) onPick = function onPick() {
+      try {
+        location.reload();
+      } catch (e) {}
+    };
+    var cur = K.player(slot);
+    box.innerHTML = '';
+    box.className = 'kplayers';
+    K.players().forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kpl' + (n === cur ? ' sel' : '');
+      b.textContent = (n === cur ? '✔ ' : '') + n;
+      b.onclick = function () {
+        K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        onPick && onPick(n);
+      };
+      box.appendChild(b);
+    });
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'kpl add';
+    add.textContent = '➕ Nuovo';
+    add.onclick = function () {
+      box.innerHTML = '';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.maxLength = 14;
+      inp.placeholder = 'Scrivi il nome';
+      inp.className = 'kplin';
+      var ok = document.createElement('button');
+      ok.type = 'button';
+      ok.className = 'kpl sel';
+      ok.textContent = 'OK';
+      var no = document.createElement('button');
+      no.type = 'button';
+      no.className = 'kpl';
+      no.textContent = 'Annulla';
+      var done = function done() {
+        var n = addName(inp.value);
+        if (n) K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        if (n && onPick) onPick(n);
+      };
+      ok.onclick = done;
+      no.onclick = function () {
+        return K.playerPicker(box, slot, onPick);
+      };
+      inp.onkeydown = function (e) {
+        if (e.key === 'Enter') done();
+      };
+      box.appendChild(inp);
+      box.appendChild(ok);
+      box.appendChild(no);
+      setTimeout(function () {
+        try {
+          inp.focus();
+        } catch (e) {}
+      }, 50);
+    };
+    box.appendChild(add);
+  };
+  K.addScore = function (game, name, add) {
+    if (!name) return;
+    var B = K.load('sala-board', {});
+    var G = B[game] = B[game] || {};
+    var r = G[name] = G[name] || {
+      pts: 0
+    };
+    for (var k in add) {
+      if (k === 'max') {
+        r.max = r.max || {};
+        for (var b in add.max) {
+          if (r.max[b] == null || add.max[b] > r.max[b]) r.max[b] = add.max[b];
+        }
+      } else if (k === 'best') {
+        r.best = r.best || {};
+        for (var _b2 in add.best) {
+          var v = add.best[_b2];
+          if (r.best[_b2] == null || v < r.best[_b2]) r.best[_b2] = v;
+        }
+      } else r[k] = (r[k] || 0) + add[k];
+    }
+    r.last = Date.now();
+    K.save('sala-board', B);
+  };
+  K.boardOf = function (game) {
+    var G = (K.load('sala-board', {}) || {})[game] || {};
+    return Object.keys(G).map(function (n) {
+      return Object.assign({
+        name: n
+      }, G[n]);
+    }).sort(function (a, b) {
+      return (b.pts || 0) - (a.pts || 0) || (b.last || 0) - (a.last || 0);
+    });
+  };
+  var esc = function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;'
+      }[c];
+    });
+  };
+  K.showBoard = function (title, sections, note) {
+    var h = '<h2>🏆 ' + esc(title) + '</h2>';
+    var _iterator6 = _createForOfIteratorHelper(sections),
+      _step6;
+    try {
+      var _loop = function _loop() {
+        var s = _step6.value;
+        if (s.title) h += '<h3 class="kbh">' + esc(s.title) + '</h3>';
+        if (!s.rows.length) {
+          h += '<p class="note">' + esc(s.empty || 'Ancora nessun punteggio: gioca una partita!') + '</p>';
+          return 1;
+        }
+        h += '<table class="kbt"><tr>' + (s.norank ? '' : '<th>#</th>') + s.cols.map(function (c) {
+          return '<th>' + esc(c.h) + '</th>';
+        }).join('') + '</tr>';
+        s.rows.forEach(function (r, i) {
+          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1) + '</td>') + s.cols.map(function (c) {
+            return '<td>' + esc(c.f(r)) + '</td>';
+          }).join('') + '</tr>';
+        });
+        h += '</table>';
+      };
+      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+        if (_loop()) continue;
+      }
+    } catch (err) {
+      _iterator6.e(err);
+    } finally {
+      _iterator6.f();
+    }
+    if (note) h += '<p class="note">' + esc(note) + '</p>';
+    h += '<div class="row"><button class="go" id="kbclose" type="button">Chiudi</button><button class="go alt" id="kbreset" type="button">🗑 Azzera classifica</button></div>';
+    var ov = $('kboard');
+    ov.querySelector('.card').innerHTML = h;
+    ov.hidden = false;
+    $('kbclose').onclick = function () {
+      ov.hidden = true;
+    };
+    $('kbreset').onclick = function () {
+      var b = $('kbreset');
+      if (b.dataset.sure) {
+        var B = K.load('sala-board', {});
+        (sections.games || []).forEach(function (g) {
+          return delete B[g];
+        });
+        K.save('sala-board', B);
+        ov.hidden = true;
+        K.toast('Classifica azzerata');
+      } else {
+        b.dataset.sure = '1';
+        b.textContent = 'Sicuro? Tocca ancora';
+      }
+    };
+  };
+  K.ensurePlayers = function () {
+    var box = $('players');
+    if (box) return box;
+    var card = document.querySelector('#menu .card');
+    if (!card) return null;
+    var h1 = card.querySelector('h1');
+    var h = document.createElement('h2');
+    h.textContent = 'Chi gioca?';
+    box = document.createElement('div');
+    box.id = 'players';
+    if (h1 && h1.nextSibling) {
+      card.insertBefore(box, h1.nextSibling);
+      card.insertBefore(h, box);
+    } else {
+      card.appendChild(h);
+      card.appendChild(box);
+    }
+    return box;
+  };
+  K.fmtT = function (s) {
+    return Math.floor(s / 60) + ':' + ('0' + Math.floor(s) % 60).slice(-2) + '.' + Math.floor(s % 1 * 10);
+  };
+})();
+(function () {
+  var ctx = K.ctx,
+    $ = K.$,
+    SS = K.S;
+  K.maxDpr = 1.5;
+  K.addMusic('bruco', {
+    tempo: 128,
+    lead: 'triangle',
+    lv: .09,
+    mel: 'C5 D5 E5 - G5 - E5 - F5 E5 D5 - C5 - - - E5 F5 G5 - A5 - G5 - F5 E5 D5 - E5 - - -',
+    bass: 'C3 - G2 - C3 - G2 - F2 - C3 - G2 - C3 -',
+    drums: 'k-h-s-h-'
+  });
+  var GW = 20,
+    GH = 14,
+    NL = 10,
+    DIRS = [[0, -1], [-1, 0], [0, 1], [1, 0]];
+  var NAMES = ['Il prato', 'I quattro sassi', 'La staccionata', 'I due ruscelli', 'Il recinto', 'La croce dei fiori', 'Il campo di sassi', 'Le quattro stanze', 'Lo zig-zag', 'Il grande giardino'];
+  var FRUITS = ['🍎', '🍐', '🍓', '🍌', '🍇', '🍒', '🍊', '🍉'];
+  function rect(set, x0, y0, x1, y1) {
+    for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) set[y * GW + x] = 1;
+  }
+  function layout(i) {
+    var s = new Array(GW * GH).fill(0);
+    if (i === 1) {
+      rect(s, 4, 3, 5, 4);
+      rect(s, 14, 3, 15, 4);
+      rect(s, 4, 9, 5, 10);
+      rect(s, 14, 9, 15, 10);
+    }
+    if (i === 2) {
+      rect(s, 6, 4, 13, 4);
+      rect(s, 6, 9, 13, 9);
+    }
+    if (i === 3) {
+      rect(s, 6, 1, 6, 5);
+      rect(s, 13, 8, 13, 12);
+      rect(s, 6, 9, 6, 12);
+      rect(s, 13, 1, 13, 4);
+    }
+    if (i === 4) {
+      rect(s, 3, 2, 8, 2);
+      rect(s, 11, 2, 16, 2);
+      rect(s, 3, 11, 8, 11);
+      rect(s, 11, 11, 16, 11);
+      rect(s, 3, 3, 3, 5);
+      rect(s, 16, 3, 16, 5);
+      rect(s, 3, 8, 3, 10);
+      rect(s, 16, 8, 16, 10);
+    }
+    if (i === 5) {
+      rect(s, 9, 2, 10, 11);
+      rect(s, 3, 6, 16, 6);
+      s[6 * GW + 9] = 1;
+      for (var _i3 = 0, _arr3 = [6, 13]; _i3 < _arr3.length; _i3++) {
+        var x = _arr3[_i3];
+        s[6 * GW + x] = 0;
+      }
+    }
+    if (i === 6) {
+      var R = rng(77);
+      for (var k = 0; k < 22; k++) {
+        var _x = 1 + Math.floor(R() * (GW - 2)),
+          y = 1 + Math.floor(R() * (GH - 2));
+        s[y * GW + _x] = 1;
+      }
+    }
+    if (i === 7) {
+      rect(s, 9, 1, 10, 4);
+      rect(s, 9, 9, 10, 12);
+      rect(s, 1, 6, 4, 6);
+      rect(s, 15, 6, 18, 6);
+    }
+    if (i === 8) {
+      for (var _k = 0; _k < 4; _k++) {
+        var _x2 = 3 + _k * 4;
+        if (_k % 2) rect(s, _x2, 1, _x2, 8);else rect(s, _x2, 5, _x2, 12);
+      }
+    }
+    if (i === 9) {
+      rect(s, 3, 2, 16, 2);
+      rect(s, 16, 2, 16, 10);
+      rect(s, 5, 11, 16, 11);
+      rect(s, 3, 4, 3, 11);
+      rect(s, 5, 4, 14, 4);
+      rect(s, 5, 4, 5, 9);
+      rect(s, 7, 9, 14, 9);
+      rect(s, 14, 6, 14, 9);
+    }
+    for (var _x3 = 1; _x3 <= 12; _x3++) s[7 * GW + _x3] = 0;
+    for (var _x4 = 1; _x4 <= 6; _x4++) {
+      s[6 * GW + _x4] = 0;
+      s[8 * GW + _x4] = 0;
+    }
+    for (var _x5 = 0; _x5 < GW; _x5++) {
+      s[_x5] = 1;
+      s[(GH - 1) * GW + _x5] = 1;
+    }
+    for (var _y = 0; _y < GH; _y++) {
+      s[_y * GW] = 1;
+      s[_y * GW + GW - 1] = 1;
+    }
+    return s;
+  }
+  function rng(seed) {
+    var v = seed;
+    return function () {
+      v = v * 16807 % 2147483647;
+      return v / 2147483647;
+    };
+  }
+  var goal = function goal(i) {
+      return 8 + i;
+    },
+    tickF = function tickF(i) {
+      return Math.max(5, 10 - i * .55);
+    };
+  var lv = 0,
+    rocks = null,
+    snake = [],
+    dir = 3,
+    queue = [],
+    fruit = null,
+    star = null,
+    grow = 0,
+    score = 0,
+    lives = 3,
+    eatenLv = 0,
+    state = 'menu',
+    t = 0,
+    tick = 0,
+    msg = null,
+    player = '',
+    dead = 0,
+    pops = [],
+    nFruit = 0;
+  function free(x, y) {
+    if (x < 0 || y < 0 || x >= GW || y >= GH) return false;
+    if (rocks[y * GW + x]) return false;
+    return true;
+  }
+  function onSnake(x, y, skipTail) {
+    for (var i = 0; i < snake.length - (skipTail ? 1 : 0); i++) if (snake[i].x === x && snake[i].y === y) return true;
+    return false;
+  }
+  function placeFruit() {
+    var h = snake[0];
+    for (var k = 0; k < 500; k++) {
+      var x = 1 + Math.floor(Math.random() * (GW - 2)),
+        y = 1 + Math.floor(Math.random() * (GH - 2));
+      if (!free(x, y) || onSnake(x, y) || star && star.x === x && star.y === y) continue;
+      if (k < 300 && Math.abs(x - h.x) + Math.abs(y - h.y) < 4) continue;
+      return {
+        x: x,
+        y: y,
+        e: FRUITS[nFruit % FRUITS.length]
+      };
+    }
+    return {
+      x: 1,
+      y: 1,
+      e: '🍎'
+    };
+  }
+  function resetSnake() {
+    snake = [];
+    for (var i = 0; i < 3; i++) snake.push({
+      x: 4 - i,
+      y: 7,
+      px: 4 - i,
+      py: 7
+    });
+    dir = 3;
+    queue = [];
+    grow = 0;
+    tick = 0;
+    star = null;
+    fruit = placeFruit();
+  }
+  function startLevel(i, keep) {
+    lv = i;
+    rocks = layout(i);
+    eatenLv = 0;
+    resetSnake();
+    if (keep) {
+      eatenLv = keep.eatenLv || 0;
+      if (keep.snake && keep.snake.length) {
+        snake = keep.snake.map(function (s) {
+          return {
+            x: s.x,
+            y: s.y,
+            px: s.x,
+            py: s.y
+          };
+        });
+        dir = keep.dir;
+        fruit = placeFruit();
+      }
+    }
+    state = 'ready';
+    dead = 0;
+    msg = {
+      t: 120,
+      s: 'Livello ' + (i + 1) + ' · ' + NAMES[i],
+      s2: 'mangia ' + goal(i) + ' frutti!'
+    };
+    K.wantMusic = 'bruco';
+  }
+  function newGame(i) {
+    score = 0;
+    lives = 3;
+    player = K.player(0);
+    startLevel(i || 0);
+  }
+  function turn(d) {
+    if (state === 'ready') state = 'play';
+    var last = queue.length ? queue[queue.length - 1] : dir;
+    if (d === last || d === (last + 2) % 4) return;
+    if (queue.length < 3) queue.push(d);
+  }
+  function step() {
+    if (queue.length) dir = queue.shift();
+    var h = snake[0],
+      nx = h.x + DIRS[dir][0],
+      ny = h.y + DIRS[dir][1];
+    var _iterator7 = _createForOfIteratorHelper(snake),
+      _step7;
+    try {
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        var s = _step7.value;
+        s.px = s.x;
+        s.py = s.y;
+      }
+    } catch (err) {
+      _iterator7.e(err);
+    } finally {
+      _iterator7.f();
+    }
+    var eatF = fruit && fruit.x === nx && fruit.y === ny;
+    if (!free(nx, ny) || onSnake(nx, ny, grow === 0 && !eatF)) {
+      crash();
+      return;
+    }
+    for (var i = snake.length - 1; i > 0; i--) {
+      snake[i].x = snake[i - 1].x;
+      snake[i].y = snake[i - 1].y;
+    }
+    if (grow > 0) {
+      var tl = snake[snake.length - 1];
+      snake.push({
+        x: tl.px,
+        y: tl.py,
+        px: tl.px,
+        py: tl.py
+      });
+      grow--;
+    }
+    h.x = nx;
+    h.y = ny;
+    if (eatF) {
+      grow += 1;
+      nFruit++;
+      eatenLv++;
+      var p = 10 * (lv + 1);
+      score += p;
+      pops.push({
+        x: nx,
+        y: ny,
+        s: '+' + p,
+        t: 45
+      });
+      K.jingle([660, 990], 45);
+      if (eatenLv >= goal(lv)) {
+        levelWon();
+        return;
+      }
+      fruit = placeFruit();
+      if (nFruit % 5 === 0 && !star) {
+        star = placeFruit();
+        star.e = '⭐';
+        star.t = 420;
+      }
+    }
+    if (star && star.x === nx && star.y === ny) {
+      var _p = 50 * (lv + 1);
+      score += _p;
+      grow += 2;
+      pops.push({
+        x: nx,
+        y: ny,
+        s: '+' + _p,
+        t: 60
+      });
+      star = null;
+      K.jingle([784, 1046, 1318], 50);
+    }
+  }
+  function crash() {
+    state = 'dead';
+    dead = 90;
+    lives--;
+    K.beep(180, .5, 'sawtooth', .06, -120);
+  }
+  function levelWon() {
+    state = 'won';
+    dead = 150;
+    var b = 100 * (lv + 1);
+    score += b;
+    msg = {
+      t: 150,
+      s: 'Bravo! Livello finito',
+      s2: '+' + b + ' punti'
+    };
+    K.jingle([523, 659, 784, 1046], 90);
+    PROG.open = Math.max(PROG.open, Math.min(NL - 1, lv + 1));
+    PROG.done[lv] = true;
+    K.save('bruco-prog', PROG);
+  }
+  function gameOver() {
+    state = 'over';
+    K.addScore('bruco', player, {
+      pts: score,
+      partite: 1,
+      max: {
+        record: score,
+        livello: lv + 1,
+        lunghezza: snake.length
+      }
+    });
+    K.del('bruco-run');
+    setTimeout(function () {
+      return showEnd(false);
+    }, 700);
+  }
+  function update(f) {
+    t += f;
+    if (msg) {
+      msg.t -= f;
+      if (msg.t <= 0) msg = null;
+    }
+    for (var i = pops.length - 1; i >= 0; i--) {
+      pops[i].t -= f;
+      if (pops[i].t <= 0) pops.splice(i, 1);
+    }
+    if (K.pressed('up')) turn(0);
+    if (K.pressed('left')) turn(1);
+    if (K.pressed('down')) turn(2);
+    if (K.pressed('right')) turn(3);
+    if (state === 'dead') {
+      dead -= f;
+      if (dead <= 0) {
+        if (lives > 0) {
+          resetSnake();
+          state = 'ready';
+          msg = {
+            t: 90,
+            s: 'Ancora ' + lives + (lives === 1 ? ' vita' : ' vite') + '!',
+            s2: 'tocca una freccia per ripartire'
+          };
+        } else gameOver();
+      }
+      return;
+    }
+    if (state === 'won') {
+      dead -= f;
+      if (dead <= 0) {
+        if (lv < NL - 1) {
+          startLevel(lv + 1);
+          K.save('bruco-run', snap());
+        } else {
+          state = 'over';
+          K.addScore('bruco', player, {
+            pts: score,
+            partite: 1,
+            max: {
+              record: score,
+              livello: NL,
+              lunghezza: snake.length
+            }
+          });
+          K.del('bruco-run');
+          setTimeout(function () {
+            return showEnd(true);
+          }, 300);
+        }
+      }
+      return;
+    }
+    if (state === 'ready') {
+      if (t > 60 && !msg) {}
+      return;
+    }
+    if (state !== 'play') return;
+    if (star) {
+      star.t -= f;
+      if (star.t <= 0) star = null;
+    }
+    tick += f;
+    var T = tickF(lv);
+    while (tick >= T && state === 'play') {
+      tick -= T;
+      step();
+    }
+  }
+  var L = {};
+  function lay() {
+    var vw = K.W,
+      vh = K.H,
+      land = vw > vh;
+    var ts = Math.max(10, Math.floor(land ? Math.min((vh - 76) / GH, (vw - 270) / GW) : Math.min((vh - 390) / GH, (vw - 24) / GW)));
+    var bw = ts * GW;
+    L = {
+      ts: ts,
+      ox: land ? Math.round(Math.max(240, (vw - bw) / 2 + 90)) : Math.round((vw - bw) / 2),
+      oy: land ? Math.round(Math.max(50, (vh - ts * GH) / 2 + 12)) : 96,
+      land: land
+    };
+    if (land && L.ox + bw > vw - 10) L.ox = vw - 10 - bw;
+  }
+  var bgK = '',
+    bgC = null;
+  function bgCanvas() {
+    var key = K.W + 'x' + K.H + '_' + K.dpr + '_' + lv + '_' + L.ts;
+    if (key === bgK) return bgC;
+    var d = K.dpr,
+      c = document.createElement('canvas');
+    c.width = K.W * d;
+    c.height = K.H * d;
+    var x = c.getContext('2d');
+    x.scale(d, d);
+    var so = SS.use(x);
+    var hue = [[124, 200, 240], [150, 210, 255], [255, 214, 170], [170, 220, 250], [230, 200, 255], [255, 200, 220], [200, 230, 190], [180, 215, 250], [255, 225, 160], [200, 190, 255]][lv];
+    var g = x.createLinearGradient(0, 0, 0, K.H);
+    g.addColorStop(0, 'rgb(' + hue + ')');
+    g.addColorStop(1, '#e8f6d8');
+    x.fillStyle = g;
+    x.fillRect(0, 0, K.W, K.H);
+    for (var i = 0; i < 26; i++) {
+      var fx = i * 151 % K.W,
+        fy = i * 89 % K.H;
+      x.globalAlpha = .35;
+      x.font = '22px sans-serif';
+      x.fillText(['🌼', '🌷', '🍀', '🦋'][i % 4], fx, fy);
+    }
+    x.globalAlpha = 1;
+    var ts = L.ts,
+      ox = L.ox,
+      oy = L.oy;
+    SS.rrp(ox - 10, oy - 10 + 7, GW * ts + 20, GH * ts + 20, 18);
+    x.fillStyle = 'rgba(0,0,0,.25)';
+    x.fill();
+    SS.rrp(ox - 10, oy - 10, GW * ts + 20, GH * ts + 20, 18);
+    x.fillStyle = '#8a5a32';
+    x.fill();
+    x.lineWidth = 3;
+    x.strokeStyle = 'rgba(28,23,36,.8)';
+    x.stroke();
+    for (var j = 0; j < GH; j++) for (var _i4 = 0; _i4 < GW; _i4++) {
+      x.fillStyle = (_i4 + j) % 2 ? '#86cc5a' : '#7cc252';
+      x.fillRect(ox + _i4 * ts, oy + j * ts, ts, ts);
+    }
+    x.fillStyle = '#3f8a3a';
+    for (var _i5 = 0; _i5 < GW; _i5++) {
+      x.fillRect(ox + _i5 * ts, oy, ts, ts);
+      x.fillRect(ox + _i5 * ts, oy + (GH - 1) * ts, ts, ts);
+    }
+    for (var _j = 0; _j < GH; _j++) {
+      x.fillRect(ox, oy + _j * ts, ts, ts);
+      x.fillRect(ox + (GW - 1) * ts, oy + _j * ts, ts, ts);
+    }
+    for (var k = 0; k < (GW + GH) * 2; k++) {
+      var _i6 = void 0,
+        _j2 = void 0;
+      if (k < GW) {
+        _i6 = k;
+        _j2 = 0;
+      } else if (k < 2 * GW) {
+        _i6 = k - GW;
+        _j2 = GH - 1;
+      } else if (k < 2 * GW + GH) {
+        _i6 = 0;
+        _j2 = k - 2 * GW;
+      } else {
+        _i6 = GW - 1;
+        _j2 = k - 2 * GW - GH;
+      }
+      x.fillStyle = '#5fb04a';
+      x.beginPath();
+      x.arc(ox + _i6 * ts + ts * .35, oy + _j2 * ts + ts * .4, ts * .3, 0, 6.2832);
+      x.arc(ox + _i6 * ts + ts * .68, oy + _j2 * ts + ts * .55, ts * .28, 0, 6.2832);
+      x.fill();
+    }
+    for (var _j3 = 1; _j3 < GH - 1; _j3++) for (var _i7 = 1; _i7 < GW - 1; _i7++) if (rocks[_j3 * GW + _i7]) {
+      var px = ox + _i7 * ts,
+        py = oy + _j3 * ts;
+      x.fillStyle = 'rgba(0,0,0,.25)';
+      x.beginPath();
+      x.ellipse(px + ts / 2, py + ts * .8, ts * .45, ts * .18, 0, 0, 6.2832);
+      x.fill();
+      SS.rrp(px + ts * .06, py + ts * .08, ts * .88, ts * .78, ts * .3);
+      var gg = x.createLinearGradient(0, py, 0, py + ts);
+      gg.addColorStop(0, '#c9c4d4');
+      gg.addColorStop(1, '#7a7488');
+      x.fillStyle = gg;
+      x.fill();
+      x.lineWidth = 1.5;
+      x.strokeStyle = 'rgba(28,23,36,.7)';
+      x.stroke();
+      x.fillStyle = 'rgba(255,255,255,.45)';
+      x.beginPath();
+      x.ellipse(px + ts * .34, py + ts * .28, ts * .16, ts * .08, -.5, 0, 6.2832);
+      x.fill();
+    }
+    SS.use(so);
+    bgK = key;
+    bgC = c;
+    return c;
+  }
+  var SPR = {};
+  function spr(key, w, h, fn) {
+    var k = key + '_' + K.dpr + '_' + L.ts;
+    if (SPR[k]) return SPR[k];
+    var d = K.dpr,
+      c = document.createElement('canvas');
+    c.width = Math.ceil(w * d);
+    c.height = Math.ceil(h * d);
+    var x = c.getContext('2d');
+    x.scale(d, d);
+    var so = SS.use(x);
+    fn(x, w, h);
+    SS.use(so);
+    return SPR[k] = c;
+  }
+  function seg(alt) {
+    var s = L.ts * 1.1;
+    return spr('seg' + alt, s, s, function (x, w) {
+      var col = alt ? '#9ad84a' : '#7cc63a';
+      var g = x.createRadialGradient(w * .38, w * .35, w * .05, w / 2, w / 2, w * .48);
+      g.addColorStop(0, SS.tone(col, .45));
+      g.addColorStop(1, SS.tone(col, -.25));
+      x.fillStyle = g;
+      x.beginPath();
+      x.arc(w / 2, w / 2, w * .44, 0, 6.2832);
+      x.fill();
+      x.lineWidth = w * .06;
+      x.strokeStyle = 'rgba(28,23,36,.8)';
+      x.stroke();
+      x.fillStyle = '#f2c230';
+      x.beginPath();
+      x.arc(w / 2, w / 2, w * .1, 0, 6.2832);
+      x.fill();
+    });
+  }
+  function fruitSpr(e) {
+    var s = L.ts * 1.05;
+    return spr('f' + e, s, s, function (x, w) {
+      x.font = Math.round(w * .8) + 'px sans-serif';
+      x.textAlign = 'center';
+      x.textBaseline = 'middle';
+      x.fillText(e, w / 2, w * .55);
+    });
+  }
+  function lerp(a, b, k) {
+    return a + (b - a) * k;
+  }
+  function draw() {
+    lay();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (rocks) ctx.drawImage(bgCanvas(), 0, 0);else {
+      ctx.fillStyle = '#bfe6a8';
+      ctx.fillRect(0, 0, K.W * K.dpr, K.H * K.dpr);
+    }
+    ctx.setTransform(K.dpr, 0, 0, K.dpr, 0, 0);
+    if (state === 'menu' || !rocks) return;
+    var ts = L.ts,
+      ox = L.ox,
+      oy = L.oy,
+      k = state === 'play' ? Math.min(1, tick / tickF(lv)) : 1;
+    var cx = function cx(gx) {
+        return ox + gx * ts + ts / 2;
+      },
+      cy = function cy(gy) {
+        return oy + gy * ts + ts / 2;
+      };
+    if (fruit) {
+      var b = Math.sin(t * .12) * ts * .05,
+        fs = fruitSpr(fruit.e),
+        w = ts * 1.05;
+      ctx.drawImage(fs, cx(fruit.x) - w / 2, cy(fruit.y) - w / 2 + b, w, w);
+    }
+    if (star && (star.t > 100 || Math.floor(t / 6) % 2)) {
+      var _fs = fruitSpr('⭐'),
+        _w = ts * 1.05 * (1 + Math.sin(t * .2) * .08);
+      ctx.drawImage(_fs, cx(star.x) - _w / 2, cy(star.y) - _w / 2, _w, _w);
+    }
+    var blink = state === 'dead' && Math.floor(dead / 6) % 2;
+    if (!blink) {
+      for (var i = snake.length - 1; i >= 1; i--) {
+        var _s = snake[i],
+          x = cx(lerp(_s.px, _s.x, k)),
+          y = cy(lerp(_s.py, _s.y, k)),
+          _w2 = ts * 1.1 * (i === snake.length - 1 ? .8 : 1);
+        ctx.drawImage(seg(i % 2), x - _w2 / 2, y - _w2 / 2, _w2, _w2);
+      }
+      var h = snake[0],
+        hx = cx(lerp(h.px, h.x, k)),
+        hy = cy(lerp(h.py, h.y, k)),
+        R = ts * .6,
+        dx = DIRS[dir][0],
+        dy = DIRS[dir][1];
+      var g = ctx.createRadialGradient(hx - R * .3, hy - R * .35, R * .1, hx, hy, R);
+      g.addColorStop(0, '#c8f07a');
+      g.addColorStop(1, '#5aa82a');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(hx, hy, R, 0, 6.2832);
+      ctx.fill();
+      ctx.lineWidth = ts * .07;
+      ctx.strokeStyle = 'rgba(28,23,36,.85)';
+      ctx.stroke();
+      var px = -dy,
+        py = dx;
+      ctx.strokeStyle = 'rgba(28,23,36,.85)';
+      ctx.lineWidth = ts * .06;
+      for (var _i8 = 0, _arr4 = [-1, 1]; _i8 < _arr4.length; _i8++) {
+        var sd = _arr4[_i8];
+        var ax = hx - dx * R * .3 + px * sd * R * .5,
+          ay = hy - dy * R * .3 + py * sd * R * .5,
+          ex = ax - dx * R * .5 + px * sd * R * .55,
+          ey = ay - dy * R * .5 + py * sd * R * .55;
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+        ctx.fillStyle = '#e8484f';
+        ctx.beginPath();
+        ctx.arc(ex, ey, ts * .1, 0, 6.2832);
+        ctx.fill();
+      }
+      for (var _i9 = 0, _arr5 = [-1, 1]; _i9 < _arr5.length; _i9++) {
+        var _sd = _arr5[_i9];
+        var _ex = hx + dx * R * .3 + px * _sd * R * .38,
+          _ey = hy + dy * R * .3 + py * _sd * R * .38;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(_ex, _ey, R * .26, 0, 6.2832);
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(28,23,36,.8)';
+        ctx.stroke();
+        ctx.fillStyle = '#1c1724';
+        ctx.beginPath();
+        ctx.arc(_ex + dx * R * .1, _ey + dy * R * .1, R * .13, 0, 6.2832);
+        ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(255,140,160,.5)';
+      for (var _i0 = 0, _arr6 = [-1, 1]; _i0 < _arr6.length; _i0++) {
+        var _sd2 = _arr6[_i0];
+        ctx.beginPath();
+        ctx.arc(hx + dx * R * .05 + px * _sd2 * R * .62, hy + dy * R * .05 + py * _sd2 * R * .62, R * .14, 0, 6.2832);
+        ctx.fill();
+      }
+    }
+    var _iterator8 = _createForOfIteratorHelper(pops),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var q = _step8.value;
+        K.text(q.s, cx(q.x), cy(q.y) - (60 - q.t) * .6, 18, '#fff7c0', 'center');
+      }
+    } catch (err) {
+      _iterator8.e(err);
+    } finally {
+      _iterator8.f();
+    }
+    var hy2 = oy - 18;
+    K.text('Punti ' + score, ox, hy2, 18, '#1c1724');
+    K.text('🍎 ' + eatenLv + '/' + goal(lv), ox + GW * ts / 2, hy2, 17, '#1c1724', 'center');
+    ctx.font = '18px sans-serif';
+    ctx.textAlign = 'right';
+    var s = '';
+    for (var _i1 = 0; _i1 < lives; _i1++) s += '❤️';
+    ctx.fillText(s, ox + GW * ts, hy2);
+    ctx.textAlign = 'left';
+    if (state === 'ready' && !msg) K.text('Tocca una freccia o scorri il dito per partire!', ox + GW * ts / 2, oy + GH * ts * .33, 20, '#fff', 'center');
+    if (msg) {
+      K.text(msg.s, ox + GW * ts / 2, oy + GH * ts * .38, 28, '#fff', 'center');
+      if (msg.s2) K.text(msg.s2, ox + GW * ts / 2, oy + GH * ts * .38 + 30, 18, '#ffe48a', 'center');
+    }
+    if (state === 'over') K.text('Fine partita!', ox + GW * ts / 2, oy + GH * ts * .5, 30, '#fff', 'center');
+  }
+  var cv = K.cv;
+  var sw = null;
+  cv.addEventListener('touchstart', function (e) {
+    if (!K.playing) return;
+    var tt = e.changedTouches[0];
+    sw = {
+      x: tt.clientX,
+      y: tt.clientY,
+      id: tt.identifier
+    };
+  }, {
+    passive: true
+  });
+  cv.addEventListener('touchmove', function (e) {
+    if (!sw) return;
+    for (var _i10 = 0, _Array$from = Array.from(e.changedTouches); _i10 < _Array$from.length; _i10++) {
+      var tt = _Array$from[_i10];
+      if (tt.identifier === sw.id) {
+        var dx = tt.clientX - sw.x,
+          dy = tt.clientY - sw.y;
+        if (Math.abs(dx) + Math.abs(dy) > 26) {
+          turn(Math.abs(dx) > Math.abs(dy) ? dx > 0 ? 3 : 1 : dy > 0 ? 2 : 0);
+          sw.x = tt.clientX;
+          sw.y = tt.clientY;
+        }
+      }
+    }
+    if (e.cancelable) e.preventDefault();
+  }, {
+    passive: false
+  });
+  cv.addEventListener('touchend', function () {
+    sw = null;
+  }, {
+    passive: true
+  });
+  var PROG = K.load('bruco-prog', {
+    open: 0,
+    done: {}
+  });
+  if (!PROG.done) PROG.done = {};
+  function snap() {
+    if (!rocks || state === 'over' || state === 'menu') return null;
+    var alive = state !== 'dead';
+    return {
+      lv: lv,
+      score: score,
+      lives: Math.max(1, lives),
+      eatenLv: eatenLv,
+      snake: alive ? snake.map(function (s) {
+        return {
+          x: s.x,
+          y: s.y
+        };
+      }) : null,
+      dir: dir,
+      player: player,
+      nFruit: nFruit
+    };
+  }
+  function restore(s) {
+    score = s.score;
+    lives = s.lives;
+    player = s.player || K.player(0);
+    nFruit = s.nFruit || 0;
+    startLevel(s.lv, s);
+    msg = {
+      t: 90,
+      s: 'Bentornato!',
+      s2: 'tocca una freccia per ripartire'
+    };
+  }
+  function renderMenu() {
+    K.playerPicker($('players'), 0);
+    var b = K.boardOf('bruco').find(function (r) {
+      return r.name === K.player(0);
+    });
+    $('rec').textContent = b && b.max ? '🏆 Il tuo record: ' + b.max.record + ' punti · bruco lungo ' + (b.max.lunghezza || 0) : '';
+    var box = $('levels');
+    box.innerHTML = '';
+    NAMES.forEach(function (n, i) {
+      var bt = document.createElement('button');
+      bt.type = 'button';
+      var open = i <= PROG.open;
+      bt.className = 'lvl' + (PROG.done[i] ? ' done' : '') + (open ? '' : ' lock');
+      bt.innerHTML = '<b>' + (i + 1) + '</b>' + n + '<small>' + (open ? PROG.done[i] ? '✅ finito' : goal(i) + ' frutti' : '🔒') + '</small>';
+      bt.onclick = function () {
+        if (!open) return;
+        K.del('bruco-run');
+        newGame(i);
+        $('menu').hidden = true;
+        K.start();
+      };
+      box.appendChild(bt);
+    });
+    var sv = K.load('bruco-run', null),
+      cb = $('cont');
+    if (sv && typeof sv.lv === 'number') {
+      cb.hidden = false;
+      cb.innerHTML = '▶ Continua la partita<small>livello ' + (sv.lv + 1) + ' · ' + sv.score + ' punti · ' + sv.lives + ' ❤️</small>';
+      cb.onclick = function () {
+        restore(sv);
+        $('menu').hidden = true;
+        K.start();
+      };
+    } else cb.hidden = true;
+  }
+  function showMenu() {
+    K.stop();
+    $('end').hidden = true;
+    state = 'menu';
+    rocks = null;
+    renderMenu();
+    $('menu').hidden = false;
+    K.wantMusic = null;
+  }
+  function showEnd(all) {
+    K.stop();
+    $('endT').textContent = all ? '🏆 Hai finito tutti i giardini!' : 'Fine partita!';
+    $('endS').textContent = player + ': ' + score + ' punti · livello ' + (lv + 1) + ' · bruco lungo ' + snake.length;
+    $('end').hidden = false;
+  }
+  $('go').onclick = function () {
+    K.del('bruco-run');
+    newGame(0);
+    $('menu').hidden = true;
+    K.start();
+  };
+  $('endAgain').onclick = function () {
+    $('end').hidden = true;
+    newGame(lv);
+    K.start();
+  };
+  $('endMenu').onclick = showMenu;
+  $('boardBtn').onclick = function () {
+    var sec = [{
+      cols: [{
+        h: 'Giocatore',
+        f: function f(r) {
+          return r.name;
+        }
+      }, {
+        h: 'Punti',
+        f: function f(r) {
+          return r.pts || 0;
+        }
+      }, {
+        h: 'Record',
+        f: function f(r) {
+          return r.max && r.max.record || 0;
+        }
+      }, {
+        h: 'Livello',
+        f: function f(r) {
+          return r.max && r.max.livello || 0;
+        }
+      }, {
+        h: 'Lunghezza',
+        f: function f(r) {
+          return r.max && r.max.lunghezza || 0;
+        }
+      }],
+      rows: K.boardOf('bruco')
+    }];
+    sec.games = ['bruco'];
+    K.showBoard('Classifica Il Bruco Mangione', sec, 'Frutto 10 punti per il livello · stella 50 · livello finito 100');
+  };
+  K.buttons([{
+    k: 'left',
+    label: '◀',
+    pos: 'dl'
+  }, {
+    k: 'right',
+    label: '▶',
+    pos: 'dr'
+  }, {
+    k: 'up',
+    label: '▲',
+    pos: 'du'
+  }, {
+    k: 'down',
+    label: '▼',
+    pos: 'dd'
+  }]);
+  K.game = {
+    update: update,
+    draw: draw,
+    save: function save() {
+      var s = snap();
+      return s ? K.save('bruco-run', s) : true;
+    },
+    exit: showMenu
+  };
+  K.initUI();
+  K.run();
+  showMenu();
+  window.__BR = {
+    newGame: newGame,
+    update: update,
+    turn: turn,
+    step: step,
+    get snake() {
+      return snake;
+    },
+    get fruit() {
+      return fruit;
+    },
+    get state() {
+      return state;
+    },
+    set state(v) {
+      state = v;
+    },
+    get score() {
+      return score;
+    },
+    get lives() {
+      return lives;
+    },
+    get lv() {
+      return lv;
+    },
+    get eatenLv() {
+      return eatenLv;
+    },
+    get dir() {
+      return dir;
+    },
+    free: free,
+    onSnake: onSnake,
+    layout: layout,
+    startLevel: startLevel
+  };
+})();</script>
+</body>
+</html>
