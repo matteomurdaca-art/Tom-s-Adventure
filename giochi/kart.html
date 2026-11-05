@@ -2148,7 +2148,7 @@ var K = function () {
           return '<th>' + esc(c.h) + '</th>';
         }).join('') + '</tr>';
         s.rows.forEach(function (r, i) {
-          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1) + '</td>') + s.cols.map(function (c) {
+          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🏆 1°' : i === 1 ? '2°' : i === 2 ? '3°' : i + 1) + '</td>') + s.cols.map(function (c) {
             return '<td>' + esc(c.f(r)) + '</td>';
           }).join('') + '</tr>';
         });
@@ -3596,7 +3596,7 @@ var K = function () {
       var open = i <= PROG.open,
         best = PROG.best[i];
       b.className = 'lvl' + (best && best <= 3 ? ' done' : '') + (open ? '' : ' lock');
-      b.innerHTML = '<b>' + (i + 1) + '</b>' + t.name + '<small>' + (open ? best ? 'Miglior posto: ' + ['🥇', '🥈', '🥉', '4°'][best - 1] : t.sub : '🔒 arriva tra i primi 3 nella pista prima') + '</small>';
+      b.innerHTML = '<b>' + (i + 1) + '</b>' + t.name + '<small>' + (open ? best ? 'Miglior posto: ' + ['🏆 1°', '2°', '3°', '4°'][best - 1] : t.sub : '🔒 arriva tra i primi 3 nella pista prima') + '</small>';
       b.onclick = function () {
         if (!open) return;
         K.del('tomkart-run');
@@ -3637,10 +3637,10 @@ var K = function () {
     r.order.forEach(function (k, i) {
       var d = document.createElement('div');
       d.className = 'resrow' + (k === me ? ' me' : '');
-      d.textContent = ['🥇', '🥈', '🥉', '4°'][i] + '  ' + K.CHARS[k.ch].name + '  ·  ' + K.fmt(k.fin);
+      d.textContent = ['🏆 1°', '2°', '3°', '4°'][i] + '  ' + K.CHARS[k.ch].name + '  ·  ' + K.fmt(k.fin);
       box.appendChild(d);
     });
-    $('resTitle').textContent = r.pl === 1 ? 'HAI VINTO! 🏆' : r.pl <= 3 ? 'Sul podio! ' + ['', '🥇', '🥈', '🥉'][r.pl] : '4° posto: riprova!';
+    $('resTitle').textContent = r.pl === 1 ? 'HAI VINTO! 🏆' : r.pl <= 3 ? 'Sul podio! ' + ['', '1° posto', '2° posto', '3° posto'][r.pl] : '4° posto: riprova!';
     var nx = trackIdx + 1;
     $('resNext').hidden = !(r.pl <= 3 && nx < TRACKS.length);
     $('resNote').textContent = r.pl <= 3 && nx < TRACKS.length ? 'Hai sbloccato: ' + TRACKS[nx].name + '!' : r.pl > 3 ? 'Arriva tra i primi 3 per sbloccare la pista successiva.' : 'Hai finito tutte le piste!';

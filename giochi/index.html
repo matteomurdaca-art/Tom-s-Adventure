@@ -38,12 +38,12 @@ a.game span{font-size:14px;color:#5d6273}
 <div class="grid">
   <a class="game g1" href="../#gioca"><div class="ic">✏️</div><b>L'avventura di Tom</b><span>Il gioco nato dal disegno di Tommy: 20 livelli in 2 mondi, boss, poteri e negozio</span></a>
   <a class="game g2" href="kart.html"><div class="ic">🏎️</div><b>Tom Kart</b><span>Corse in kart su 4 piste con pacchi regalo, razzi carota e turbo</span></a>
-  <a class="game g3" href="pianeti.html"><div class="ic">🪐</div><b>Tom tra i Pianeti</b><span>Cammina tutto intorno ai pianeti rotondi e prendi la cometa</span></a>
+  <a class="game g3" href="pianeti.html"><div class="ic">🌍</div><b>Tom tra i Pianeti</b><span>Cammina tutto intorno ai pianeti rotondi e prendi la cometa</span></a>
   <a class="game g4" href="corsa.html"><div class="ic">🏃</div><b>Corsa Pazza</b><span>12 concorrenti, 3 manche a ostacoli: chi vince la corona?</span></a>
   <a class="game g5" href="robot.html"><div class="ic">🤖</div><b>Robottino</b><span>Il robot con l'elica: plana, dà pugni e ritrova gli ingranaggi</span></a>
   <a class="game g6" href="vichinghi.html"><div class="ic">⚔️</div><b>La Spada del Nord</b><span>Guerriero, arciera e nano contro troll e stregone: salva la principessa!</span></a>
   <a class="game g7" href="tavolo.html"><div class="ic">🎲</div><b>Giochi da tavolo</b><span>Tris, Dama, Scacchi e Scopa: contro il computer o in due</span></a>
-  <a class="game g8" href="sparabolle.html"><div class="ic">🫧</div><b>Spara Bolle</b><span>Mira e spara: tre bolle dello stesso colore scoppiano!</span></a>
+  <a class="game g8" href="sparabolle.html"><div class="ic">🔵</div><b>Spara Bolle</b><span>Mira e spara: tre bolle dello stesso colore scoppiano!</span></a>
   <a class="game g9" href="bollegiganti.html"><div class="ic">🎈</div><b>Tommy e le Bolle Giganti</b><span>Spara il rampino: le bolle si dividono fino a sparire. Non farti toccare!</span></a>
   <a class="game g10" href="ember.html"><div class="ic">🔥</div><b>Ember Breaker</b><span>Rompi i mattoni con la palla di fuoco e scegli i potenziamenti</span></a>
   <a class="game g11" href="outrun.html"><div class="ic">🏮</div><b>Outrun the Dark</b><span>Corri con la lanterna e salta gli ostacoli: non farti prendere dal buio!</span></a>
@@ -72,18 +72,20 @@ a.game span{font-size:14px;color:#5d6273}
   render();
 })();
 </script>
-<p class="note" id="upd" hidden>Versione 45 · <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;cursor:pointer">🔄 Aggiorna i giochi</button></p>
+<p class="note" id="upd">Versione 46<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
 <script>
 (function(){
-  if(!('serviceWorker' in navigator)||!/github\.io$/.test(location.hostname)) return;
+  var info=document.getElementById('updInfo'), m=/OS (\d+)_(\d+)/.exec(navigator.userAgent||''), sw=('serviceWorker' in navigator)&&/github\.io$/.test(location.hostname);
+  info.textContent=(m?' · iPad con iOS '+m[1]+'.'+m[2]:'')+(sw?' · funziona anche senza internet':(/github\.io$/.test(location.hostname)?' · serve internet':''));
+  var go=function(){ location.replace(location.pathname+'?v='+Date.now()); };
+  document.getElementById('updBtn').onclick=function(){ this.textContent='⏳ Aggiorno…';
+    if(!sw||!window.Promise){ go(); return; }
+    (window.caches?caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k.indexOf('fonts')<0; }).map(function(k){ return caches.delete(k); })); }):Promise.resolve())
+      .then(function(){ return navigator.serviceWorker.getRegistration('../'); }).then(function(r){ return r&&r.update(); }).then(go,go); };
+  if(!sw) return;
   var had=!!navigator.serviceWorker.controller, done=false;
   navigator.serviceWorker.addEventListener('controllerchange',function(){ if(had&&!done){ done=true; location.reload(); } });
   navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(r){ try{ r.update(); }catch(e){} }).catch(function(){});
-  document.getElementById('upd').hidden=false;
-  document.getElementById('updBtn').onclick=function(){ var b=this; b.textContent='⏳ Aggiorno…';
-    var go=function(){ location.replace(location.pathname+'?v='+Date.now()); };
-    (window.caches?caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k.indexOf('fonts')<0; }).map(function(k){ return caches.delete(k); })); }):Promise.resolve())
-      .then(function(){ return navigator.serviceWorker.getRegistration('../'); }).then(function(r){ return r&&r.update(); }).then(go,go); };
 })();
 </script>
 </body>

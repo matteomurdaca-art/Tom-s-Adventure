@@ -82,7 +82,7 @@ a.home{color:#1d1f2b}
 <div id="ktoast" hidden></div>
 <div class="ov" id="kboard" hidden style="z-index:20"><div class="card"></div></div>
 <div class="ov" id="menu"><div class="card">
-  <h1>🪐 Tom tra i Pianeti</h1>
+  <h1>🌍 Tom tra i Pianeti</h1>
   <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
   <button class="go" id="cont" type="button" hidden></button>
   <h2>Chi va nello spazio?</h2>
@@ -2144,7 +2144,7 @@ var K = function () {
           return '<th>' + esc(c.h) + '</th>';
         }).join('') + '</tr>';
         s.rows.forEach(function (r, i) {
-          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1) + '</td>') + s.cols.map(function (c) {
+          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🏆 1°' : i === 1 ? '2°' : i === 2 ? '3°' : i + 1) + '</td>') + s.cols.map(function (c) {
             return '<td>' + esc(c.f(r)) + '</td>';
           }).join('') + '</tr>';
         });
