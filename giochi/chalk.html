@@ -1,0 +1,2977 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><title>Chalk Ghost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Rock+Salt&display=swap">
+<style>
+:root{--bg:#0e1a17;--board:#1b3b33;--frame:#7a5532;--chalk:#f4efdf;--dim:#aebdb2;--gold:#ffd36b;--teal:#7fe0c8;--bad:#ff8f7a;--ok:#9be38a;--panel:#142720;--line:#2e4d43;--f-body:"Patrick Hand","Chalkboard SE","Comic Sans MS",cursive,sans-serif;--f-title:"Rock Salt","Chalkboard SE","Bradley Hand",cursive}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#0e1a17;background:var(--bg);color:#f4efdf;color:var(--chalk);font-family:"Patrick Hand","Chalkboard SE","Comic Sans MS",cursive,sans-serif;font-family:var(--f-body);font-size:22px;line-height:1.3;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+input{-webkit-user-select:text;user-select:text}
+#app{height:100%;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;max-width:1100px;margin:0 auto}
+.screen{-webkit-flex:1;flex:1;min-height:0;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;padding:12px 16px;overflow:auto;-webkit-overflow-scrolling:touch}
+.screen>*{-webkit-flex-shrink:0;flex-shrink:0;margin-bottom:12px}
+[hidden]{display:none!important}
+.title{font-family:var(--f-title);font-size:44px;line-height:1.1;margin:8px 0 0;text-align:center;color:var(--chalk)}
+.tag{text-align:center;color:var(--dim);margin:0 0 4px;font-size:24px}
+.ghostsvg{width:120px;height:120px;margin:4px auto 0;display:block}
+.menu-btns{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;margin-top:6px}
+.menu-btns>*{margin-bottom:12px}
+.btn{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;border:3px solid var(--chalk);background:transparent;border-radius:16px;padding:14px 18px;font-size:28px;text-align:center;min-height:64px}
+.btn small{font-size:18px;color:var(--dim);margin-top:2px}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#241a07}
+.btn.primary small{color:#4a3a14}
+.btn.ghost{border-color:var(--line);font-size:21px;padding:10px 16px;-webkit-flex-direction:row;flex-direction:row;min-height:52px}
+.btn:disabled{opacity:.4}
+.row{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;-webkit-justify-content:center;justify-content:center;-webkit-align-items:center;align-items:center}
+.row>*{margin:6px}
+.chip{border:3px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 16px;font-size:20px;min-height:48px}
+.seg{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap}
+.seg button{border:3px solid var(--line);background:transparent;border-radius:12px;min-width:60px;min-height:54px;padding:6px 14px;font-size:26px;margin:0 8px 8px 0}
+.seg button[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:#06231c}
+.muted{color:var(--dim)}
+h2{font-family:var(--f-title);font-weight:400;font-size:28px;margin:6px 0 2px}
+.field>span{display:block;margin-bottom:6px}
+.field input,.answer input{width:100%;background:#0b1512;border:3px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:26px;color:var(--chalk)}
+.names{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap}
+.names label{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;width:240px;margin:0 12px 10px 0}
+.names i{width:22px;height:22px;border-radius:50%;-webkit-flex:none;flex:none;background:var(--c);margin-right:8px}
+#bar{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center}
+#bar>*{margin-right:8px}#bar>*:last-child{margin-right:0}
+.bar2{display:-webkit-flex;display:flex}
+#status{-webkit-flex:1;flex:1;text-align:center;color:var(--dim);font-size:20px;min-width:0}
+#game{padding-top:8px;overflow:hidden}
+#game>*{margin-bottom:8px}
+#main{-webkit-flex:1;flex:1;min-height:0;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;margin-bottom:0}
+#side{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;width:100%;-webkit-align-items:stretch;align-items:stretch}
+#side>*{margin:0 0 10px}
+#game.land #main{-webkit-flex-direction:row;flex-direction:row;-webkit-align-items:center;align-items:center}
+#game.land #boardWrap{margin-right:20px}
+#game.land #side{-webkit-flex:1;flex:1;min-width:0}
+#scores{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;-webkit-justify-content:center;justify-content:center}
+#scores span{border:3px solid var(--c,var(--line));border-color:var(--c);border-radius:999px;padding:2px 14px;font-size:20px;margin:3px}
+#scores span.big{border-color:var(--gold);color:var(--gold);font-size:24px}
+#panel{min-height:90px;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;text-align:center}
+#panel>*{margin:5px 0}
+#topBuzz{-webkit-transform:rotate(180deg);transform:rotate(180deg)}
+.buzzrow{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap}
+.buzz{-webkit-flex:1 1 120px;flex:1 1 120px;margin:4px;background:var(--c);color:#10201b;border:0;border-radius:16px;min-height:72px;font-size:26px;font-weight:700}
+.buzz.two{min-height:70px;font-size:28px}
+.buzz.locked{opacity:.28}
+.buzz.live{outline:5px solid var(--chalk)}
+#boardWrap{-webkit-flex:none;flex:none}
+#board{position:relative;width:320px;height:320px;margin:0 auto;background:#1b3b33;background:radial-gradient(ellipse at 30% 20%,#25473e,#1b3b33 55%,#16322b);border:10px solid var(--frame);border-radius:12px;box-shadow:inset 0 0 40px rgba(0,0,0,.45),0 4px 14px rgba(0,0,0,.5)}
+#board.ok{border-color:#58a552}
+#board.bad{border-color:#b9594a}
+#board.shake{-webkit-animation:shake .35s;animation:shake .35s}
+@-webkit-keyframes shake{20%{-webkit-transform:translateX(-7px)}40%{-webkit-transform:translateX(7px)}60%{-webkit-transform:translateX(-5px)}80%{-webkit-transform:translateX(5px)}}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+#cv{position:absolute;top:0;left:0;width:100%;height:100%}
+#pts{position:absolute;left:10px;top:6px;font-size:26px;color:var(--gold);text-shadow:0 1px 3px #000}
+#pts.late{color:var(--bad);-webkit-animation:pulse .8s infinite;animation:pulse .8s infinite}
+@-webkit-keyframes pulse{50%{opacity:.45}}@keyframes pulse{50%{opacity:.45}}
+.big-word{font-family:var(--f-title);font-size:34px;color:var(--chalk)}
+.judge .big-word{font-size:24px}
+.judge .btn{padding:8px 16px;font-size:24px;min-width:140px}
+.res-ok{color:var(--ok);font-size:28px}.res-bad{color:var(--bad);font-size:26px}
+.answer{display:-webkit-flex;display:flex;width:100%;max-width:560px}
+.answer input{-webkit-flex:1;flex:1;min-width:0;margin-right:8px}
+.hold{border:3px dashed var(--dim);background:transparent;border-radius:14px;padding:10px 14px;font-size:20px;color:var(--dim);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.hold.on{color:var(--gold);border-color:var(--gold);font-size:28px}
+.timer{height:8px;border-radius:4px;background:#0b1512;width:100%;max-width:420px;overflow:hidden}
+.timer i{display:block;height:100%;background:var(--gold)}
+.ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(5,12,10,.9);display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;z-index:20;padding:16px}
+.ov>*{margin:7px 0}
+.ov .btn{min-width:280px}
+#toast{position:fixed;left:50%;bottom:24px;-webkit-transform:translateX(-50%);transform:translateX(-50%);background:var(--chalk);color:#10201b;padding:10px 20px;border-radius:999px;z-index:30;font-size:24px}
+.rank{width:100%;max-width:460px}
+.rank div{display:-webkit-flex;display:flex;-webkit-justify-content:space-between;justify-content:space-between;border-bottom:2px dashed var(--line);padding:6px 2px;font-size:26px}
+.marks{font-size:30px;letter-spacing:2px}
+</style></head><body>
+<div id="app">
+ <section id="menu" class="screen">
+  <h1 class="title">Chalk Ghost</h1>
+  <svg class="ghostsvg" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#f4efdf" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M24 84V46a26 26 0 0 1 52 0v38a8.7 8 0 0 1-17.3 0 8.7 8 0 0 1-17.4 0 8.7 8 0 0 1-17.3 0z"/><circle cx="41" cy="46" r="3.5"/><circle cx="59" cy="46" r="3.5"/><ellipse cx="50" cy="59" rx="5" ry="7"/><path d="M80 30l10-12M86 36l9-3" stroke="#ffd36b"/></g></svg>
+  <p class="tag" id="tag"></p>
+  <div class="menu-btns" id="menuBtns"></div>
+  <div class="row" id="menuFoot"></div>
+ </section>
+ <section id="setup" class="screen" hidden></section>
+ <section id="howto" class="screen" hidden></section>
+ <section id="game" class="screen" hidden>
+  <div id="bar"><button id="bBack" class="chip" type="button"></button><div id="status"></div><button id="bPause" class="chip" type="button"></button><button id="bSnd" class="chip" type="button" aria-label="Sound"></button></div>
+  <div id="main"><div id="boardWrap"><div id="board"><canvas id="cv" width="800" height="800"></canvas><div id="pts"></div></div></div>
+  <div id="side"><div id="scores"></div>
+  <div id="topBuzz" class="buzzrow" hidden></div>
+  <div id="panel"></div>
+  <div id="botBuzz" class="buzzrow" hidden></div></div></div>
+ </section>
+ <div id="pauseO" class="ov" hidden></div>
+</div>
+<div id="toast" hidden></div>
+
+<script>/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) });
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true });
+  defineProperty(
+    GeneratorFunctionPrototype,
+    "constructor",
+    { value: GeneratorFunction, configurable: true }
+  );
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    defineProperty(this, "_invoke", { value: enqueue });
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per GeneratorResume behavior specified since ES2015:
+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume
+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method;
+    var method = delegate.iterator[methodName];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method, or a missing .next method, always terminate the
+      // yield* loop.
+      context.delegate = null;
+
+      // Note: ["return"] must be used for ES3 parsing compatibility.
+      if (methodName === "throw" && delegate.iterator["return"]) {
+        // If the delegate iterator has a return method, give it a
+        // chance to clean up.
+        context.method = "return";
+        context.arg = undefined;
+        maybeInvokeDelegate(delegate, context);
+
+        if (context.method === "throw") {
+          // If maybeInvokeDelegate(context) changed context.method from
+          // "return" to "throw", let that override the TypeError below.
+          return ContinueSentinel;
+        }
+      }
+      if (methodName !== "return") {
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a '" + methodName + "' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(val) {
+    var object = Object(val);
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable != null) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    throw new TypeError(typeof iterable + " is not iterable");
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+(function(){
+ if(!String.prototype.padStart){String.prototype.padStart=function(n,c){var s=String(this);c=c===undefined?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};}
+ if(!Object.assign){Object.assign=function(t){for(var i=1;i<arguments.length;i++){var s=arguments[i];if(s)for(var k in s)if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k];}return t;};}
+ if(!Array.prototype.findIndex){Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};}
+ if(window.NodeList&&!NodeList.prototype.forEach){NodeList.prototype.forEach=Array.prototype.forEach;}
+ [Element.prototype,Document.prototype,DocumentFragment.prototype].forEach(function(P){ if(!P.append){P.append=function(){for(var i=0;i<arguments.length;i++){var n=arguments[i];this.appendChild(n instanceof Node?n:document.createTextNode(String(n)));}};} });
+ var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+ if(C&&!C.ellipse){C.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){this.save();this.translate(x,y);this.rotate(rot);this.scale(rx,ry);this.arc(0,0,1,a0,a1,ccw);this.restore();};}
+})();
+function _regenerator() { var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var D = Math.PI / 180;
+var arc = function arc(cx, cy, rx, ry, a0, a1, rot) {
+  rot = rot || 0;
+  var n = Math.max(8, Math.ceil(Math.abs(a1 - a0) / 5)),
+    c = Math.cos(rot * D),
+    s = Math.sin(rot * D),
+    o = [];
+  for (var i = 0; i <= n; i++) {
+    var a = (a0 + (a1 - a0) * i / n) * D,
+      x = Math.cos(a) * rx,
+      y = Math.sin(a) * ry;
+    o.push([cx + x * c - y * s, cy + x * s + y * c]);
+  }
+  return o;
+};
+var circ = function circ(cx, cy, r, a0, a1) {
+  return arc(cx, cy, r, r, a0 == null ? 0 : a0, a1 == null ? 360 : a1);
+};
+var bez = function bez(a, b, c, d) {
+  var o = [];
+  for (var i = 0; i <= 18; i++) {
+    var t = i / 18,
+      u = 1 - t;
+    o.push([u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * d[0], u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * d[1]]);
+  }
+  return o;
+};
+var cat = function cat() {
+  var _ref;
+  return (_ref = []).concat.apply(_ref, arguments);
+};
+var mir = function mir(s) {
+  return s.map(function (p) {
+    return [100 - p[0], p[1]];
+  });
+};
+var bump = function bump(cx, cy, r, n, amp) {
+  var o = [];
+  for (var i = 0; i <= 72; i++) {
+    var a = i / 72 * 2 * Math.PI,
+      rr = r * (1 + amp * Math.sin(n * a));
+    o.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.92]);
+  }
+  return o;
+};
+var rect = function rect(x1, y1, x2, y2) {
+  return [[x1, y1], [x2, y1], [x2, y2], [x1, y2], [x1, y1]];
+};
+var SUBJECTS = [{
+  id: "house",
+  it: ["casa", "casetta"],
+  en: ["house", "home"],
+  S: function S() {
+    return [rect(25, 47, 75, 85), [[17, 50], [50, 18], [83, 50]], rect(44, 62, 56, 85), rect(31, 54, 41, 64), [[36, 54], [36, 64]], [[31, 59], [41, 59]], [[64, 32], [64, 19], [72, 19], [72, 36]], circ(53, 74, 1.2), [[8, 85], [92, 85]]];
+  }
+}, {
+  id: "tree",
+  it: ["albero", "pianta"],
+  en: ["tree"],
+  S: function S() {
+    return [[[44, 90], [45, 62]], [[56, 90], [55, 62]], bump(50, 38, 23, 7, 0.1), circ(40, 40, 2.3), circ(60, 32, 2.3), circ(56, 50, 2.3), [[50, 62], [50, 50]], [[18, 90], [82, 90]]];
+  }
+}, {
+  id: "sun",
+  it: ["sole"],
+  en: ["sun"],
+  S: function S() {
+    var r = [circ(50, 50, 15)];
+    for (var k = 0; k < 12; k++) {
+      var a = k * 30 * D;
+      r.push([[50 + Math.cos(a) * 22, 50 + Math.sin(a) * 22], [50 + Math.cos(a) * 34, 50 + Math.sin(a) * 34]]);
+    }
+    r.push(arc(50, 52, 8, 6, 20, 160), circ(44, 46, 1.4), circ(56, 46, 1.4));
+    return r;
+  }
+}, {
+  id: "moon",
+  it: ["luna", "mezzaluna"],
+  en: ["moon", "crescent"],
+  S: function S() {
+    return [arc(50, 50, 30, 30, 310, 50), arc(60, 50, 24.8, 24.8, 292, 68), [[78, 18], [86, 18]], [[82, 14], [82, 22]], [[86, 52], [94, 52]], [[90, 48], [90, 56]], [[74, 78], [82, 78]], [[78, 74], [78, 82]]];
+  }
+}, {
+  id: "star",
+  it: ["stella"],
+  en: ["star"],
+  S: function S() {
+    var p = [];
+    for (var i = 0; i <= 10; i++) {
+      var r = i % 2 ? 15 : 36,
+        a = (-90 + i * 36) * D;
+      p.push([50 + Math.cos(a) * r, 54 + Math.sin(a) * r]);
+    }
+    return [p, circ(50, 52, 1.4)];
+  }
+}, {
+  id: "heart",
+  it: ["cuore"],
+  en: ["heart"],
+  S: function S() {
+    var p = [];
+    for (var i = 0; i <= 64; i++) {
+      var t = i / 64 * 2 * Math.PI;
+      p.push([50 + 2.3 * 16 * Math.pow(Math.sin(t), 3) / 1.0 * 0.95, 46 - 2.1 * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * 0.95]);
+    }
+    return [p, arc(34, 38, 8, 8, 200, 250)];
+  }
+}, {
+  id: "cat",
+  it: ["gatto", "gatta", "micio", "gattino"],
+  en: ["cat", "kitten"],
+  S: function S() {
+    return [arc(50, 58, 22, 19, 0, 360), [[30, 46], [29, 22], [44, 38]], [[70, 46], [71, 22], [56, 38]], arc(41, 56, 3.5, 4.5, 0, 360), arc(59, 56, 3.5, 4.5, 0, 360), [[47, 64], [53, 64], [50, 68], [47, 64]], bez([50, 68], [50, 73], [45, 74], [43, 71]), bez([50, 68], [50, 73], [55, 74], [57, 71]), [[34, 66], [14, 62]], [[34, 70], [14, 72]], [[66, 66], [86, 62]], [[66, 70], [86, 72]], [[50, 40], [50, 46]], [[44, 41], [45, 46]], [[56, 41], [55, 46]]];
+  }
+}, {
+  id: "fish",
+  it: ["pesce"],
+  en: ["fish"],
+  S: function S() {
+    return [arc(44, 50, 28, 18, 40, 320), [[65.4, 61.6], [88, 74], [80, 50], [88, 26], [65.4, 38.4]], circ(30, 44, 2.6), [[17, 52], [22, 54]], arc(30, 50, 8, 14, -60, 60), [[42, 33], [50, 22], [58, 35]], arc(50, 48, 5, 5, 200, 340), arc(58, 56, 5, 5, 200, 340), circ(12, 28, 3), circ(18, 18, 2)];
+  }
+}, {
+  id: "flower",
+  it: ["fiore", "margherita"],
+  en: ["flower", "daisy"],
+  S: function S() {
+    var r = [bez([50, 90], [48, 74], [52, 60], [50, 48]), cat(bez([50, 76], [36, 76], [28, 66], [26, 60]), bez([26, 60], [38, 58], [48, 66], [50, 76])), cat(bez([50, 70], [64, 70], [72, 60], [74, 54]), bez([74, 54], [62, 52], [52, 60], [50, 70]))];
+    for (var k = 0; k < 6; k++) {
+      var a = (-90 + 60 * k) * D;
+      r.push(circ(50 + Math.cos(a) * 15, 34 + Math.sin(a) * 15, 9));
+    }
+    r.push(circ(50, 34, 6.5));
+    return r;
+  }
+}, {
+  id: "sailboat",
+  it: ["barca", "barca a vela", "veliero", "nave"],
+  en: ["boat", "sailboat", "ship"],
+  S: function S() {
+    return [[[18, 68], [82, 68], [70, 84], [30, 84], [18, 68]], [[50, 68], [50, 14]], [[52, 18], [52, 64], [82, 64], [52, 18]], [[48, 26], [48, 64], [28, 64], [48, 26]], [[50, 14], [60, 18], [50, 22]], cat(arc(22, 92, 8, 4, 180, 360), arc(38, 92, 8, 4, 180, 360)), cat(arc(62, 92, 8, 4, 180, 360), arc(78, 92, 8, 4, 180, 360))];
+  }
+}, {
+  id: "car",
+  it: ["macchina", "auto", "automobile"],
+  en: ["car"],
+  S: function S() {
+    return [[[10, 68], [10, 54], [24, 50], [34, 34], [64, 34], [74, 50], [90, 54], [90, 68], [10, 68]], [[36, 38], [32, 50], [50, 50], [50, 38], [36, 38]], [[54, 38], [54, 50], [70, 50], [62, 38], [54, 38]], circ(28, 70, 9), circ(72, 70, 9), circ(28, 70, 3), circ(72, 70, 3), [[84, 58], [90, 58]], [[4, 86], [96, 86]]];
+  }
+}, {
+  id: "bicycle",
+  it: ["bici", "bicicletta"],
+  en: ["bike", "bicycle"],
+  S: function S() {
+    return [circ(24, 64, 17), circ(76, 64, 17), [[24, 64], [50, 64], [40, 38], [24, 64]], [[40, 38], [68, 38], [50, 64]], [[68, 38], [76, 64]], [[68, 38], [66, 28]], [[60, 28], [72, 28]], [[34, 36], [46, 36]], circ(24, 64, 2), circ(76, 64, 2), circ(50, 64, 3)];
+  }
+}, {
+  id: "umbrella",
+  it: ["ombrello"],
+  en: ["umbrella"],
+  S: function S() {
+    return [arc(50, 46, 38, 30, 180, 360), cat(arc(24.7, 46, 12.7, 7, 180, 0), arc(50, 46, 12.7, 7, 180, 0), arc(75.3, 46, 12.7, 7, 180, 0)), [[50, 16], [50, 9]], [[50, 16], [37.4, 46]], [[50, 16], [62.7, 46]], [[50, 46], [50, 82]], arc(58, 82, 8, 8, 180, 0)];
+  }
+}, {
+  id: "key",
+  it: ["chiave"],
+  en: ["key"],
+  S: function S() {
+    return [circ(28, 50, 17), circ(28, 50, 7), [[45, 50], [90, 50]], [[90, 50], [90, 64]], [[80, 50], [80, 62]], [[70, 50], [70, 60]], [[45, 46], [90, 46], [90, 50]]];
+  }
+}, {
+  id: "glasses",
+  it: ["occhiali"],
+  en: ["glasses", "eyeglasses"],
+  S: function S() {
+    return [circ(28, 54, 16), circ(72, 54, 16), arc(50, 54, 7, 7, 200, 340), [[12, 50], [3, 40]], [[88, 50], [97, 40]], [[20, 48], [26, 44]], [[64, 48], [70, 44]]];
+  }
+}, {
+  id: "apple",
+  it: ["mela"],
+  en: ["apple"],
+  S: function S() {
+    return [cat(bez([50, 34], [62, 24], [86, 36], [84, 60]), bez([84, 60], [82, 84], [62, 92], [50, 86]), bez([50, 86], [38, 92], [18, 84], [16, 60]), bez([16, 60], [14, 36], [38, 24], [50, 34])), [[50, 34], [52, 18]], cat(bez([52, 22], [60, 10], [72, 12], [76, 14]), bez([76, 14], [72, 28], [58, 28], [52, 22])), arc(32, 56, 10, 14, 200, 250)];
+  }
+}, {
+  id: "mushroom",
+  it: ["fungo", "funghetto"],
+  en: ["mushroom"],
+  S: function S() {
+    return [arc(50, 52, 36, 32, 180, 360), [[14, 52], [86, 52]], [[38, 52], [36, 86], [64, 86], [62, 52]], circ(34, 36, 5), circ(56, 26, 6), circ(70, 42, 4), [[20, 88], [24, 80], [28, 88]], [[72, 88], [76, 80], [80, 88]]];
+  }
+}, {
+  id: "ghost",
+  it: ["fantasma"],
+  en: ["ghost"],
+  S: function S() {
+    return [cat(arc(50, 44, 26, 26, 180, 360), [[76, 44], [76, 84]]), cat(arc(67.3, 84, 8.67, 8, 0, 180), arc(50, 84, 8.67, 8, 0, 180), arc(32.7, 84, 8.67, 8, 0, 180)), [[24, 84], [24, 44]], circ(41, 44, 3.5), circ(59, 44, 3.5), arc(50, 57, 5, 7, 0, 360), arc(34, 54, 3, 2, 0, 360), arc(66, 54, 3, 2, 0, 360)];
+  }
+}, {
+  id: "pumpkin",
+  it: ["zucca"],
+  en: ["pumpkin"],
+  S: function S() {
+    return [arc(50, 58, 38, 28, 0, 360), [[46, 32], [44, 20], [54, 18], [54, 32]], arc(50, 58, 22, 28, 120, 240), arc(50, 58, 22, 28, -60, 60), [[34, 52], [44, 52], [39, 43], [34, 52]], [[56, 52], [66, 52], [61, 43], [56, 52]], [[48, 59], [52, 59], [50, 55], [48, 59]], [[36, 67], [42, 73], [46, 67], [50, 73], [54, 67], [58, 73], [64, 67]]];
+  }
+}, {
+  id: "bat",
+  it: ["pipistrello"],
+  en: ["bat"],
+  S: function S() {
+    var w = [[57, 46], [66, 30], [96, 26], [88, 44], [82, 40], [76, 54], [70, 48], [64, 58], [58, 56]];
+    return [arc(50, 54, 7, 11, 0, 360), circ(50, 38, 6), [[45, 34], [44, 26], [49, 32]], [[55, 34], [56, 26], [51, 32]], w, mir(w), circ(48, 37, 1), circ(52, 37, 1), [[48, 41], [49, 44], [50, 41]]];
+  }
+}, {
+  id: "candle",
+  it: ["candela"],
+  en: ["candle"],
+  S: function S() {
+    return [cat([[38, 42], [38, 84]], [[38, 84], [62, 84]], [[62, 84], [62, 42]]), arc(50, 42, 12, 4, 0, 360), [[50, 42], [50, 33]], cat(bez([50, 33], [40, 23], [46, 13], [50, 6]), bez([50, 6], [54, 13], [60, 23], [50, 33])), [[38, 52], [38, 58]], [[62, 56], [62, 64]], [[26, 86], [74, 86]], [[30, 86], [32, 92], [68, 92], [70, 86]]];
+  }
+}, {
+  id: "lantern",
+  it: ["lanterna"],
+  en: ["lantern"],
+  S: function S() {
+    return [arc(50, 22, 14, 12, 180, 360), [[34, 26], [66, 26], [62, 32], [38, 32], [34, 26]], [[38, 32], [34, 72], [66, 72], [62, 32]], [[46, 32], [44, 72]], [[54, 32], [56, 72]], [[32, 72], [68, 72], [64, 80], [36, 80], [32, 72]], cat(bez([50, 66], [44, 60], [48, 54], [50, 50]), bez([50, 50], [52, 54], [56, 60], [50, 66]))];
+  }
+}, {
+  id: "spider",
+  it: ["ragno"],
+  en: ["spider"],
+  S: function S() {
+    var L = [[[42, 50], [28, 38], [16, 46], [10, 62]], [[42, 54], [26, 52], [14, 62], [10, 78]], [[42, 58], [28, 66], [18, 78], [16, 90]], [[44, 60], [36, 74], [32, 84], [34, 92]]];
+    var r = [[[50, 4], [50, 32]], circ(50, 54, 12), circ(50, 38, 6.5)];
+    L.forEach(function (l) {
+      r.push(l);
+      r.push(mir(l));
+    });
+    r.push(circ(47, 37, 1.2), circ(53, 37, 1.2));
+    return r;
+  }
+}, {
+  id: "witchhat",
+  it: ["cappello da strega", "cappello strega", "cappello di strega", "strega"],
+  en: ["witch hat", "witch's hat", "witch", "hat"],
+  S: function S() {
+    return [arc(50, 74, 42, 10, 0, 360), bez([28, 72], [36, 50], [42, 30], [56, 12]), [[56, 12], [66, 8], [72, 14]], bez([72, 14], [66, 34], [68, 56], [72, 72]), bez([33, 58], [45, 64], [58, 64], [68, 59]), bez([32, 64], [45, 70], [58, 70], [69, 65]), rect(46, 60, 54, 70)];
+  }
+}, {
+  id: "castle",
+  it: ["castello"],
+  en: ["castle"],
+  S: function S() {
+    return [cat([[16, 86], [16, 32], [34, 32], [34, 86]]), cat([[66, 86], [66, 32], [84, 32], [84, 86]]), [[34, 50], [66, 50]], [[16, 32], [16, 26], [21, 26], [21, 32], [25, 32], [25, 26], [30, 26], [30, 32], [34, 32]], [[66, 32], [66, 26], [71, 26], [71, 32], [75, 32], [75, 26], [80, 26], [80, 32], [84, 32]], cat([[42, 86], [42, 68]], arc(50, 68, 8, 8, 180, 360), [[58, 68], [58, 86]]), [[25, 26], [25, 12]], [[25, 12], [38, 16], [25, 20]], rect(22, 42, 28, 50), rect(72, 42, 78, 50), [[6, 86], [94, 86]]];
+  }
+}, {
+  id: "rocket",
+  it: ["razzo", "navicella"],
+  en: ["rocket", "spaceship"],
+  S: function S() {
+    return [cat(bez([50, 8], [68, 24], [66, 50], [64, 70]), [[64, 70], [36, 70]], bez([36, 70], [34, 50], [32, 24], [50, 8])), circ(50, 38, 7.5), [[36, 60], [22, 78], [37, 72]], [[64, 60], [78, 78], [63, 72]], [[42, 72], [50, 94], [58, 72]], circ(14, 20, 1.5), circ(86, 30, 1.5), circ(80, 12, 1.2)];
+  }
+}, {
+  id: "clock",
+  it: ["sveglia", "orologio"],
+  en: ["clock", "alarm clock"],
+  S: function S() {
+    var r = [circ(50, 58, 28), cat(arc(28, 30, 9, 9, 180, 360), [[37, 30], [19, 30]]), cat(arc(72, 30, 9, 9, 180, 360), [[81, 30], [63, 30]]), [[50, 30], [50, 24]], [[44, 24], [56, 24]]];
+    for (var k = 0; k < 12; k++) {
+      var a = k * 30 * D;
+      r.push([[50 + Math.cos(a) * 22, 58 + Math.sin(a) * 22], [50 + Math.cos(a) * 25, 58 + Math.sin(a) * 25]]);
+    }
+    r.push([[50, 58], [50, 40]], [[50, 58], [62, 64]], circ(50, 58, 2), [[34, 84], [28, 94]], [[66, 84], [72, 94]]);
+    return r;
+  }
+}, {
+  id: "cup",
+  it: ["tazza", "tazzina", "tazza di caffe"],
+  en: ["cup", "mug", "coffee cup"],
+  S: function S() {
+    return [[[22, 38], [78, 38]], cat(bez([22, 38], [24, 76], [34, 86], [50, 86]), bez([50, 86], [66, 86], [76, 76], [78, 38])), arc(80, 56, 13, 12, -90, 90), bez([40, 30], [34, 24], [46, 18], [40, 10]), bez([54, 30], [48, 24], [60, 18], [54, 10]), arc(50, 90, 34, 5, 0, 180)];
+  }
+}, {
+  id: "guitar",
+  it: ["chitarra"],
+  en: ["guitar"],
+  S: function S() {
+    return [cat(bez([50, 48], [66, 48], [68, 60], [62, 64]), bez([62, 64], [78, 68], [78, 92], [50, 92]), bez([50, 92], [22, 92], [22, 68], [38, 64]), bez([38, 64], [32, 60], [34, 48], [50, 48])), circ(50, 72, 6), [[46, 48], [46, 10]], [[54, 48], [54, 10]], rect(44, 2, 56, 12), [[46, 18], [54, 18]], [[46, 26], [54, 26]], [[46, 34], [54, 34]], [[42, 84], [58, 84]], [[49, 12], [49, 84]], [[51, 12], [51, 84]]];
+  }
+}, {
+  id: "mountain",
+  it: ["montagna", "monte"],
+  en: ["mountain"],
+  S: function S() {
+    return [[[6, 86], [34, 32], [44, 48], [58, 22], [94, 86]], [[47, 38], [58, 22], [68, 40], [62, 38], [58, 45], [54, 38], [47, 38]], [[27, 44], [34, 32], [41, 44], [36, 42], [33, 48], [30, 42], [27, 44]], circ(82, 18, 8), [[4, 86], [96, 86]]];
+  }
+}, {
+  id: "snowman",
+  it: ["pupazzo di neve", "pupazzo"],
+  en: ["snowman"],
+  S: function S() {
+    return [circ(50, 76, 18), circ(50, 48, 14), circ(50, 26, 10), [[40, 17], [60, 17]], [[44, 17], [45, 6], [55, 6], [56, 17]], circ(46, 24, 1.2), circ(54, 24, 1.2), [[50, 27], [62, 29], [50, 31]], circ(50, 44, 1.5), circ(50, 52, 1.5), circ(50, 72, 1.5), circ(50, 80, 1.5), [[37, 46], [20, 36], [15, 30]], [[63, 46], [80, 38], [86, 32]]];
+  }
+}, {
+  id: "butterfly",
+  it: ["farfalla"],
+  en: ["butterfly"],
+  S: function S() {
+    var up = cat(bez([50, 48], [70, 14], [96, 24], [84, 46]), bez([84, 46], [78, 52], [64, 52], [50, 50])),
+      lo = cat(bez([50, 52], [64, 54], [82, 60], [74, 76]), bez([74, 76], [64, 86], [54, 70], [50, 58])),
+      an = bez([50, 36], [48, 24], [42, 18], [38, 16]);
+    return [[[50, 34], [50, 72]], up, mir(up), lo, mir(lo), an, mir(an), circ(76, 36, 4), circ(24, 36, 4), circ(68, 68, 3), circ(32, 68, 3)];
+  }
+}, {
+  id: "rabbit",
+  it: ["coniglio", "coniglietto"],
+  en: ["rabbit", "bunny"],
+  S: function S() {
+    return [arc(50, 64, 22, 20, 0, 360), arc(40, 26, 6.5, 21, 0, 360), arc(60, 26, 6.5, 21, 0, 360), arc(40, 28, 3, 14, 0, 360), arc(60, 28, 3, 14, 0, 360), circ(42, 60, 2), circ(58, 60, 2), [[47, 67], [53, 67], [50, 70], [47, 67]], bez([50, 70], [50, 75], [45, 76], [43, 73]), bez([50, 70], [50, 75], [55, 76], [57, 73]), [[36, 68], [22, 66]], [[36, 72], [22, 74]], [[64, 68], [78, 66]], [[64, 72], [78, 74]]];
+  }
+}, {
+  id: "crown",
+  it: ["corona"],
+  en: ["crown"],
+  S: function S() {
+    return [[[14, 78], [14, 36], [34, 54], [50, 24], [66, 54], [86, 36], [86, 78], [14, 78]], [[14, 66], [86, 66]], circ(14, 31, 4), circ(50, 19, 4), circ(86, 31, 4), circ(50, 72, 2.2), circ(30, 72, 2.2), circ(70, 72, 2.2)];
+  }
+}];
+var spir = function spir(cx, cy, r0, r1, turns) {
+  var o = [],
+    n = Math.ceil(turns * 24);
+  for (var i = 0; i <= n; i++) {
+    var f = i / n,
+      a = f * turns * 2 * Math.PI,
+      r = r0 + (r1 - r0) * f;
+    o.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+  }
+  return o;
+};
+var bumpE = function bumpE(cx, cy, rx, ry, n, amp) {
+  var o = [];
+  for (var i = 0; i <= 80; i++) {
+    var a = i / 80 * 2 * Math.PI,
+      k = 1 + amp * Math.sin(n * a);
+    o.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]);
+  }
+  return o;
+};
+var wavy = function wavy(x0, x1, y, amp, n) {
+  var o = [];
+  for (var i = 0; i <= n * 8; i++) {
+    var f = i / (n * 8);
+    o.push([x0 + (x1 - x0) * f, y + Math.sin(f * n * 2 * Math.PI) * amp]);
+  }
+  return o;
+};
+var thick = function thick(p, w) {
+  var L = [],
+    Rr = [];
+  for (var i = 0; i < p.length; i++) {
+    var a = p[Math.max(0, i - 1)],
+      b = p[Math.min(p.length - 1, i + 1)];
+    var dx = b[0] - a[0],
+      dy = b[1] - a[1];
+    var d = Math.hypot(dx, dy) || 1;
+    dx /= d;
+    dy /= d;
+    L.push([p[i][0] - dy * w, p[i][1] + dx * w]);
+    Rr.push([p[i][0] + dy * w, p[i][1] - dx * w]);
+  }
+  return cat(L, Rr.reverse(), [L[0]]);
+};
+var rotp = function rotp(p, a, cx, cy) {
+  var c = Math.cos(a * D),
+    s = Math.sin(a * D);
+  return [cx + (p[0] - cx) * c - (p[1] - cy) * s, cy + (p[0] - cx) * s + (p[1] - cy) * c];
+};
+var rot = function rot(a, cx, cy) {
+  for (var _len = arguments.length, st = new Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
+    st[_key - 3] = arguments[_key];
+  }
+  return st.map(function (s) {
+    return s.map(function (p) {
+      return rotp(p, a, cx, cy);
+    });
+  });
+};
+var col = function col(c, p) {
+  p.col = c;
+  return p;
+};
+var frond = function frond(bx, by, a) {
+  var r = a * D,
+    cs = Math.cos(r),
+    sn = Math.sin(r),
+    tip = [bx + cs * 38, by + sn * 38 + 10];
+  return cat(bez([bx, by], [bx + cs * 14, by + sn * 14 - 12], [tip[0] - cs * 10, tip[1] - sn * 10 - 8], tip), bez(tip, [tip[0] - cs * 10, tip[1] - sn * 10 + 3], [bx + cs * 14, by + sn * 14 - 2], [bx, by]));
+};
+SUBJECTS.push({
+  id: "dog",
+  it: ["cane", "cagnolino"],
+  en: ["dog", "puppy"],
+  S: function S() {
+    return [arc(50, 56, 24, 22, 0, 360), cat(bez([29, 45], [10, 42], [8, 70], [22, 74]), bez([22, 74], [30, 70], [30, 56], [29, 45])), cat(bez([71, 45], [90, 42], [92, 70], [78, 74]), bez([78, 74], [70, 70], [70, 56], [71, 45])), circ(41, 52, 2.5), circ(59, 52, 2.5), arc(50, 68, 10, 8, 0, 360), arc(50, 63, 4.5, 3, 0, 360), [[50, 66], [50, 72]], bez([50, 72], [46, 77], [42, 75], [40, 72]), bez([50, 72], [54, 77], [58, 75], [60, 72]), arc(50, 77, 3, 4, 0, 180)];
+  }
+}, {
+  id: "elephant",
+  it: ["elefante"],
+  en: ["elephant"],
+  S: function S() {
+    return [circ(50, 48, 25), arc(22, 50, 13, 18, 90, 270), arc(78, 50, 13, 18, -90, 90), bez([44, 62], [42, 76], [40, 88], [50, 92]), bez([56, 62], [58, 74], [58, 82], [54, 86]), [[50, 92], [54, 86]], circ(40, 44, 2.5), circ(60, 44, 2.5), bez([38, 66], [32, 74], [34, 80], [38, 82]), bez([62, 66], [68, 74], [66, 80], [62, 82])];
+  }
+}, {
+  id: "giraffe",
+  it: ["giraffa"],
+  en: ["giraffe"],
+  S: function S() {
+    return [arc(60, 68, 24, 14, 0, 360), [[42, 62], [36, 26]], [[52, 58], [46, 22]], arc(42, 18, 11, 7, 0, 360, -20), [[38, 12], [36, 5]], circ(36, 4, 1.8), [[46, 11], [48, 4]], circ(48, 3, 1.8), circ(38, 18, 1.3), [[44, 80], [44, 94]], [[52, 82], [52, 94]], [[70, 82], [70, 94]], [[78, 78], [78, 94]], [[84, 64], [90, 74]], circ(56, 64, 3.5), circ(68, 70, 3.5), circ(76, 62, 3), circ(42, 44, 2.8), circ(46, 34, 2.4)];
+  }
+}, {
+  id: "penguin",
+  it: ["pinguino"],
+  en: ["penguin"],
+  S: function S() {
+    return [arc(50, 56, 24, 34, 0, 360), arc(50, 62, 14, 25, 0, 360), circ(42, 34, 2.2), circ(58, 34, 2.2), [[45, 40], [55, 40], [50, 47], [45, 40]], bez([28, 50], [14, 60], [14, 72], [22, 76]), bez([72, 50], [86, 60], [86, 72], [78, 76]), [[36, 92], [42, 86], [48, 92]], [[52, 92], [58, 86], [64, 92]]];
+  }
+}, {
+  id: "owl",
+  it: ["gufo", "civetta"],
+  en: ["owl"],
+  S: function S() {
+    return [arc(50, 58, 26, 32, 0, 360), [[30, 34], [26, 18], [41, 28]], [[70, 34], [74, 18], [59, 28]], circ(40, 46, 10), circ(60, 46, 10), circ(40, 46, 3.5), circ(60, 46, 3.5), [[46, 54], [54, 54], [50, 63], [46, 54]], [[40, 72], [44, 77], [48, 72]], [[52, 72], [56, 77], [60, 72]], [[44, 82], [48, 87], [52, 82]], [[16, 94], [84, 94]]];
+  }
+}, {
+  id: "duck",
+  it: ["papera", "paperella", "anatra"],
+  en: ["duck"],
+  S: function S() {
+    return [arc(48, 68, 30, 20, 0, 360), [[76, 62], [90, 52], [84, 72]], circ(34, 40, 14), [[21, 38], [8, 42], [21, 47]], circ(33, 36, 2), arc(52, 66, 15, 9, 180, 330), wavy(8, 92, 92, 2, 4)];
+  }
+}, {
+  id: "turtle",
+  it: ["tartaruga"],
+  en: ["turtle", "tortoise"],
+  S: function S() {
+    return [arc(50, 58, 32, 26, 180, 360), [[18, 58], [82, 58]], [[41, 44], [45.5, 36], [54.5, 36], [59, 44], [54.5, 52], [45.5, 52], [41, 44]], [[45.5, 36], [40, 26]], [[54.5, 36], [60, 26]], circ(86, 56, 8), circ(88, 54, 1.4), [[30, 58], [28, 72], [40, 72], [40, 58]], [[60, 58], [60, 72], [72, 72], [70, 58]], [[18, 58], [8, 62], [18, 64]]];
+  }
+}, {
+  id: "snail",
+  it: ["lumaca", "chiocciola"],
+  en: ["snail"],
+  S: function S() {
+    return [bez([88, 84], [40, 94], [10, 88], [14, 62]), bez([24, 72], [40, 78], [62, 76], [88, 84]), [[14, 62], [12, 46]], circ(12, 43, 3.5), [[22, 64], [26, 48]], circ(26, 45, 3.5), circ(56, 54, 24), spir(56, 54, 2, 19, 2.6)];
+  }
+}, {
+  id: "frog",
+  it: ["rana", "ranocchio"],
+  en: ["frog"],
+  S: function S() {
+    return [arc(50, 60, 34, 24, 0, 360), circ(33, 36, 10), circ(67, 36, 10), circ(33, 36, 3.5), circ(67, 36, 3.5), arc(50, 58, 20, 12, 20, 160), circ(46, 52, 1.2), circ(54, 52, 1.2)];
+  }
+}, {
+  id: "bird",
+  it: ["uccellino", "uccello"],
+  en: ["bird"],
+  S: function S() {
+    return [arc(46, 58, 26, 20, 0, 360, -12), circ(68, 40, 11), [[78, 40], [91, 44], [78, 48]], circ(70, 38, 1.8), arc(42, 58, 13, 8, 180, 360, -15), [[22, 62], [8, 56], [10, 68], [22, 67]], [[44, 78], [44, 90]], [[54, 78], [54, 90]], [[38, 90], [50, 90]], [[48, 90], [58, 90]]];
+  }
+}, {
+  id: "lion",
+  it: ["leone"],
+  en: ["lion"],
+  S: function S() {
+    return [bump(50, 52, 38, 12, .09), circ(50, 54, 22), circ(41, 50, 2.5), circ(59, 50, 2.5), [[46, 58], [54, 58], [50, 63], [46, 58]], bez([50, 63], [50, 69], [44, 70], [42, 66]), bez([50, 63], [50, 69], [56, 70], [58, 66]), circ(30, 30, 5), circ(70, 30, 5)];
+  }
+}, {
+  id: "whale",
+  it: ["balena"],
+  en: ["whale"],
+  S: function S() {
+    return [bez([8, 62], [12, 34], [56, 32], [78, 54]), [[78, 54], [86, 38], [96, 34]], [[96, 34], [94, 46], [86, 52], [82, 58]], bez([82, 58], [60, 84], [14, 84], [8, 62]), circ(24, 56, 2), [[40, 34], [40, 20]], bez([40, 20], [37, 16], [34, 14], [30, 16]), bez([40, 20], [43, 16], [46, 14], [50, 16]), [[18, 70], [56, 76]]];
+  }
+}, {
+  id: "octopus",
+  it: ["polpo", "piovra"],
+  en: ["octopus"],
+  S: function S() {
+    var t = [28, 38, 46, 54, 62, 72].map(function (x, i) {
+      return bez([x, 62], [x + (i % 2 ? 10 : -10), 72], [x + (i % 2 ? -10 : 10), 80], [x + (i % 2 ? 4 : -4), 92]);
+    });
+    return [arc(50, 40, 26, 28, 180, 360), [[24, 40], [26, 62]], [[76, 40], [74, 62]], circ(42, 40, 5), circ(58, 40, 5), circ(42, 41, 2), circ(58, 41, 2), arc(50, 52, 6, 4, 20, 160)].concat(_toConsumableArray(t));
+  }
+}, {
+  id: "snake",
+  it: ["serpente", "serpe", "biscia"],
+  en: ["snake"],
+  S: function S() {
+    var sp = cat(bez([10, 84], [30, 96], [52, 76], [44, 60]), bez([44, 60], [38, 46], [70, 52], [78, 36]));
+    return [thick(sp, 5), circ(81, 31, 7), circ(83, 29, 1.3), [[88, 34], [96, 36], [92, 38]], [[88, 34], [96, 32], [92, 30]]];
+  }
+}, {
+  id: "bee",
+  it: ["ape", "apina"],
+  en: ["bee"],
+  S: function S() {
+    return [arc(52, 58, 22, 16, 0, 360), [[44, 43], [42, 72]], [[54, 42], [54, 73]], [[64, 46], [66, 70]], circ(28, 56, 9), circ(25, 54, 1.6), bez([24, 48], [20, 38], [16, 34], [12, 36]), bez([30, 47], [30, 36], [26, 30], [22, 30]), arc(46, 36, 9, 17, 0, 360, 25), arc(62, 34, 9, 17, 0, 360, -12), [[73, 58], [82, 60], [73, 62]]];
+  }
+}, {
+  id: "ladybug",
+  it: ["coccinella"],
+  en: ["ladybug", "ladybird"],
+  S: function S() {
+    return [circ(50, 58, 30), [[50, 28], [50, 88]], arc(50, 32, 15, 10, 180, 360), circ(36, 50, 5), circ(64, 50, 5), circ(34, 68, 5), circ(66, 68, 5), bez([44, 24], [40, 14], [34, 12], [30, 14]), bez([56, 24], [60, 14], [66, 12], [70, 14])];
+  }
+}, {
+  id: "crab",
+  it: ["granchio"],
+  en: ["crab"],
+  S: function S() {
+    var claw = arc(14, 38, 9, 9, 40, 330);
+    return [arc(50, 62, 26, 16, 0, 360), [[40, 48], [40, 38]], circ(40, 35, 3.5), [[60, 48], [60, 38]], circ(60, 35, 3.5), [[26, 58], [18, 48]], claw, mir([[26, 58], [18, 48]]), mir(claw), [[30, 72], [18, 80], [14, 90]], [[34, 76], [24, 86], [22, 94]], mir([[30, 72], [18, 80], [14, 90]]), mir([[34, 76], [24, 86], [22, 94]]), arc(50, 64, 6, 4, 20, 160)];
+  }
+}, {
+  id: "pig",
+  it: ["maiale", "maialino", "porcellino"],
+  en: ["pig", "piggy"],
+  S: function S() {
+    return [arc(50, 54, 32, 28, 0, 360), [[26, 34], [20, 18], [38, 28]], [[74, 34], [80, 18], [62, 28]], arc(50, 62, 13, 10, 0, 360), circ(45, 62, 2), circ(55, 62, 2), circ(38, 48, 2.5), circ(62, 48, 2.5)];
+  }
+}, {
+  id: "bear",
+  it: ["orso", "orsetto"],
+  en: ["bear", "teddy bear"],
+  S: function S() {
+    return [circ(50, 56, 26), circ(28, 32, 9), circ(72, 32, 9), circ(28, 32, 4), circ(72, 32, 4), arc(50, 66, 11, 9, 0, 360), arc(50, 61, 4.5, 3, 0, 360), circ(41, 50, 2.5), circ(59, 50, 2.5), [[50, 64], [50, 69]], bez([50, 69], [48, 72], [46, 73], [43, 71]), bez([50, 69], [52, 72], [54, 73], [57, 71])];
+  }
+}, {
+  id: "mouse",
+  it: ["topo", "topolino", "topino"],
+  en: ["mouse"],
+  S: function S() {
+    return [arc(50, 60, 26, 24, 0, 360), circ(30, 30, 13), circ(70, 30, 13), circ(30, 30, 6), circ(70, 30, 6), circ(50, 70, 3.5), circ(40, 56, 2.5), circ(60, 56, 2.5), [[36, 66], [14, 62]], [[36, 70], [14, 74]], [[64, 66], [86, 62]], [[64, 70], [86, 74]], bez([50, 74], [48, 77], [46, 79], [43, 77]), bez([50, 74], [52, 77], [54, 79], [57, 77])];
+  }
+}, {
+  id: "shark",
+  it: ["squalo"],
+  en: ["shark"],
+  S: function S() {
+    return [cat(bez([6, 62], [20, 40], [56, 40], [92, 60]), bez([92, 60], [60, 78], [26, 80], [6, 62])), [[42, 43], [52, 16], [62, 45]], [[88, 60], [98, 40], [96, 76], [88, 60]], circ(22, 56, 2.2), [[10, 64], [20, 68], [16, 62], [26, 70]], [[36, 68], [40, 64], [44, 69]], [[52, 70], [56, 65], [60, 70]], wavy(0, 100, 90, 2, 5)];
+  }
+}, {
+  id: "dinosaur",
+  it: ["dinosauro"],
+  en: ["dinosaur", "dino"],
+  S: function S() {
+    return [arc(46, 64, 26, 16, 0, 360), [[64, 56], [78, 30]], [[72, 62], [88, 36]], arc(88, 27, 10, 6, 0, 360, -25), circ(90, 25, 1.3), bez([22, 62], [12, 64], [8, 70], [4, 72]), bez([22, 72], [14, 74], [10, 78], [4, 72]), [[34, 78], [34, 93]], [[44, 80], [44, 93]], [[58, 80], [58, 93]], [[68, 76], [68, 93]], [[36, 50], [40, 42], [44, 49]], [[46, 48], [50, 40], [54, 47]], [[56, 49], [60, 42], [63, 51]]];
+  }
+}, {
+  id: "icecream",
+  it: ["gelato"],
+  en: ["ice cream"],
+  S: function S() {
+    return [arc(50, 42, 19, 19, 180, 360), cat(arc(37.7, 42, 6.3, 6, 180, 0), arc(50, 42, 6.3, 6, 180, 0), arc(62.3, 42, 6.3, 6, 180, 0)), [[33, 50], [50, 94], [67, 50], [33, 50]], [[38, 62], [58, 62]], [[44, 76], [56, 76]], [[36, 54], [58, 86]], [[64, 54], [42, 86]], circ(50, 18, 4.5), [[50, 14], [56, 8]]];
+  }
+}, {
+  id: "cake",
+  it: ["torta", "dolce"],
+  en: ["cake"],
+  S: function S() {
+    return [rect(18, 64, 82, 88), rect(24, 44, 76, 64), wavy(24, 76, 44, 3, 5), [[36, 44], [36, 28]], [[50, 44], [50, 26]], [[64, 44], [64, 28]], cat(bez([36, 28], [32, 22], [36, 18], [36, 16]), bez([36, 16], [40, 18], [40, 24], [36, 28])), cat(bez([50, 26], [46, 20], [50, 16], [50, 14]), bez([50, 14], [54, 16], [54, 22], [50, 26])), cat(bez([64, 28], [60, 22], [64, 18], [64, 16]), bez([64, 16], [68, 18], [68, 24], [64, 28])), [[8, 88], [92, 88]], circ(32, 76, 3), circ(50, 76, 3), circ(68, 76, 3)];
+  }
+}, {
+  id: "pizza",
+  it: ["pizza"],
+  en: ["pizza"],
+  S: function S() {
+    return [bez([14, 28], [34, 14], [66, 14], [86, 28]), [[14, 28], [50, 92], [86, 28]], bez([19, 34], [36, 23], [64, 23], [81, 34]), circ(40, 44, 6), circ(60, 42, 6), circ(50, 62, 5), circ(34, 34, 1.5), circ(66, 34, 1.5), circ(50, 34, 1.5)];
+  }
+}, {
+  id: "banana",
+  it: ["banana"],
+  en: ["banana"],
+  S: function S() {
+    return [bez([22, 24], [10, 66], [48, 92], [88, 66]), [[88, 66], [90, 59], [84, 57]], bez([84, 57], [52, 76], [32, 60], [34, 28]), [[22, 24], [34, 28]], [[22, 24], [20, 14], [28, 12], [30, 22]]];
+  }
+}, {
+  id: "carrot",
+  it: ["carota"],
+  en: ["carrot"],
+  S: function S() {
+    return [bez([38, 30], [46, 60], [48, 80], [50, 94]), bez([50, 94], [52, 80], [54, 60], [62, 30]), arc(50, 30, 12, 5, 0, 360), bez([50, 26], [44, 14], [38, 10], [34, 6]), bez([50, 26], [50, 14], [50, 8], [50, 4]), bez([50, 26], [56, 14], [62, 10], [66, 6]), [[44, 46], [52, 46]], [[48, 60], [56, 60]], [[46, 74], [52, 74]]];
+  }
+}, {
+  id: "strawberry",
+  it: ["fragola"],
+  en: ["strawberry"],
+  S: function S() {
+    return [cat(bez([50, 90], [20, 70], [18, 40], [24, 34]), bez([24, 34], [40, 26], [60, 26], [76, 34]), bez([76, 34], [82, 40], [80, 70], [50, 90])), [[36, 34], [44, 24], [50, 32], [56, 24], [64, 34]], [[50, 30], [50, 16]], circ(38, 48, 1.4), circ(50, 46, 1.4), circ(62, 48, 1.4), circ(44, 60, 1.4), circ(56, 60, 1.4), circ(50, 72, 1.4), circ(32, 58, 1.4), circ(68, 58, 1.4)];
+  }
+}, {
+  id: "cherries",
+  it: ["ciliegie", "ciliegia"],
+  en: ["cherries", "cherry"],
+  S: function S() {
+    return [circ(34, 72, 12), circ(66, 72, 12), bez([34, 60], [36, 40], [44, 26], [58, 14]), bez([66, 60], [64, 40], [58, 26], [58, 14]), cat(bez([58, 14], [70, 8], [84, 14], [86, 20]), bez([86, 20], [76, 24], [64, 22], [58, 14])), arc(30, 68, 6, 6, 200, 260), arc(62, 68, 6, 6, 200, 260)];
+  }
+}, {
+  id: "watermelon",
+  it: ["anguria", "cocomero"],
+  en: ["watermelon"],
+  S: function S() {
+    return [arc(50, 40, 42, 42, 0, 180), [[8, 40], [92, 40]], arc(50, 40, 35, 35, 0, 180), circ(34, 58, 2), circ(50, 66, 2), circ(66, 58, 2), circ(42, 50, 2), circ(58, 50, 2)];
+  }
+}, {
+  id: "lollipop",
+  it: ["lecca-lecca", "leccalecca", "lecca lecca"],
+  en: ["lollipop"],
+  S: function S() {
+    return [circ(50, 38, 26), spir(50, 38, 3, 21, 2.5), [[50, 64], [50, 95]]];
+  }
+}, {
+  id: "hamburger",
+  it: ["hamburger", "panino"],
+  en: ["hamburger", "burger"],
+  S: function S() {
+    return [arc(50, 46, 36, 26, 180, 360), [[14, 46], [86, 46]], circ(36, 30, 1.6), circ(50, 24, 1.6), circ(64, 30, 1.6), circ(44, 36, 1.6), circ(58, 38, 1.6), wavy(14, 86, 52, 2.5, 6), rect(14, 58, 86, 68), [[14, 72], [86, 72], [80, 84], [20, 84], [14, 72]]];
+  }
+}, {
+  id: "donut",
+  it: ["ciambella", "donut"],
+  en: ["donut", "doughnut"],
+  S: function S() {
+    return [circ(50, 52, 36), circ(50, 52, 11), bumpE(50, 52, 27, 27, 9, .09), [[36, 34], [40, 37]], [[60, 34], [56, 38]], [[70, 52], [66, 54]], [[34, 66], [38, 63]], [[56, 72], [58, 68]], [[28, 50], [32, 48]]];
+  }
+}, {
+  id: "train",
+  it: ["treno", "locomotiva"],
+  en: ["train", "locomotive"],
+  S: function S() {
+    return [rect(10, 44, 56, 72), rect(56, 28, 84, 72), [[52, 28], [88, 28]], [[22, 44], [22, 32], [32, 32], [32, 44]], rect(62, 36, 78, 50), circ(24, 78, 8), circ(44, 78, 8), circ(70, 78, 9), [[4, 88], [96, 88]], circ(27, 24, 4), circ(34, 15, 5)];
+  }
+}, {
+  id: "plane",
+  it: ["aereo", "aeroplano"],
+  en: ["plane", "airplane", "aeroplane"],
+  S: function S() {
+    return [bez([8, 52], [20, 40], [70, 40], [92, 48]), bez([92, 48], [70, 60], [20, 60], [8, 52]), [[14, 50], [8, 30], [24, 42]], [[42, 52], [56, 82], [70, 82], [62, 52]], circ(40, 48, 2), circ(48, 47, 2), circ(56, 47, 2), circ(64, 47, 2), [[78, 44], [85, 47]]];
+  }
+}, {
+  id: "helicopter",
+  it: ["elicottero"],
+  en: ["helicopter"],
+  S: function S() {
+    return [arc(46, 58, 26, 16, 0, 360), arc(60, 54, 10, 8, 180, 360), [[70, 54], [92, 50]], [[70, 62], [92, 54]], circ(92, 48, 5), [[12, 34], [82, 34]], [[46, 42], [46, 34]], [[22, 84], [70, 84]], [[34, 74], [32, 84]], [[56, 74], [58, 84]]];
+  }
+}, {
+  id: "bus",
+  it: ["autobus", "bus", "pullman"],
+  en: ["bus"],
+  S: function S() {
+    return [rect(8, 26, 92, 74), rect(14, 32, 28, 50), rect(32, 32, 46, 50), rect(50, 32, 64, 50), rect(68, 32, 82, 50), [[8, 58], [92, 58]], circ(26, 76, 9), circ(74, 76, 9), circ(26, 76, 3), circ(74, 76, 3), circ(87, 66, 2)];
+  }
+}, {
+  id: "truck",
+  it: ["camion"],
+  en: ["truck", "lorry"],
+  S: function S() {
+    return [rect(6, 28, 56, 70), [[56, 44], [74, 44], [88, 58], [88, 70], [56, 70]], [[62, 48], [72, 48], [80, 58], [62, 58], [62, 48]], circ(22, 74, 8), circ(46, 74, 8), circ(74, 74, 8), [[2, 86], [98, 86]]];
+  }
+}, {
+  id: "tractor",
+  it: ["trattore"],
+  en: ["tractor"],
+  S: function S() {
+    return [circ(68, 66, 20), circ(68, 66, 8), circ(24, 76, 11), circ(24, 76, 4), [[12, 70], [12, 50], [44, 50], [44, 70]], [[44, 50], [44, 28], [66, 28], [66, 46]], rect(48, 32, 62, 46), [[20, 50], [20, 36]], [[4, 94], [96, 94]]];
+  }
+}, {
+  id: "hotballoon",
+  it: ["mongolfiera"],
+  en: ["hot air balloon", "balloon ride"],
+  S: function S() {
+    return [circ(50, 36, 26), arc(50, 36, 11, 26, 0, 360), [[50, 10], [50, 62]], [[26, 44], [40, 74]], [[74, 44], [60, 74]], rect(40, 74, 60, 88), [[50, 62], [50, 74]]];
+  }
+}, {
+  id: "cloud",
+  it: ["nuvola"],
+  en: ["cloud"],
+  S: function S() {
+    return [bumpE(50, 52, 38, 20, 5, .13), wavy(30, 70, 86, 1.5, 2)];
+  }
+}, {
+  id: "rainbow",
+  it: ["arcobaleno"],
+  en: ["rainbow"],
+  S: function S() {
+    return [col("#ff7a7a", arc(50, 76, 42, 42, 180, 360)), col("#ffd36b", arc(50, 76, 33, 33, 180, 360)), col("#8be07a", arc(50, 76, 24, 24, 180, 360)), col("#6fb7ff", arc(50, 76, 15, 15, 180, 360)), bumpE(14, 84, 13, 8, 4, .14), bumpE(86, 84, 13, 8, 4, .14)];
+  }
+}, {
+  id: "snowflake",
+  it: ["fiocco di neve", "fiocco", "neve"],
+  en: ["snowflake", "snow flake", "snow"],
+  S: function S() {
+    var r = [];
+    var _loop = function _loop() {
+      var a = (k * 60 - 90) * D,
+        c = Math.cos(a),
+        s = Math.sin(a),
+        px = -s,
+        py = c,
+        P = function P(d, o) {
+          return [50 + c * d + px * o, 50 + s * d + py * o];
+        };
+      r.push([P(0, 0), P(38, 0)], [P(22, -9), P(22, 0), P(22, 9)], [P(30, -7), P(30, 0), P(30, 7)]);
+    };
+    for (var k = 0; k < 6; k++) {
+      _loop();
+    }
+    return r;
+  }
+}, {
+  id: "leaf",
+  it: ["foglia"],
+  en: ["leaf"],
+  S: function S() {
+    return [cat(bez([50, 92], [14, 70], [14, 30], [50, 8]), bez([50, 8], [86, 30], [86, 70], [50, 92])), [[50, 92], [50, 98]], [[50, 92], [50, 24]], [[50, 72], [34, 58]], [[50, 72], [66, 58]], [[50, 52], [36, 40]], [[50, 52], [64, 40]]];
+  }
+}, {
+  id: "palm",
+  it: ["palma", "palma da cocco"],
+  en: ["palm tree", "palm"],
+  S: function S() {
+    return [bez([44, 94], [46, 70], [50, 50], [53, 34]), bez([52, 94], [54, 70], [58, 50], [60, 34])].concat(_toConsumableArray([200, 235, 270, 305, 340].map(function (a) {
+      return frond(56, 32, a);
+    })), [circ(52, 38, 3), circ(60, 40, 3), wavy(20, 80, 94, 1.5, 3)]);
+  }
+}, {
+  id: "cactus",
+  it: ["cactus"],
+  en: ["cactus"],
+  S: function S() {
+    return [cat([[42, 86], [42, 34]], arc(50, 34, 8, 8, 180, 360), [[58, 34], [58, 86]]), cat([[42, 70], [28, 70], [24, 66], [24, 50]], arc(28, 50, 4, 4, 180, 360), [[32, 50], [32, 60], [42, 60]]), cat([[58, 62], [68, 62], [72, 58], [72, 42]], arc(76, 42, 4, 4, 180, 360), [[80, 42], [80, 66], [58, 66]]), [[34, 86], [66, 86], [62, 98], [38, 98], [34, 86]], [[46, 44], [48, 42]], [[52, 52], [54, 50]], [[46, 64], [48, 62]], circ(50, 24, 3)];
+  }
+}, {
+  id: "volcano",
+  it: ["vulcano"],
+  en: ["volcano"],
+  S: function S() {
+    return [[[8, 92], [38, 38], [62, 38], [92, 92]], [[38, 38], [44, 44], [56, 44], [62, 38]], bez([50, 44], [48, 58], [54, 68], [50, 82]), bez([42, 46], [40, 52], [40, 58], [44, 62]), circ(50, 26, 6), circ(58, 16, 8), [[30, 30], [26, 24]], [[70, 30], [74, 24]], [[4, 92], [96, 92]]];
+  }
+}, {
+  id: "lightning",
+  it: ["fulmine", "lampo"],
+  en: ["lightning", "lightning bolt", "bolt"],
+  S: function S() {
+    return [[[56, 6], [26, 54], [46, 54], [38, 94], [74, 42], [54, 42], [56, 6]]];
+  }
+}, {
+  id: "ball",
+  it: ["pallone", "palla"],
+  en: ["ball", "football", "soccer ball"],
+  S: function S() {
+    return [circ(50, 50, 36), [[50, 38], [61, 46], [57, 59], [43, 59], [39, 46], [50, 38]], [[50, 38], [50, 15]], [[61, 46], [79, 40]], [[57, 59], [69, 75]], [[43, 59], [31, 75]], [[39, 46], [21, 40]]];
+  }
+}, {
+  id: "kite",
+  it: ["aquilone"],
+  en: ["kite"],
+  S: function S() {
+    return [[[50, 6], [78, 40], [50, 76], [22, 40], [50, 6]], [[50, 6], [50, 76]], [[22, 40], [78, 40]], bez([50, 76], [40, 84], [60, 88], [50, 96]), [[44, 84], [50, 88], [44, 92]], [[56, 88], [50, 91], [56, 95]]];
+  }
+}, {
+  id: "balloon",
+  it: ["palloncino", "pallone gonfiabile"],
+  en: ["balloon"],
+  S: function S() {
+    return [arc(50, 42, 26, 32, 0, 360), [[50, 74], [45, 81], [55, 81], [50, 74]], bez([50, 81], [44, 88], [56, 92], [48, 98]), arc(38, 34, 8, 12, 200, 260)];
+  }
+}, {
+  id: "present",
+  it: ["regalo", "pacco regalo"],
+  en: ["present", "gift"],
+  S: function S() {
+    return [rect(18, 46, 82, 90), rect(14, 34, 86, 46), [[44, 34], [44, 90]], [[56, 34], [56, 90]], cat(bez([50, 34], [36, 14], [22, 24], [34, 34])), cat(bez([50, 34], [64, 14], [78, 24], [66, 34]))];
+  }
+}, {
+  id: "pencil",
+  it: ["matita"],
+  en: ["pencil"],
+  S: function S() {
+    return rot(35, 50, 50, rect(40, 18, 60, 76), [[40, 76], [50, 94], [60, 76]], [[46, 86], [54, 86]], rect(40, 8, 60, 18), [[40, 26], [60, 26]]);
+  }
+}, {
+  id: "book",
+  it: ["libro"],
+  en: ["book"],
+  S: function S() {
+    return [[[50, 30], [10, 24], [10, 76], [50, 82]], [[50, 30], [90, 24], [90, 76], [50, 82]], [[6, 28], [6, 80], [50, 88], [94, 80], [94, 28]], [[18, 36], [42, 40]], [[18, 46], [42, 50]], [[18, 56], [42, 60]], [[58, 40], [82, 36]], [[58, 50], [82, 46]], [[58, 60], [82, 56]]];
+  }
+}, {
+  id: "scissors",
+  it: ["forbici"],
+  en: ["scissors"],
+  S: function S() {
+    return [circ(30, 78, 12), circ(70, 78, 12), [[34, 67], [62, 12]], [[66, 67], [38, 12]], circ(50, 38, 2.5)];
+  }
+}, {
+  id: "tshirt",
+  it: ["maglietta", "maglia", "t-shirt"],
+  en: ["t-shirt", "tshirt", "shirt"],
+  S: function S() {
+    return [[[34, 16], [18, 26], [8, 44], [22, 52], [28, 46], [28, 86], [72, 86], [72, 46], [78, 52], [92, 44], [82, 26], [66, 16]], arc(50, 16, 16, 10, 0, 180)];
+  }
+}, {
+  id: "chair",
+  it: ["sedia"],
+  en: ["chair"],
+  S: function S() {
+    return [[[30, 10], [30, 56]], [[64, 10], [64, 56]], [[30, 10], [64, 10]], [[30, 24], [64, 24]], rect(22, 56, 74, 66), [[26, 66], [26, 94]], [[70, 66], [70, 94]]];
+  }
+}, {
+  id: "phone",
+  it: ["telefono", "cellulare", "smartphone"],
+  en: ["phone", "smartphone", "mobile phone", "cellphone"],
+  S: function S() {
+    return [rect(30, 8, 70, 92), rect(35, 16, 65, 76), circ(50, 84, 4), [[44, 12], [56, 12]], rect(39, 22, 47, 30), rect(53, 22, 61, 30), rect(39, 36, 47, 44), rect(53, 36, 61, 44)];
+  }
+}, {
+  id: "tv",
+  it: ["televisione", "tv", "televisore"],
+  en: ["tv", "television"],
+  S: function S() {
+    return [rect(10, 22, 90, 72), rect(16, 28, 84, 66), [[50, 22], [34, 8]], [[50, 22], [66, 8]], [[34, 72], [30, 88]], [[66, 72], [70, 88]]];
+  }
+}, {
+  id: "headphones",
+  it: ["cuffie"],
+  en: ["headphones"],
+  S: function S() {
+    return [arc(50, 52, 34, 34, 180, 360), arc(18, 64, 10, 16, 0, 360), arc(82, 64, 10, 16, 0, 360)];
+  }
+}, {
+  id: "drum",
+  it: ["tamburo", "batteria"],
+  en: ["drum"],
+  S: function S() {
+    return [arc(50, 34, 34, 12, 0, 360), [[16, 34], [16, 70]], [[84, 34], [84, 70]], arc(50, 70, 34, 12, 0, 180), [[16, 48], [30, 72], [44, 52], [58, 72], [72, 52], [84, 70]], [[30, 8], [48, 30]], [[70, 8], [54, 30]]];
+  }
+}, {
+  id: "trophy",
+  it: ["trofeo", "coppa"],
+  en: ["trophy", "cup trophy"],
+  S: function S() {
+    return [cat(bez([28, 16], [28, 50], [40, 62], [50, 62]), bez([50, 62], [60, 62], [72, 50], [72, 16]), [[72, 16], [28, 16]]), arc(28, 32, 12, 12, 90, 270), arc(72, 32, 12, 12, -90, 90), [[50, 62], [50, 78]], rect(32, 78, 68, 90), [[50, 28], [53, 36], [61, 36], [55, 41], [57, 49], [50, 44], [43, 49], [45, 41], [39, 36], [47, 36], [50, 28]]];
+  }
+}, {
+  id: "hammer",
+  it: ["martello"],
+  en: ["hammer"],
+  S: function S() {
+    return [rect(46, 36, 54, 94), rect(28, 14, 70, 36), [[28, 14], [18, 18], [18, 32], [28, 36]]];
+  }
+}, {
+  id: "lighthouse",
+  it: ["faro"],
+  en: ["lighthouse"],
+  S: function S() {
+    return [[[38, 92], [42, 36], [58, 36], [62, 92]], [[40, 54], [60, 54]], [[39, 72], [61, 72]], rect(40, 24, 60, 36), [[38, 24], [50, 10], [62, 24], [38, 24]], [[66, 30], [90, 22]], [[66, 30], [92, 30]], [[66, 30], [90, 38]], [[34, 30], [10, 22]], [[34, 30], [8, 30]], [[34, 30], [10, 38]], [[26, 92], [74, 92]]];
+  }
+}, {
+  id: "tent",
+  it: ["tenda"],
+  en: ["tent"],
+  S: function S() {
+    return [[[8, 86], [50, 14], [92, 86], [8, 86]], [[40, 86], [50, 50], [60, 86]], [[50, 14], [50, 50]], [[50, 14], [50, 6]], [[50, 6], [60, 9], [50, 12]], [[2, 86], [98, 86]]];
+  }
+}, {
+  id: "bell",
+  it: ["campana", "campanella"],
+  en: ["bell"],
+  S: function S() {
+    return [cat(bez([16, 78], [26, 70], [28, 50], [32, 36]), bez([32, 36], [38, 16], [62, 16], [68, 36]), bez([68, 36], [72, 50], [74, 70], [84, 78]), [[84, 78], [16, 78]]), circ(50, 84, 6), circ(50, 11, 4)];
+  }
+}, {
+  id: "ladder",
+  it: ["scala"],
+  en: ["ladder"],
+  S: function S() {
+    var r = [[[34, 8], [26, 94]], [[66, 8], [74, 94]]];
+    [20, 36, 52, 68, 84].forEach(function (y) {
+      var k = (y - 8) * 8 / 86;
+      r.push([[34 - k, y], [66 + k, y]]);
+    });
+    return r;
+  }
+}, {
+  id: "flag",
+  it: ["bandiera"],
+  en: ["flag"],
+  S: function S() {
+    return [[[24, 8], [24, 94]], [[24, 12], [84, 12], [72, 28], [84, 44], [24, 44]], [[14, 94], [34, 94]], circ(40, 28, 5)];
+  }
+}, {
+  id: "robot",
+  it: ["robot"],
+  en: ["robot"],
+  S: function S() {
+    return [rect(30, 12, 70, 40), [[50, 12], [50, 5]], circ(50, 3, 2), rect(38, 20, 46, 28), rect(54, 20, 62, 28), [[40, 34], [60, 34]], rect(24, 44, 76, 80), rect(36, 52, 64, 68), circ(44, 60, 3), circ(56, 60, 3), [[24, 50], [10, 60], [10, 74]], [[76, 50], [90, 60], [90, 74]], [[36, 80], [36, 94]], [[64, 80], [64, 94]]];
+  }
+}, {
+  id: "ufo",
+  it: ["disco volante", "ufo", "navicella aliena"],
+  en: ["ufo", "flying saucer"],
+  S: function S() {
+    return [arc(50, 46, 18, 16, 180, 360), arc(50, 54, 40, 12, 0, 360), circ(34, 60, 2.5), circ(50, 63, 2.5), circ(66, 60, 2.5), [[38, 66], [24, 94]], [[62, 66], [76, 94]], circ(12, 20, 1.5), circ(86, 28, 1.5), circ(78, 10, 1.2)];
+  }
+}, {
+  id: "saturn",
+  it: ["saturno", "pianeta"],
+  en: ["saturn", "planet"],
+  S: function S() {
+    return [circ(50, 50, 20), arc(50, 50, 42, 10, 0, 360, -20), circ(14, 16, 1.5), circ(86, 82, 1.5), circ(82, 14, 1.2)];
+  }
+}, {
+  id: "sword",
+  it: ["spada"],
+  en: ["sword"],
+  S: function S() {
+    return [[[44, 56], [44, 14], [50, 4], [56, 14], [56, 56]], rect(32, 56, 68, 62), rect(46, 62, 54, 82), circ(50, 87, 5), [[50, 14], [50, 52]]];
+  }
+}, {
+  id: "shield",
+  it: ["scudo"],
+  en: ["shield"],
+  S: function S() {
+    return [cat([[22, 14], [78, 14], [78, 48]], bez([78, 48], [76, 74], [60, 88], [50, 94]), bez([50, 94], [40, 88], [24, 74], [22, 48]), [[22, 48], [22, 14]]), [[50, 14], [50, 92]], [[22, 44], [78, 44]]];
+  }
+}, {
+  id: "chest",
+  it: ["forziere", "tesoro", "scrigno"],
+  en: ["treasure chest", "chest", "treasure"],
+  S: function S() {
+    return [rect(12, 48, 88, 86), bez([12, 48], [12, 22], [88, 22], [88, 48]), rect(44, 52, 56, 66), circ(50, 58, 2), [[30, 26], [30, 86]], [[70, 26], [70, 86]]];
+  }
+}, {
+  id: "wand",
+  it: ["bacchetta magica", "bacchetta", "bacchetta di magia"],
+  en: ["wand", "magic wand"],
+  S: function S() {
+    var st = rot(40, 50, 60, rect(48, 34, 52, 94));
+    var tip = rotp([50, 34], 40, 50, 60);
+    var sp = function sp(x, y, r) {
+      var p = [];
+      for (var i = 0; i <= 10; i++) {
+        var rr = i % 2 ? r * .42 : r,
+          a = (-90 + i * 36) * D;
+        p.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr]);
+      }
+      return p;
+    };
+    return [].concat(_toConsumableArray(st), [sp(tip[0] + 2, tip[1] - 8, 10), [[tip[0] + 20, tip[1] - 14], [tip[0] + 24, tip[1] - 14]], [[tip[0] - 16, tip[1] - 18], [tip[0] - 20, tip[1] - 18]], [[tip[0] + 18, tip[1] + 2], [tip[0] + 22, tip[1] + 2]]]);
+  }
+});
+if (!Element.prototype.matches) Element.prototype.matches = Element.prototype.webkitMatchesSelector;
+if (!Element.prototype.closest) Element.prototype.closest = function (sel) {
+  var e = this;
+  while (e && e.nodeType === 1) {
+    if (e.matches(sel)) return e;
+    e = e.parentNode;
+  }
+  return null;
+};
+(function () {
+  "use strict";
+
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  var T_DRAW = 14,
+    T_EXTRA = 4,
+    PAUSE = .2;
+  var PLYR = function () {
+    try {
+      var p = JSON.parse(localStorage.getItem("sala-player") || "null");
+      return typeof p === "string" && p ? p : "";
+    } catch (e) {
+      return "";
+    }
+  }();
+  var PREF = "chg-" + (PLYR ? PLYR + "@" : "");
+  var COLORS = ["#ff7a7a", "#6fb7ff", "#8be07a", "#ffd36b", "#c79bff", "#ff9f55"];
+  var NAMES = {
+    it: ["Rosso", "Blu", "Verde", "Giallo", "Viola", "Arancio"],
+    en: ["Red", "Blue", "Green", "Yellow", "Purple", "Orange"]
+  };
+  var TX = {
+    it: {
+      tag: "Il gessetto disegna. Tu indovina prima che finisca.",
+      solo: "Da solo",
+      soloS: "10 disegni: prima indovini, più punti fai",
+      daily: "Sfida del giorno",
+      dailyS: "5 disegni uguali per tutti, ogni giorno",
+      party: "Festa",
+      partyS: "2–6 giocatori sullo stesso schermo",
+      cont: "Continua",
+      contS: "Riprendi la partita salvata",
+      how: "Come si gioca",
+      back: "← Indietro",
+      pause: "❚❚ Pausa",
+      resume: "Riprendi",
+      restart: "Ricomincia",
+      menu: "Menu",
+      stop: "✋ Fermati: lo so!",
+      ph: "Cosa sta disegnando?",
+      send: "Rispondi",
+      keep: "Continua a guardare",
+      wrong: "Sbagliato!",
+      right: "Giusto!",
+      pts: "punti",
+      next: "Avanti",
+      finish: "Vedi il risultato",
+      last: "Ultima occasione!",
+      timeUp: "Tempo scaduto!",
+      itWas: "Era:",
+      nobody: "Nessuno l'ha indovinato.",
+      players: "Giocatori",
+      rounds: "Disegni",
+      start: "Inizia",
+      buzzNow: "Premi il tuo colore appena lo sai!",
+      say: "{n}, dillo ad alta voce!",
+      jr: "✔ Giusto",
+      jw: "✘ Sbagliato",
+      hold: "👁 Tieni premuto per la risposta (solo il giudice)",
+      out: "{n} è fuori da questo disegno",
+      endT: "Fine!",
+      score: "Punteggio",
+      best: "Record",
+      win: "Vince {n}!",
+      tie: "Pareggio!",
+      again: "Rigioca",
+      share: "Copia risultato",
+      copied: "Copiato!",
+      doneToday: "Fatta oggi",
+      round: "Disegno",
+      nameN: "Nomi",
+      howT: ["Il gessetto disegna un oggetto a poco a poco.", "Più presto lo riconosci, più punti prendi (da 100 a 10).", "Da solo: premi «Fermati», scrivi cosa è. Se sbagli perdi 15 punti e il disegno riparte.", "In festa: ognuno ha il suo colore. Il primo che preme dice la risposta ad alta voce e un altro giocatore conferma o no. Chi sbaglia resta fuori da quel disegno.", "Le risposte valgono anche in inglese. Gli articoli non contano."]
+    },
+    en: {
+      tag: "The chalk draws. Guess before it finishes.",
+      solo: "Solo",
+      soloS: "10 drawings: the earlier you guess, the more you score",
+      daily: "Daily challenge",
+      dailyS: "5 drawings, the same for everyone, every day",
+      party: "Party",
+      partyS: "2–6 players on one screen",
+      cont: "Continue",
+      contS: "Resume your saved game",
+      how: "How to play",
+      back: "← Back",
+      pause: "❚❚ Pause",
+      resume: "Resume",
+      restart: "Restart",
+      menu: "Menu",
+      stop: "✋ Stop: I know!",
+      ph: "What is it drawing?",
+      send: "Answer",
+      keep: "Keep watching",
+      wrong: "Wrong!",
+      right: "Correct!",
+      pts: "points",
+      next: "Next",
+      finish: "See results",
+      last: "Last chance!",
+      timeUp: "Time's up!",
+      itWas: "It was:",
+      nobody: "Nobody got it.",
+      players: "Players",
+      rounds: "Drawings",
+      start: "Start",
+      buzzNow: "Hit your colour as soon as you know!",
+      say: "{n}, say it out loud!",
+      jr: "✔ Correct",
+      jw: "✘ Wrong",
+      hold: "👁 Hold for the answer (judge only)",
+      out: "{n} is out for this drawing",
+      endT: "The end!",
+      score: "Score",
+      best: "Best",
+      win: "{n} wins!",
+      tie: "It's a tie!",
+      again: "Play again",
+      share: "Copy result",
+      copied: "Copied!",
+      doneToday: "Done today",
+      round: "Drawing",
+      nameN: "Names",
+      howT: ["The chalk draws an object bit by bit.", "The earlier you recognise it, the more you score (100 down to 10).", "Solo: tap Stop, type what it is. A wrong answer costs 15 points and the drawing carries on.", "Party: everyone has a colour. The first to tap says the answer out loud and another player confirms or not. A wrong answer puts you out of that drawing.", "Answers work in Italian or English. Articles don't matter."]
+    }
+  };
+  function ls(k, v) {
+    try {
+      if (v === undefined) {
+        var s = localStorage.getItem(PREF + k);
+        return s == null ? null : JSON.parse(s);
+      }
+      if (v === null) localStorage.removeItem(PREF + k);else localStorage.setItem(PREF + k, JSON.stringify(v));
+    } catch (e) {
+      return null;
+    }
+  }
+  var LANG = ls("lang") || ((navigator.language || "it").toLowerCase().startsWith("it") ? "it" : "en");
+  var t = function t(k, r) {
+    var s = TX[LANG][k] != null ? TX[LANG][k] : TX.en[k];
+    if (r) for (var a in r) s = s.replace("{" + a + "}", r[a]);
+    return s;
+  };
+  var cap = function cap(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = a + 0x6D2B79F5 | 0;
+      var x = Math.imul(a ^ a >>> 15, 1 | a);
+      x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x;
+      return ((x ^ x >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function hashStr(s) {
+    var h = 2166136261;
+    var _iterator = _createForOfIteratorHelper(s),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var c = _step.value;
+        h ^= c.charCodeAt(0);
+        h = Math.imul(h, 16777619);
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+    return h >>> 0;
+  }
+  function shuffle(a, r) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(r() * (i + 1));
+      var _ref2 = [a[j], a[i]];
+      a[i] = _ref2[0];
+      a[j] = _ref2[1];
+    }
+    return a;
+  }
+  var SUB = function SUB(id) {
+    return SUBJECTS.find(function (s) {
+      return s.id === id;
+    });
+  };
+  var P = {};
+  function prep(s) {
+    if (P[s.id]) return P[s.id];
+    var r = rng(hashStr(s.id)),
+      strokes = [];
+    var total = 0;
+    s.S().forEach(function (raw) {
+      var pts = [raw[0].slice()];
+      for (var i = 1; i < raw.length; i++) {
+        var a = raw[i - 1],
+          b = raw[i],
+          d = Math.hypot(b[0] - a[0], b[1] - a[1]),
+          n = Math.max(1, Math.ceil(d / 1.5));
+        for (var k = 1; k <= n; k++) pts.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]);
+      }
+      var ph = [r() * 6, r() * 6, r() * 6, r() * 6];
+      var w = pts.map(function (p, k) {
+        return [p[0] + .45 * (Math.sin(k * .33 + ph[0]) + .5 * Math.sin(k * .87 + ph[1])), p[1] + .45 * (Math.sin(k * .29 + ph[2]) + .5 * Math.sin(k * .91 + ph[3]))];
+      });
+      var cum = [0];
+      for (var _i = 1; _i < w.length; _i++) cum.push(cum[_i - 1] + Math.hypot(w[_i][0] - w[_i - 1][0], w[_i][1] - w[_i - 1][1]));
+      var spk = w.map(function () {
+        return r() < .55 ? [(r() - .5) * 1.6, (r() - .5) * 1.6, .1 + r() * .2] : null;
+      });
+      strokes.push({
+        w,
+        cum,
+        len: cum[cum.length - 1] || 1,
+        spk
+      });
+      total += cum[cum.length - 1] || 1;
+    });
+    var avail = T_DRAW - PAUSE * (strokes.length - 1);
+    var t0 = 0;
+    strokes.forEach(function (st) {
+      st.t0 = t0;
+      st.dur = Math.max(.05, avail * st.len / total);
+      t0 += st.dur + PAUSE;
+    });
+    return P[s.id] = {
+      strokes
+    };
+  }
+  var cv = $("cv"),
+    cx = cv.getContext("2d");
+  function drawBoard(sub, tm) {
+    var S = 8;
+    cx.clearRect(0, 0, 800, 800);
+    cx.lineCap = cx.lineJoin = "round";
+    var pr = prep(sub);
+    var tip = null;
+    var _iterator2 = _createForOfIteratorHelper(pr.strokes),
+      _step2;
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var st = _step2.value;
+        if (tm <= st.t0) break;
+        var q = Math.min(1, (tm - st.t0) / st.dur),
+          L = q * st.len,
+          path = [];
+        var i = 0;
+        while (i < st.w.length && st.cum[i] <= L) {
+          path.push(st.w[i]);
+          i++;
+        }
+        if (i < st.w.length && i > 0) {
+          var a = st.w[i - 1],
+            b = st.w[i],
+            f = (L - st.cum[i - 1]) / (st.cum[i] - st.cum[i - 1] || 1);
+          path.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]);
+        }
+        if (path.length < 2) {
+          if (path.length === 1 && q < 1) tip = path[0];
+          continue;
+        }
+        cx.beginPath();
+        path.forEach(function (p, k) {
+          return k ? cx.lineTo(p[0] * S, p[1] * S) : cx.moveTo(p[0] * S, p[1] * S);
+        });
+        cx.strokeStyle = "rgba(244,239,223,.92)";
+        cx.lineWidth = 7;
+        cx.stroke();
+        cx.save();
+        cx.translate(1.4, -1);
+        cx.strokeStyle = "rgba(255,252,240,.5)";
+        cx.lineWidth = 3;
+        cx.stroke();
+        cx.restore();
+        cx.fillStyle = "rgba(244,239,223,1)";
+        for (var k = 0; k < path.length && k < st.spk.length; k++) {
+          var s = st.spk[k];
+          if (s) {
+            cx.globalAlpha = s[2];
+            cx.fillRect(path[k][0] * S + s[0] * S - 1, path[k][1] * S + s[1] * S - 1, 3, 3);
+          }
+        }
+        cx.globalAlpha = 1;
+        if (q < 1) tip = path[path.length - 1];
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+    if (tip && tm < T_DRAW) {
+      var x = tip[0] * S,
+        y = tip[1] * S,
+        g = cx.createRadialGradient(x, y, 0, x, y, 26);
+      g.addColorStop(0, "rgba(255,255,240,.55)");
+      g.addColorStop(1, "rgba(255,255,240,0)");
+      cx.fillStyle = g;
+      cx.beginPath();
+      cx.arc(x, y, 26, 0, 7);
+      cx.fill();
+      cx.save();
+      cx.translate(x, y);
+      cx.rotate(-.75);
+      cx.fillStyle = "#f6f1e1";
+      cx.fillRect(2, -7, 40, 14);
+      cx.fillStyle = "#cfc7ad";
+      cx.fillRect(30, -7, 12, 14);
+      cx.restore();
+    }
+    return !!tip && tm < T_DRAW;
+  }
+  var nfd = function nfd(s) {
+    return s.normalize ? s.normalize("NFD") : s.replace(/[àáâä]/g, "a").replace(/[èéêë]/g, "e").replace(/[ìíîï]/g, "i").replace(/[òóôö]/g, "o").replace(/[ùúûü]/g, "u");
+  };
+  var norm = function norm(s) {
+    return nfd(String(s).toLowerCase()).replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\b(il|lo|la|le|gli|i|l|un|uno|una|the|a|an|di|del|della)\b/g, " ").replace(/\s+/g, " ").trim();
+  };
+  function lev(a, b) {
+    var m = [];
+    for (var i = 0; i <= a.length; i++) {
+      m[i] = [i];
+      for (var j = 1; j <= b.length; j++) m[i][j] = i ? 0 : j;
+    }
+    for (var _i2 = 1; _i2 <= a.length; _i2++) for (var _j = 1; _j <= b.length; _j++) m[_i2][_j] = Math.min(m[_i2 - 1][_j] + 1, m[_i2][_j - 1] + 1, m[_i2 - 1][_j - 1] + (a[_i2 - 1] === b[_j - 1] ? 0 : 1));
+    return m[a.length][b.length];
+  }
+  function match(guess, sub) {
+    var g = norm(guess);
+    if (!g) return false;
+    var _iterator3 = _createForOfIteratorHelper(sub.it.concat(sub.en)),
+      _step3;
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var raw = _step3.value;
+        var a = norm(raw);
+        if (!a) continue;
+        if (g === a) return true;
+        if (a.length >= 3 && (" " + g + " ").includes(" " + a + " ")) return true;
+        var thr = a.length >= 10 ? 2 : a.length >= 6 ? 1 : 0;
+        if (thr && lev(g, a) <= thr) return true;
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    return false;
+  }
+  var AC = null,
+    SND = ls("snd") !== 0,
+    scr = null;
+  function ac() {
+    if (!SND) return null;
+    try {
+      if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+      if (AC.state === "suspended") AC.resume();
+      return AC;
+    } catch (e) {
+      return null;
+    }
+  }
+  function tone(f, d, type, g, sl, delay) {
+    var a = ac();
+    if (!a) return;
+    try {
+      var t0 = a.currentTime + (delay || 0),
+        o = a.createOscillator(),
+        n = a.createGain();
+      o.type = type || "sine";
+      o.frequency.setValueAtTime(f, t0);
+      if (sl) o.frequency.exponentialRampToValueAtTime(sl, t0 + d);
+      n.gain.setValueAtTime(g || .12, t0);
+      n.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+      o.connect(n);
+      n.connect(a.destination);
+      o.start(t0);
+      o.stop(t0 + d + .02);
+    } catch (e) {}
+  }
+  function scratch(on) {
+    var a = ac();
+    if (!a) {
+      return;
+    }
+    try {
+      if (!scr) {
+        var n = a.sampleRate * 2,
+          b = a.createBuffer(1, n, a.sampleRate),
+          d = b.getChannelData(0);
+        for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+        var s = a.createBufferSource();
+        s.buffer = b;
+        s.loop = true;
+        var f = a.createBiquadFilter();
+        f.type = "bandpass";
+        f.frequency.value = 2600;
+        f.Q.value = .7;
+        var g = a.createGain();
+        g.gain.value = 0;
+        s.connect(f);
+        f.connect(g);
+        g.connect(a.destination);
+        s.start();
+        scr = {
+          g
+        };
+      }
+      scr.g.gain.setTargetAtTime(on ? .035 : 0, a.currentTime, .05);
+    } catch (e) {}
+  }
+  var sfx = {
+    ok() {
+      tone(660, .12, "triangle", .14);
+      tone(880, .2, "triangle", .14, 0, .1);
+      tone(1100, .25, "triangle", .1, 0, .2);
+    },
+    bad() {
+      tone(220, .28, "sawtooth", .1, 120);
+    },
+    buzz() {
+      tone(520, .12, "square", .08);
+    },
+    end() {
+      tone(440, .15, "triangle", .12);
+      tone(550, .15, "triangle", .12, 0, .15);
+      tone(660, .3, "triangle", .12, 0, .3);
+    }
+  };
+  var _G = null,
+    lastTs = 0,
+    drawingNow = false;
+  var pts = function pts(tm) {
+    return tm < T_DRAW ? Math.max(10, Math.round(100 * (1 - tm / T_DRAW))) : 10;
+  };
+  var curSub = function curSub() {
+    return SUB(_G.order[_G.round]);
+  };
+  var pname = function pname(i) {
+    return _G.players[i].name;
+  };
+  function toast(m) {
+    var e = $("toast");
+    e.textContent = m;
+    e.hidden = false;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () {
+      return e.hidden = true;
+    }, 1800);
+  }
+  function show(id) {
+    ["menu", "setup", "howto", "game"].forEach(function (x) {
+      return $(x).hidden = x !== id;
+    });
+  }
+  function dailyKey() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function startGame(mode, opt) {
+    opt = opt || {};
+    var order, players, N;
+    if (mode === "solo") {
+      N = 10;
+      order = shuffle(SUBJECTS.map(function (s) {
+        return s.id;
+      }), Math.random).slice(0, N);
+      players = [{
+        name: "",
+        score: 0
+      }];
+    } else if (mode === "daily") {
+      N = 5;
+      order = shuffle(SUBJECTS.map(function (s) {
+        return s.id;
+      }), rng(hashStr(dailyKey()))).slice(0, N);
+      players = [{
+        name: "",
+        score: 0
+      }];
+    } else {
+      N = opt.N;
+      order = shuffle(SUBJECTS.map(function (s) {
+        return s.id;
+      }), Math.random).slice(0, N);
+      players = opt.players.map(function (p) {
+        return {
+          name: p.name,
+          score: 0
+        };
+      });
+    }
+    _G = {
+      mode,
+      N,
+      order,
+      players,
+      round: 0,
+      t: 0,
+      phase: "draw",
+      locked: [],
+      wrong: 0,
+      buzzer: -1,
+      ansT: 0,
+      ptsAt: 0,
+      results: [],
+      paused: false,
+      res: null,
+      opt
+    };
+    ls("save", null);
+    beginRound();
+  }
+  function beginRound() {
+    _G.t = 0;
+    _G.phase = "draw";
+    _G.locked = [];
+    _G.wrong = 0;
+    _G.buzzer = -1;
+    _G.res = null;
+    $("board").className = "";
+    show("game");
+    renderAll();
+    saveGame();
+  }
+  function saveGame() {
+    if (!_G || _G.phase === "end") return;
+    ls("save", {
+      mode: _G.mode,
+      N: _G.N,
+      order: _G.order,
+      players: _G.players,
+      round: _G.round,
+      t: _G.t,
+      phase: _G.phase === "answer" ? "draw" : _G.phase,
+      locked: _G.locked,
+      wrong: _G.wrong,
+      results: _G.results,
+      res: _G.res,
+      opt: _G.opt
+    });
+  }
+  function resumeGame() {
+    var s = ls("save");
+    if (!s) return;
+    _G = Object.assign({
+      buzzer: -1,
+      ansT: 0,
+      ptsAt: 0,
+      paused: false
+    }, s);
+    show("game");
+    $("board").className = _G.phase === "reveal" ? _G.res && _G.res.solved ? "ok" : "bad" : "";
+    renderAll();
+  }
+  function renderAll() {
+    renderBar();
+    renderScores();
+    renderBuzz();
+    renderPanel();
+    fit();
+  }
+  function fit() {
+    if (!_G || $("game").hidden) return;
+    var g = $("game"),
+      b = $("board"),
+      bw = $("boardWrap"),
+      side = $("side"),
+      main = $("main");
+    var land = window.innerWidth > window.innerHeight * 1.05;
+    g.classList.toggle("land", land);
+    if (land) {
+      if (bw.parentNode !== main || bw.nextSibling !== side) main.insertBefore(bw, side);
+    } else if (bw.parentNode !== side || bw.nextSibling !== $("panel")) side.insertBefore(bw, $("panel"));
+    var cs = getComputedStyle(g),
+      pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom),
+      padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    var H = g.clientHeight - pad - $("bar").getBoundingClientRect().height - 16,
+      W = g.clientWidth - padX;
+    var size;
+    if (land) {
+      size = Math.min(H, W * .52);
+    } else {
+      var others = 0;
+      for (var _i3 = 0, _arr = ["scores", "topBuzz", "panel", "botBuzz"]; _i3 < _arr.length; _i3++) {
+        var id = _arr[_i3];
+        var e = $(id);
+        if (e && !e.hidden) others += e.getBoundingClientRect().height + 10;
+      }
+      size = Math.min(W, 640, H - others - 10);
+    }
+    size = Math.max(160, Math.floor(size));
+    b.style.width = b.style.height = size + "px";
+  }
+  window.addEventListener("resize", function () {
+    return fit();
+  });
+  window.addEventListener("orientationchange", function () {
+    return setTimeout(fit, 300);
+  });
+  function renderBar() {
+    $("bBack").textContent = t("back");
+    $("bPause").textContent = t("pause");
+    $("bSnd").textContent = SND ? "🔊" : "🔇";
+    $("bPause").hidden = _G.phase === "end";
+    $("status").textContent = _G.phase === "end" ? "" : (_G.mode === "daily" ? t("daily") + " · " : "") + t("round") + " " + (_G.round + 1) + "/" + _G.N;
+  }
+  function renderScores() {
+    var e = $("scores");
+    e.hidden = _G.mode === "party" && _G.players.length === 2;
+    if (_G.mode === "party") e.innerHTML = _G.players.map(function (p, i) {
+      return "<span style=\"--c:".concat(COLORS[i], "\">").concat(esc(p.name), " ").concat(p.score, "</span>");
+    }).join("");else e.innerHTML = "<span class=\"big\">\u2605 ".concat(_G.players[0].score, "</span>");
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[c];
+    });
+  }
+  function renderBuzz() {
+    var top = $("topBuzz"),
+      bot = $("botBuzz");
+    top.hidden = bot.hidden = true;
+    top.innerHTML = bot.innerHTML = "";
+    if (_G.mode !== "party" || _G.phase === "end") return;
+    var n = _G.players.length,
+      btn = function btn(i, two) {
+        return "<button class=\"buzz".concat(two ? " two" : "").concat(_G.locked.includes(i) ? " locked" : "").concat(_G.buzzer === i ? " live" : "", "\" data-b=\"").concat(i, "\" style=\"--c:").concat(COLORS[i], "\" ").concat(_G.locked.includes(i) || _G.phase !== "draw" ? "disabled" : "", ">").concat(esc(_G.players[i].name)).concat(n === 2 ? " · " + _G.players[i].score : "", "</button>");
+      };
+    if (n === 2) {
+      top.hidden = bot.hidden = false;
+      top.innerHTML = btn(1, true);
+      bot.innerHTML = btn(0, true);
+    } else {
+      bot.hidden = false;
+      bot.innerHTML = _G.players.map(function (p, i) {
+        return btn(i, false);
+      }).join("");
+    }
+  }
+  function renderPanel() {
+    var p = $("panel"),
+      s = curSub(),
+      ph = _G.phase;
+    p.classList.remove("judge");
+    $("board").classList.remove("shake");
+    if (ph === "end") {
+      renderEnd();
+      return;
+    }
+    $("boardWrap").hidden = false;
+    if (ph === "draw") {
+      if (_G.mode === "party") {
+        p.innerHTML = "<div class=\"muted\">".concat(t("buzzNow"), "</div>") + (_G.locked.length ? "<div class=\"muted\">".concat(_G.locked.map(function (i) {
+          return t("out", {
+            n: esc(pname(i))
+          });
+        }).join(" · "), "</div>") : "");
+      } else p.innerHTML = "<button class=\"btn primary\" data-a=\"stop\" style=\"width:100%;max-width:520px\">".concat(t("stop"), "</button>");
+    } else if (ph === "answer") {
+      if (_G.mode === "party") {
+        p.classList.add("judge");
+        p.innerHTML = "<div class=\"big-word\" style=\"color:".concat(COLORS[_G.buzzer], "\">").concat(t("say", {
+          n: esc(pname(_G.buzzer))
+        }), "</div><div class=\"timer\"><i id=\"ansBar\" style=\"width:100%\"></i></div><div class=\"row\"><button class=\"btn primary\" data-a=\"jr\">").concat(t("jr"), "</button><button class=\"btn\" data-a=\"jw\">").concat(t("jw"), "</button></div><button class=\"hold\" id=\"hold\">").concat(t("hold"), "</button>");
+        var h = $("hold"),
+          on = function on() {
+            h.classList.add("on");
+            h.textContent = cap(s[LANG][0]);
+          },
+          off = function off() {
+            h.classList.remove("on");
+            h.textContent = t("hold");
+          };
+        h.addEventListener("touchstart", function (e) {
+          e.preventDefault();
+          on();
+        }, {
+          passive: false
+        });
+        ["touchend", "touchcancel"].forEach(function (ev) {
+          return h.addEventListener(ev, off);
+        });
+        h.addEventListener("mousedown", function (e) {
+          e.preventDefault();
+          on();
+        });
+        ["mouseup", "mouseleave"].forEach(function (ev) {
+          return h.addEventListener(ev, off);
+        });
+      } else {
+        p.innerHTML = "<form class=\"answer\" id=\"ansForm\"><input id=\"ansIn\" placeholder=\"".concat(esc(t("ph")), "\" autocomplete=\"off\" autocapitalize=\"off\" spellcheck=\"false\" enterkeyhint=\"send\"><button class=\"btn primary\" type=\"submit\" style=\"padding:8px 16px\">").concat(t("send"), "</button></form><button class=\"btn ghost\" data-a=\"keep\">").concat(t("keep"), "</button>");
+        $("ansForm").onsubmit = function (e) {
+          e.preventDefault();
+          submitAnswer($("ansIn").value);
+        };
+        var ai = $("ansIn");
+        if (ai) {
+          try {
+            ai.focus();
+          } catch (e) {}
+        }
+      }
+    } else if (ph === "reveal") {
+      var r = _G.res,
+        last = _G.round + 1 >= _G.N;
+      var line;
+      if (r.solved) line = _G.mode === "party" ? "<div class=\"res-ok\">".concat(t("right"), " ").concat(esc(pname(r.who)), " +").concat(r.award, " ").concat(t("pts"), "</div>") : "<div class=\"res-ok\">".concat(t("right"), " +").concat(r.award, " ").concat(t("pts"), "</div>");else line = "<div class=\"res-bad\">".concat(r.timeout ? t("timeUp") : t("nobody"), "</div>");
+      p.innerHTML = "<div class=\"muted\">".concat(t("itWas"), "</div><div class=\"big-word\">").concat(esc(cap(s[LANG][0])), "</div>").concat(line, "<button class=\"btn primary\" data-a=\"next\" style=\"min-width:220px\">").concat(last ? t("finish") : t("next"), "</button>");
+    }
+  }
+  function renderEnd() {
+    var p = $("panel");
+    $("boardWrap").hidden = true;
+    $("scores").innerHTML = "";
+    var best = ls("best") || 0;
+    if (_G.mode === "party") {
+      var rk = _G.players.map(function (x, i) {
+          return {
+            n: x.name,
+            s: x.score,
+            i
+          };
+        }).sort(function (a, b) {
+          return b.s - a.s;
+        }),
+        top = rk[0].s,
+        w = rk.filter(function (x) {
+          return x.s === top;
+        });
+      p.innerHTML = "<h2>".concat(t("endT"), "</h2><div class=\"big-word\">").concat(w.length > 1 ? t("tie") : t("win", {
+        n: esc(w[0].n)
+      }), "</div><div class=\"rank\">").concat(rk.map(function (x) {
+        return "<div style=\"color:".concat(COLORS[x.i], "\"><span>").concat(esc(x.n), "</span><b>").concat(x.s, "</b></div>");
+      }).join(""), "</div><div class=\"row\"><button class=\"btn primary\" data-a=\"again\">").concat(t("again"), "</button><button class=\"btn\" data-a=\"menu\">").concat(t("menu"), "</button></div>");
+    } else {
+      var sc = _G.players[0].score,
+        marks = _G.results.map(function (r) {
+          return !r.solved ? "⬛" : r.award >= 70 ? "🟩" : r.award >= 40 ? "🟨" : "🟧";
+        }).join("");
+      _G.marks = marks;
+      p.innerHTML = "<h2>".concat(t("endT"), "</h2><div class=\"marks\">").concat(marks, "</div><div class=\"big-word\">").concat(t("score"), ": ").concat(sc, "</div>").concat(_G.mode === "solo" ? "<div class=\"muted\">".concat(t("best"), ": ").concat(Math.max(best, sc), "</div>") : "", "<div class=\"row\">").concat(_G.mode === "daily" ? "<button class=\"btn primary\" data-a=\"share\">".concat(t("share"), "</button>") : "<button class=\"btn primary\" data-a=\"again\">".concat(t("again"), "</button>"), "<button class=\"btn\" data-a=\"menu\">").concat(t("menu"), "</button></div>");
+    }
+  }
+  function finishRound(solved, award, who, timeout) {
+    _G.phase = "reveal";
+    _G.t = T_DRAW;
+    _G.res = {
+      solved,
+      award,
+      who,
+      timeout: !!timeout
+    };
+    _G.results.push({
+      solved,
+      award
+    });
+    if (solved) {
+      _G.players[_G.mode === "party" ? who : 0].score += award;
+      sfx.ok();
+    } else sfx.bad();
+    $("board").className = solved ? "ok" : "bad";
+    scratch(false);
+    renderAll();
+    saveGame();
+  }
+  function submitAnswer(v) {
+    if (_G.phase !== "answer" || _G.mode === "party") return;
+    if (match(v, curSub())) {
+      finishRound(true, Math.max(10, pts(_G.t) - 15 * _G.wrong), 0);
+    } else {
+      _G.wrong++;
+      sfx.bad();
+      _G.phase = "draw";
+      renderAll();
+      var b = $("board");
+      b.classList.remove("shake");
+      void b.offsetWidth;
+      b.classList.add("shake");
+      toast(t("wrong"));
+    }
+  }
+  function buzz(i) {
+    if (!_G || _G.mode !== "party" || _G.phase !== "draw" || _G.paused || _G.locked.includes(i)) return;
+    sfx.buzz();
+    _G.phase = "answer";
+    _G.buzzer = i;
+    _G.ansT = 10;
+    _G.ptsAt = pts(_G.t);
+    scratch(false);
+    renderAll();
+  }
+  function judge(ok) {
+    if (_G.phase !== "answer" || _G.mode !== "party") return;
+    var i = _G.buzzer;
+    if (ok) finishRound(true, _G.ptsAt, i);else {
+      _G.locked.push(i);
+      _G.buzzer = -1;
+      sfx.bad();
+      if (_G.locked.length >= _G.players.length) finishRound(false, 0, -1);else {
+        _G.phase = "draw";
+        renderAll();
+      }
+    }
+  }
+  function nextRound() {
+    _G.round++;
+    if (_G.round >= _G.N) endGame();else beginRound();
+  }
+  function endGame() {
+    _G.phase = "end";
+    ls("save", null);
+    sfx.end();
+    if (_G.mode === "solo") {
+      var sc = _G.players[0].score;
+      if (sc > (ls("best") || 0)) ls("best", sc);
+    }
+    if (_G.mode === "daily") ls("daily-" + dailyKey(), {
+      score: _G.players[0].score,
+      marks: _G.results.map(function (r) {
+        return !r.solved ? "⬛" : r.award >= 70 ? "🟩" : r.award >= 40 ? "🟨" : "🟧";
+      }).join("")
+    });
+    renderAll();
+  }
+  function shareText() {
+    var m = _G.marks || "";
+    return "Chalk Ghost \xB7 ".concat(dailyKey(), "\n").concat(m, " ").concat(_G.players[0].score);
+  }
+  function copy(_x) {
+    return _copy.apply(this, arguments);
+  }
+  function _copy() {
+    _copy = _asyncToGenerator(_regenerator().m(function _callee(txt) {
+      var a, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            _context.p = 0;
+            _context.n = 1;
+            return navigator.clipboard.writeText(txt);
+          case 1:
+            toast(t("copied"));
+            _context.n = 3;
+            break;
+          case 2:
+            _context.p = 2;
+            _t = _context.v;
+            a = document.createElement("textarea");
+            a.value = txt;
+            a.style.position = "fixed";
+            a.style.opacity = "0";
+            document.body.appendChild(a);
+            a.select();
+            try {
+              document.execCommand("copy");
+              toast(t("copied"));
+            } catch (_) {}
+            a.remove();
+          case 3:
+            return _context.a(2);
+        }
+      }, _callee, null, [[0, 2]]);
+    }));
+    return _copy.apply(this, arguments);
+  }
+  function goMenu() {
+    if (_G && _G.phase !== "end") saveGame();
+    _G = null;
+    scratch(false);
+    $("pauseO").hidden = true;
+    renderMenu();
+    show("menu");
+  }
+  function setPause(on) {
+    if (!_G || _G.phase === "end") return;
+    _G.paused = on;
+    scratch(false);
+    var o = $("pauseO");
+    o.hidden = !on;
+    if (on) o.innerHTML = "<h2>".concat(t("pause").replace("❚❚ ", ""), "</h2><button class=\"btn primary\" data-p=\"resume\">").concat(t("resume"), "</button><button class=\"btn\" data-p=\"restart\">").concat(t("restart"), "</button><button class=\"btn\" data-p=\"menu\">").concat(t("menu"), "</button><button class=\"btn ghost\" data-p=\"sala\">\uD83C\uDFE0 Sala giochi</button>");
+  }
+  function goSala() {
+    if (_G && _G.phase !== "end") saveGame();
+    location.href = "index.html";
+  }
+  function renderMenu() {
+    $("tag").textContent = t("tag");
+    var sv = ls("save"),
+      best = ls("best") || 0,
+      dd = ls("daily-" + dailyKey());
+    var b = function b(a, l, s, c) {
+      return "<button class=\"btn ".concat(c || "", "\" data-m=\"").concat(a, "\">").concat(l, "<small>").concat(s, "</small></button>");
+    };
+    $("menuBtns").innerHTML = (sv ? b("cont", t("cont"), t("contS"), "primary") : "") + b("solo", t("solo"), t("soloS") + (best ? " \xB7 ".concat(t("best"), ": ").concat(best) : ""), sv ? "" : "primary") + b("daily", t("daily"), dd ? "".concat(t("doneToday"), ": ").concat(dd.marks, " ").concat(dd.score) : t("dailyS")) + b("party", t("party"), t("partyS"));
+    $("menuFoot").innerHTML = "<button class=\"btn ghost\" data-m=\"how\">".concat(t("how"), "</button><button class=\"btn ghost\" data-m=\"lang\">").concat(LANG === "it" ? "English" : "Italiano", "</button><button class=\"btn ghost\" data-m=\"snd\">").concat(SND ? "🔊" : "🔇", "</button><button class=\"btn ghost\" data-m=\"sala\">\uD83C\uDFE0 Sala giochi</button>");
+  }
+  var SET = {
+    n: 3,
+    N: 8,
+    names: []
+  };
+  function renderSetup() {
+    var names = [];
+    for (var i = 0; i < SET.n; i++) names.push(SET.names[i] != null ? SET.names[i] : NAMES[LANG][i]);
+    var sg = function sg(arr, cur, k) {
+      return "<div class=\"seg\">".concat(arr.map(function (v) {
+        return "<button type=\"button\" data-s=\"".concat(k, "\" data-v=\"").concat(v, "\" aria-pressed=\"").concat(v === cur, "\">").concat(v, "</button>");
+      }).join(""), "</div>");
+    };
+    $("setup").innerHTML = "<div class=\"bar2\"><button class=\"chip\" data-s=\"back\" type=\"button\">".concat(t("back"), "</button></div><h2>").concat(t("party"), "</h2><div class=\"field\"><span>").concat(t("players"), "</span>").concat(sg([2, 3, 4, 5, 6], SET.n, "n"), "</div><div class=\"field\"><span>").concat(t("rounds"), "</span>").concat(sg([5, 8, 10], SET.N, "N"), "</div><div class=\"field\"><span>").concat(t("nameN"), "</span><div class=\"names\">").concat(names.map(function (n, i) {
+      return "<label style=\"--c:".concat(COLORS[i], "\"><i></i><input data-nm=\"").concat(i, "\" value=\"").concat(esc(n), "\" maxlength=\"12\"></label>");
+    }).join(""), "</div></div><button class=\"btn primary\" data-s=\"go\" type=\"button\">").concat(t("start"), "</button>");
+  }
+  function renderHow() {
+    $("howto").innerHTML = "<div class=\"bar2\"><button class=\"chip\" data-s=\"back\" type=\"button\">".concat(t("back"), "</button></div><h2>").concat(t("how"), "</h2>").concat(TX[LANG].howT.map(function (x) {
+      return "<p>".concat(esc(x), "</p>");
+    }).join(""));
+  }
+  document.addEventListener("click", function (e) {
+    var m = e.target.closest("[data-m]");
+    if (m) {
+      ac();
+      var _a = m.dataset.m;
+      if (_a === "cont") resumeGame();else if (_a === "solo") startGame("solo");else if (_a === "daily") startGame("daily");else if (_a === "party") {
+        renderSetup();
+        show("setup");
+      } else if (_a === "how") {
+        renderHow();
+        show("howto");
+      } else if (_a === "lang") {
+        LANG = LANG === "it" ? "en" : "it";
+        ls("lang", LANG);
+        renderMenu();
+      } else if (_a === "sala") goSala();else if (_a === "snd") {
+        SND = !SND;
+        ls("snd", SND ? 1 : 0);
+        if (SND) ac();
+        renderMenu();
+      }
+      return;
+    }
+    var s = e.target.closest("[data-s]");
+    if (s) {
+      var _a2 = s.dataset.s;
+      if (_a2 === "back") {
+        renderMenu();
+        show("menu");
+      } else if (_a2 === "n" || _a2 === "N") {
+        document.querySelectorAll("#setup [data-nm]").forEach(function (i) {
+          return SET.names[+i.dataset.nm] = i.value;
+        });
+        SET[_a2] = +s.dataset.v;
+        renderSetup();
+      } else if (_a2 === "go") {
+        var pl = [];
+        document.querySelectorAll("#setup [data-nm]").forEach(function (i) {
+          return pl.push({
+            name: i.value.trim() || NAMES[LANG][+i.dataset.nm]
+          });
+        });
+        SET.names = pl.map(function (p) {
+          return p.name;
+        });
+        ac();
+        startGame("party", {
+          N: SET.N,
+          players: pl
+        });
+      }
+      return;
+    }
+    var a = e.target.closest("[data-a]");
+    if (a && _G) {
+      var k = a.dataset.a;
+      if (k === "stop" && _G.phase === "draw") {
+        _G.phase = "answer";
+        scratch(false);
+        renderAll();
+      } else if (k === "keep") {
+        _G.phase = "draw";
+        renderAll();
+      } else if (k === "jr") judge(true);else if (k === "jw") judge(false);else if (k === "next") nextRound();else if (k === "again") startGame(_G.mode, _G.opt);else if (k === "menu") goMenu();else if (k === "share") copy(shareText());
+      return;
+    }
+    var p = e.target.closest("[data-p]");
+    if (p) {
+      var _k = p.dataset.p;
+      if (_k === "resume") setPause(false);else if (_k === "restart") {
+        var md = _G.mode,
+          op = _G.opt;
+        $("pauseO").hidden = true;
+        startGame(md, op);
+      } else if (_k === "menu") goMenu();else if (_k === "sala") goSala();
+    }
+  });
+  var onBuzz = function onBuzz(e) {
+    var b = e.target.closest && e.target.closest(".buzz");
+    if (b && !b.disabled) {
+      e.preventDefault();
+      buzz(+b.dataset.b);
+    }
+  };
+  document.addEventListener("touchstart", onBuzz, {
+    passive: false
+  });
+  document.addEventListener("mousedown", onBuzz);
+  $("bBack").onclick = function () {
+    return goMenu();
+  };
+  $("bPause").onclick = function () {
+    return setPause(!(_G && _G.paused));
+  };
+  $("bSnd").onclick = function () {
+    SND = !SND;
+    ls("snd", SND ? 1 : 0);
+    if (SND) ac();else scratch(false);
+    $("bSnd").textContent = SND ? "🔊" : "🔇";
+  };
+  document.addEventListener("keydown", function (e) {
+    if (!_G) return;
+    var inp = e.target && e.target.tagName === "INPUT";
+    if (e.key === "Escape" || (e.key === "p" || e.key === "P") && !inp) {
+      setPause(!_G.paused);
+      return;
+    }
+    if (inp || _G.paused) return;
+    if (e.key === " " && _G.phase === "draw" && _G.mode !== "party") {
+      e.preventDefault();
+      _G.phase = "answer";
+      scratch(false);
+      renderAll();
+    } else if (_G.mode === "party" && /^[1-6]$/.test(e.key)) {
+      var i = +e.key - 1;
+      if (i < _G.players.length) buzz(i);
+    } else if (e.key === "Enter" && _G.phase === "reveal") nextRound();
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && _G && _G.phase !== "end" && !_G.paused) setPause(true);
+  });
+  var lastPts = "";
+  function tick(dt) {
+    if (!_G || _G.phase === "end") return;
+    if (!_G.paused) {
+      if (_G.phase === "draw") {
+        _G.t += dt;
+        if (_G.t >= T_DRAW + T_EXTRA) {
+          _G.t = T_DRAW + T_EXTRA;
+          finishRound(false, 0, -1, true);
+        }
+      } else if (_G.phase === "answer" && _G.mode === "party") {
+        _G.ansT -= dt;
+        var b = $("ansBar");
+        if (b) b.style.width = Math.max(0, _G.ansT / 10 * 100) + "%";
+        if (_G.ansT <= 0) judge(false);
+      }
+    }
+    var s = curSub();
+    var dr = drawBoard(s, Math.min(_G.t, T_DRAW));
+    if (dr !== drawingNow) {
+      drawingNow = dr;
+      scratch(dr && _G.phase === "draw" && !_G.paused);
+    }
+    var e = $("pts");
+    var txt = "";
+    if (_G.phase === "draw" || _G.phase === "answer") {
+      var late = _G.t >= T_DRAW;
+      txt = (late ? t("last") + " " : "") + "★ " + (_G.phase === "answer" && _G.mode === "party" ? _G.ptsAt : pts(_G.t));
+      e.classList.toggle("late", late);
+    } else if (_G.phase === "reveal") {
+      e.classList.remove("late");
+    }
+    if (txt !== lastPts) {
+      e.textContent = txt;
+      lastPts = txt;
+    }
+  }
+  function loop(ts) {
+    var dt = Math.min(.05, (ts - lastTs) / 1000 || 0);
+    lastTs = ts;
+    tick(dt);
+    requestAnimationFrame(loop);
+  }
+  window.__CG = {
+    tick,
+    G: function G() {
+      return _G;
+    },
+    match,
+    SUBJECTS,
+    startGame,
+    buzz,
+    judge,
+    submitAnswer,
+    T_DRAW,
+    T_EXTRA,
+    pts,
+    setPause,
+    goMenu
+  };
+  renderMenu();
+  show("menu");
+  requestAnimationFrame(loop);
+})();</script>
+</body></html>
