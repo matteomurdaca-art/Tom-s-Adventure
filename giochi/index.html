@@ -47,7 +47,7 @@ a.game span{font-size:14px;color:#5d6273}
   <a class="game g9" href="bollegiganti.html"><div class="ic">🎈</div><b>Tommy e le Bolle Giganti</b><span>Spara il rampino: le bolle si dividono fino a sparire. Non farti toccare!</span></a>
   <a class="game g10" href="ember.html"><div class="ic">🔥</div><b>Ember Breaker</b><span>Rompi i mattoni con la palla di fuoco e scegli i potenziamenti</span></a>
   <a class="game g11" href="outrun.html"><div class="ic">🏮</div><b>Outrun the Dark</b><span>Corri con la lanterna e salta gli ostacoli: non farti prendere dal buio!</span></a>
-  <a class="game g12" href="blocchi.html"><div class="ic">🧱</div><b>Blocchi a Cascata</b><span>Incastra i pezzi colorati che cadono e completa le righe</span></a>
+  <a class="game g12" href="blocchi.html"><div class="ic">🔷</div><b>Blocchi a Cascata</b><span>Incastra i pezzi colorati che cadono e completa le righe</span></a>
   <a class="game g13" href="labirinto.html"><div class="ic">🍭</div><b>Tommy nel Labirinto</b><span>Mangia le caramelle, scappa dai mostrini e acchiappali col lecca-lecca</span></a>
   <a class="game g14" href="folla.html"><div class="ic">🏃</div><b>La Folla di Tommy</b><span>Scegli le porte ×3 e +10, fai crescere la folla e batti quella rossa</span></a>
   <a class="game g15" href="bruco.html"><div class="ic">🐍</div><b>Il Serpente Mangione</b><span>Guida il serpente, mangia mele e banane e diventa lunghissimo</span></a>
@@ -69,6 +69,20 @@ a.game span{font-size:14px;color:#5d6273}
   if(L('sala-players',null)==null) S('sala-players',players());
   if(L('sala-player',null)==null) S('sala-player',players()[0]);
   render();
+})();
+</script>
+<p class="note" id="upd" hidden>Versione 44 · <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;cursor:pointer">🔄 Aggiorna i giochi</button></p>
+<script>
+(function(){
+  if(!('serviceWorker' in navigator)||!/github\.io$/.test(location.hostname)) return;
+  var had=!!navigator.serviceWorker.controller, done=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){ if(had&&!done){ done=true; location.reload(); } });
+  navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(r){ try{ r.update(); }catch(e){} }).catch(function(){});
+  document.getElementById('upd').hidden=false;
+  document.getElementById('updBtn').onclick=function(){ var b=this; b.textContent='⏳ Aggiorno…';
+    var go=function(){ location.replace(location.pathname+'?v='+Date.now()); };
+    (window.caches?caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k.indexOf('fonts')<0; }).map(function(k){ return caches.delete(k); })); }):Promise.resolve())
+      .then(function(){ return navigator.serviceWorker.getRegistration('../'); }).then(function(r){ return r&&r.update(); }).then(go,go); };
 })();
 </script>
 </body>
