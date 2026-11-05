@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1d1f2b">
-<title>Il Bruco Mangione</title>
+<title>Il Serpente Mangione</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -77,21 +77,23 @@ a.home{color:#1d1f2b}
     <button class="go alt" id="ksaveexit" type="button">◀ Salva ed esci</button>
   </div>
   <div class="row"><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
-  <p class="note">Il Bruco Mangione · Sala giochi di Tom · versione 1</p>
+  <p class="note">Il Serpente Mangione · Sala giochi di Tom · versione 1</p>
 </div></div>
 <div id="ktoast" hidden></div>
 <div class="ov" id="kboard" hidden style="z-index:20"><div class="card"></div></div>
 <div class="ov" id="menu"><div class="card">
-  <h1>🐛 Il Bruco Mangione</h1>
+  <h1>🐍 Il Serpente Mangione</h1>
   <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
   <button class="go" id="cont" type="button" hidden></button>
   <h2>Chi gioca?</h2>
   <div id="players"></div>
+  <h2>Cosa mangia il serpente?</h2>
+  <div id="food" class="kplayers"></div>
   <p id="rec" class="note"></p>
   <button class="go" id="go" type="button">▶ Nuova partita</button>
   <h2>Oppure scegli il giardino</h2>
   <div class="lvls" id="levels"></div>
-  <p class="note">Guida il bruco con le frecce oppure scorrendo il dito: mangia la frutta per diventare sempre più lungo! Non sbattere contro i sassi, la siepe o la tua stessa coda. Le ⭐ valgono tanti punti ma spariscono presto.</p>
+  <p class="note">Guida il serpente con le frecce oppure scorrendo il dito: mangia mele e banane per diventare sempre più lungo! Non sbattere contro i sassi, la siepe o la tua stessa coda. Le ⭐ valgono tanti punti ma spariscono presto.</p>
   <div class="row"><button class="go alt" id="boardBtn" type="button">🏆 Classifica</button><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
 </div></div>
 <div class="ov" id="end" hidden><div class="card">
@@ -2225,7 +2227,10 @@ var K = function () {
     NL = 10,
     DIRS = [[0, -1], [-1, 0], [0, 1], [1, 0]];
   var NAMES = ['Il prato', 'I quattro sassi', 'La staccionata', 'I due ruscelli', 'Il recinto', 'La croce dei fiori', 'Il campo di sassi', 'Le quattro stanze', 'Lo zig-zag', 'Il grande giardino'];
-  var FRUITS = ['🍎', '🍐', '🍓', '🍌', '🍇', '🍒', '🍊', '🍉'];
+  var FOOD = K.load('bruco-food', 'both');
+  var foods = function foods() {
+    return FOOD === 'mele' ? ['🍎'] : FOOD === 'banane' ? ['🍌'] : ['🍎', '🍌'];
+  };
   function rect(set, x0, y0, x1, y1) {
     for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) set[y * GW + x] = 1;
   }
@@ -2359,16 +2364,17 @@ var K = function () {
         y = 1 + Math.floor(Math.random() * (GH - 2));
       if (!free(x, y) || onSnake(x, y) || star && star.x === x && star.y === y) continue;
       if (k < 300 && Math.abs(x - h.x) + Math.abs(y - h.y) < 4) continue;
+      var F = foods();
       return {
         x: x,
         y: y,
-        e: FRUITS[nFruit % FRUITS.length]
+        e: F[nFruit % F.length]
       };
     }
     return {
       x: 1,
       y: 1,
-      e: '🍎'
+      e: foods()[0]
     };
   }
   function resetSnake() {
@@ -2742,23 +2748,60 @@ var K = function () {
   }
   function seg(alt) {
     var s = L.ts * 1.1;
-    return spr('seg' + alt, s, s, function (x, w) {
-      var col = alt ? '#9ad84a' : '#7cc63a';
+    return spr('sn' + alt, s, s, function (x, w) {
+      var col = '#3faa4a';
       var g = x.createRadialGradient(w * .38, w * .35, w * .05, w / 2, w / 2, w * .48);
-      g.addColorStop(0, SS.tone(col, .45));
-      g.addColorStop(1, SS.tone(col, -.25));
+      g.addColorStop(0, SS.tone(col, .5));
+      g.addColorStop(1, SS.tone(col, -.3));
       x.fillStyle = g;
       x.beginPath();
-      x.arc(w / 2, w / 2, w * .44, 0, 6.2832);
+      x.arc(w / 2, w / 2, w * .42, 0, 6.2832);
       x.fill();
-      x.lineWidth = w * .06;
-      x.strokeStyle = 'rgba(28,23,36,.8)';
-      x.stroke();
-      x.fillStyle = '#f2c230';
-      x.beginPath();
-      x.arc(w / 2, w / 2, w * .1, 0, 6.2832);
-      x.fill();
+      if (alt) {
+        x.fillStyle = '#f2d040';
+        x.beginPath();
+        x.ellipse(w / 2, w / 2, w * .18, w * .13, 0, 0, 6.2832);
+        x.fill();
+        x.strokeStyle = 'rgba(28,23,36,.35)';
+        x.lineWidth = 1;
+        x.stroke();
+      } else {
+        x.fillStyle = 'rgba(20,70,30,.45)';
+        for (var _i8 = 0, _arr4 = [[.35, .38], [.62, .4], [.48, .64]]; _i8 < _arr4.length; _i8++) {
+          var _arr4$_i = _slicedToArray(_arr4[_i8], 2),
+            a = _arr4$_i[0],
+            b = _arr4$_i[1];
+          x.beginPath();
+          x.arc(w * a, w * b, w * .06, 0, 6.2832);
+          x.fill();
+        }
+      }
     });
+  }
+  function bodyLine(pts, ts) {
+    if (pts.length < 2) return;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(28,23,36,.85)';
+    ctx.lineWidth = ts * .92;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    var _iterator8 = _createForOfIteratorHelper(pts),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var p = _step8.value;
+        ctx.lineTo(p[0], p[1]);
+      }
+    } catch (err) {
+      _iterator8.e(err);
+    } finally {
+      _iterator8.f();
+    }
+    ctx.stroke();
+    ctx.strokeStyle = '#3faa4a';
+    ctx.lineWidth = ts * .8;
+    ctx.stroke();
   }
   function fruitSpr(e) {
     var s = L.ts * 1.05;
@@ -2804,12 +2847,15 @@ var K = function () {
     }
     var blink = state === 'dead' && Math.floor(dead / 6) % 2;
     if (!blink) {
+      var pts = snake.map(function (s) {
+        return [cx(lerp(s.px, s.x, k)), cy(lerp(s.py, s.y, k))];
+      });
+      bodyLine(pts, ts);
       for (var i = snake.length - 1; i >= 1; i--) {
-        var _s = snake[i],
-          x = cx(lerp(_s.px, _s.x, k)),
-          y = cy(lerp(_s.py, _s.y, k)),
-          _w2 = ts * 1.1 * (i === snake.length - 1 ? .8 : 1);
-        ctx.drawImage(seg(i % 2), x - _w2 / 2, y - _w2 / 2, _w2, _w2);
+        var x = pts[i][0],
+          y = pts[i][1],
+          _w2 = ts * 1.0 * (i === snake.length - 1 ? .62 : i === snake.length - 2 ? .82 : 1);
+        ctx.drawImage(seg(i % 3 === 0 ? 1 : 0), x - _w2 / 2, y - _w2 / 2, _w2, _w2);
       }
       var h = snake[0],
         hx = cx(lerp(h.px, h.x, k)),
@@ -2817,9 +2863,29 @@ var K = function () {
         R = ts * .6,
         dx = DIRS[dir][0],
         dy = DIRS[dir][1];
+      var px = -dy,
+        py = dx;
+      if (Math.floor(t / 40) % 3 === 0 && state !== 'dead') {
+        var tl = R * (1.1 + Math.sin(t * .6) * .15),
+          bx = hx + dx * R * .8,
+          by = hy + dy * R * .8,
+          ex = hx + dx * (R * .8 + tl),
+          ey = hy + dy * (R * .8 + tl);
+        ctx.strokeStyle = '#e8484f';
+        ctx.lineWidth = ts * .07;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(ex, ey);
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex + dx * R * .25 + px * R * .22, ey + dy * R * .25 + py * R * .22);
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex + dx * R * .25 - px * R * .22, ey + dy * R * .25 - py * R * .22);
+        ctx.stroke();
+      }
       var g = ctx.createRadialGradient(hx - R * .3, hy - R * .35, R * .1, hx, hy, R);
-      g.addColorStop(0, '#c8f07a');
-      g.addColorStop(1, '#5aa82a');
+      g.addColorStop(0, '#8fe07a');
+      g.addColorStop(1, '#2f8a3a');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(hx, hy, R, 0, 6.2832);
@@ -2827,27 +2893,15 @@ var K = function () {
       ctx.lineWidth = ts * .07;
       ctx.strokeStyle = 'rgba(28,23,36,.85)';
       ctx.stroke();
-      var px = -dy,
-        py = dx;
-      ctx.strokeStyle = 'rgba(28,23,36,.85)';
-      ctx.lineWidth = ts * .06;
-      for (var _i8 = 0, _arr4 = [-1, 1]; _i8 < _arr4.length; _i8++) {
-        var sd = _arr4[_i8];
-        var ax = hx - dx * R * .3 + px * sd * R * .5,
-          ay = hy - dy * R * .3 + py * sd * R * .5,
-          ex = ax - dx * R * .5 + px * sd * R * .55,
-          ey = ay - dy * R * .5 + py * sd * R * .55;
+      ctx.fillStyle = 'rgba(20,60,25,.6)';
+      for (var _i9 = 0, _arr5 = [-1, 1]; _i9 < _arr5.length; _i9++) {
+        var sd = _arr5[_i9];
         ctx.beginPath();
-        ctx.moveTo(ax, ay);
-        ctx.lineTo(ex, ey);
-        ctx.stroke();
-        ctx.fillStyle = '#e8484f';
-        ctx.beginPath();
-        ctx.arc(ex, ey, ts * .1, 0, 6.2832);
+        ctx.arc(hx + dx * R * .62 + px * sd * R * .16, hy + dy * R * .62 + py * sd * R * .16, R * .06, 0, 6.2832);
         ctx.fill();
       }
-      for (var _i9 = 0, _arr5 = [-1, 1]; _i9 < _arr5.length; _i9++) {
-        var _sd = _arr5[_i9];
+      for (var _i0 = 0, _arr6 = [-1, 1]; _i0 < _arr6.length; _i0++) {
+        var _sd = _arr6[_i0];
         var _ex = hx + dx * R * .3 + px * _sd * R * .38,
           _ey = hy + dy * R * .3 + py * _sd * R * .38;
         ctx.fillStyle = '#fff';
@@ -2862,29 +2916,22 @@ var K = function () {
         ctx.arc(_ex + dx * R * .1, _ey + dy * R * .1, R * .13, 0, 6.2832);
         ctx.fill();
       }
-      ctx.fillStyle = 'rgba(255,140,160,.5)';
-      for (var _i0 = 0, _arr6 = [-1, 1]; _i0 < _arr6.length; _i0++) {
-        var _sd2 = _arr6[_i0];
-        ctx.beginPath();
-        ctx.arc(hx + dx * R * .05 + px * _sd2 * R * .62, hy + dy * R * .05 + py * _sd2 * R * .62, R * .14, 0, 6.2832);
-        ctx.fill();
-      }
     }
-    var _iterator8 = _createForOfIteratorHelper(pops),
-      _step8;
+    var _iterator9 = _createForOfIteratorHelper(pops),
+      _step9;
     try {
-      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
-        var q = _step8.value;
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var q = _step9.value;
         K.text(q.s, cx(q.x), cy(q.y) - (60 - q.t) * .6, 18, '#fff7c0', 'center');
       }
     } catch (err) {
-      _iterator8.e(err);
+      _iterator9.e(err);
     } finally {
-      _iterator8.f();
+      _iterator9.f();
     }
     var hy2 = oy - 18;
     K.text('Punti ' + score, ox, hy2, 18, '#1c1724');
-    K.text('🍎 ' + eatenLv + '/' + goal(lv), ox + GW * ts / 2, hy2, 17, '#1c1724', 'center');
+    K.text(foods()[0] + ' ' + eatenLv + '/' + goal(lv), ox + GW * ts / 2, hy2, 17, '#1c1724', 'center');
     ctx.font = '18px sans-serif';
     ctx.textAlign = 'right';
     var s = '';
@@ -2972,10 +3019,24 @@ var K = function () {
   }
   function renderMenu() {
     K.playerPicker($('players'), 0);
+    var fb = $('food');
+    fb.innerHTML = '';
+    [['mele', '🍎 Solo mele'], ['banane', '🍌 Solo banane'], ['both', '🍎🍌 Mele e banane']].forEach(function (o) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kpl' + (FOOD === o[0] ? ' sel' : '');
+      b.textContent = (FOOD === o[0] ? '✔ ' : '') + o[1];
+      b.onclick = function () {
+        FOOD = o[0];
+        K.save('bruco-food', FOOD);
+        renderMenu();
+      };
+      fb.appendChild(b);
+    });
     var b = K.boardOf('bruco').find(function (r) {
       return r.name === K.player(0);
     });
-    $('rec').textContent = b && b.max ? '🏆 Il tuo record: ' + b.max.record + ' punti · bruco lungo ' + (b.max.lunghezza || 0) : '';
+    $('rec').textContent = b && b.max ? '🏆 Il tuo record: ' + b.max.record + ' punti · serpente lungo ' + (b.max.lunghezza || 0) : '';
     var box = $('levels');
     box.innerHTML = '';
     NAMES.forEach(function (n, i) {
@@ -3017,7 +3078,7 @@ var K = function () {
   function showEnd(all) {
     K.stop();
     $('endT').textContent = all ? '🏆 Hai finito tutti i giardini!' : 'Fine partita!';
-    $('endS').textContent = player + ': ' + score + ' punti · livello ' + (lv + 1) + ' · bruco lungo ' + snake.length;
+    $('endS').textContent = player + ': ' + score + ' punti · livello ' + (lv + 1) + ' · serpente lungo ' + snake.length;
     $('end').hidden = false;
   }
   $('go').onclick = function () {
@@ -3063,7 +3124,7 @@ var K = function () {
       rows: K.boardOf('bruco')
     }];
     sec.games = ['bruco'];
-    K.showBoard('Classifica Il Bruco Mangione', sec, 'Frutto 10 punti per il livello · stella 50 · livello finito 100');
+    K.showBoard('Classifica Il Serpente Mangione', sec, 'Frutto 10 punti per il livello · stella 50 · livello finito 100');
   };
   K.buttons([{
     k: 'left',
