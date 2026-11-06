@@ -3,7 +3,7 @@
   "short_name": "Sala di Tom",
   "description": "La sala giochi di Tommy: tanti giochi nati dai suoi disegni.",
   "lang": "it",
-  "start_url": "./",
+  "start_url": "./giochi/index.html",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "any",
@@ -26,5 +26,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "id": "./"
 }

@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1d1f2b">
 <title>Sala giochi di Tom</title>
-<link rel="apple-touch-icon" href="../icons/apple-180.png?v=2"><meta name="apple-mobile-web-app-title" content="Sala di Tom">
+<link rel="apple-touch-icon" href="../icons/apple-180.png?v=2"><meta name="apple-mobile-web-app-title" content="Sala di Tom"><link rel="manifest" href="../manifest.webmanifest"><meta name="theme-color" content="#2b1d5c">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -73,7 +73,7 @@ a.game span{font-size:14px;color:#5d6273}
   render();
 })();
 </script>
-<p class="note" id="upd">Versione 49<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
+<p class="note" id="upd">Versione 50<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
 <script>
 (function(){
   var info=document.getElementById('updInfo'), m=/OS (\d+)_(\d+)/.exec(navigator.userAgent||''), sw=('serviceWorker' in navigator)&&/github\.io$/.test(location.hostname);
