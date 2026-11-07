@@ -2742,7 +2742,7 @@ var K = function () {
         var v = s.b[_i0];
         if (!v) continue;
         var p = sqXY(L, _i0);
-        disc(p.x, p.y, L.sw, v <= 2 ? 0 : 1, isK(v));
+        disc(p.x, p.y, L.sw, v <= 2 ? 0 : 1, isK(v), FACE() && v > 2);
       }
     },
     side(p) {
@@ -2772,7 +2772,10 @@ var K = function () {
     }
     return c;
   }
-  function disc(x, y, sw, col, king) {
+  function disc(x, y, sw, col, king, flip) {
+    if (flip) return flipAt(x, y, function (a, b) {
+      return disc(a, b, sw, col, king);
+    });
     var q = Math.round(sw),
       c = spr('d' + col + (king ? 'k' : '') + q, q * 1.1, q * 1.2, q * .55, q * .75, function () {
         return disc0(0, 0, q, col, king);
@@ -3302,14 +3305,24 @@ var K = function () {
             y: f.y + (p.y - f.y) * k - Math.sin(k * Math.PI) * L.sw * .3
           };
         }
-        piece(x[1], x[0], p.x, p.y, L.sw);
+        piece(x[1], x[0], p.x, p.y, L.sw, FACE() && x[0] === 'b');
       }
     },
     side(p) {
       return p === 0 ? '⬜ bianchi' : '⬛ neri';
     }
   };
-  function piece(ty, c, x, y, s) {
+  function flipAt(x, y, fn) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(Math.PI);
+    fn(0, 0);
+    ctx.restore();
+  }
+  function piece(ty, c, x, y, s, flip) {
+    if (flip) return flipAt(x, y, function (a, b) {
+      return piece(ty, c, a, b, s);
+    });
     var q = Math.round(s),
       im = spr('p' + ty + c + q, q * 1.1, q * 1.5, q * .55, q * 1.05, function () {
         return piece0(ty, c, 0, 0, q);
@@ -4150,6 +4163,9 @@ var K = function () {
     scacchi: CHESS,
     scopa: SCOPA
   };
+  var FACE = function FACE() {
+    return G && G.mode === '2p' && G.kind !== 'scopa';
+  };
   function layout() {
     var W = K.W,
       Hh = K.H,
@@ -4161,7 +4177,26 @@ var K = function () {
       W: W,
       H: Hh
     };
-    if (land) {
+    if (FACE()) {
+      var hs = land ? 100 : 124;
+      L.face = true;
+      L.top = {
+        x: 10,
+        y: top,
+        w: W - 20,
+        h: hs
+      };
+      L.bot = {
+        x: 10,
+        y: Hh - hs - 8,
+        w: W - 20,
+        h: hs
+      };
+      L.ax = 10;
+      L.ay = top + hs + 8;
+      L.aw = W - 20;
+      L.ah = Hh - top - hs * 2 - 24;
+    } else if (land) {
       L.px = W - PW - 12;
       L.py = top;
       L.pw = PW;
@@ -4368,6 +4403,54 @@ var K = function () {
       button('again', G.over ? '🔄 Rivincita' : '🔄 Ricomincia', x + 16, y + h - 62, w - 32, 46, G.over ? '#f2c230' : '#d9dde4');
     } else button('again', G.over ? '🔄 Rivincita' : '🔄 Ricomincia', x + w - 180, y + h - 56, 164, 42, G.over ? '#f2c230' : '#d9dde4');
   }
+  function facePanel(p, R, flip) {
+    var L = lay,
+      s = G.s,
+      K2 = KINDS[G.kind],
+      my = G.turn === p && !G.over;
+    ctx.save();
+    if (flip) {
+      ctx.translate(R.x + R.w, R.y + R.h);
+      ctx.rotate(Math.PI);
+    } else ctx.translate(R.x, R.y);
+    var w = R.w,
+      h = R.h;
+    rrp(0, 0, w, h, 16);
+    ctx.fillStyle = my ? 'rgba(40,90,50,.85)' : 'rgba(20,16,30,.72)';
+    ctx.fill();
+    ctx.lineWidth = my ? 4 : 2;
+    ctx.strokeStyle = my ? '#5fd06a' : 'rgba(255,255,255,.2)';
+    ctx.stroke();
+    K.text(who(p) + '  ' + K2.side(p), 16, 32, 20, '#ffffff');
+    var st = G.over ? G.over.w === p ? '🏆 Hai vinto!' : G.over.w < 0 ? 'Patta!' : 'Ha vinto ' + who(1 - p) : my ? '👉 Tocca a te!' : 'Aspetta: tocca a ' + who(1 - p);
+    K.text(st, 16, 66, my || G.over ? 22 : 17, G.over ? '#f2c230' : my ? '#ffe48a' : '#c7ccd8');
+    var log = s.log || [];
+    var rx = w * .5;
+    if (G.kind === 'scacchi' || G.kind === 'dama') {
+      if (log.length && (log.length - 1) % 2 !== p) ctext('Ultima mossa di ' + who(1 - p) + ': ' + log[log.length - 1], 16, h - 16, 15, '#c7ccd8');
+      if (G.kind === 'scacchi') {
+        var oc = p === 0 ? 'b' : 'w',
+          arr = ((s.lost || {})[oc] || []).slice().sort(function (a, b2) {
+            return VAL[b2] - VAL[a];
+          });
+        ctext('Pezzi mangiati: ' + arr.length, rx, 30, 15, '#ffe48a');
+        var sz = Math.min(22, (w * .5 - (flip ? 20 : 180)) / 9);
+        arr.forEach(function (ty, i) {
+          return piece(ty, oc, rx + 10 + i % 9 * sz, 52 + sz * .5 + Math.floor(i / 9) * sz * 1.3, sz * 1.4);
+        });
+      } else {
+        var lost = s.lost || [0, 0];
+        ctext('Pedine mangiate: ' + lost[1 - p], rx, 30, 15, '#ffe48a');
+        for (var i = 0; i < Math.min(12, lost[1 - p]); i++) disc(rx + 14 + i * Math.min(20, (w * .5 - (flip ? 30 : 190)) / 12), 62, 20, 1 - p, false);
+      }
+    }
+    ctx.restore();
+    if (!flip) {
+      var bw = 150,
+        bh = 40;
+      button('again', G.over ? '🔄 Rivincita' : '🔄 Ricomincia', R.x + R.w - bw - 12, R.y + R.h - bh - 10, bw, bh, G.over ? '#f2c230' : '#d9dde4');
+    }
+  }
   function notes(L, x, y, w, h, yy) {
     var s = G.s,
       log = s.log || [];
@@ -4476,7 +4559,10 @@ var K = function () {
     lay = layout();
     btns = [];
     KINDS[G.kind].draw();
-    panel();
+    if (lay.face) {
+      facePanel(1, lay.top, true);
+      facePanel(0, lay.bot, false);
+    } else panel();
     var _iterator28 = _createForOfIteratorHelper(fx),
       _step28;
     try {
