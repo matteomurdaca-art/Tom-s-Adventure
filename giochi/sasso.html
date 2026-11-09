@@ -1,0 +1,1294 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Sasso, Carta, Forbici</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:#2b1d5c;background:-webkit-linear-gradient(top,#3a2a7a,#1d1f2b);background:linear-gradient(180deg,#3a2a7a,#1d1f2b);color:#fff;font-family:-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-appearance:none}
+[hidden]{display:none!important}
+.scr{position:absolute;top:0;left:0;right:0;bottom:0}
+/* ---------- menu ---------- */
+#menu{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px 40px;text-align:center}
+h1{font-size:36px;margin:6px 0 2px;letter-spacing:-.5px}
+.hands{font-size:58px;margin:6px 0}
+.sub{color:#c7ccd8;margin:0 0 16px;font-size:17px}
+h2{font-size:20px;margin:18px 0 8px;color:#ffe48a}
+.row{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;-webkit-justify-content:center;justify-content:center}
+.row>*{margin:5px}
+.pill{border:2px solid #14151d;background:#f6f7fb;color:#1d1f2b;border-radius:14px;padding:10px 16px;font-size:18px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.4)}
+.pill.on{background:#f2c230}
+.big{display:block;margin:18px auto 8px;min-width:280px;border:3px solid #14151d;background:#5fd06a;color:#10201b;border-radius:18px;padding:16px 22px;font-size:24px;font-weight:800;box-shadow:5px 5px 0 rgba(0,0,0,.45)}
+.big small{display:block;font-size:15px;font-weight:600;margin-top:2px}
+.ghost{display:inline-block;margin:6px;border:2px solid rgba(255,255,255,.35);background:transparent;border-radius:14px;padding:10px 16px;font-size:17px}
+#stats{color:#c7ccd8;font-size:16px;margin-top:10px}
+/* ---------- partita ---------- */
+#game{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column}
+#bar{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;padding:10px 12px;-webkit-flex:none;flex:none}
+#bar .tb{border:2px solid #14151d;background:#f6f7fb;color:#1d1f2b;border-radius:12px;padding:8px 13px;font-size:16px;font-weight:700;box-shadow:2px 2px 0 rgba(0,0,0,.4)}
+#bar .mid{-webkit-flex:1;flex:1;text-align:center;font-weight:700;font-size:16px;color:#c7ccd8}
+.half{-webkit-flex:1;flex:1;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;min-height:0;position:relative}
+#pTop{-webkit-transform:rotate(180deg);transform:rotate(180deg)}
+.who{font-size:22px;font-weight:800;margin-bottom:4px}
+.score{font-size:15px;color:#c7ccd8;margin-bottom:8px}
+.picks{display:-webkit-flex;display:flex;-webkit-justify-content:center;justify-content:center}
+.pick{width:108px;height:108px;margin:0 8px;border-radius:24px;border:3px solid #14151d;background:#f6f7fb;font-size:58px;line-height:100px;padding:0;box-shadow:4px 4px 0 rgba(0,0,0,.45);-webkit-transition:-webkit-transform .12s;transition:transform .12s}
+.pick:active{-webkit-transform:scale(.93);transform:scale(.93)}
+.pick.chosen{background:#f2c230;-webkit-transform:scale(1.08);transform:scale(1.08)}
+.pick.dim{opacity:.35}
+.pick.hidden{background:#5a4a8a;color:transparent;text-shadow:none}
+.lbl{font-size:13px;color:#c7ccd8;margin-top:6px;text-align:center}
+.hint{font-size:16px;color:#ffe48a;margin-top:10px;min-height:22px}
+#arena{-webkit-flex:none;flex:none;height:210px;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;position:relative}
+.hand{font-size:96px;width:140px;text-align:center;line-height:1}
+.hand.l{-webkit-transform:scaleX(-1);transform:scaleX(-1)}
+.hand.shake{-webkit-animation:shake .45s ease-in-out 3;animation:shake .45s ease-in-out 3}
+.hand.l.shake{-webkit-animation:shakeL .45s ease-in-out 3;animation:shakeL .45s ease-in-out 3}
+@-webkit-keyframes shake{50%{-webkit-transform:translateY(-34px)}}@keyframes shake{50%{transform:translateY(-34px)}}
+@-webkit-keyframes shakeL{0%,100%{-webkit-transform:scaleX(-1)}50%{-webkit-transform:scaleX(-1) translateY(-34px)}}@keyframes shakeL{0%,100%{transform:scaleX(-1)}50%{transform:scaleX(-1) translateY(-34px)}}
+#call{position:absolute;left:0;right:0;top:6px;text-align:center;font-size:26px;font-weight:800;color:#ffe48a;text-shadow:2px 2px 0 #14151d}
+#res{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-size:22px;font-weight:800;text-shadow:2px 2px 0 #14151d}
+#vs{font-size:26px;font-weight:800;color:#c7ccd8;margin:0 6px}
+#game:not(.duo) #arena{-webkit-flex:1;flex:1;height:auto}
+#game:not(.duo) .hand{font-size:120px;width:170px}
+#game.duo #arena{height:150px}
+#game.duo .hand{font-size:72px;width:100px}
+#game.duo #call{top:-2px;font-size:22px}
+.dots{font-size:22px;letter-spacing:4px;margin-top:2px}
+/* ---------- finestre ---------- */
+.ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,11,22,.88);display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;z-index:20;padding:20px;text-align:center}
+.ov h2{font-size:30px;color:#fff;margin:4px 0 8px}
+.ov p{color:#c7ccd8;font-size:18px;margin:0 0 12px}
+.ov .big{margin:8px auto}
+.ov .ghost{min-width:260px}
+.tab{margin:6px auto 10px;border-collapse:collapse;font-size:17px}
+.tab td,.tab th{padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.15)}
+.tab th{color:#ffe48a;font-size:14px}
+</style></head><body>
+
+<section id="menu" class="scr">
+  <div class="hands">✊ ✋ ✌️</div>
+  <h1>Sasso, Carta, Forbici</h1>
+  <p class="sub">Il sasso rompe le forbici, le forbici tagliano la carta, la carta avvolge il sasso.</p>
+  <button class="big" id="cont" type="button" hidden></button>
+  <h2>Contro chi?</h2>
+  <div class="row"><button class="pill" data-m="cpu" type="button">🤖 Computer</button><button class="pill" data-m="duo" type="button">👫 In due (faccia a faccia)</button></div>
+  <div id="cpuOpt"><h2>Il computer è…</h2>
+  <div class="row"><button class="pill" data-l="0" type="button">🎲 A caso</button><button class="pill" data-l="1" type="button">🦊 Furbo</button></div></div>
+  <div id="duoOpt" hidden><h2>Chi gioca contro <span id="me"></span>?</h2><div class="row" id="opp"></div></div>
+  <h2>Partita al meglio di…</h2>
+  <div class="row"><button class="pill" data-b="3" type="button">3 mani</button><button class="pill" data-b="5" type="button">5 mani</button><button class="pill" data-b="7" type="button">7 mani</button></div>
+  <button class="big" id="go" type="button">▶ Gioca!</button>
+  <div id="stats"></div>
+  <div><button class="ghost" id="bBoard" type="button">🏆 Classifica</button><a class="ghost" href="index.html" style="color:#fff;text-decoration:none">🏠 Sala giochi</a><button class="ghost" id="bSnd" type="button"></button></div>
+</section>
+
+<section id="game" class="scr" hidden>
+  <div id="bar"><button class="tb" id="bBack" type="button">← Indietro</button><div class="mid" id="info"></div><button class="tb" id="bPause" type="button">❚❚ Pausa</button></div>
+  <div class="half" id="pTop"><div class="who" id="nTop"></div><div class="dots" id="dTop"></div><div class="picks" id="kTop"></div><div class="hint" id="hTop"></div></div>
+  <div id="arena"><div id="call"></div><div class="hand l" id="hL">✊</div><div id="vs">VS</div><div class="hand" id="hR">✊</div><div id="res"></div></div>
+  <div class="half" id="pBot"><div class="who" id="nBot"></div><div class="dots" id="dBot"></div><div class="picks" id="kBot"></div><div class="hint" id="hBot"></div></div>
+</section>
+
+<div class="ov" id="pause" hidden><h2>Pausa</h2><p id="pInfo"></p>
+  <button class="big" id="pGo" type="button">▶ Riprendi</button>
+  <button class="ghost" id="pMenu" type="button">Salva ed esci</button>
+  <button class="ghost" id="pSala" type="button">🏠 Sala giochi</button></div>
+<div class="ov" id="end" hidden><div style="font-size:70px" id="eIc"></div><h2 id="eT"></h2><p id="eS"></p>
+  <button class="big" id="eAgain" type="button">🔄 Rivincita</button>
+  <button class="ghost" id="eMenu" type="button">◀ Menu</button></div>
+<div class="ov" id="board" hidden><h2>🏆 Classifica</h2><table class="tab" id="bTab"></table><p style="font-size:14px">Partita vinta 3 punti · persa 0 · contro il computer furbo una vittoria vale 4</p>
+  <button class="ghost" id="bClose" type="button">Chiudi</button></div>
+
+<script>/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) });
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true });
+  defineProperty(
+    GeneratorFunctionPrototype,
+    "constructor",
+    { value: GeneratorFunction, configurable: true }
+  );
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    defineProperty(this, "_invoke", { value: enqueue });
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per GeneratorResume behavior specified since ES2015:
+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume
+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method;
+    var method = delegate.iterator[methodName];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method, or a missing .next method, always terminate the
+      // yield* loop.
+      context.delegate = null;
+
+      // Note: ["return"] must be used for ES3 parsing compatibility.
+      if (methodName === "throw" && delegate.iterator["return"]) {
+        // If the delegate iterator has a return method, give it a
+        // chance to clean up.
+        context.method = "return";
+        context.arg = undefined;
+        maybeInvokeDelegate(delegate, context);
+
+        if (context.method === "throw") {
+          // If maybeInvokeDelegate(context) changed context.method from
+          // "return" to "throw", let that override the TypeError below.
+          return ContinueSentinel;
+        }
+      }
+      if (methodName !== "return") {
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a '" + methodName + "' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(val) {
+    var object = Object(val);
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable != null) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    throw new TypeError(typeof iterable + " is not iterable");
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+(function(){
+ if(!String.prototype.padStart){String.prototype.padStart=function(n,c){var s=String(this);c=c===undefined?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};}
+ if(!Object.assign){Object.assign=function(t){for(var i=1;i<arguments.length;i++){var s=arguments[i];if(s)for(var k in s)if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k];}return t;};}
+ if(!Array.prototype.findIndex){Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};}
+ if(window.NodeList&&!NodeList.prototype.forEach){NodeList.prototype.forEach=Array.prototype.forEach;}
+ [Element.prototype,Document.prototype,DocumentFragment.prototype].forEach(function(P){ if(!P.append){P.append=function(){for(var i=0;i<arguments.length;i++){var n=arguments[i];this.appendChild(n instanceof Node?n:document.createTextNode(String(n)));}};} });
+ var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+ if(C&&!C.ellipse){C.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){this.save();this.translate(x,y);this.rotate(rot);this.scale(rx,ry);this.arc(0,0,1,a0,a1,ccw);this.restore();};}
+})();
+(function () {
+  "use strict";
+
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  var L = function L(k, d) {
+    try {
+      var v = localStorage.getItem(k);
+      return v == null ? d : JSON.parse(v);
+    } catch (e) {
+      return d;
+    }
+  };
+  var S = function S(k, v) {
+    try {
+      localStorage.setItem(k, JSON.stringify(v));
+    } catch (e) {}
+  };
+  function players() {
+    var l = L('sala-players', null);
+    return l && l.length ? l : ['Tommy', 'Milly', 'Papone'];
+  }
+  var ME = function () {
+    var l = players(),
+      p = L('sala-player', null);
+    return l.indexOf(p) < 0 ? l[0] : p;
+  }();
+  var PK = 'scf-' + ME + '@';
+  var H = ['✊', '✋', '✌️'],
+    N = ['Sasso', 'Carta', 'Forbici'];
+  var beats = function beats(a, b) {
+    return a === 0 && b === 2 || a === 1 && b === 0 || a === 2 && b === 1;
+  };
+  var SND = L('scf-snd', true),
+    AC = null;
+  function tone(f, d, type, v) {
+    if (!SND) return;
+    try {
+      if (!AC) {
+        var A = window.AudioContext || window.webkitAudioContext;
+        if (!A) return;
+        AC = new A();
+      }
+      var o = AC.createOscillator(),
+        g = AC.createGain();
+      o.type = type || 'square';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(v || .05, AC.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001, AC.currentTime + d);
+      o.connect(g);
+      g.connect(AC.destination);
+      o.start();
+      o.stop(AC.currentTime + d + .02);
+    } catch (e) {}
+  }
+  var jingle = function jingle(fs, ms) {
+    return fs.forEach(function (f, i) {
+      return setTimeout(function () {
+        return tone(f, .14, 'square', .05);
+      }, i * (ms || 90));
+    });
+  };
+  var opt = L(PK + 'opt', {
+    mode: 'cpu',
+    lvl: 1,
+    best: 3,
+    opp: null
+  });
+  function oppList() {
+    return players().filter(function (n) {
+      return n !== ME;
+    });
+  }
+  function renderMenu() {
+    var g = L(PK + 'run', null),
+      cb = $('cont');
+    if (g && !g.over) {
+      cb.hidden = false;
+      cb.innerHTML = '▶ Continua la partita<small>' + (g.mode === 'cpu' ? 'contro il computer' : 'contro ' + g.names[1]) + ' · ' + g.score[0] + ' a ' + g.score[1] + '</small>';
+      cb.onclick = function () {
+        G = g;
+        startUI();
+      };
+    } else cb.hidden = true;
+    document.querySelectorAll('[data-m]').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.m === opt.mode);
+      b.onclick = function () {
+        opt.mode = b.dataset.m;
+        S(PK + 'opt', opt);
+        renderMenu();
+      };
+    });
+    document.querySelectorAll('[data-l]').forEach(function (b) {
+      b.classList.toggle('on', +b.dataset.l === opt.lvl);
+      b.onclick = function () {
+        opt.lvl = +b.dataset.l;
+        S(PK + 'opt', opt);
+        renderMenu();
+      };
+    });
+    document.querySelectorAll('[data-b]').forEach(function (b) {
+      b.classList.toggle('on', +b.dataset.b === opt.best);
+      b.onclick = function () {
+        opt.best = +b.dataset.b;
+        S(PK + 'opt', opt);
+        renderMenu();
+      };
+    });
+    $('cpuOpt').hidden = opt.mode !== 'cpu';
+    $('duoOpt').hidden = opt.mode !== 'duo';
+    $('me').textContent = ME;
+    var ol = oppList();
+    if (ol.indexOf(opt.opp) < 0) opt.opp = ol[0] || 'Ospite';
+    var box = $('opp');
+    box.innerHTML = '';
+    (ol.length ? ol : ['Ospite']).forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pill' + (n === opt.opp ? ' on' : '');
+      b.textContent = n;
+      b.onclick = function () {
+        opt.opp = n;
+        S(PK + 'opt', opt);
+        renderMenu();
+      };
+      box.appendChild(b);
+    });
+    var st = L(PK + 'stats', {
+      w: 0,
+      l: 0,
+      streak: 0,
+      bestStreak: 0
+    });
+    $('stats').textContent = ME + ': ' + st.w + ' partite vinte, ' + st.l + ' perse · miglior serie di vittorie: ' + st.bestStreak;
+    $('bSnd').textContent = SND ? '🔊 Suoni' : '🔇 Suoni';
+    $('bSnd').onclick = function () {
+      SND = !SND;
+      S('scf-snd', SND);
+      renderMenu();
+    };
+  }
+  var G = null,
+    busy = false;
+  function newGame() {
+    G = {
+      mode: opt.mode,
+      lvl: opt.lvl,
+      best: opt.best,
+      names: [ME, opt.mode === 'cpu' ? 'Computer' : opt.opp],
+      score: [0, 0],
+      hist: [],
+      pick: [null, null],
+      over: false
+    };
+    startUI();
+  }
+  function need() {
+    return Math.floor(G.best / 2) + 1;
+  }
+  function startUI() {
+    $('menu').hidden = true;
+    $('game').hidden = false;
+    $('end').hidden = true;
+    $('game').classList.toggle('duo', G.mode === 'duo');
+    G.pick = [null, null];
+    busy = false;
+    draw();
+    save();
+  }
+  function save() {
+    if (G) S(PK + 'run', G);
+  }
+  function dots(p) {
+    var s = '';
+    for (var i = 0; i < need(); i++) s += i < G.score[p] ? '⭐' : '☆';
+    return s;
+  }
+  function draw() {
+    var duo = G.mode === 'duo';
+    $('pTop').style.visibility = duo ? 'visible' : 'hidden';
+    $('pTop').style.display = duo ? '' : 'none';
+    $('nBot').textContent = G.names[0];
+    $('nTop').textContent = G.names[1];
+    $('dBot').textContent = dots(0);
+    $('dTop').textContent = dots(1);
+    $('info').textContent = (duo ? G.names[0] + ' contro ' + G.names[1] : 'Contro il computer ' + (G.lvl ? 'furbo 🦊' : 'a caso 🎲')) + ' · ' + G.score[0] + ' a ' + G.score[1];
+    picks('kBot', 0);
+    if (duo) picks('kTop', 1);
+    $('hBot').textContent = busy ? '' : G.pick[0] != null ? duo ? 'Fatto! Aspetta ' + G.names[1] : '' : 'Scegli la tua mossa';
+    $('hTop').textContent = busy ? '' : G.pick[1] != null ? 'Fatto! Aspetta ' + G.names[0] : 'Scegli la tua mossa';
+    if (!duo && !busy && G.pick[0] == null) {
+      $('hBot').textContent = 'Scegli la tua mossa';
+    }
+  }
+  function picks(id, p) {
+    var box = $(id);
+    box.innerHTML = '';
+    var duo = G.mode === 'duo';
+    H.forEach(function (h, i) {
+      var w = document.createElement('div');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = h;
+      var cls = 'pick';
+      if (G.pick[p] != null) {
+        if (duo && !busy) cls += ' hidden';else cls += G.pick[p] === i ? ' chosen' : ' dim';
+      }
+      b.className = cls;
+      b.onclick = function () {
+        return choose(p, i);
+      };
+      w.appendChild(b);
+      var l = document.createElement('div');
+      l.className = 'lbl';
+      l.textContent = N[i];
+      w.appendChild(l);
+      box.appendChild(w);
+    });
+  }
+  function cpuMove() {
+    if (!G.lvl || G.hist.length < 2) return Math.floor(Math.random() * 3);
+    var last = G.hist[G.hist.length - 1][0],
+      cnt = [1, 1, 1];
+    for (var i = 1; i < G.hist.length; i++) if (G.hist[i - 1][0] === last) cnt[G.hist[i][0]] += 2;
+    G.hist.forEach(function (h) {
+      return cnt[h[0]]++;
+    });
+    var guess = 0;
+    for (var _i = 1; _i < 3; _i++) if (cnt[_i] > cnt[guess]) guess = _i;
+    if (Math.random() < .3) return Math.floor(Math.random() * 3);
+    return (guess + 1) % 3;
+  }
+  function choose(p, i) {
+    if (busy || G.over || G.pick[p] != null) return;
+    G.pick[p] = i;
+    tone(600, .06, 'triangle', .05);
+    if (G.mode === 'cpu') {
+      G.pick[1] = cpuMove();
+      reveal();
+    } else if (G.pick[0] != null && G.pick[1] != null) reveal();else draw();
+  }
+  function reveal() {
+    var g0 = G;
+    busy = true;
+    draw();
+    var hl = $('hL'),
+      hr = $('hR'),
+      call = $('call'),
+      res = $('res');
+    res.textContent = '';
+    hl.textContent = hr.textContent = '✊';
+    hl.classList.remove('shake');
+    hr.classList.remove('shake');
+    void hl.offsetWidth;
+    hl.classList.add('shake');
+    hr.classList.add('shake');
+    var words = ['Sasso…', 'Carta…', 'Forbici!'];
+    words.forEach(function (w, k) {
+      return setTimeout(function () {
+        if (G !== g0) return;
+        call.textContent = w;
+        tone(330 + k * 110, .1, 'square', .05);
+      }, k * 450);
+    });
+    setTimeout(function () {
+      if (G !== g0) return;
+      hl.classList.remove('shake');
+      hr.classList.remove('shake');
+      var a = G.pick[0],
+        b = G.pick[1];
+      hl.textContent = H[a];
+      hr.textContent = H[b];
+      call.textContent = '';
+      var w = -1;
+      if (beats(a, b)) w = 0;else if (beats(b, a)) w = 1;
+      G.hist.push([a, b, w]);
+      if (w >= 0) G.score[w]++;
+      if (w < 0) {
+        res.textContent = 'Pari! ' + N[a] + ' e ' + N[b];
+        res.style.color = '#c7ccd8';
+        tone(300, .2, 'triangle', .05);
+      } else {
+        var x = w === 0 ? a : b,
+          y = w === 0 ? b : a;
+        res.textContent = N[x] + ' ' + (x === 2 ? 'tagliano la' : x === 1 ? 'avvolge il' : 'rompe le') + ' ' + N[y].toLowerCase() + ' · punto a ' + G.names[w] + '!';
+        res.style.color = w === 0 || G.mode === 'duo' ? '#5fd06a' : '#ff8a8a';
+        w === 0 || G.mode === 'duo' ? jingle([523, 659, 784], 80) : tone(180, .3, 'sawtooth', .05);
+      }
+      save();
+      draw();
+      setTimeout(function () {
+        if (G !== g0) return;
+        if (G.score[0] >= need() || G.score[1] >= need()) finish();else {
+          G.pick = [null, null];
+          busy = false;
+          res.textContent = '';
+          draw();
+          save();
+        }
+      }, 1500);
+    }, 1400);
+  }
+  function finish() {
+    G.over = true;
+    var w = G.score[0] > G.score[1] ? 0 : 1,
+      duo = G.mode === 'duo';
+    var B = L('sala-board', {}),
+      g = B.sasso = B.sasso || {};
+    var add = function add(n, won) {
+      var r = g[n] = g[n] || {
+        pts: 0
+      };
+      r.pts += won ? G.mode === 'cpu' && G.lvl ? 4 : 3 : 0;
+      r.vinte = (r.vinte || 0) + (won ? 1 : 0);
+      r.perse = (r.perse || 0) + (won ? 0 : 1);
+      r.last = Date.now();
+    };
+    add(G.names[0], w === 0);
+    if (duo) add(G.names[1], w === 1);
+    S('sala-board', B);
+    var st = L(PK + 'stats', {
+      w: 0,
+      l: 0,
+      streak: 0,
+      bestStreak: 0
+    });
+    if (w === 0) {
+      st.w++;
+      st.streak++;
+      st.bestStreak = Math.max(st.bestStreak, st.streak);
+    } else {
+      st.l++;
+      st.streak = 0;
+    }
+    S(PK + 'stats', st);
+    try {
+      localStorage.removeItem(PK + 'run');
+    } catch (e) {}
+    $('eIc').textContent = w === 0 || duo ? '🏆' : '🤖';
+    $('eT').textContent = duo ? 'Vince ' + G.names[w] + '!' : w === 0 ? 'Hai vinto, ' + ME + '!' : 'Ha vinto il computer';
+    $('eS').textContent = G.score[0] + ' a ' + G.score[1] + (w === 0 && st.streak > 1 && !duo ? ' · ' + st.streak + ' vittorie di fila!' : '');
+    w === 0 || duo ? jingle([523, 659, 784, 1046, 1318], 110) : jingle([392, 330, 262], 150);
+    setTimeout(function () {
+      if (G) $('end').hidden = false;
+    }, 900);
+  }
+  function goMenu() {
+    if (G && !G.over) {
+      if (busy && G.hist.length && G.pick[0] != null) {}
+      G.pick = [null, null];
+      save();
+    }
+    G = null;
+    busy = false;
+    $('call').textContent = '';
+    $('res').textContent = '';
+    $('pause').hidden = true;
+    $('end').hidden = true;
+    $('game').hidden = true;
+    $('menu').hidden = false;
+    renderMenu();
+  }
+  function goSala() {
+    if (G && !G.over) save();
+    location.href = 'index.html';
+  }
+  function showBoard() {
+    var g = (L('sala-board', {}) || {}).sasso || {};
+    var rows = Object.keys(g).map(function (n) {
+      return Object.assign({
+        name: n
+      }, g[n]);
+    }).sort(function (a, b) {
+      return b.pts - a.pts;
+    });
+    $('bTab').innerHTML = '<tr><th>#</th><th>Giocatore</th><th>Punti</th><th>Vinte</th><th>Perse</th></tr>' + (rows.length ? rows.map(function (r, i) {
+      return '<tr><td>' + (i ? i + 1 + '°' : '🏆') + '</td><td>' + r.name + '</td><td>' + r.pts + '</td><td>' + (r.vinte || 0) + '</td><td>' + (r.perse || 0) + '</td></tr>';
+    }).join('') : '<tr><td colspan="5">Ancora nessuna partita</td></tr>');
+    $('board').hidden = false;
+  }
+  $('go').onclick = newGame;
+  $('bBack').onclick = goMenu;
+  $('bPause').onclick = function () {
+    $('pInfo').textContent = G.names[0] + ' ' + G.score[0] + ' · ' + G.names[1] + ' ' + G.score[1];
+    $('pause').hidden = false;
+  };
+  $('pGo').onclick = function () {
+    return $('pause').hidden = true;
+  };
+  $('pMenu').onclick = goMenu;
+  $('pSala').onclick = goSala;
+  $('eAgain').onclick = function () {
+    opt.mode = G.mode;
+    opt.lvl = G.lvl;
+    opt.best = G.best;
+    newGame();
+  };
+  $('eMenu').onclick = goMenu;
+  $('bBoard').onclick = showBoard;
+  $('bClose').onclick = function () {
+    return $('board').hidden = true;
+  };
+  window.addEventListener('pagehide', function () {
+    if (G && !G.over) save();
+  });
+  renderMenu();
+  window.__SCF = {
+    get G() {
+      return G;
+    },
+    choose: choose,
+    newGame: newGame,
+    set opt(v) {
+      opt = v;
+    }
+  };
+})();</script>
+</body></html>
