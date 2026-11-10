@@ -2720,8 +2720,9 @@ var K = function () {
       dist = _nearIdx2[1];
     c.idx = ni;
     var off = dist > TR.w / 2 + 6;
-    var maxs = (off ? 3.2 : 5.2) * (rg ? .72 : 1) * (c.human ? 1 : 1);
-    fw += gas * .17 * f;
+    var boost = c.human && mode === 1 ? 1.1 : 1;
+    var maxs = (off ? 3.2 : 5.2) * (rg ? .72 : 1) * boost;
+    fw += gas * .17 * boost * f;
     if (fw > maxs) fw += (maxs - fw) * .12 * f;
     if (fw < -2) fw = -2;
     fw *= Math.pow(.992, f);
