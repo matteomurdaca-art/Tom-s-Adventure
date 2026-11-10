@@ -1,4 +1,4 @@
-const VERSION='tom-v56';
+const VERSION='tom-v57';
 const SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-180.png'].concat(['index','kart','pianeti','corsa','robot','vichinghi','tavolo','sparabolle','bollegiganti','ember','outrun','blocchi','labirinto','folla','bruco','gessetto','chalk','pittura','sasso','bolidi'].map(n=>'giochi/'+n+'.html'));
 /* tutti i giochi della Sala vengono salvati subito, così funzionano anche senza internet */
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });
