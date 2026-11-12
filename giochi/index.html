@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" manifest="../tom.appcache">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -76,7 +76,7 @@ a.game span{font-size:14px;color:#5d6273}
   render();
 })();
 </script>
-<p class="note" id="upd">Versione 57<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
+<p class="note" id="upd">Versione 58<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
 <script>
 (function(){
   var info=document.getElementById('updInfo'), m=/OS (\d+)_(\d+)/.exec(navigator.userAgent||''), sw=('serviceWorker' in navigator)&&/github\.io$/.test(location.hostname);
@@ -86,6 +86,16 @@ a.game span{font-size:14px;color:#5d6273}
     if(!sw||!window.Promise){ go(); return; }
     (window.caches?caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k.indexOf('fonts')<0; }).map(function(k){ return caches.delete(k); })); }):Promise.resolve())
       .then(function(){ return navigator.serviceWorker.getRegistration('../'); }).then(function(r){ return r&&r.update(); }).then(go,go); };
+  var ac=!sw&&window.applicationCache&&document.documentElement.getAttribute('manifest')?window.applicationCache:null;
+  if(ac){ var lab=function(t){ info.textContent=(m?' · iPad con iOS '+m[1]+'.'+m[2]:'')+' · '+t; };
+    var asked=false, tm=0;
+    var st=function(){ var s=ac.status; if(s==1){ lab('✅ pronta anche senza internet'); if(asked){ asked=false; clearTimeout(tm); go(); } } else if(s==2||s==3) lab('⏳ salvo i giochi per usarli senza internet…'); else if(s==4){ try{ ac.swapCache(); }catch(e){} location.reload(); } };
+    ac.addEventListener('progress',function(e){ if(e.total) lab('⏳ salvo i giochi per usarli senza internet… '+e.loaded+'/'+e.total); });
+    ac.addEventListener('cached',st); ac.addEventListener('noupdate',st); ac.addEventListener('updateready',st);
+    ac.addEventListener('error',function(){ if(asked){ asked=false; clearTimeout(tm); document.getElementById('updBtn').textContent='🔄 Aggiorna i giochi'; } lab(navigator.onLine===false?'senza internet: uso i giochi salvati':'⚠️ salvataggio offline non riuscito, riapri con internet'); });
+    st();
+    document.getElementById('updBtn').onclick=function(){ this.textContent='⏳ Aggiorno…'; asked=true; tm=setTimeout(go,20000); try{ ac.update(); }catch(e){ go(); } };
+  }
   if(!sw) return;
   var had=!!navigator.serviceWorker.controller, done=false;
   navigator.serviceWorker.addEventListener('controllerchange',function(){ if(had&&!done){ done=true; location.reload(); } });

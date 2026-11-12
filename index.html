@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it">
+<html lang="it" manifest="tom.appcache">
 <head>
 <meta charset="utf-8">
 <script>/**
@@ -13304,6 +13304,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   requestAnimationFrame(loop);
 })();</script>
 
+<script>/*appcache-ipad*/try{ var tomAC=window.applicationCache; if(tomAC&&!('serviceWorker' in navigator)) tomAC.addEventListener('updateready',function(){ try{ tomAC.swapCache(); }catch(e){} location.reload(); }); }catch(e){}</script>
 <script>if ('serviceWorker' in navigator) {
   addEventListener('load', function () {
     return navigator.serviceWorker.register('sw.js').catch(function () {});

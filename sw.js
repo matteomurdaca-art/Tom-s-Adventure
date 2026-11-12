@@ -1,4 +1,4 @@
-const VERSION='tom-v57';
+const VERSION='tom-v58';
 const SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-180.png'].concat(['index','kart','pianeti','corsa','robot','vichinghi','tavolo','sparabolle','bollegiganti','ember','outrun','blocchi','labirinto','folla','bruco','gessetto','chalk','pittura','sasso','bolidi'].map(n=>'giochi/'+n+'.html'));
 /* tutti i giochi della Sala vengono salvati subito, così funzionano anche senza internet */
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });
@@ -6,6 +6,7 @@ self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise
 self.addEventListener('fetch',e=>{
   const req=e.request; if(req.method!=='GET') return;
   const url=new URL(req.url);
+  if(/\.appcache$/.test(url.pathname)) return; // il file per gli iPad vecchi va sempre preso dalla rete
   if(url.origin===location.origin){
     // pagina: prima la rete (per gli aggiornamenti), poi la copia salvata
     // ogni pagina (gioco principale e giochi della Sala giochi) viene salvata con il suo indirizzo
