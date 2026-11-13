@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1d1f2b">
-<title>Calcetto 3 contro 3</title>
+<title>Calcetto 4 contro 4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -77,12 +77,12 @@ a.home{color:#1d1f2b}
     <button class="go alt" id="ksaveexit" type="button">◀ Salva ed esci</button>
   </div>
   <div class="row"><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
-  <p class="note">Calcetto 3 contro 3 · Sala giochi di Tom · versione 1</p>
+  <p class="note">Calcetto 4 contro 4 · Sala giochi di Tom · versione 1</p>
 </div></div>
 <div id="ktoast" hidden></div>
 <div class="ov" id="kboard" hidden style="z-index:20"><div class="card"></div></div>
 <div class="ov" id="menu"><div class="card">
-  <h1>⚽ Calcetto 3 contro 3</h1>
+  <h1>⚽ Calcetto 4 contro 4</h1>
   <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
   <button class="go" id="cont" type="button" hidden></button>
   <h2>Chi gioca?</h2>
@@ -92,7 +92,7 @@ a.home{color:#1d1f2b}
   <div class="row"><span class="dl">Durata:</span><button class="kpl" data-dur="2" type="button">2 minuti</button><button class="kpl" data-dur="3" type="button">3 minuti</button><button class="kpl" data-dur="5" type="button">5 minuti</button></div>
   <div id="tourRow"><h2>Il torneo: scegli l'avversario</h2><div class="lvls" id="tour"></div></div>
   <div id="p2Row"><h2>Chi gioca con la seconda squadra?</h2><div class="kplayers" id="p2"></div><h2>Squadra del secondo giocatore</h2><div class="lvls" id="teams2"></div><button class="go" id="play2" type="button">▶ Gioca!</button></div>
-  <p class="note">Tommy FC (arancione) contro 6 squadre sempre più forti: vinci per sbloccare la successiva. Muovi il giocatore con la levetta a sinistra. Con la palla: PASSA la passa al compagno, TIRA tira in porta (tieni premuto per un tiro più forte, inclina la levetta in su o in giù per mirare). Senza palla: RUBA fa la scivolata, CAMBIA passa all'altro giocatore. Sul computer: frecce, Spazio per tirare, X per passare.</p>
+  <p class="note">Tommy FC (arancione) contro 6 squadre sempre più forti: vinci per sbloccare la successiva. Ogni squadra ha 3 giocatori e il portiere. Muovi il giocatore con la levetta a sinistra. Con la palla: PASSAGGIO la passa al compagno, TIRO tira in porta (tieni premuto per un tiro più forte, inclina la levetta in su o in giù per mirare). Senza palla: TIRO fa la scivolata per rubare la palla, PASSAGGIO cambia giocatore. La mappa in basso mostra tutto il campo. Sul computer: frecce, Spazio per tirare, X per passare.</p>
   <div class="row"><button class="go alt" id="boardBtn" type="button">🏆 Classifica</button><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
 </div></div>
 <div class="ov" id="res" hidden><div class="card">
@@ -2211,7 +2211,7 @@ var K = function () {
   };
 })();
 (function () {
-  K.maxDpr = 1.25;
+  K.maxDpr = 1;
   var ctx = K.ctx,
     $ = K.$;
   K.addMusic('calcio', {
@@ -2230,9 +2230,9 @@ var K = function () {
     bass: 'C3 - - - G2 - - - C3 - - - - - - -',
     drums: 'k---k---'
   });
-  var HX = 370,
-    HY = 218,
-    GY = 64,
+  var HX = 420,
+    HY = 245,
+    GY = 68,
     GD = 34,
     PR = 13,
     BR = 6.5,
@@ -2276,7 +2276,7 @@ var K = function () {
     c2: '#2b2f3e',
     sh: '#2b2f3e',
     gk: '#f2c230',
-    sk: .55
+    sk: .48
   }, {
     n: 'Squali Blu',
     s: 'SQU',
@@ -2284,7 +2284,7 @@ var K = function () {
     c2: '#9fd3f0',
     sh: '#13325e',
     gk: '#f2c230',
-    sk: .75
+    sk: .64
   }, {
     n: 'Draghi Viola',
     s: 'DRA',
@@ -2292,7 +2292,7 @@ var K = function () {
     c2: '#f2c230',
     sh: '#3a2266',
     gk: '#5fbf4a',
-    sk: .95
+    sk: .8
   }];
   var SUB = ['facile', 'facile', 'media', 'media', 'difficile', 'difficilissima'];
   var HAIR = ['#4a2e1c', '#1d1f2b', '#c99a00', '#8a4b22', '#2b2f3e', '#d9a441'],
@@ -2323,6 +2323,15 @@ var K = function () {
   var s = 1,
     ox = 0,
     oy = 0,
+    cy0 = 0,
+    ah = 0,
+    cam = {
+      x: 0,
+      y: 0
+    },
+    EXb = 0,
+    EYb = 0,
+    MM = null,
     face = false,
     top = 46,
     bot = 0,
@@ -2398,6 +2407,7 @@ var K = function () {
       P.push(newPlayer(t, 'gk', 0));
       P.push(newPlayer(t, 'f', 1));
       P.push(newPlayer(t, 'f', 2));
+      P.push(newPlayer(t, 'f', 3));
     }
     for (var _i3 = 0, _P = P; _i3 < _P.length; _i3++) {
       var p = _P[_i3];
@@ -2427,7 +2437,7 @@ var K = function () {
     };
     score = [0, 0];
     clock = dur * 60;
-    ctrl = [1, 4];
+    ctrl = [1, 5];
     parts = [];
     conf = [];
     msg = null;
@@ -2450,9 +2460,12 @@ var K = function () {
         } else if (p.i === 1) {
           p.x = me ? -d * 12 : d * 80;
           p.y = me ? 0 : -40;
+        } else if (p.i === 2) {
+          p.x = me ? -d * 95 : d * 115;
+          p.y = me ? -100 : 95;
         } else {
-          p.x = me ? -d * 100 : d * 150;
-          p.y = me ? 80 : 60;
+          p.x = me ? -d * 165 : d * 200;
+          p.y = me ? 90 : -30;
         }
         p.vx = p.vy = p.dx = p.dy = 0;
         p.fx = d;
@@ -2472,16 +2485,17 @@ var K = function () {
     }
     ball.vx = ball.vy = ball.z = ball.vz = 0;
     ball.passTo = null;
-    var k = P[team * 3 + 1];
+    var k = P[team * 4 + 1];
     ball.owner = k;
     k.prot = 40;
     ball.x = k.x + k.fx * (PR + BR + 1);
     ball.y = 0;
     _humans.forEach(function (h) {
-      ctrl[h] = h * 3 + 1;
+      ctrl[h] = h * 4 + 1;
     });
     state = 'kick';
     timer = 75;
+    camTo(true);
   }
   function layout() {
     var W = K.W,
@@ -2496,13 +2510,13 @@ var K = function () {
       bot = band;
       if (face) top = band;
     }
-    var ah = H - top - bot;
-    s = Math.min(W / (2 * HX + 96), ah / (2 * HY + 62));
-    ox = W / 2;
-    oy = top + ah / 2;
+    ah = H - top - bot;
+    s = Math.min(W / 400, Math.max(W / 600, ah / (2 * HY + 90)));
+    cy0 = top + ah / 2;
+    camTo(true);
     var jr = R * 1.1,
-      rs = R * .95,
-      rp = R * .8,
+      rs = R * 1.02,
+      rp = R * .95,
       pd = 14;
     CTL = [];
     var P1 = {
@@ -2597,6 +2611,27 @@ var K = function () {
       }
     }
     bg = null;
+  }
+  var EXv = HX + 70,
+    EYv = HY + 50;
+  function camTo(snap) {
+    if (!ball) return;
+    var W = K.W,
+      hw = W / 2 / s,
+      hh = ah / 2 / s;
+    var tx = ball.x + ball.vx * 14,
+      ty = ball.y + ball.vy * 10;
+    tx = hw >= EXv ? 0 : clamp(tx, -EXv + hw, EXv - hw);
+    ty = hh >= EYv ? 0 : clamp(ty, -EYv + hh, EYv - hh);
+    if (snap) {
+      cam.x = tx;
+      cam.y = ty;
+    } else {
+      cam.x += (tx - cam.x) * .08;
+      cam.y += (ty - cam.y) * .08;
+    }
+    ox = W / 2 - cam.x * s;
+    oy = cy0 - cam.y * s;
   }
   K.onResize = function () {
     if (state !== 'menu') layout();
@@ -2984,9 +3019,26 @@ var K = function () {
       if (n && n !== p && hyp(p.x - bx, p.y - by) > nd + 55) setCtrl(h, n);
     }
     if (I.pp && o !== p) {
-      var _n2 = P.find(function (q) {
-        return q.t === p.t && q.role === 'f' && q !== p;
-      });
+      var _n2 = null,
+        _nd = 1e9;
+      var _iterator12 = _createForOfIteratorHelper(P),
+        _step12;
+      try {
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+          var _q = _step12.value;
+          if (_q.t === p.t && _q.role === 'f' && _q !== p) {
+            var dd = dist(_q, ball);
+            if (dd < _nd) {
+              _nd = dd;
+              _n2 = _q;
+            }
+          }
+        }
+      } catch (err) {
+        _iterator12.e(err);
+      } finally {
+        _iterator12.f();
+      }
       if (_n2) {
         ctrl[h] = P.indexOf(_n2);
         switchCool[h] = 40;
@@ -3036,11 +3088,11 @@ var K = function () {
       nd = 1e9;
     var bx = ball.x + ball.vx * 6,
       by = ball.y + ball.vy * 6;
-    var _iterator12 = _createForOfIteratorHelper(P),
-      _step12;
+    var _iterator13 = _createForOfIteratorHelper(P),
+      _step13;
     try {
-      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
-        var q = _step12.value;
+      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+        var q = _step13.value;
         if (q.t === t && q.role === 'f') {
           var d = hyp(q.x - bx, q.y - by) - (q.slide > 0 ? 40 : 0);
           if (d < nd) {
@@ -3050,9 +3102,9 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator12.e(err);
+      _iterator13.e(err);
     } finally {
-      _iterator12.f();
+      _iterator13.f();
     }
     return n;
   }
@@ -3070,12 +3122,27 @@ var K = function () {
       tx = ball.x + ball.vx * 7;
       ty = ball.y + ball.vy * 7;
     } else if (o && o.t === t) {
-      tx = clamp(o.x + A * 125, -HX + 60, HX - 60);
-      ty = (o.y > 0 ? -1 : 1) * (80 + Math.sin(animT / 90 + p.i) * 30);
+      var sup = P.filter(function (q) {
+          return q.t === t && q.role === 'f' && q !== o;
+        }),
+        k = sup.indexOf(p),
+        sg = o.y > 0 ? 1 : -1,
+        w = Math.sin(animT / 90 + p.i) * 25;
       if (o.role === 'gk') {
-        tx = A * -50;
-        ty = p.i === 1 ? -100 : 100;
+        tx = [A * -40, A * -40, A * 70][k];
+        ty = [-120, 120, w][k];
+      } else if (k === 0) {
+        tx = o.x + A * 135;
+        ty = -sg * (90 + w);
+      } else if (k === 1) {
+        tx = o.x + A * 60;
+        ty = sg * (160 + w * .5);
+      } else {
+        tx = o.x - A * 110;
+        ty = -sg * 30;
       }
+      tx = clamp(tx, -HX + 55, HX - 55);
+      ty = clamp(ty, -HY + 35, HY - 35);
     } else {
       var ch = chaser(t);
       if (ch === p) {
@@ -3092,9 +3159,43 @@ var K = function () {
           return;
         }
       } else {
-        var g = -A * HX;
-        tx = g + (ball.x - g) * .45;
-        ty = ball.y * .5;
+        var g = -A * HX,
+          rest = P.filter(function (q) {
+            return q.t === t && q.role === 'f' && q !== ch;
+          }),
+          _k = rest.indexOf(p);
+        if (_k === 0) {
+          tx = g + (ball.x - g) * .45;
+          ty = ball.y * .5;
+        } else {
+          var mk = null,
+            md = 1e9;
+          var _iterator14 = _createForOfIteratorHelper(opps(t)),
+            _step14;
+          try {
+            for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+              var q = _step14.value;
+              if (q.role === 'f' && q !== o) {
+                var dd = Math.abs(q.x - g) + Math.abs(q.y - ball.y) * .3;
+                if (dd < md) {
+                  md = dd;
+                  mk = q;
+                }
+              }
+            }
+          } catch (err) {
+            _iterator14.e(err);
+          } finally {
+            _iterator14.f();
+          }
+          if (mk) {
+            tx = mk.x + (g - mk.x) * .22;
+            ty = mk.y * .85;
+          } else {
+            tx = g + (ball.x - g) * .7;
+            ty = -ball.y * .3;
+          }
+        }
         if (Math.abs(tx - g) < 70) tx = g + A * 70;
       }
     }
@@ -3111,11 +3212,11 @@ var K = function () {
     p.ownT += f;
     var opp = null,
       dO = 1e9;
-    var _iterator13 = _createForOfIteratorHelper(opps(t)),
-      _step13;
+    var _iterator15 = _createForOfIteratorHelper(opps(t)),
+      _step15;
     try {
-      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
-        var q = _step13.value;
+      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+        var q = _step15.value;
         var d = dist(p, q);
         if (d < dO) {
           dO = d;
@@ -3123,9 +3224,9 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator13.e(err);
+      _iterator15.e(err);
     } finally {
-      _iterator13.f();
+      _iterator15.f();
     }
     if (dG < 175 + sk * 80 && p.ownT > 14 && (dG < 105 || laneFree(p, {
       x: gx,
@@ -3338,11 +3439,11 @@ var K = function () {
     var order = P.slice().sort(function () {
       return Math.random() - .5;
     });
-    var _iterator14 = _createForOfIteratorHelper(order),
-      _step14;
+    var _iterator16 = _createForOfIteratorHelper(order),
+      _step16;
     try {
-      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
-        var p = _step14.value;
+      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+        var p = _step16.value;
         if (p.cool > 0) continue;
         var reach = PR + BR + (p.role === 'gk' ? 11 : 3) + (p.slide > 0 ? 4 : 0),
           d = hyp(p.x - b.x, p.y - b.y);
@@ -3402,45 +3503,45 @@ var K = function () {
         }
       }
     } catch (err) {
-      _iterator14.e(err);
+      _iterator16.e(err);
     } finally {
-      _iterator14.f();
+      _iterator16.f();
     }
   }
   function update(f) {
     animT += f;
     readInput();
-    var _iterator15 = _createForOfIteratorHelper(parts),
-      _step15;
+    var _iterator17 = _createForOfIteratorHelper(parts),
+      _step17;
     try {
-      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
-        var q = _step15.value;
+      for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+        var q = _step17.value;
         q.x += q.vx * f;
         q.y += q.vy * f;
         q.l -= f;
       }
     } catch (err) {
-      _iterator15.e(err);
+      _iterator17.e(err);
     } finally {
-      _iterator15.f();
+      _iterator17.f();
     }
     parts = parts.filter(function (q) {
       return q.l > 0;
     });
-    var _iterator16 = _createForOfIteratorHelper(conf),
-      _step16;
+    var _iterator18 = _createForOfIteratorHelper(conf),
+      _step18;
     try {
-      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
-        var _c = _step16.value;
+      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+        var _c = _step18.value;
         _c.x += _c.vx * f;
         _c.y += _c.vy * f;
         _c.r += .1 * f;
         _c.l -= f;
       }
     } catch (err) {
-      _iterator16.e(err);
+      _iterator18.e(err);
     } finally {
-      _iterator16.f();
+      _iterator18.f();
     }
     conf = conf.filter(function (c) {
       return c.l > 0 && c.y < K.H + 20;
@@ -3458,11 +3559,11 @@ var K = function () {
     if (state === 'goal' || state === 'over') {
       timer -= f;
       physBall(f);
-      var _iterator17 = _createForOfIteratorHelper(P),
-        _step17;
+      var _iterator19 = _createForOfIteratorHelper(P),
+        _step19;
       try {
-        for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
-          var p = _step17.value;
+        for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
+          var p = _step19.value;
           p.vx *= .9;
           p.vy *= .9;
           p.x += p.vx * f;
@@ -3472,9 +3573,9 @@ var K = function () {
           }
         }
       } catch (err) {
-        _iterator17.e(err);
+        _iterator19.e(err);
       } finally {
-        _iterator17.f();
+        _iterator19.f();
       }
       if (timer <= 0) {
         if (state === 'over') return endMatch();
@@ -3501,48 +3602,48 @@ var K = function () {
       };
       return;
     }
-    var _iterator18 = _createForOfIteratorHelper(P),
-      _step18;
-    try {
-      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
-        var _p2 = _step18.value;
-        if (_p2.cool > 0) _p2.cool -= f;
-        if (_p2.prot > 0) _p2.prot -= f;
-      }
-    } catch (err) {
-      _iterator18.e(err);
-    } finally {
-      _iterator18.f();
-    }
-    var _iterator19 = _createForOfIteratorHelper(_humans),
-      _step19;
-    try {
-      for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
-        var h = _step19.value;
-        humanControl(h, f);
-      }
-    } catch (err) {
-      _iterator19.e(err);
-    } finally {
-      _iterator19.f();
-    }
     var _iterator20 = _createForOfIteratorHelper(P),
       _step20;
     try {
       for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
-        var _p3 = _step20.value;
-        if (!isHum(_p3)) ai(_p3, f);
+        var _p2 = _step20.value;
+        if (_p2.cool > 0) _p2.cool -= f;
+        if (_p2.prot > 0) _p2.prot -= f;
       }
     } catch (err) {
       _iterator20.e(err);
     } finally {
       _iterator20.f();
     }
-    var _iterator21 = _createForOfIteratorHelper(P),
+    var _iterator21 = _createForOfIteratorHelper(_humans),
       _step21;
     try {
       for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
-        var _p4 = _step21.value;
+        var h = _step21.value;
+        humanControl(h, f);
+      }
+    } catch (err) {
+      _iterator21.e(err);
+    } finally {
+      _iterator21.f();
+    }
+    var _iterator22 = _createForOfIteratorHelper(P),
+      _step22;
+    try {
+      for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
+        var _p3 = _step22.value;
+        if (!isHum(_p3)) ai(_p3, f);
+      }
+    } catch (err) {
+      _iterator22.e(err);
+    } finally {
+      _iterator22.f();
+    }
+    var _iterator23 = _createForOfIteratorHelper(P),
+      _step23;
+    try {
+      for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
+        var _p4 = _step23.value;
         if (_p4.slide > 0) {
           _p4.slide -= f;
           _p4.vx *= Math.pow(.96, f);
@@ -3565,9 +3666,9 @@ var K = function () {
         _p4.y = clamp(_p4.y, -HY + PR, HY - PR);
         var v = hyp(_p4.vx, _p4.vy);
         if (v > .35 && _p4.slide <= 0) {
-          var _k = Math.min(1, .3 * f);
-          _p4.fx += (_p4.vx / v - _p4.fx) * _k;
-          _p4.fy += (_p4.vy / v - _p4.fy) * _k;
+          var _k2 = Math.min(1, .3 * f);
+          _p4.fx += (_p4.vx / v - _p4.fx) * _k2;
+          _p4.fy += (_p4.vy / v - _p4.fy) * _k2;
           var m = hyp(_p4.fx, _p4.fy) || 1;
           _p4.fx /= m;
           _p4.fy /= m;
@@ -3575,9 +3676,9 @@ var K = function () {
         _p4.anim += v * .16 * f;
       }
     } catch (err) {
-      _iterator21.e(err);
+      _iterator23.e(err);
     } finally {
-      _iterator21.f();
+      _iterator23.f();
     }
     for (var i = 0; i < P.length; i++) for (var j = i + 1; j < P.length; j++) {
       var a = P[i],
@@ -3691,26 +3792,23 @@ var K = function () {
   function buildBg() {
     var W = K.W,
       H = K.H,
-      d = K.dpr;
+      d = K.dpr,
+      hw = W / 2 / s,
+      hh = ah / 2 / s;
+    EXb = Math.ceil((hw >= EXv ? 0 : EXv - hw) + hw + 8);
+    EYb = Math.ceil((hh >= EYv ? 0 : EYv - hh) + Math.max(cy0, H - cy0) / s + 8);
+    var k = s * d;
     bg = document.createElement('canvas');
-    bg.width = Math.round(W * d);
-    bg.height = Math.round(H * d);
+    bg.width = Math.round(2 * EXb * k);
+    bg.height = Math.round(2 * EYb * k);
     var x = bg.getContext('2d');
-    x.setTransform(d, 0, 0, d, 0, 0);
-    var gr = x.createLinearGradient(0, 0, 0, H);
-    gr.addColorStop(0, '#1b2433');
-    gr.addColorStop(1, '#10151f');
-    x.fillStyle = gr;
-    x.fillRect(0, 0, W, H);
-    var L = ox - (HX + 40) * s,
-      R = ox + (HX + 40) * s,
-      Tt = oy - (HY + 30) * s,
-      B = oy + (HY + 30) * s;
+    x.setTransform(k, 0, 0, k, EXb * k, EYb * k);
+    x.fillStyle = '#1b2433';
+    x.fillRect(-EXb, -EYb, 2 * EXb, 2 * EYb);
     var COLS = ['#f07a2a', '#ffffff', '#f2c230', '#3f86d4', '#e0373f', '#5fbf4a', '#ee8fc6', '#9aa2b5', '#7b4fc4'];
-    var st = Math.max(7, 9 * s);
-    var n = 0;
-    for (var yy = 6; yy < H; yy += st) for (var xx = 4; xx < W; xx += st) {
-      if (xx > L - 6 && xx < R + 6 && yy > Tt - 6 && yy < B + 6) continue;
+    var st = 9;
+    for (var yy = -EYb; yy < EYb; yy += st) for (var xx = -EXb; xx < EXb; xx += st) {
+      if (Math.abs(xx) < HX + 46 && Math.abs(yy) < HY + 36) continue;
       var r = K.rnd(xx, yy, 3);
       var row = Math.floor(yy / st);
       x.fillStyle = row % 2 ? '#232c3d' : '#1e2636';
@@ -3722,12 +3820,9 @@ var K = function () {
         x.beginPath();
         x.arc(xx, yy - st * .22, st * .22, 0, 6.283);
         x.fill();
-        n++;
       }
     }
     x.save();
-    x.translate(ox, oy);
-    x.scale(s, s);
     x.fillStyle = 'rgba(0,0,0,.45)';
     x.fillRect(-HX - 40, -HY - 30, 2 * HX + 80, 2 * HY + 60);
     var ads = ['SALA DI TOM', '⚽ GOL!', 'TOMMY FC', 'FORZA!'];
@@ -3773,7 +3868,7 @@ var K = function () {
     x.lineTo(0, HY);
     x.stroke();
     x.beginPath();
-    x.arc(0, 0, 56, 0, 6.283);
+    x.arc(0, 0, 60, 0, 6.283);
     x.stroke();
     x.fillStyle = 'rgba(255,255,255,.9)';
     x.beginPath();
@@ -3781,13 +3876,13 @@ var K = function () {
     x.fill();
     for (var _i0 = 0, _arr5 = [1, -1]; _i0 < _arr5.length; _i0++) {
       var sg = _arr5[_i0];
-      x.strokeRect(sg > 0 ? HX - 88 : -HX, -125, 88, 250);
-      x.strokeRect(sg > 0 ? HX - 32 : -HX, -82, 32, 164);
+      x.strokeRect(sg > 0 ? HX - 95 : -HX, -135, 95, 270);
+      x.strokeRect(sg > 0 ? HX - 34 : -HX, -88, 34, 176);
       x.beginPath();
-      x.arc(sg * (HX - 64), 0, 3, 0, 6.283);
+      x.arc(sg * (HX - 70), 0, 3, 0, 6.283);
       x.fill();
       x.beginPath();
-      x.arc(sg * (HX - 64), 0, 40, sg > 0 ? Math.PI * .69 : -Math.PI * .31, sg > 0 ? Math.PI * 1.31 : Math.PI * .31);
+      x.arc(sg * (HX - 70), 0, 44, sg > 0 ? Math.PI * .69 : -Math.PI * .31, sg > 0 ? Math.PI * 1.31 : Math.PI * .31);
       x.stroke();
       for (var _i1 = 0, _arr6 = [1, -1]; _i1 < _arr6.length; _i1++) {
         var sy = _arr6[_i1];
@@ -3846,11 +3941,6 @@ var K = function () {
       }
     }
     x.restore();
-    var vg = x.createRadialGradient(ox, oy, Math.min(W, H) * .2, ox, oy, Math.max(W, H) * .75);
-    vg.addColorStop(0, 'rgba(255,255,230,.06)');
-    vg.addColorStop(1, 'rgba(0,0,0,.45)');
-    x.fillStyle = vg;
-    x.fillRect(0, 0, W, H);
     bgKey = W + 'x' + H;
   }
   function drawPlayer(p, ring) {
@@ -3966,6 +4056,58 @@ var K = function () {
     ctx.stroke();
   }
   var RING = ['#f2e33a', '#7fe0ff'];
+  function radar() {
+    var W = K.W,
+      H = K.H,
+      mw = face ? Math.min(110, W * .15) : Math.min(150, W * .17),
+      mh = mw * HY / HX,
+      k = mw / (2 * HX),
+      cx = W / 2,
+      cy = face ? 52 + mh / 2 : H - mh / 2 - 12;
+    var x0 = cx - mw / 2,
+      y0 = cy - mh / 2;
+    ctx.fillStyle = 'rgba(20,60,25,.72)';
+    ctx.fillRect(x0 - 3, y0 - 3, mw + 6, mh + 6);
+    ctx.strokeStyle = 'rgba(255,255,255,.7)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x0, y0, mw, mh);
+    ctx.beginPath();
+    ctx.moveTo(cx, y0);
+    ctx.lineTo(cx, y0 + mh);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.fillRect(x0 - 3, cy - GY * k, 3, 2 * GY * k);
+    ctx.fillRect(x0 + mw, cy - GY * k, 3, 2 * GY * k);
+    var hw = W / 2 / s,
+      hh = ah / 2 / s;
+    ctx.strokeStyle = 'rgba(255,255,255,.35)';
+    ctx.strokeRect(cx + clamp(cam.x - hw, -HX, HX) * k, cy + clamp(cam.y - hh, -HY, HY) * k, (Math.min(HX, cam.x + hw) - Math.max(-HX, cam.x - hw)) * k, (Math.min(HY, cam.y + hh) - Math.max(-HY, cam.y - hh)) * k);
+    var _iterator24 = _createForOfIteratorHelper(P),
+      _step24;
+    try {
+      for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
+        var p = _step24.value;
+        var h = humanOf(p);
+        ctx.fillStyle = p.role === 'gk' ? T[p.t].gk : T[p.t].c;
+        ctx.beginPath();
+        ctx.arc(cx + p.x * k, cy + p.y * k, h >= 0 ? 4 : 3, 0, 6.283);
+        ctx.fill();
+        if (h >= 0) {
+          ctx.strokeStyle = RING[h];
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+    } catch (err) {
+      _iterator24.e(err);
+    } finally {
+      _iterator24.f();
+    }
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(cx + ball.x * k, cy + ball.y * k, 2.6, 0, 6.283);
+    ctx.fill();
+  }
   function drawControls() {
     for (var h = 0; h < CTL.length; h++) {
       var C = CTL[h],
@@ -3987,11 +4129,11 @@ var K = function () {
       ctx.strokeStyle = 'rgba(20,21,29,.5)';
       ctx.lineWidth = 2;
       ctx.stroke();
-      var _iterator22 = _createForOfIteratorHelper(C.btns),
-        _step22;
+      var _iterator25 = _createForOfIteratorHelper(C.btns),
+        _step25;
       try {
-        for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
-          var b = _step22.value;
+        for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
+          var b = _step25.value;
           var on = I[b.k];
           ctx.fillStyle = on ? 'rgba(242,194,48,.92)' : b.k === 'shoot' ? 'rgba(224,55,63,.78)' : 'rgba(63,134,212,.78)';
           ctx.beginPath();
@@ -4000,11 +4142,13 @@ var K = function () {
           ctx.strokeStyle = 'rgba(255,255,255,.85)';
           ctx.lineWidth = 3;
           ctx.stroke();
-          var lab = b.k === 'shoot' ? has ? 'TIRA' : 'RUBA' : has ? 'PASSA' : 'CAMBIA';
+          var lab = b.k === 'shoot' ? 'TIRO' : 'PASSAGGIO',
+            sub = has ? '' : b.k === 'shoot' ? 'ruba palla' : 'cambia';
           ctx.save();
           ctx.translate(b.x, b.y);
           ctx.rotate(C.rot);
-          K.text(lab, 0, b.r * .16, Math.round(b.r * (lab.length > 4 ? .36 : .42)), on ? '#1d1f2b' : '#fff', 'center', !on);
+          K.text(lab, 0, b.r * (sub ? .06 : .14), Math.round(b.r * (lab.length > 4 ? .27 : .44)), on ? '#1d1f2b' : '#fff', 'center', !on);
+          if (sub) K.text(sub, 0, b.r * .46, Math.round(b.r * .2), on ? '#1d1f2b' : 'rgba(255,255,255,.85)', 'center', false);
           if (b.k === 'shoot' && has && p.charge > 0) {
             ctx.strokeStyle = '#f2e33a';
             ctx.lineWidth = 5;
@@ -4015,9 +4159,9 @@ var K = function () {
           ctx.restore();
         }
       } catch (err) {
-        _iterator22.e(err);
+        _iterator25.e(err);
       } finally {
-        _iterator22.f();
+        _iterator25.f();
       }
       if (mode === 2) {
         ctx.save();
@@ -4032,12 +4176,22 @@ var K = function () {
   function scoreboard() {
     var W = K.W;
     var w = Math.min(360, W * .52),
-      cx = W / 2;
+      cx = W / 2,
+      y = 5;
     if (!face && cx + w / 2 > W - 250) {
       w = Math.max(230, Math.min(360, W - 270));
       cx = 8 + w / 2;
     }
-    var y = face ? top - 46 : 5;
+    if (face && CTL[0]) {
+      var C = CTL[0],
+        l = C.joy.x + C.joy.R + 8,
+        r = Math.min.apply(null, C.btns.map(function (b) {
+          return b.x - b.r;
+        })) - 8;
+      w = Math.min(320, r - l);
+      cx = (l + r) / 2;
+      y = K.H - bot / 2 - 19;
+    }
     ctx.fillStyle = 'rgba(14,16,26,.86)';
     rrect(ctx, cx - w / 2, y, w, 38, 9);
     ctx.fill();
@@ -4070,33 +4224,46 @@ var K = function () {
       return;
     }
     if (!bg || bgKey !== W + 'x' + H) buildBg();
+    if (state !== 'menu') camTo(false);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(bg, 0, 0);
+    var x0 = Math.round(d * (ox - EXb * s)),
+      y0 = Math.round(d * (oy - EYb * s)),
+      sx = Math.max(0, -x0),
+      sy = Math.max(0, -y0),
+      dw = Math.round(W * d),
+      dh = Math.round(H * d),
+      sw = Math.min(bg.width - sx, dw - Math.max(0, x0)),
+      sh = Math.min(bg.height - sy, dh - Math.max(0, y0));
+    if (x0 > 0 || y0 > 0 || sw < dw || sh < dh) {
+      ctx.fillStyle = '#1b2433';
+      ctx.fillRect(0, 0, dw, dh);
+    }
+    if (sw > 0 && sh > 0) ctx.drawImage(bg, sx, sy, sw, sh, Math.max(0, x0), Math.max(0, y0), sw, sh);
     ctx.setTransform(d * s, 0, 0, d * s, d * ox, d * oy);
-    var _iterator23 = _createForOfIteratorHelper(parts),
-      _step23;
+    var _iterator26 = _createForOfIteratorHelper(parts),
+      _step26;
     try {
-      for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
-        var q = _step23.value;
+      for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
+        var q = _step26.value;
         ctx.globalAlpha = Math.min(1, q.l / 12);
         ctx.fillStyle = q.c;
         ctx.fillRect(q.x - 1.5, q.y - 1.5, 3, 3);
       }
     } catch (err) {
-      _iterator23.e(err);
+      _iterator26.e(err);
     } finally {
-      _iterator23.f();
+      _iterator26.f();
     }
     ctx.globalAlpha = 1;
     var list = P.slice().sort(function (a, b) {
       return a.y - b.y;
     });
     var ballDrawn = false;
-    var _iterator24 = _createForOfIteratorHelper(list),
-      _step24;
+    var _iterator27 = _createForOfIteratorHelper(list),
+      _step27;
     try {
-      for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
-        var p = _step24.value;
+      for (_iterator27.s(); !(_step27 = _iterator27.n()).done;) {
+        var p = _step27.value;
         if (!ballDrawn && ball.y < p.y - 2) {
           drawBall();
           ballDrawn = true;
@@ -4105,62 +4272,62 @@ var K = function () {
         drawPlayer(p, h >= 0 ? RING[h] : null);
       }
     } catch (err) {
-      _iterator24.e(err);
+      _iterator27.e(err);
     } finally {
-      _iterator24.f();
+      _iterator27.f();
     }
     if (!ballDrawn) drawBall();
     ctx.setTransform(d, 0, 0, d, 0, 0);
-    var _iterator25 = _createForOfIteratorHelper(_humans),
-      _step25;
+    var _iterator28 = _createForOfIteratorHelper(_humans),
+      _step28;
     try {
-      for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
-        var _h3 = _step25.value;
+      for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
+        var _h3 = _step28.value;
         var _p5 = P[ctrl[_h3]];
         if (!_p5) continue;
-        var sx = ox + _p5.x * s,
-          sy = oy + _p5.y * s - (PR + 12) * s;
+        var _sx = ox + _p5.x * s,
+          _sy = oy + _p5.y * s - (PR + 12) * s;
         ctx.fillStyle = RING[_h3];
         ctx.beginPath();
-        ctx.moveTo(sx - 6, sy - 9);
-        ctx.lineTo(sx + 6, sy - 9);
-        ctx.lineTo(sx, sy);
+        ctx.moveTo(_sx - 6, _sy - 9);
+        ctx.lineTo(_sx + 6, _sy - 9);
+        ctx.lineTo(_sx, _sy);
         ctx.closePath();
         ctx.fill();
         ctx.strokeStyle = '#1d1f2b';
         ctx.lineWidth = 1.5;
         ctx.stroke();
-        if (mode === 2 || K.time < 400) K.text(names[_h3], sx, sy - 13, 13, '#fff', 'center');
+        if (mode === 2 || K.time < 400) K.text(names[_h3], _sx, _sy - 13, 13, '#fff', 'center');
         if (_p5.charge > 0) {
           var bw = 34;
           ctx.fillStyle = 'rgba(20,21,29,.8)';
-          ctx.fillRect(sx - bw / 2 - 2, sy + (PR * 2 + 22) * s, bw + 4, 8);
+          ctx.fillRect(_sx - bw / 2 - 2, _sy + (PR * 2 + 22) * s, bw + 4, 8);
           ctx.fillStyle = _p5.charge > .8 ? '#e0373f' : '#f2e33a';
-          ctx.fillRect(sx - bw / 2, sy + (PR * 2 + 22) * s + 2, bw * _p5.charge, 4);
+          ctx.fillRect(_sx - bw / 2, _sy + (PR * 2 + 22) * s + 2, bw * _p5.charge, 4);
         }
       }
     } catch (err) {
-      _iterator25.e(err);
+      _iterator28.e(err);
     } finally {
-      _iterator25.f();
+      _iterator28.f();
     }
     scoreboard();
-    if (state === 'kick') K.text(timer > 40 ? "Calcio d'inizio" : 'Pronti…', W / 2, oy - HY * s * .45, Math.round(Math.min(44, W * .05)), '#fff', 'center');
+    if (state === 'kick') K.text(timer > 40 ? "Calcio d'inizio" : 'Pronti…', W / 2, top + ah * .28, Math.round(Math.min(44, W * .05)), '#fff', 'center');
     if (msg) {
       var k = Math.min(1, msg.t / 10),
         sc = 1 + Math.sin(msg.t * .25) * .06;
       ctx.save();
-      ctx.translate(W / 2, oy - HY * s * .3);
+      ctx.translate(W / 2, top + ah * .32);
       ctx.scale(k * sc, k * sc);
       K.text(msg.s, 0, 0, Math.round(Math.min(84, W * .1)), state === 'goal' ? '#f2c230' : '#fff', 'center');
       if (state === 'goal') K.text(T[goalTeam].n, 0, Math.min(48, W * .06), Math.round(Math.min(30, W * .04)), '#fff', 'center');
       ctx.restore();
     }
-    var _iterator26 = _createForOfIteratorHelper(conf),
-      _step26;
+    var _iterator29 = _createForOfIteratorHelper(conf),
+      _step29;
     try {
-      for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
-        var c = _step26.value;
+      for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
+        var c = _step29.value;
         ctx.save();
         ctx.translate(c.x, c.y);
         ctx.rotate(c.r);
@@ -4169,10 +4336,11 @@ var K = function () {
         ctx.restore();
       }
     } catch (err) {
-      _iterator26.e(err);
+      _iterator29.e(err);
     } finally {
-      _iterator26.f();
+      _iterator29.f();
     }
+    radar();
     drawControls();
   }
   function snap() {
