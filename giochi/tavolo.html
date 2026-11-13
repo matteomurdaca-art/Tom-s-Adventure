@@ -4539,7 +4539,7 @@ var K = function () {
   var fcount = 0;
   function draw() {
     fcount++;
-    var busy = fx.length || G && G.s && (G.s.anim && t - (G.s.anim.t0 != null ? G.s.anim.t0 : G.s.anim.t) < 20 || G.s.pend);
+    var busy = fx.length || rings.length || G && G.s && (G.s.anim && t - (G.s.anim.t0 != null ? G.s.anim.t0 : G.s.anim.t) < 20 || G.s.pend);
     if (G && !busy && fcount % 2) return;
     var W = K.W,
       Hh = K.H;
@@ -4563,18 +4563,36 @@ var K = function () {
       facePanel(1, lay.top, true);
       facePanel(0, lay.bot, false);
     } else panel();
-    var _iterator28 = _createForOfIteratorHelper(fx),
+    var _iterator28 = _createForOfIteratorHelper(rings),
       _step28;
     try {
       for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
-        var f = _step28.value;
-        ctx.globalAlpha = Math.min(1, f.l / 20);
-        K.text(f.s, lay.ax + lay.aw / 2, lay.ay + lay.ah * .18 - (90 - f.l) * .3, 26, f.c, 'center');
+        var r = _step28.value;
+        ctx.globalAlpha = Math.min(1, r.l / 12);
+        ctx.strokeStyle = '#f2e33a';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 26 - r.l * .5, 0, 6.283);
+        ctx.stroke();
       }
     } catch (err) {
       _iterator28.e(err);
     } finally {
       _iterator28.f();
+    }
+    ctx.globalAlpha = 1;
+    var _iterator29 = _createForOfIteratorHelper(fx),
+      _step29;
+    try {
+      for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
+        var f = _step29.value;
+        ctx.globalAlpha = Math.min(1, f.l / 20);
+        K.text(f.s, lay.ax + lay.aw / 2, lay.ay + lay.ah * .18 - (90 - f.l) * .3, 26, f.c, 'center');
+      }
+    } catch (err) {
+      _iterator29.e(err);
+    } finally {
+      _iterator29.f();
     }
     ctx.globalAlpha = 1;
     if (G.over && G.kind !== 'scopa' && t - G.over.t > 30 && t - G.over.t < 300) {
@@ -4583,20 +4601,35 @@ var K = function () {
   }
   function update(f) {
     t += f;
-    var _iterator29 = _createForOfIteratorHelper(fx),
-      _step29;
+    var _iterator30 = _createForOfIteratorHelper(fx),
+      _step30;
     try {
-      for (_iterator29.s(); !(_step29 = _iterator29.n()).done;) {
-        var q = _step29.value;
+      for (_iterator30.s(); !(_step30 = _iterator30.n()).done;) {
+        var q = _step30.value;
         q.l -= f;
       }
     } catch (err) {
-      _iterator29.e(err);
+      _iterator30.e(err);
     } finally {
-      _iterator29.f();
+      _iterator30.f();
     }
     fx = fx.filter(function (q) {
       return q.l > 0;
+    });
+    var _iterator31 = _createForOfIteratorHelper(rings),
+      _step31;
+    try {
+      for (_iterator31.s(); !(_step31 = _iterator31.n()).done;) {
+        var r = _step31.value;
+        r.l -= f;
+      }
+    } catch (err) {
+      _iterator31.e(err);
+    } finally {
+      _iterator31.f();
+    }
+    rings = rings.filter(function (r) {
+      return r.l > 0;
     });
     if (!G || G.over) return;
     if (G.kind === 'scopa' && G.s.pend) {
@@ -4645,20 +4678,20 @@ var K = function () {
   }
   function tapAt(x, y) {
     if (!G || !K.playing || !$('kpause').hidden) return;
-    var _iterator30 = _createForOfIteratorHelper(btns),
-      _step30;
+    var _iterator32 = _createForOfIteratorHelper(btns),
+      _step32;
     try {
-      for (_iterator30.s(); !(_step30 = _iterator30.n()).done;) {
-        var b = _step30.value;
+      for (_iterator32.s(); !(_step32 = _iterator32.n()).done;) {
+        var b = _step32.value;
         if (x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h) {
           if (b.id === 'again') newGame(G.kind, G.mode, G.lvl);
           return;
         }
       }
     } catch (err) {
-      _iterator30.e(err);
+      _iterator32.e(err);
     } finally {
-      _iterator30.f();
+      _iterator32.f();
     }
     if (G.over) return;
     if (G.turn < 0 && G.kind !== 'scopa') return;
@@ -4667,12 +4700,41 @@ var K = function () {
   }
   var cv0 = K.cv;
   var lastTouch = 0;
-  cv0.addEventListener('touchstart', function (e) {
+  var rings = [];
+  function touchXY(tt) {
     var r = cv0.getBoundingClientRect(),
-      tt = e.changedTouches[0];
-    lastTouch = Date.now();
-    tapAt(tt.clientX - r.left, tt.clientY - r.top);
-    if (e.cancelable) e.preventDefault();
+      sx = window.pageXOffset || 0,
+      sy = window.pageYOffset || 0;
+    var x = (tt.pageX != null ? tt.pageX - sx : tt.clientX) - r.left,
+      y = (tt.pageY != null ? tt.pageY - sy : tt.clientY) - r.top;
+    return [x, y];
+  }
+  function overUI(el) {
+    while (el && el !== document.body) {
+      if (el.id === 'hud' || el.id === 'menu' || el.id === 'kpause' || el.className && String(el.className).indexOf('ov') >= 0 && el.tagName === 'DIV' || el.tagName === 'BUTTON' || el.tagName === 'A') return true;
+      el = el.parentNode;
+    }
+    return false;
+  }
+  document.addEventListener('touchstart', function (e) {
+    if (!G || !K.playing) return;
+    if (window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
+    var L = e.changedTouches;
+    var used = false;
+    for (var i = 0; i < L.length; i++) {
+      var tt = L[i];
+      if (overUI(tt.target)) continue;
+      var p = touchXY(tt);
+      lastTouch = Date.now();
+      used = true;
+      rings.push({
+        x: p[0],
+        y: p[1],
+        l: 22
+      });
+      tapAt(p[0], p[1]);
+    }
+    if (used && e.cancelable) e.preventDefault();
   }, {
     passive: false
   });
