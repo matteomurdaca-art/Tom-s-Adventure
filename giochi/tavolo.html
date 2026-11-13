@@ -4569,7 +4569,7 @@ var K = function () {
       for (_iterator28.s(); !(_step28 = _iterator28.n()).done;) {
         var r = _step28.value;
         ctx.globalAlpha = Math.min(1, r.l / 12);
-        ctx.strokeStyle = '#f2e33a';
+        ctx.strokeStyle = r.c || '#f2e33a';
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(r.x, r.y, 26 - r.l * .5, 0, 6.283);
@@ -4696,7 +4696,93 @@ var K = function () {
     if (G.over) return;
     if (G.turn < 0 && G.kind !== 'scopa') return;
     if (isCPU(G.turn) && !(G.kind === 'scopa' && G.s.show)) return;
+    if (G.kind === 'dama' || G.kind === 'scacchi') {
+      var o = TOFF[G.turn] || {
+          x: 0,
+          y: 0
+        },
+        cx = x + o.x * lay.sw,
+        cy = y + o.y * lay.sh,
+        p = snapTap(cx, cy);
+      if (p) {
+        o.x = Math.max(-1.2, Math.min(1.2, o.x + (p[0] - cx) / lay.sw * .6));
+        o.y = Math.max(-1.2, Math.min(1.2, o.y + (p[1] - cy) / lay.sh * .6));
+        TOFF[G.turn] = o;
+        try {
+          localStorage.setItem('tavolo-toff', JSON.stringify(TOFF));
+        } catch (e) {}
+        x = p[0];
+        y = p[1];
+      } else {
+        x = cx;
+        y = cy;
+      }
+    }
     KINDS[G.kind].tap(x, y);
+  }
+  var TOFF = [{
+    x: 0,
+    y: 0
+  }, {
+    x: 0,
+    y: 0
+  }];
+  try {
+    var v = JSON.parse(localStorage.getItem('tavolo-toff') || 'null');
+    if (v && v.length === 2) TOFF = v;
+  } catch (e) {}
+  function validSq(q) {
+    var s = G.s;
+    if (q < 0) return 0;
+    if (G.kind === 'scacchi') {
+      var _ms = chLegal(s);
+      if (s.sel >= 0 && _ms.some(function (m) {
+        return m.f === s.sel && m.t === q;
+      })) return 2;
+      if (s.b[q] && s.b[q][0] === s.turn && _ms.some(function (m) {
+        return m.f === q;
+      })) return 1;
+      return 0;
+    }
+    var ms = damaMoves(s.b, G.turn);
+    if (s.sel >= 0 && ms.some(function (m) {
+      return m.path[0] === s.sel && m.path[m.path.length - 1] === q;
+    })) return 2;
+    if (own(s.b[q], G.turn) && ms.some(function (m) {
+      return m.path[0] === q;
+    })) return 1;
+    return 0;
+  }
+  function snapTap(x, y) {
+    var L = lay,
+      raw = sqAt(x, y);
+    if (validSq(raw)) return null;
+    var best = -1,
+      bs = 1e9,
+      bk = 0;
+    for (var q = 0; q < 64; q++) {
+      var _v = validSq(q);
+      if (!_v) continue;
+      var _c = sqXY(L, q),
+        dx = (x - _c.x) / L.sw,
+        dy = (y - _c.y) / L.sh;
+      if (Math.abs(dx) > .8 || Math.abs(dy) > 1.35) continue;
+      var sc = dx * dx + dy * dy * .7 - (_v === 2 ? .15 : 0);
+      if (sc < bs) {
+        bs = sc;
+        best = q;
+        bk = _v;
+      }
+    }
+    if (best < 0) return null;
+    var c = sqXY(L, best);
+    rings.push({
+      x: c.x,
+      y: c.y,
+      l: 16,
+      c: '#5fd06a'
+    });
+    return [c.x, c.y];
   }
   var cv0 = K.cv;
   var lastTouch = 0;
