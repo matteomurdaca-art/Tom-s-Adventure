@@ -2458,14 +2458,11 @@ var K = function () {
           p.x = -d * (HX - 22);
           p.y = 0;
         } else if (p.i === 1) {
-          p.x = me ? -d * 12 : d * 80;
-          p.y = me ? 0 : -40;
-        } else if (p.i === 2) {
-          p.x = me ? -d * 95 : d * 115;
-          p.y = me ? -100 : 95;
+          p.x = -d * (me ? PR + BR + 1 : 76);
+          p.y = 0;
         } else {
-          p.x = me ? -d * 165 : d * 200;
-          p.y = me ? 90 : -30;
+          p.x = -d * (me ? 175 : 190);
+          p.y = p.i === 2 ? -110 : 110;
         }
         p.vx = p.vy = p.dx = p.dy = 0;
         p.fx = d;
