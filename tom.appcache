@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v58 b7232fe7b0
+# v59 821eed0793
 
 CACHE:
 ./
@@ -8,6 +8,7 @@ giochi/blocchi.html
 giochi/bolidi.html
 giochi/bollegiganti.html
 giochi/bruco.html
+giochi/calcio.html
 giochi/chalk.html
 giochi/corsa.html
 giochi/ember.html

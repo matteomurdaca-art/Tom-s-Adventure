@@ -1,0 +1,4492 @@
+<!DOCTYPE html>
+<html lang="it" manifest="../tom.appcache">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d1f2b">
+<title>Calcetto 3 contro 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1f2b;--paper:#f6f7fb;--yel:#f2c230;--blu:#3f86d4;--red:#e0373f;--grn:#4aa35a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#14151d;color:#fff;font-family:'Pixelify Sans',monospace}
+body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#stage{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#cv{position:absolute;top:0;left:0;display:block;touch-action:none}
+#hud{position:absolute;top:6px;right:8px;display:none;z-index:5}
+body.playing #hud{display:flex}
+#hud button{font:700 16px 'Pixelify Sans',monospace;background:rgba(20,21,29,.75);color:#fff;border:2px solid #5d6273;padding:6px 10px;margin-left:6px;cursor:pointer}
+#pad{position:absolute;left:0;right:0;bottom:0;height:0;display:none;z-index:4}
+body.playing #pad{display:block}
+.kb{position:absolute;bottom:14px;width:78px;height:78px;border:3px solid rgba(255,255,255,.7);background:rgba(20,21,29,.45);color:#fff;font:700 30px 'Pixelify Sans',monospace;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;border-radius:14px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.3)}
+.kb.on{background:rgba(242,194,48,.75);color:#1d1f2b}
+.kb small{font-size:12px;display:block}
+.kb.bl1{left:14px} .kb.bl2{left:104px} .kb.bl3{left:194px}
+.kb.br1{right:14px} .kb.br2{right:104px} .kb.br3{right:194px}
+.kb.big.bl2{left:122px} .kb.big.br2{right:122px}
+.kb.blu{left:59px;bottom:104px} .kb.bld{left:59px}
+.kb.big{width:96px;height:96px}
+@media (orientation:landscape) and (min-height:561px){ .kb{bottom:64px} .kb.blu{bottom:154px} }
+@media (max-height:420px){ .kb{width:64px;height:64px;font-size:24px} .kb.bl2{left:88px} .kb.bl3{left:162px} .kb.br2{right:88px} .kb.br3{right:162px} .kb.big{width:76px;height:76px} .kb.big.bl2{left:98px} .kb.big.br2{right:98px} }
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(10,11,18,.72);z-index:10;padding:12px;overflow:auto}
+.ov[hidden],[hidden]{display:none!important}
+.card{background:#f6f7fb;color:#1d1f2b;border:4px solid #14151d;box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:16px 18px;max-width:760px;width:100%;text-align:center;max-height:100%;overflow:auto}
+.card h1{margin:0 0 6px;font-size:34px} .card h2{margin:0 0 8px;font-size:26px}
+.card p{margin:6px 0}
+.go{font:700 20px 'Pixelify Sans',monospace;background:var(--yel);color:#1d1f2b;border:3px solid #14151d;padding:9px 16px;margin:5px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.22),inset 3px 3px 0 rgba(255,255,255,.5)}
+.go.alt{background:#fff} .go:disabled{opacity:.45;cursor:default}
+.go small{display:block;font-size:13px;font-weight:400}
+.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}
+.kchars{display:flex;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.kchar{font:700 15px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:4px;padding:6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;color:#1d1f2b}
+.kchar canvas{width:44px;height:58px;image-rendering:pixelated;image-rendering:crisp-edges}
+.kchar.sel{background:var(--yel)}
+.note{font-size:14px;color:#5d6273}
+#kpnote.ok{color:#2f7d2e;font-weight:700} #kpnote.bad{color:#c62828;font-weight:700}
+#ktoast{position:absolute;left:50%;top:12px;transform:translateX(-50%);-webkit-transform:translateX(-50%);z-index:30;background:#4aa35a;color:#fff;font:700 18px 'Pixelify Sans',monospace;padding:6px 14px;border:3px solid #14151d;pointer-events:none;white-space:nowrap}
+#ktoast.bad{background:#e0373f}
+#kpriv{background:#fff3cd;border:2px solid #e0373f;color:#7a1d22;padding:6px 8px;font-size:14px;margin:6px 0}
+.lvls{display:flex;flex-wrap:wrap;justify-content:center}
+.lvl{font:700 16px 'Pixelify Sans',monospace;width:150px;min-height:92px;margin:5px;padding:8px;border:3px solid #14151d;background:#fff;cursor:pointer;color:#1d1f2b;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lvl b{font-size:26px} .lvl.done{background:#c9f0cf} .lvl.lock{background:#e3e5ec;color:#9aa0b5;cursor:default}
+.lvl small{font-weight:400;font-size:13px}
+a.home{color:#1d1f2b}
+.kplayers{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;margin:4px 0 8px}
+.kpl{font:700 17px 'Pixelify Sans',monospace;background:#fff;border:3px solid #14151d;margin:3px;padding:6px 10px;cursor:pointer;color:#1d1f2b}
+.kpl.sel{background:var(--yel)} .kpl.add{background:#e9f6ea}
+.kplin{font:700 18px 'Pixelify Sans',monospace;border:3px solid #14151d;padding:6px 8px;margin:3px;width:180px}
+.kbh{margin:10px 0 4px;font-size:20px}
+.kbt{border-collapse:collapse;margin:4px auto 8px;font:700 16px 'Pixelify Sans',monospace;min-width:280px}
+.kbt th,.kbt td{border:2px solid #14151d;padding:4px 10px;background:#fff} .kbt th{background:#e3e5ec} .kbt tr.first td{background:#fff3c4}
+.sw{display:inline-block;width:30px;height:30px;border:3px solid #14151d;border-radius:50%;vertical-align:middle;position:relative;overflow:hidden;margin:2px 4px}.sw i{position:absolute;left:11px;top:0;width:6px;height:100%}.lvl.tm{min-height:96px}.lvl.sel{background:var(--yel)!important}.dl{font:700 17px 'Pixelify Sans',monospace;margin-right:6px}.rsc{font:700 22px 'Pixelify Sans',monospace}.rsc b{font-size:34px;margin:0 8px}body.cface #hud{top:8px;right:auto;left:50%;-webkit-transform:translateX(-50%);transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="hud"><button id="kback" type="button">◀ Indietro</button><button id="kpbtn" type="button">❚❚ Pausa</button></div>
+<div id="pad"></div>
+<div class="ov" id="kpause" hidden><div class="card">
+  <h2>❚❚ Pausa</h2>
+  <p id="kpnote"></p>
+  <div class="row">
+    <button class="go" id="kresume" type="button">▶ Riprendi</button>
+    <button class="go alt" id="ksave" type="button">💾 Salva</button>
+    <button class="go alt" id="ksaveexit" type="button">◀ Salva ed esci</button>
+  </div>
+  <div class="row"><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+  <p class="note">Calcetto 3 contro 3 · Sala giochi di Tom · versione 1</p>
+</div></div>
+<div id="ktoast" hidden></div>
+<div class="ov" id="kboard" hidden style="z-index:20"><div class="card"></div></div>
+<div class="ov" id="menu"><div class="card">
+  <h1>⚽ Calcetto 3 contro 3</h1>
+  <p id="kpriv" hidden>⚠ Safari è in Navigazione privata: qui i progressi non si salvano.</p>
+  <button class="go" id="cont" type="button" hidden></button>
+  <h2>Chi gioca?</h2>
+  <div id="players"></div>
+  <h2>Come giochi?</h2>
+  <div class="row"><button class="kpl" data-mode="1" type="button">⚽ Contro il computer</button><button class="kpl" data-mode="2" type="button">👦👦 In due</button></div>
+  <div class="row"><span class="dl">Durata:</span><button class="kpl" data-dur="2" type="button">2 minuti</button><button class="kpl" data-dur="3" type="button">3 minuti</button><button class="kpl" data-dur="5" type="button">5 minuti</button></div>
+  <div id="tourRow"><h2>Il torneo: scegli l'avversario</h2><div class="lvls" id="tour"></div></div>
+  <div id="p2Row"><h2>Chi gioca con la seconda squadra?</h2><div class="kplayers" id="p2"></div><h2>Squadra del secondo giocatore</h2><div class="lvls" id="teams2"></div><button class="go" id="play2" type="button">▶ Gioca!</button></div>
+  <p class="note">Tommy FC (arancione) contro 6 squadre sempre più forti: vinci per sbloccare la successiva. Muovi il giocatore con la levetta a sinistra. Con la palla: PASSA la passa al compagno, TIRA tira in porta (tieni premuto per un tiro più forte, inclina la levetta in su o in giù per mirare). Senza palla: RUBA fa la scivolata, CAMBIA passa all'altro giocatore. Sul computer: frecce, Spazio per tirare, X per passare.</p>
+  <div class="row"><button class="go alt" id="boardBtn" type="button">🏆 Classifica</button><a class="go alt" href="index.html">🏠 Sala giochi</a><button class="go alt ksnd" type="button">Suono</button><button class="go alt kmus" type="button">Musica</button></div>
+</div></div>
+<div class="ov" id="res" hidden><div class="card">
+  <h1 id="resTitle"></h1>
+  <p id="resScore" class="rsc"></p>
+  <p id="resNote"></p>
+  <div class="row"><button class="go" id="resNext" type="button">Prossima squadra ▶</button><button class="go alt" id="resAgain" type="button">🔄 Rigioca</button><button class="go alt" id="resMenu" type="button">◀ Menu</button></div>
+</div></div>
+
+<script>/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) });
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true });
+  defineProperty(
+    GeneratorFunctionPrototype,
+    "constructor",
+    { value: GeneratorFunction, configurable: true }
+  );
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    defineProperty(this, "_invoke", { value: enqueue });
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per GeneratorResume behavior specified since ES2015:
+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume
+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method;
+    var method = delegate.iterator[methodName];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method, or a missing .next method, always terminate the
+      // yield* loop.
+      context.delegate = null;
+
+      // Note: ["return"] must be used for ES3 parsing compatibility.
+      if (methodName === "throw" && delegate.iterator["return"]) {
+        // If the delegate iterator has a return method, give it a
+        // chance to clean up.
+        context.method = "return";
+        context.arg = undefined;
+        maybeInvokeDelegate(delegate, context);
+
+        if (context.method === "throw") {
+          // If maybeInvokeDelegate(context) changed context.method from
+          // "return" to "throw", let that override the TypeError below.
+          return ContinueSentinel;
+        }
+      }
+      if (methodName !== "return") {
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a '" + methodName + "' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(val) {
+    var object = Object(val);
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable != null) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    throw new TypeError(typeof iterable + " is not iterable");
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+(function(){
+ if(!String.prototype.padStart){String.prototype.padStart=function(n,c){var s=String(this);c=c===undefined?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};}
+ if(!Object.assign){Object.assign=function(t){for(var i=1;i<arguments.length;i++){var s=arguments[i];if(s)for(var k in s)if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k];}return t;};}
+ if(!Array.prototype.findIndex){Array.prototype.findIndex=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i,this))return i;return -1;};}
+ if(window.NodeList&&!NodeList.prototype.forEach){NodeList.prototype.forEach=Array.prototype.forEach;}
+ [Element.prototype,Document.prototype,DocumentFragment.prototype].forEach(function(P){ if(!P.append){P.append=function(){for(var i=0;i<arguments.length;i++){var n=arguments[i];this.appendChild(n instanceof Node?n:document.createTextNode(String(n)));}};} });
+ var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+ if(C&&!C.ellipse){C.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){this.save();this.translate(x,y);this.rotate(rot);this.scale(rx,ry);this.arc(0,0,1,a0,a1,ccw);this.restore();};}
+})();
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n3 = 0, F = function F() {}; return { s: F, n: function n() { return _n3 >= r.length ? { done: !0 } : { done: !1, value: r[_n3++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var K = function () {
+  var K = {};
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  K.$ = $;
+  var cv = $('cv'),
+    ctx = cv.getContext('2d');
+  K.cv = cv;
+  K.ctx = ctx;
+  K.W = 800;
+  K.H = 450;
+  K.dpr = 1;
+  function resize() {
+    var st = $('stage');
+    var w = Math.max(200, st.clientWidth),
+      h = Math.max(150, st.clientHeight);
+    K.dpr = Math.min(window.devicePixelRatio || 1, K.maxDpr || 1.5);
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+    cv.width = Math.round(w * K.dpr);
+    cv.height = Math.round(h * K.dpr);
+    K.W = w;
+    K.H = h;
+    K.onResize && K.onResize(w, h);
+  }
+  K.resize = resize;
+  var lsw = 0,
+    lsh = 0;
+  addEventListener('resize', resize);
+  addEventListener('orientationchange', function () {
+    setTimeout(resize, 150);
+    setTimeout(resize, 500);
+  });
+  K.keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    a: false,
+    b: false,
+    c: false
+  };
+  var prev = {};
+  K.pressed = function (k) {
+    return K.keys[k] && !prev[k];
+  };
+  K._prev = prev;
+  var BTN = [];
+  K.buttons = function (list) {
+    var pad = $('pad');
+    pad.innerHTML = '';
+    BTN.length = 0;
+    var _iterator = _createForOfIteratorHelper(list),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var b = _step.value;
+        var e = document.createElement('div');
+        e.className = 'kb ' + (b.cls || '') + ' ' + b.pos;
+        e.id = 'kb_' + b.k;
+        e.innerHTML = b.label;
+        pad.appendChild(e);
+        BTN.push({
+          el: e,
+          k: b.k
+        });
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  };
+  function touchKeys(e) {
+    var playing = K.playing && $('kpause').hidden;
+    var st = {};
+    var hit = false;
+    if (playing) for (var i = 0; i < e.touches.length; i++) {
+      var t = e.touches[i];
+      var best = null,
+        bd = 1e9;
+      var _iterator2 = _createForOfIteratorHelper(BTN),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var b = _step2.value;
+          var r = b.el.getBoundingClientRect();
+          if (!r.width || b.el.offsetParent === null) continue;
+          if (t.clientY < r.top - 45 || t.clientY > r.bottom + 200) continue;
+          if (t.clientX < r.left - 40 || t.clientX > r.right + 40) continue;
+          var cx = (r.left + r.right) / 2,
+            cy = (r.top + r.bottom) / 2,
+            dd = Math.abs(t.clientX - cx) * 2 + Math.abs(t.clientY - cy) * .3;
+          if (dd < bd) {
+            bd = dd;
+            best = b;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      if (best) {
+        st[best.k] = true;
+        hit = true;
+      }
+    }
+    var _iterator3 = _createForOfIteratorHelper(BTN),
+      _step3;
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var _b = _step3.value;
+        K.keys[_b.k] = !!st[_b.k] || !!kbd[_b.k];
+        _b.el.classList.toggle('on', !!st[_b.k]);
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    if (hit && e.cancelable) e.preventDefault();
+  }
+  ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (ev) {
+    return document.addEventListener(ev, touchKeys, {
+      passive: false
+    });
+  });
+  document.addEventListener('mousedown', function (e) {
+    var b = BTN.find(function (b) {
+      return b.el.contains(e.target);
+    });
+    if (b) {
+      K.keys[b.k] = true;
+      b.el.classList.add('on');
+      var _up = function up() {
+        K.keys[b.k] = !!kbd[b.k];
+        b.el.classList.remove('on');
+        removeEventListener('mouseup', _up);
+      };
+      addEventListener('mouseup', _up);
+    }
+  });
+  var KMAP = {
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    KeyA: 'left',
+    KeyD: 'right',
+    KeyW: 'up',
+    KeyS: 'down',
+    Space: 'a',
+    KeyZ: 'a',
+    KeyK: 'a',
+    KeyX: 'b',
+    KeyL: 'b',
+    Enter: 'b',
+    ShiftLeft: 'b',
+    KeyC: 'c',
+    KeyJ: 'c'
+  };
+  var kbd = {};
+  addEventListener('keydown', function (e) {
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      if (K.playing) K.togglePause();
+      return;
+    }
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = true;
+      K.keys[k] = true;
+      if (K.playing) e.preventDefault();
+    }
+  });
+  addEventListener('keyup', function (e) {
+    var k = KMAP[e.code];
+    if (k) {
+      kbd[k] = false;
+      K.keys[k] = false;
+    }
+  });
+  document.addEventListener('contextmenu', function (e) {
+    if (K.playing) e.preventDefault();
+  });
+  var ac = null;
+  K.soundOn = true;
+  K.musicOn = true;
+  try {
+    if (localStorage.getItem('tomk-sound') === '0') K.soundOn = false;
+    if (localStorage.getItem('tomk-music') === '0') K.musicOn = false;
+  } catch (e) {}
+  function actx() {
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended' && ac.resume) ac.resume();
+    } catch (e) {}
+    return ac;
+  }
+  ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(function (ev) {
+    return document.addEventListener(ev, function () {
+      var c = actx();
+      if (c) {
+        try {
+          var b = c.createBuffer(1, 1, 22050),
+            s = c.createBufferSource();
+          s.buffer = b;
+          s.connect(c.destination);
+          s.start(0);
+        } catch (e) {}
+      }
+    }, {
+      passive: true
+    });
+  });
+  K.beep = function (f, d, type, vol, slide) {
+    if (!K.soundOn) return;
+    var c = actx();
+    if (!c) return;
+    try {
+      var o = c.createOscillator(),
+        g = c.createGain();
+      o.type = type || 'square';
+      o.frequency.value = f;
+      if (slide) o.frequency.linearRampToValueAtTime(Math.max(20, f + slide), c.currentTime + d);
+      g.gain.value = vol || .05;
+      g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + d);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start();
+      o.stop(c.currentTime + d);
+    } catch (e) {}
+  };
+  K.jingle = function (notes, step, type) {
+    return notes.forEach(function (n, i) {
+      return setTimeout(function () {
+        return K.beep(n, .14, type || 'triangle', .06);
+      }, i * (step || 90));
+    });
+  };
+  var NT = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11
+  };
+  var fq = function fq(n) {
+    var m = /^([A-G])(#|b)?(\d)$/.exec(n);
+    if (!m) return 0;
+    var s = NT[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+    return 440 * Math.pow(2, (12 * (+m[3] + 1) + s - 69) / 12);
+  };
+  var parse = function parse(str) {
+    var t = str.split(/\s+/),
+      out = [];
+    for (var i = 0; i < t.length; i++) {
+      if (t[i] === '-') continue;
+      var len = 1;
+      for (var j = i + 1; j < t.length && t[j] === '-'; j++) len++;
+      out.push({
+        step: i,
+        len,
+        f: fq(t[i])
+      });
+    }
+    return {
+      notes: out,
+      steps: t.length
+    };
+  };
+  K.MUS = {};
+  K.addMusic = function (name, m) {
+    m.M = parse(m.mel);
+    m.B = parse(m.bass);
+    m.A = m.arp ? m.arp.split(' ').map(fq) : null;
+    K.MUS[name] = m;
+  };
+  var MZ = {
+    cur: null,
+    next: 0,
+    step: 0,
+    bus: null,
+    echo: null,
+    noise: null
+  };
+  function mzBus() {
+    if (MZ.bus) return true;
+    var c = actx();
+    if (!c) return false;
+    try {
+      MZ.bus = c.createGain();
+      MZ.bus.gain.value = .5;
+      MZ.bus.connect(c.destination);
+      var dl = c.createDelay(),
+        fb = c.createGain(),
+        wet = c.createGain();
+      MZ.echo = c.createGain();
+      dl.delayTime.value = .33;
+      fb.gain.value = .33;
+      wet.gain.value = .45;
+      MZ.echo.connect(MZ.bus);
+      MZ.echo.connect(dl);
+      dl.connect(fb);
+      fb.connect(dl);
+      dl.connect(wet);
+      wet.connect(MZ.bus);
+      var nb = c.createBuffer(1, c.sampleRate * .5, c.sampleRate),
+        d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      MZ.noise = nb;
+    } catch (e) {
+      MZ.bus = null;
+      return false;
+    }
+    return true;
+  }
+  function tone(type, f, t, dur, v, out, bell) {
+    var o = ac.createOscillator(),
+      g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    var a = .008,
+      rel = bell ? dur * 1.6 : Math.min(.08, dur * .4);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + a);
+    if (bell) g.gain.exponentialRampToValueAtTime(.0001, t + rel);else {
+      g.gain.setValueAtTime(v, t + Math.max(a, dur - rel));
+      g.gain.linearRampToValueAtTime(.0001, t + dur);
+    }
+    o.connect(g);
+    g.connect(out);
+    o.start(t);
+    o.stop(t + (bell ? rel : dur) + .05);
+  }
+  function drum(k, t) {
+    if (k === 'k') {
+      var o = ac.createOscillator(),
+        _g = ac.createGain();
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + .12);
+      _g.gain.setValueAtTime(.42, t);
+      _g.gain.exponentialRampToValueAtTime(.001, t + .15);
+      o.connect(_g);
+      _g.connect(MZ.bus);
+      o.start(t);
+      o.stop(t + .16);
+      return;
+    }
+    var s = ac.createBufferSource(),
+      f = ac.createBiquadFilter(),
+      g = ac.createGain();
+    s.buffer = MZ.noise;
+    f.type = 'highpass';
+    f.frequency.value = k === 'h' ? 7000 : 1500;
+    var len = k === 'h' ? .04 : .12;
+    g.gain.setValueAtTime(k === 'h' ? .1 : .2, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + len);
+    s.connect(f);
+    f.connect(g);
+    g.connect(MZ.bus);
+    s.start(t);
+    s.stop(t + len + .02);
+  }
+  function mzStep(m, s, t) {
+    var sd = 60 / m.tempo / 2,
+      out = m.echo ? MZ.echo : MZ.bus;
+    var ms = s % m.M.steps;
+    var _iterator4 = _createForOfIteratorHelper(m.M.notes),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var n = _step4.value;
+        if (n.step === ms) tone(m.lead, n.f, t, n.len * sd * .95, m.lv, out, m.bell);
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
+    }
+    var bs = s % m.B.steps;
+    var _iterator5 = _createForOfIteratorHelper(m.B.notes),
+      _step5;
+    try {
+      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+        var _n = _step5.value;
+        if (_n.step === bs) tone('triangle', _n.f, t, _n.len * sd * .9, .25, MZ.bus);
+      }
+    } catch (err) {
+      _iterator5.e(err);
+    } finally {
+      _iterator5.f();
+    }
+    var dk = m.drums.charAt(s % m.drums.length);
+    if (dk !== '-') drum(dk, t);
+    if (m.A && s % 2 === 0) tone('sine', m.A[s / 2 % m.A.length], t, sd * .9, .05, out, true);
+  }
+  K.wantMusic = null;
+  function musicTick() {
+    var want = K.musicOn && K.playing && $('kpause').hidden ? K.wantMusic : null;
+    if (want !== MZ.cur) {
+      if (MZ.bus) {
+        try {
+          MZ.bus.disconnect();
+        } catch (e) {}
+        MZ.bus = null;
+      }
+      MZ.cur = want;
+      MZ.step = 0;
+      if (want) {
+        if (mzBus()) MZ.next = ac.currentTime + .08;else MZ.cur = null;
+      }
+    }
+    if (!MZ.cur || !MZ.bus || !K.MUS[MZ.cur]) return;
+    var m = K.MUS[MZ.cur],
+      sd = 60 / m.tempo / 2;
+    if (MZ.next < ac.currentTime) MZ.next = ac.currentTime + .02;
+    try {
+      while (MZ.next < ac.currentTime + .15) {
+        mzStep(m, MZ.step, MZ.next);
+        MZ.next += sd;
+        MZ.step++;
+      }
+    } catch (e) {}
+  }
+  K.storageOK = function () {
+    try {
+      localStorage.setItem('tomk-test', '1');
+      var ok = localStorage.getItem('tomk-test') === '1';
+      localStorage.removeItem('tomk-test');
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  };
+  var PER = /-(run|prog|pick)$/;
+  function raw(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+  function who() {
+    try {
+      var p = JSON.parse(raw('sala-player') || 'null');
+      return typeof p === 'string' ? p : '';
+    } catch (e) {
+      return '';
+    }
+  }
+  function firstPlayer() {
+    try {
+      var l = JSON.parse(raw('sala-players') || 'null');
+      if (Array.isArray(l) && l.length) return l[0];
+    } catch (e) {}
+    try {
+      var n = JSON.parse(raw('tom-name') || 'null');
+      if (n) return n;
+    } catch (e) {}
+    return 'Tommy';
+  }
+  function pkey(key) {
+    if (!PER.test(key)) return key;
+    var p = who() || firstPlayer();
+    return key + '@' + p;
+  }
+  K.load = function (key, def) {
+    try {
+      var v = localStorage.getItem(pkey(key));
+      if (v == null && PER.test(key) && (who() || firstPlayer()) === firstPlayer()) v = localStorage.getItem(key);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) {
+      return def;
+    }
+  };
+  K.save = function (key, val) {
+    try {
+      var t = JSON.stringify(val),
+        kk = pkey(key);
+      localStorage.setItem(kk, t);
+      if (kk !== key && (who() || firstPlayer()) === firstPlayer()) localStorage.removeItem(key);
+      return localStorage.getItem(kk) === t;
+    } catch (e) {
+      return false;
+    }
+  };
+  K.del = function (key) {
+    try {
+      localStorage.removeItem(pkey(key));
+      if (PER.test(key) && (who() || firstPlayer()) === firstPlayer()) localStorage.removeItem(key);
+    } catch (e) {}
+  };
+  var toastT = 0;
+  K.toast = function (msg, bad) {
+    var t = $('ktoast');
+    t.textContent = msg;
+    t.className = bad ? 'bad' : '';
+    t.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      t.hidden = true;
+    }, 2000);
+  };
+  K.playing = false;
+  K.game = null;
+  K.start = function () {
+    K.playing = true;
+    $('kpause').hidden = true;
+    document.body.classList.add('playing');
+    last = 0;
+  };
+  K.stop = function () {
+    K.playing = false;
+    document.body.classList.remove('playing');
+    for (var k in K.keys) K.keys[k] = false;
+    BTN.forEach(function (b) {
+      return b.el.classList.remove('on');
+    });
+  };
+  K.togglePause = function () {
+    if (!K.playing) return;
+    if ($('kpause').hidden) {
+      $('kpause').hidden = false;
+      $('kpnote').textContent = '';
+      for (var k in K.keys) K.keys[k] = false;
+      K.game && K.game.save && K.game.save();
+    } else $('kpause').hidden = true;
+  };
+  function saveExit() {
+    var ok = true;
+    if (K.game && K.game.save) ok = K.game.save();
+    K.stop();
+    $('kpause').hidden = true;
+    K.game && K.game.exit && K.game.exit();
+    K.toast(ok ? '💾 Partita salvata: la ritrovi in "Continua"' : '⚠ Partita NON salvata (Navigazione privata)', !ok);
+  }
+  K.saveExit = saveExit;
+  function updToggles() {
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.textContent = K.soundOn ? '🔊 Suono sì' : '🔈 Suono no';
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.textContent = K.musicOn ? '🎵 Musica sì' : '🎵 Musica no';
+    });
+  }
+  K.initUI = function () {
+    $('kback').onclick = saveExit;
+    $('kpbtn').onclick = K.togglePause;
+    $('kresume').onclick = function () {
+      $('kpause').hidden = true;
+      last = 0;
+    };
+    $('ksave').onclick = function () {
+      var ok = K.game && K.game.save ? K.game.save() : false;
+      $('kpnote').textContent = ok ? '✔ Partita salvata' : '⚠ Non salvata: Safari è in Navigazione privata';
+      $('kpnote').className = ok ? 'ok' : 'bad';
+    };
+    $('ksaveexit').onclick = saveExit;
+    document.querySelectorAll('.ksnd').forEach(function (b) {
+      return b.onclick = function () {
+        K.soundOn = !K.soundOn;
+        try {
+          localStorage.setItem('tomk-sound', K.soundOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    document.querySelectorAll('.kmus').forEach(function (b) {
+      return b.onclick = function () {
+        K.musicOn = !K.musicOn;
+        try {
+          localStorage.setItem('tomk-music', K.musicOn ? '1' : '0');
+        } catch (e) {}
+        updToggles();
+      };
+    });
+    updToggles();
+    if (!K.storageOK()) {
+      var w = $('kpriv');
+      if (w) w.hidden = false;
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && K.playing && $('kpause').hidden) K.togglePause();
+    });
+    addEventListener('pagehide', function () {
+      if (K.playing && K.game && K.game.save) K.game.save();
+    });
+  };
+  var last = 0;
+  K.time = 0;
+  function loop(t) {
+    if (window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
+    var st = $('stage'),
+      sw = st.clientWidth,
+      sh = st.clientHeight;
+    if (sw !== lsw || sh !== lsh) {
+      lsw = sw;
+      lsh = sh;
+      resize();
+    }
+    var dt = last ? t - last : 16.67;
+    last = t;
+    var f = Math.min(dt / 16.67, 2.5);
+    var paused = !$('kpause').hidden;
+    if (K.game) {
+      if (K.playing && !paused) {
+        K.time += f;
+        K.game.update(f);
+      } else if (K.game.idle) K.game.idle(f);
+      K.game.draw();
+    }
+    for (var k in K.keys) prev[k] = K.keys[k];
+    musicTick();
+    requestAnimationFrame(loop);
+  }
+  K.run = function () {
+    resize();
+    requestAnimationFrame(loop);
+  };
+  var PAL = {
+    k: '#1d1f2b',
+    w: '#ffffff',
+    W: '#e8ecf4',
+    g: '#9aa0b5',
+    G: '#5d6273',
+    s: '#f2c59a',
+    S: '#d99a6c',
+    h: '#4a2e1c',
+    o: '#f07a2a',
+    O: '#c25a14',
+    r: '#e0373f',
+    R: '#9c1f26',
+    y: '#f2c230',
+    Y: '#c99a00',
+    b: '#3f86d4',
+    B: '#24548f',
+    c: '#9fd3f0',
+    l: '#7cc242',
+    L: '#3d7a1f',
+    n: '#4aa35a',
+    p: '#8a5cc7',
+    P: '#5a3a8a',
+    q: '#e096d2',
+    m: '#9b7653',
+    M: '#6b4a2e',
+    e: '#e8cfa8',
+    d: '#3b3f4f',
+    C: '#c8642a',
+    E: '#e8d2a6',
+    D: '#c9a978'
+  };
+  K.PAL = PAL;
+  var SC = {};
+  K.sprite = function (key, rows, over) {
+    if (SC[key]) return SC[key];
+    var w = Math.max.apply(null, rows.map(function (r) {
+        return r.length;
+      })),
+      h = rows.length,
+      c = document.createElement('canvas');
+    c.width = w + 2;
+    c.height = h + 2;
+    var x = c.getContext('2d');
+    var put = function put(col, dx, dy) {
+      return rows.forEach(function (r, j) {
+        for (var i = 0; i < r.length; i++) {
+          var ch = r[i];
+          if (ch === '.' || ch === ' ') continue;
+          x.fillStyle = col || over && over[ch] || PAL[ch] || '#f0f';
+          x.fillRect(i + dx, j + dy, 1, 1);
+        }
+      });
+    };
+    for (var _i = 0, _arr = [[0, 1], [2, 1], [1, 0], [1, 2]]; _i < _arr.length; _i++) {
+      var _arr$_i = _slicedToArray(_arr[_i], 2),
+        dx = _arr$_i[0],
+        dy = _arr$_i[1];
+      put('#14151d', dx, dy);
+    }
+    put(null, 1, 1);
+    return SC[key] = c;
+  };
+  K.draw = function (c, x, y, U, flip) {
+    var w = c.width * U,
+      h = c.height * U;
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+    if (flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, -w / 2, -h + U, w, h);
+    ctx.restore();
+  };
+  var TOMHEAD = ["..h.h.h...", ".hhhhhhh..", ".hhssssss.", ".hsssswks.", ".ssssssss.", "..sssskss."];
+  var TOMBODY = {
+    stand: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "...d..d...", "..kk..kk.."],
+    walkA: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "..d....d..", ".kk....kk."],
+    walkB: ["...oooo...", "..oooooo..", "..soooos..", "...dddd...", "....dd....", "....kk...."],
+    jump: ["s..oooo..s", ".soooooos.", "...oooo...", "...dddd...", "..d....d..", ".kk....kk."]
+  };
+  var MILLYHEAD = ["..CCCCC...", ".CCCCCCC..", ".CCssssss.", ".CCsswkss.", ".CCssssss.", ".CC.ssks.."];
+  var MILLYBODY = {
+    stand: ["...pppp...", "..sppppps.", ".pppppppp.", "...s..s...", "..kk..kk.."],
+    walkA: ["...pppp...", "..sppppps.", ".pppppppp.", "..s....s..", ".kk....kk."],
+    walkB: ["...pppp...", "..sppppps.", ".pppppppp.", "....ss....", "....kk...."],
+    jump: ["s..pppp..s", ".spppppps.", ".pppppppp.", "..s....s..", ".kk....kk."]
+  };
+  var PAPHEAD = ["...ssss...", "..sWssss..", ".sssssss..", ".Sssswks..", ".ssssssss.", "..sssskss."];
+  var PAPTOP = ["...bbbb...", "..bbbbbb..", "..bbbbbb..", "..sbbbbs..", "...dddd..."];
+  var PAPLEGS = {
+    stand: ["...d..d...", "...d..d...", "..kk..kk.."],
+    walkA: ["..d....d..", "..d....d..", ".kk....kk."],
+    walkB: ["....dd....", "....dd....", "....kk...."],
+    jump: ["..d....d..", "..d....d..", ".kk....kk."]
+  };
+  var BUNNY = {
+    stand: ["............", ".......EEEE.", "......EEEEEE", "..ww..EEkEEq", ".wEEEEDEEEE.", ".EEEEEEDEE..", ".EEEEEEDE...", "..EE..EE...."],
+    jump: ["......EEEE..", ".....EEEEEE.", "..ww.EEkEEq.", ".wEEEEDEEE..", "EEEEEEEDE...", ".EEEEEEE....", "..E.....E...", "............"]
+  };
+  K.CHARS = {
+    tommy: {
+      name: 'Tommy',
+      col: '#f07a2a'
+    },
+    milly: {
+      name: 'Milly',
+      col: '#8a5cc7'
+    },
+    papone: {
+      name: 'Papone',
+      col: '#3f86d4'
+    },
+    carotino: {
+      name: 'Carotino',
+      col: '#e8d2a6'
+    }
+  };
+  K.CHAR_ORDER = ['tommy', 'milly', 'papone', 'carotino'];
+  K.charS = function (ch, f) {
+    f = f || 'stand';
+    if (ch === 'milly') return K.sprite('milly_' + f, MILLYHEAD.concat(MILLYBODY[f] || MILLYBODY.stand));
+    if (ch === 'papone') return K.sprite('pap_' + f, PAPHEAD.concat(f === 'jump' ? ["s..bbbb..s", ".sbbbbbbs.", "..bbbbbb..", "..bbbbbb..", "...dddd..."] : PAPTOP, PAPLEGS[f] || PAPLEGS.stand));
+    if (ch === 'carotino') return K.sprite('bun_' + (f === 'jump' || f === 'walkA' ? 'jump' : 'stand'), BUNNY[f === 'jump' || f === 'walkA' ? 'jump' : 'stand']);
+    return K.sprite('tom_' + f, TOMHEAD.concat(TOMBODY[f] || TOMBODY.stand));
+  };
+  K.headS = function (ch) {
+    if (ch === 'milly') return K.sprite('mh', MILLYHEAD);
+    if (ch === 'papone') return K.sprite('ph', PAPHEAD);
+    if (ch === 'carotino') return K.sprite('bh', BUNNY.stand.slice(0, 5));
+    return K.sprite('th', TOMHEAD);
+  };
+  K.rect = function (x, y, w, h, c) {
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  };
+  K.text = function (t, x, y, size, col, align, shadow) {
+    ctx.font = '700 ' + size + "px 'Pixelify Sans', monospace";
+    ctx.textAlign = align || 'left';
+    if (shadow !== false) {
+      ctx.fillStyle = 'rgba(20,21,29,.8)';
+      ctx.fillText(t, x + 2, y + 2);
+    }
+    ctx.fillStyle = col || '#fff';
+    ctx.fillText(t, x, y);
+    ctx.textAlign = 'left';
+  };
+  K.rnd = function (i, j, s) {
+    var v = Math.sin(i * 127.1 + (j || 0) * 311.7 + (s || 0) * 74.7) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  K.fmt = function (s) {
+    return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  };
+  K.charPicker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var c = document.createElement('canvas'),
+        s = K.charS(ch, 'stand');
+      c.width = s.width;
+      c.height = s.height;
+      var x = c.getContext('2d');
+      x.drawImage(s, 0, 0);
+      b.appendChild(c);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+  return K;
+}();
+(function () {
+  var S = K.S = {};
+  var c = K.ctx;
+  S.OUT = '#1c1724';
+  S.LW = 2.4;
+  S.use = function (x) {
+    var o = c;
+    c = x;
+    return o;
+  };
+  var TC = {};
+  S.tone = function (h, a) {
+    var k = h + a;
+    var v = TC[k];
+    if (v) return v;
+    var n = parseInt(h.slice(1), 16);
+    var r = n >> 16,
+      g = n >> 8 & 255,
+      b = n & 255;
+    if (a > 0) {
+      r += (255 - r) * a;
+      g += (255 - g) * a;
+      b += (255 - b) * a;
+    } else {
+      r *= 1 + a;
+      g *= 1 + a;
+      b *= 1 + a;
+    }
+    return TC[k] = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')';
+  };
+  var tone = S.tone;
+  S.rrp = function (x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  };
+  S.edge = function (lw) {
+    c.lineWidth = lw || S.LW;
+    c.strokeStyle = S.OUT;
+    c.lineJoin = 'round';
+    c.stroke();
+  };
+  S.part = function (x, y, w, h, r, col) {
+    S.rrp(x, y, w, h, r);
+    S.edge();
+    c.fillStyle = tone(col, -.3);
+    c.fill();
+    S.rrp(x, y, w * .78, h * .94, r);
+    c.fillStyle = col;
+    c.fill();
+    S.rrp(x + w * .14, y + h * .12, Math.max(1.5, w * .15), h * .4, w * .08);
+    c.fillStyle = tone(col, .4);
+    c.fill();
+  };
+  S.orb = function (cx, cy, rx, ry, col) {
+    c.beginPath();
+    c.ellipse(cx, cy, rx, ry, 0, 0, 6.2832);
+    S.edge();
+    c.fillStyle = tone(col, -.28);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx - rx * .13, cy - ry * .13, rx * .84, ry * .84, 0, 0, 6.2832);
+    c.fillStyle = col;
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx - rx * .36, cy - ry * .42, rx * .28, ry * .19, -.6, 0, 6.2832);
+    c.fillStyle = 'rgba(255,255,255,.42)';
+    c.fill();
+  };
+  S.dot = function (cx, cy, r, col) {
+    c.fillStyle = col;
+    c.beginPath();
+    c.arc(cx, cy, r, 0, 6.2832);
+    c.fill();
+  };
+  S.limb = function (x1, y1, x2, y2, w, col) {
+    c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(x1, y1);
+    c.lineTo(x2, y2);
+    c.lineWidth = w + S.LW * 1.3;
+    c.strokeStyle = S.OUT;
+    c.stroke();
+    c.lineWidth = w;
+    c.strokeStyle = col;
+    c.stroke();
+    c.lineWidth = Math.max(1, w * .28);
+    c.strokeStyle = tone(col, .32);
+    c.beginPath();
+    c.moveTo(x1 - w * .2, y1);
+    c.lineTo(x2 - w * .2, y2);
+    c.stroke();
+  };
+  S.shape = function (p, col, noEdge) {
+    c.beginPath();
+    c.moveTo(p[0], p[1]);
+    for (var i = 2; i < p.length; i += 2) c.lineTo(p[i], p[i + 1]);
+    c.closePath();
+    if (!noEdge) S.edge();
+    c.fillStyle = col;
+    c.fill();
+  };
+  S.curve = function (p, col, noEdge) {
+    var n = p.length / 2;
+    c.beginPath();
+    c.moveTo((p[0] + p[2]) / 2, (p[1] + p[3]) / 2);
+    for (var i = 1; i <= n; i++) {
+      var a = i % n * 2,
+        b = (i + 1) % n * 2;
+      c.quadraticCurveTo(p[a], p[a + 1], (p[a] + p[b]) / 2, (p[a + 1] + p[b + 1]) / 2);
+    }
+    c.closePath();
+    if (!noEdge) S.edge();
+    c.fillStyle = col;
+    c.fill();
+  };
+  S.eye = function (x, y, r, pup) {
+    S.dot(x, y, r + 1.1, S.OUT);
+    S.dot(x, y, r, '#ffffff');
+    S.dot(x + r * .3, y + r * .1, r * .58, pup || S.OUT);
+    S.dot(x + r * .05, y - r * .3, r * .26, '#ffffff');
+  };
+  S.glow = function (x, y, r, col) {
+    var g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, col);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  S.shadow = function (x, y, rx, a) {
+    c.fillStyle = 'rgba(20,10,30,' + .16 * (a == null ? 1 : a) + ')';
+    c.beginPath();
+    c.ellipse(x, y, rx * 1.35, rx * .4, 0, 0, 6.2832);
+    c.fill();
+    c.fillStyle = 'rgba(20,10,30,' + .2 * (a == null ? 1 : a) + ')';
+    c.beginPath();
+    c.ellipse(x, y, rx * .85, rx * .25, 0, 0, 6.2832);
+    c.fill();
+  };
+  S.clouds = function (vw, camX, p, gap, night, rnd) {
+    var o = camX * p,
+      i0 = Math.floor((o - 200) / gap),
+      i1 = Math.ceil((o + vw + 200) / gap);
+    c.fillStyle = night ? 'rgba(90,60,110,.5)' : 'rgba(255,255,255,.78)';
+    for (var i = i0; i <= i1; i++) {
+      var r = rnd(i, 7, 3);
+      if (r > .6) continue;
+      var sx = i * gap - o,
+        cy = 28 + r * 70;
+      for (var _i2 = 0, _arr2 = [[0, 0, 22], [22, -8, 26], [46, 0, 20], [22, 6, 24]]; _i2 < _arr2.length; _i2++) {
+        var q = _arr2[_i2];
+        c.beginPath();
+        c.ellipse(sx + q[0], cy + q[1], q[2] * 1.3, q[2] * .7, 0, 0, 6.2832);
+        c.fill();
+      }
+    }
+  };
+  S.kid = function (x, y, face, L, pose) {
+    c.save();
+    c.translate(x, y);
+    c.scale(face * (L.sc || 1), L.sc || 1);
+    if (pose.rot) {
+      c.translate(0, -18);
+      c.rotate(pose.rot);
+      c.translate(0, 18);
+    }
+    var air = pose.air,
+      mv = pose.walk != null,
+      ph = mv ? Math.sin(pose.walk) : 0,
+      s = ph * 5,
+      bob = mv && !air ? -Math.abs(Math.cos(pose.walk)) * 1.2 : 0;
+    if (L.bunny) {
+      var hop = air ? 0 : Math.abs(Math.sin((pose.walk || 0) * 1.2)) * 3;
+      c.translate(0, -hop);
+      S.orb(-13, -12, 4.5, 4.5, '#ffffff');
+      S.orb(-3, -11, 12, 9, L.fur);
+      S.orb(3, -4, 5, 3, S.tone(L.fur, -.1));
+      S.orb(-9, -3, 5, 3, S.tone(L.fur, -.1));
+      S.limb(4, -24, 0 + (air ? -3 : 0), -42, 4.5, L.fur);
+      S.limb(9, -24, 10 + (air ? -2 : 0), -42, 4.5, S.tone(L.fur, .05));
+      S.limb(9, -27, 10, -39, 1.6, '#f2a6c4');
+      S.orb(8, -20, 9, 8.5, L.fur);
+      S.eye(12, -22, 2.2);
+      S.dot(17, -18, 2, '#f07aa8');
+      S.dot(10, -15, 1.8, 'rgba(240,120,160,.45)');
+      c.restore();
+      return;
+    }
+    var tall = L.tall ? 4 : 0,
+      hip = -11 - tall * .5 + bob,
+      top = hip - 14 - tall * .6,
+      hy = top - 8;
+    S.limb(-2, hip, -2 + (air ? -4 : -s * .8), air ? -6 : -3, 5, S.tone(L.pants, -.2));
+    S.orb(-1 + (air ? -4 : -s * .8), air ? -5 : -2, 4.3, 2.7, '#2a2230');
+    S.limb(-4, top + 4, air ? -10 : -5 + s * .7, air ? top - 4 : top + 12, 3.8, S.tone(L.shirt, -.2));
+    S.orb(air ? -10 : -5 + s * .7, air ? top - 4 : top + 12, 2.6, 2.6, L.skin);
+    if (L.style === 'long') S.curve([-9, hy - 4, 6, hy - 6, 4, top + 12, -11, top + 12], L.hair);
+    if (L.style === 'pony') {
+      S.limb(-8, hy - 2, -13, hy + 8 + (mv ? ph * 2 : 0), 4.5, L.hair);
+      S.dot(-8, hy - 1, 2.4, '#f2c230');
+    }
+    S.limb(3, hip, 3 + (air ? 5 : s * .8), air ? -8 : -3, 5, L.pants);
+    S.orb(4 + (air ? 5 : s * .8), air ? -7 : -2, 4.5, 2.8, '#3a3040');
+    if (L.dress) S.curve([-9, hip + 3, -6, top, 6, top, 10, hip + 3], L.shirt);else S.part(-7.5, top, 15, hip - top + 3, 6, L.shirt);
+    if (!L.dress) {
+      S.rrp(-7.5, hip - 3, 15, 3.5, 1.7);
+      c.fillStyle = S.tone(L.pants, -.1);
+      c.fill();
+    }
+    S.orb(1, hy, 9, 9, L.skin);
+    if (L.style === 'bald') {
+      c.beginPath();
+      c.ellipse(-6, hy, 3.4, 5, 0, 0, 6.2832);
+      c.fillStyle = L.hair;
+      c.fill();
+      S.dot(-1, hy - 6, 2.6, 'rgba(255,255,255,.5)');
+    } else {
+      c.beginPath();
+      c.ellipse(0, hy - 3, 9.6, 6.5, 0, Math.PI, 6.2832);
+      c.lineTo(-9.6, hy + 2);
+      c.closePath();
+      S.edge();
+      c.fillStyle = L.hair;
+      c.fill();
+      if (L.style === 'spiky') for (var k = 0; k < 3; k++) S.shape([-7 + k * 5, hy - 7, -4 + k * 5, hy - 15 + k, -1 + k * 5, hy - 8], L.hair);
+      S.dot(-2, hy - 6, 1.6, 'rgba(255,255,255,.35)');
+    }
+    if (L.glasses) {
+      c.lineWidth = 1.3;
+      c.strokeStyle = S.OUT;
+      c.beginPath();
+      c.arc(5, hy, 3.4, 0, 6.2832);
+      c.stroke();
+    }
+    S.eye(5, hy, 2.2, L.eyes);
+    S.dot(3, hy + 4, 1.6, 'rgba(230,100,100,.4)');
+    c.strokeStyle = S.OUT;
+    c.lineWidth = 1.1;
+    c.beginPath();
+    c.arc(6, hy + 3.5, 2, .2, 2.3);
+    c.stroke();
+    if (L.beard) {
+      S.curve([-1, hy + 4, 9, hy + 3, 8, hy + 9, 2, hy + 10], L.beard);
+    }
+    S.limb(4, top + 4, air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 3.8, L.shirt);
+    S.orb(air ? 10 : 5 - s * .7, air ? top - 5 : top + 12, 2.7, 2.7, L.skin);
+    c.restore();
+  };
+  S.LOOK = {
+    tommy: {
+      shirt: '#f07a2a',
+      pants: '#3b4a6b',
+      hair: '#4a2e1c',
+      skin: '#f4c9a0',
+      style: 'spiky'
+    },
+    milly: {
+      shirt: '#8a5cc7',
+      pants: '#5a3a8a',
+      hair: '#c8642a',
+      skin: '#f4c9a0',
+      style: 'long',
+      dress: true
+    },
+    papone: {
+      shirt: '#3f86d4',
+      pants: '#3b3f4f',
+      hair: '#8a6a4f',
+      skin: '#efc19a',
+      style: 'bald',
+      tall: true,
+      beard: '#8a6a4f'
+    },
+    carotino: {
+      bunny: true,
+      fur: '#efe2c4'
+    }
+  };
+  S.picker = function (box, cur, onPick) {
+    box.innerHTML = '';
+    K.CHAR_ORDER.forEach(function (ch) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kchar' + (ch === cur ? ' sel' : '');
+      var cv = document.createElement('canvas');
+      cv.width = 88;
+      cv.height = 116;
+      var x = cv.getContext('2d');
+      x.scale(2, 2);
+      var o = S.use(x);
+      try {
+        S.kid(22, 56, 1, S.LOOK[ch], {
+          walk: null,
+          air: false
+        });
+      } catch (e) {}
+      S.use(o);
+      b.appendChild(cv);
+      var n = document.createElement('span');
+      n.textContent = K.CHARS[ch].name;
+      b.appendChild(n);
+      b.onclick = function () {
+        return onPick(ch);
+      };
+      box.appendChild(b);
+    });
+  };
+})();
+(function () {
+  var $ = K.$;
+  K.players = function () {
+    var l = K.load('sala-players', null);
+    if (!Array.isArray(l)) {
+      l = ['Tommy', 'Milly', 'Papone'];
+      var tn = K.load('tom-name', null);
+      if (typeof tn === 'string' && tn && l.indexOf(tn) < 0) l.unshift(tn);
+    }
+    return l;
+  };
+  K.player = function (slot) {
+    var all = K.players();
+    var p = K.load('sala-player' + (slot || ''), null);
+    if (all.indexOf(p) < 0) p = all[slot ? 1 : 0] || all[0];
+    return p;
+  };
+  K.setPlayer = function (slot, name) {
+    K.save('sala-player' + (slot || ''), name);
+  };
+  function addName(n) {
+    n = String(n || '').replace(/\s+/g, ' ').trim().slice(0, 14);
+    if (!n) return null;
+    var l = K.players();
+    var ex = l.find(function (x) {
+      return x.toLowerCase() === n.toLowerCase();
+    });
+    if (ex) return ex;
+    l.push(n);
+    K.save('sala-players', l.slice(-16));
+    return n;
+  }
+  K.playerPicker = function (box, slot, onPick) {
+    if (!onPick && !slot) onPick = function onPick() {
+      try {
+        location.reload();
+      } catch (e) {}
+    };
+    var cur = K.player(slot);
+    box.innerHTML = '';
+    box.className = 'kplayers';
+    K.players().forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kpl' + (n === cur ? ' sel' : '');
+      b.textContent = (n === cur ? '✔ ' : '') + n;
+      b.onclick = function () {
+        K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        onPick && onPick(n);
+      };
+      box.appendChild(b);
+    });
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'kpl add';
+    add.textContent = '➕ Nuovo';
+    add.onclick = function () {
+      box.innerHTML = '';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.maxLength = 14;
+      inp.placeholder = 'Scrivi il nome';
+      inp.className = 'kplin';
+      var ok = document.createElement('button');
+      ok.type = 'button';
+      ok.className = 'kpl sel';
+      ok.textContent = 'OK';
+      var no = document.createElement('button');
+      no.type = 'button';
+      no.className = 'kpl';
+      no.textContent = 'Annulla';
+      var done = function done() {
+        var n = addName(inp.value);
+        if (n) K.setPlayer(slot, n);
+        K.playerPicker(box, slot, onPick);
+        if (n && onPick) onPick(n);
+      };
+      ok.onclick = done;
+      no.onclick = function () {
+        return K.playerPicker(box, slot, onPick);
+      };
+      inp.onkeydown = function (e) {
+        if (e.key === 'Enter') done();
+      };
+      box.appendChild(inp);
+      box.appendChild(ok);
+      box.appendChild(no);
+      setTimeout(function () {
+        try {
+          inp.focus();
+        } catch (e) {}
+      }, 50);
+    };
+    box.appendChild(add);
+  };
+  K.addScore = function (game, name, add) {
+    if (!name) return;
+    var B = K.load('sala-board', {});
+    var G = B[game] = B[game] || {};
+    var r = G[name] = G[name] || {
+      pts: 0
+    };
+    for (var k in add) {
+      if (k === 'max') {
+        r.max = r.max || {};
+        for (var b in add.max) {
+          if (r.max[b] == null || add.max[b] > r.max[b]) r.max[b] = add.max[b];
+        }
+      } else if (k === 'best') {
+        r.best = r.best || {};
+        for (var _b2 in add.best) {
+          var v = add.best[_b2];
+          if (r.best[_b2] == null || v < r.best[_b2]) r.best[_b2] = v;
+        }
+      } else r[k] = (r[k] || 0) + add[k];
+    }
+    r.last = Date.now();
+    K.save('sala-board', B);
+  };
+  K.boardOf = function (game) {
+    var G = (K.load('sala-board', {}) || {})[game] || {};
+    return Object.keys(G).map(function (n) {
+      return Object.assign({
+        name: n
+      }, G[n]);
+    }).sort(function (a, b) {
+      return (b.pts || 0) - (a.pts || 0) || (b.last || 0) - (a.last || 0);
+    });
+  };
+  var esc = function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;'
+      }[c];
+    });
+  };
+  K.showBoard = function (title, sections, note) {
+    var h = '<h2>🏆 ' + esc(title) + '</h2>';
+    var _iterator6 = _createForOfIteratorHelper(sections),
+      _step6;
+    try {
+      var _loop = function _loop() {
+        var s = _step6.value;
+        if (s.title) h += '<h3 class="kbh">' + esc(s.title) + '</h3>';
+        if (!s.rows.length) {
+          h += '<p class="note">' + esc(s.empty || 'Ancora nessun punteggio: gioca una partita!') + '</p>';
+          return 1;
+        }
+        h += '<table class="kbt"><tr>' + (s.norank ? '' : '<th>#</th>') + s.cols.map(function (c) {
+          return '<th>' + esc(c.h) + '</th>';
+        }).join('') + '</tr>';
+        s.rows.forEach(function (r, i) {
+          h += '<tr' + (i === 0 && !s.norank ? ' class="first"' : '') + '>' + (s.norank ? '' : '<td>' + (i === 0 ? '🏆 1°' : i === 1 ? '2°' : i === 2 ? '3°' : i + 1) + '</td>') + s.cols.map(function (c) {
+            return '<td>' + esc(c.f(r)) + '</td>';
+          }).join('') + '</tr>';
+        });
+        h += '</table>';
+      };
+      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+        if (_loop()) continue;
+      }
+    } catch (err) {
+      _iterator6.e(err);
+    } finally {
+      _iterator6.f();
+    }
+    if (note) h += '<p class="note">' + esc(note) + '</p>';
+    h += '<div class="row"><button class="go" id="kbclose" type="button">Chiudi</button><button class="go alt" id="kbreset" type="button">🗑 Azzera classifica</button></div>';
+    var ov = $('kboard');
+    ov.querySelector('.card').innerHTML = h;
+    ov.hidden = false;
+    $('kbclose').onclick = function () {
+      ov.hidden = true;
+    };
+    $('kbreset').onclick = function () {
+      var b = $('kbreset');
+      if (b.dataset.sure) {
+        var B = K.load('sala-board', {});
+        (sections.games || []).forEach(function (g) {
+          return delete B[g];
+        });
+        K.save('sala-board', B);
+        ov.hidden = true;
+        K.toast('Classifica azzerata');
+      } else {
+        b.dataset.sure = '1';
+        b.textContent = 'Sicuro? Tocca ancora';
+      }
+    };
+  };
+  K.ensurePlayers = function () {
+    var box = $('players');
+    if (box) return box;
+    var card = document.querySelector('#menu .card');
+    if (!card) return null;
+    var h1 = card.querySelector('h1');
+    var h = document.createElement('h2');
+    h.textContent = 'Chi gioca?';
+    box = document.createElement('div');
+    box.id = 'players';
+    if (h1 && h1.nextSibling) {
+      card.insertBefore(box, h1.nextSibling);
+      card.insertBefore(h, box);
+    } else {
+      card.appendChild(h);
+      card.appendChild(box);
+    }
+    return box;
+  };
+  K.fmtT = function (s) {
+    return Math.floor(s / 60) + ':' + ('0' + Math.floor(s) % 60).slice(-2) + '.' + Math.floor(s % 1 * 10);
+  };
+})();
+(function () {
+  K.maxDpr = 1.25;
+  var ctx = K.ctx,
+    $ = K.$;
+  K.addMusic('calcio', {
+    tempo: 138,
+    lead: 'square',
+    lv: .05,
+    mel: 'C5 - E5 G5 - E5 C5 - D5 - F5 A5 - F5 D5 - E5 - G5 C6 - G5 E5 - D5 E5 F5 D5 G5 - - -',
+    bass: 'C3 G2 C3 G2 D3 A2 D3 A2 E3 B2 E3 B2 G2 D3 G2 D3',
+    drums: 'k-h-s-h-k-k-s-h-'
+  });
+  K.addMusic('cwin', {
+    tempo: 130,
+    lead: 'square',
+    lv: .08,
+    mel: 'C5 E5 G5 C6 - G5 C6 - - - - - - - - -',
+    bass: 'C3 - - - G2 - - - C3 - - - - - - -',
+    drums: 'k---k---'
+  });
+  var HX = 370,
+    HY = 218,
+    GY = 64,
+    GD = 34,
+    PR = 13,
+    BR = 6.5,
+    FR = 0.984;
+  var TEAMS = [{
+    n: 'Tommy FC',
+    s: 'TOM',
+    c: '#f07a2a',
+    c2: '#ffffff',
+    sh: '#1d1f2b',
+    gk: '#3fbf6a',
+    sk: .6
+  }, {
+    n: 'Gattini Volanti',
+    s: 'GAT',
+    c: '#ee8fc6',
+    c2: '#ffffff',
+    sh: '#7a3d63',
+    gk: '#f2c230',
+    sk: 0
+  }, {
+    n: 'Ranocchi Saltanti',
+    s: 'RAN',
+    c: '#5fbf4a',
+    c2: '#f2e33a',
+    sh: '#2c5f22',
+    gk: '#e0373f',
+    sk: .18
+  }, {
+    n: 'Pinguini Furbi',
+    s: 'PIN',
+    c: '#2b2f3e',
+    c2: '#ffffff',
+    sh: '#ffffff',
+    gk: '#f07a2a',
+    sk: .36
+  }, {
+    n: 'Lupi Grigi',
+    s: 'LUP',
+    c: '#9aa2b5',
+    c2: '#2b2f3e',
+    sh: '#2b2f3e',
+    gk: '#f2c230',
+    sk: .55
+  }, {
+    n: 'Squali Blu',
+    s: 'SQU',
+    c: '#2f74c9',
+    c2: '#9fd3f0',
+    sh: '#13325e',
+    gk: '#f2c230',
+    sk: .75
+  }, {
+    n: 'Draghi Viola',
+    s: 'DRA',
+    c: '#7b4fc4',
+    c2: '#f2c230',
+    sh: '#3a2266',
+    gk: '#5fbf4a',
+    sk: .95
+  }];
+  var SUB = ['facile', 'facile', 'media', 'media', 'difficile', 'difficilissima'];
+  var HAIR = ['#4a2e1c', '#1d1f2b', '#c99a00', '#8a4b22', '#2b2f3e', '#d9a441'],
+    SKIN = ['#f2c59a', '#d99a6c', '#f6d2b0', '#b97a4f', '#e8b48a', '#f2c59a'];
+  var mode = 1,
+    oppIdx = 0,
+    team2 = 5,
+    dur = 3,
+    P = [],
+    ball = null,
+    T = [],
+    skill = [.6, .6],
+    score = [0, 0],
+    clock = 0,
+    state = 'menu',
+    timer = 0,
+    kickTeam = 0,
+    goalTeam = 0;
+  var ctrl = [-1, -1],
+    _humans = [0],
+    names = ['', ''],
+    switchCool = [0, 0],
+    animT = 0,
+    parts = [],
+    conf = [],
+    msg = null,
+    results = null;
+  var s = 1,
+    ox = 0,
+    oy = 0,
+    face = false,
+    top = 46,
+    bot = 0,
+    CTL = [],
+    bg = null,
+    bgKey = '';
+  var IN = [mkIn(), mkIn()];
+  var ST = {
+    shots: 0,
+    saves: 0,
+    parry: 0,
+    goals: 0,
+    far: 0
+  };
+  function mkIn() {
+    return {
+      jx: 0,
+      jy: 0,
+      tx: 0,
+      ty: 0,
+      tj: false,
+      pass: false,
+      shoot: false,
+      pp: false,
+      ps: false,
+      lp: false,
+      ls: false,
+      kx: 0,
+      ky: 0
+    };
+  }
+  var hyp = function hyp(x, y) {
+      return Math.sqrt(x * x + y * y);
+    },
+    clamp = function clamp(v, a, b) {
+      return v < a ? a : v > b ? b : v;
+    },
+    dist = function dist(a, b) {
+      return hyp(a.x - b.x, a.y - b.y);
+    };
+  var dirOf = function dirOf(t) {
+    return t === 0 ? 1 : -1;
+  };
+  function newPlayer(t, role, i) {
+    return {
+      t: t,
+      role: role,
+      i: i,
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      dx: 0,
+      dy: 0,
+      fx: dirOf(t),
+      fy: 0,
+      anim: 0,
+      cool: 0,
+      prot: 0,
+      slide: 0,
+      rec: 0,
+      hold: 0,
+      ownT: 0,
+      charge: 0,
+      speed: 0,
+      hair: HAIR[(i + t * 3) % 6],
+      skin: SKIN[(i * 2 + t) % 6]
+    };
+  }
+  function setupMatch() {
+    P = [];
+    for (var t = 0; t < 2; t++) {
+      P.push(newPlayer(t, 'gk', 0));
+      P.push(newPlayer(t, 'f', 1));
+      P.push(newPlayer(t, 'f', 2));
+    }
+    for (var _i3 = 0, _P = P; _i3 < _P.length; _i3++) {
+      var p = _P[_i3];
+      var sk = skill[p.t];
+      p.speed = p.role === 'gk' ? 2.05 + sk * .75 : 2.05 + sk * .85;
+    }
+    _humans.forEach(function (h) {
+      var t = h;
+      for (var _i4 = 0, _P2 = P; _i4 < _P2.length; _i4++) {
+        var _p = _P2[_i4];
+        if (_p.t === t && _p.role === 'f') {
+          _p.speed = 2.95;
+        }
+      }
+    });
+    ball = {
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      z: 0,
+      vz: 0,
+      owner: null,
+      passTo: null,
+      roll: 0,
+      last: null
+    };
+    score = [0, 0];
+    clock = dur * 60;
+    ctrl = [1, 4];
+    parts = [];
+    conf = [];
+    msg = null;
+  }
+  function teamOfHuman(h) {
+    return h;
+  }
+  function kickoff(team) {
+    kickTeam = team;
+    var _iterator7 = _createForOfIteratorHelper(P),
+      _step7;
+    try {
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        var p = _step7.value;
+        var d = dirOf(p.t),
+          me = p.t === team;
+        if (p.role === 'gk') {
+          p.x = -d * (HX - 22);
+          p.y = 0;
+        } else if (p.i === 1) {
+          p.x = me ? -d * 12 : d * 80;
+          p.y = me ? 0 : -40;
+        } else {
+          p.x = me ? -d * 100 : d * 150;
+          p.y = me ? 80 : 60;
+        }
+        p.vx = p.vy = p.dx = p.dy = 0;
+        p.fx = d;
+        p.fy = 0;
+        p.cool = 0;
+        p.prot = 0;
+        p.slide = 0;
+        p.rec = 0;
+        p.hold = 0;
+        p.charge = 0;
+        p.ownT = 0;
+      }
+    } catch (err) {
+      _iterator7.e(err);
+    } finally {
+      _iterator7.f();
+    }
+    ball.vx = ball.vy = ball.z = ball.vz = 0;
+    ball.passTo = null;
+    var k = P[team * 3 + 1];
+    ball.owner = k;
+    k.prot = 40;
+    ball.x = k.x + k.fx * (PR + BR + 1);
+    ball.y = 0;
+    _humans.forEach(function (h) {
+      ctrl[h] = h * 3 + 1;
+    });
+    state = 'kick';
+    timer = 75;
+  }
+  function layout() {
+    var W = K.W,
+      H = K.H;
+    face = mode === 2 && H > W * 1.05;
+    document.body.classList.toggle('cface', face);
+    var R = Math.max(38, Math.min(64, Math.min(W, H) * .085)),
+      band = Math.round(R * 2.35 + 14);
+    top = 46;
+    bot = 0;
+    if (H >= 500) {
+      bot = band;
+      if (face) top = band;
+    }
+    var ah = H - top - bot;
+    s = Math.min(W / (2 * HX + 96), ah / (2 * HY + 62));
+    ox = W / 2;
+    oy = top + ah / 2;
+    var jr = R * 1.1,
+      rs = R * .95,
+      rp = R * .8,
+      pd = 14;
+    CTL = [];
+    var P1 = {
+      rot: 0,
+      joy: {
+        x: pd + jr,
+        y: H - pd - jr,
+        R: jr,
+        kx: 0,
+        ky: 0
+      },
+      btns: []
+    };
+    if (mode === 2 && !face) {
+      P1.btns = [{
+        k: 'pass',
+        x: P1.joy.x + jr + 20 + rp,
+        y: H - pd - rp - R * .2,
+        r: rp
+      }, {
+        k: 'shoot',
+        x: P1.joy.x + jr + 20 + rp * 2 + 14 + rs,
+        y: H - pd - rs,
+        r: rs
+      }];
+      P1.zone = [0, H * .4, P1.joy.x + jr + 12, H];
+    } else {
+      P1.btns = [{
+        k: 'shoot',
+        x: W - pd - rs,
+        y: H - pd - rs,
+        r: rs
+      }, {
+        k: 'pass',
+        x: W - pd - rs * 2 - 18 - rp,
+        y: H - pd - rp - R * .2,
+        r: rp
+      }];
+      P1.zone = [0, face ? H * .5 : 56, W * .5, H];
+    }
+    CTL.push(P1);
+    if (mode === 2) {
+      if (face) {
+        var P2 = {
+          rot: Math.PI,
+          joy: {
+            x: W - pd - jr,
+            y: pd + jr,
+            R: jr,
+            kx: 0,
+            ky: 0
+          },
+          btns: [{
+            k: 'shoot',
+            x: pd + rs,
+            y: pd + rs,
+            r: rs
+          }, {
+            k: 'pass',
+            x: pd + rs * 2 + 18 + rp,
+            y: pd + rp + R * .2,
+            r: rp
+          }],
+          zone: [W * .5, 0, W, H * .5]
+        };
+        CTL.push(P2);
+      } else {
+        var _P3 = {
+          rot: 0,
+          joy: {
+            x: W - pd - jr,
+            y: H - pd - jr,
+            R: jr,
+            kx: 0,
+            ky: 0
+          },
+          btns: []
+        };
+        _P3.btns = [{
+          k: 'pass',
+          x: _P3.joy.x - jr - 20 - rp,
+          y: H - pd - rp - R * .2,
+          r: rp
+        }, {
+          k: 'shoot',
+          x: _P3.joy.x - jr - 20 - rp * 2 - 14 - rs,
+          y: H - pd - rs,
+          r: rs
+        }];
+        _P3.zone = [_P3.joy.x - jr - 12, H * .4, W, H];
+        CTL.push(_P3);
+      }
+    }
+    bg = null;
+  }
+  K.onResize = function () {
+    if (state !== 'menu') layout();
+  };
+  var TT = {};
+  var lastTouch = 0;
+  var active = function active() {
+    return K.playing && $('kpause').hidden && CTL.length;
+  };
+  function onHud(x, y) {
+    var r = $('hud').getBoundingClientRect();
+    return x >= r.left - 6 && x <= r.right + 6 && y >= r.top - 6 && y <= r.bottom + 6;
+  }
+  function tStart(id, x, y) {
+    for (var h = 0; h < CTL.length; h++) {
+      var C = CTL[h];
+      var _iterator8 = _createForOfIteratorHelper(C.btns),
+        _step8;
+      try {
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+          var b = _step8.value;
+          if (hyp(x - b.x, y - b.y) < b.r * 1.3) {
+            TT[id] = {
+              h: h,
+              k: b.k
+            };
+            return true;
+          }
+        }
+      } catch (err) {
+        _iterator8.e(err);
+      } finally {
+        _iterator8.f();
+      }
+    }
+    for (var _h = 0; _h < CTL.length; _h++) {
+      var z = CTL[_h].zone;
+      if (x >= z[0] && x <= z[2] && y >= z[1] && y <= z[3]) {
+        TT[id] = {
+          h: _h,
+          k: 'joy'
+        };
+        setJoy(_h, x, y);
+        return true;
+      }
+    }
+    return false;
+  }
+  function setJoy(h, x, y) {
+    var j = CTL[h].joy;
+    var dx = x - j.x,
+      dy = y - j.y;
+    var m = hyp(dx, dy);
+    if (m > j.R) {
+      dx *= j.R / m;
+      dy *= j.R / m;
+    }
+    j.kx = dx;
+    j.ky = dy;
+    var I = IN[h];
+    I.tx = dx / j.R;
+    I.ty = dy / j.R;
+    if (hyp(I.tx, I.ty) < .18) {
+      I.tx = 0;
+      I.ty = 0;
+    }
+  }
+  function refresh() {
+    for (var h = 0; h < 2; h++) {
+      var I = IN[h];
+      I.tj = false;
+      I.pass = false;
+      I.shoot = false;
+    }
+    for (var id in TT) {
+      var t = TT[id],
+        _I = IN[t.h];
+      if (t.k === 'joy') _I.tj = true;else _I[t.k] = true;
+    }
+    for (var _h2 = 0; _h2 < CTL.length; _h2++) if (!IN[_h2].tj) {
+      IN[_h2].tx = 0;
+      IN[_h2].ty = 0;
+      CTL[_h2].joy.kx = 0;
+      CTL[_h2].joy.ky = 0;
+    }
+  }
+  document.addEventListener('touchstart', function (e) {
+    lastTouch = Date.now();
+    if (!active()) return;
+    var used = false;
+    var L = e.changedTouches;
+    for (var i = 0; i < L.length; i++) {
+      var t = L[i];
+      if (onHud(t.clientX, t.clientY)) continue;
+      if (tStart(t.identifier, t.clientX, t.clientY)) used = true;
+    }
+    refresh();
+    if (used && e.cancelable) e.preventDefault();
+  }, {
+    passive: false
+  });
+  document.addEventListener('touchmove', function (e) {
+    if (!active()) return;
+    var used = false;
+    var L = e.changedTouches;
+    for (var i = 0; i < L.length; i++) {
+      var t = TT[L[i].identifier];
+      if (t) {
+        used = true;
+        if (t.k === 'joy') setJoy(t.h, L[i].clientX, L[i].clientY);
+      }
+    }
+    if (used && e.cancelable) e.preventDefault();
+  }, {
+    passive: false
+  });
+  function tEndEv(e) {
+    lastTouch = Date.now();
+    var L = e.changedTouches;
+    for (var i = 0; i < L.length; i++) delete TT[L[i].identifier];
+    refresh();
+  }
+  document.addEventListener('touchend', tEndEv);
+  document.addEventListener('touchcancel', tEndEv);
+  var mDown = false;
+  K.cv.addEventListener('mousedown', function (e) {
+    if (Date.now() - lastTouch < 900 || !active()) return;
+    mDown = true;
+    tStart('m', e.clientX, e.clientY);
+    refresh();
+  });
+  addEventListener('mousemove', function (e) {
+    if (mDown && TT.m && TT.m.k === 'joy') setJoy(TT.m.h, e.clientX, e.clientY);
+  });
+  addEventListener('mouseup', function () {
+    if (mDown) {
+      mDown = false;
+      delete TT.m;
+      refresh();
+    }
+  });
+  function readInput() {
+    for (var h = 0; h < 2; h++) {
+      var I = IN[h];
+      var jx = I.tx,
+        jy = I.ty,
+        sh = I.shoot,
+        pa = I.pass;
+      if (h === 0) {
+        var kx = (K.keys.right ? 1 : 0) - (K.keys.left ? 1 : 0),
+          ky = (K.keys.down ? 1 : 0) - (K.keys.up ? 1 : 0);
+        if (kx || ky) {
+          var m = hyp(kx, ky);
+          jx = kx / m;
+          jy = ky / m;
+        }
+        if (K.keys.a) sh = true;
+        if (K.keys.b || K.keys.c) pa = true;
+      }
+      I.jx = jx;
+      I.jy = jy;
+      I.pp = pa && !I.lp;
+      I.ps = sh && !I.ls;
+      I.sh = sh;
+      I.lp = pa;
+      I.ls = sh;
+    }
+  }
+  var kickS = function kickS(p) {
+    return K.beep(150 + p * 60, .07, 'square', .07, -60);
+  };
+  var whistle = function whistle(n) {
+    for (var i = 0; i < (n || 1); i++) setTimeout(function () {
+      K.beep(2300, .18, 'sine', .05, 120);
+    }, i * 260);
+  };
+  function setCtrl(h, p) {
+    var i = P.indexOf(p);
+    if (i < 0 || P[i].role !== 'f' || ctrl[h] === i) return;
+    ctrl[h] = i;
+    switchCool[h] = 24;
+  }
+  var isHum = function isHum(p) {
+    return _humans.some(function (h) {
+      return ctrl[h] === P.indexOf(p);
+    });
+  };
+  function humanOf(p) {
+    var _iterator9 = _createForOfIteratorHelper(_humans),
+      _step9;
+    try {
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var h = _step9.value;
+        if (ctrl[h] === P.indexOf(p)) return h;
+      }
+    } catch (err) {
+      _iterator9.e(err);
+    } finally {
+      _iterator9.f();
+    }
+    return -1;
+  }
+  function take(p) {
+    ball.shot = 0;
+    ball.owner = p;
+    ball.passTo = null;
+    ball.z = 0;
+    ball.vz = 0;
+    p.prot = 12;
+    p.ownT = 0;
+    if (p.role === 'gk') {
+      p.hold = 48;
+    }
+    K.beep(420, .04, 'triangle', .04);
+  }
+  function release(p, vx, vy, vz) {
+    ball.owner = null;
+    ball.vx = vx;
+    ball.vy = vy;
+    ball.vz = vz || 0;
+    ball.last = p;
+    p.cool = 13;
+    p.charge = 0;
+    p.hold = 0;
+  }
+  function mates(p) {
+    return P.filter(function (q) {
+      return q.t === p.t && q !== p;
+    });
+  }
+  function opps(t) {
+    return P.filter(function (q) {
+      return q.t !== t;
+    });
+  }
+  function laneFree(a, b, t) {
+    var worst = 999;
+    var _iterator0 = _createForOfIteratorHelper(opps(t)),
+      _step0;
+    try {
+      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+        var o = _step0.value;
+        var vx = b.x - a.x,
+          vy = b.y - a.y,
+          L = vx * vx + vy * vy || 1;
+        var k = ((o.x - a.x) * vx + (o.y - a.y) * vy) / L;
+        k = clamp(k, 0, 1);
+        var d = hyp(a.x + vx * k - o.x, a.y + vy * k - o.y);
+        if (d < worst) worst = d;
+      }
+    } catch (err) {
+      _iterator0.e(err);
+    } finally {
+      _iterator0.f();
+    }
+    return worst;
+  }
+  function bestMate(p, ux, uy) {
+    var best = null,
+      bs = -1e9;
+    var A = dirOf(p.t);
+    var _iterator1 = _createForOfIteratorHelper(mates(p)),
+      _step1;
+    try {
+      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+        var m = _step1.value;
+        if (m.role === 'gk' && p.role === 'gk') continue;
+        var dx = m.x - p.x,
+          dy = m.y - p.y,
+          d = hyp(dx, dy) || 1;
+        var sc = 0;
+        if (ux || uy) sc += (dx * ux + dy * uy) / d * 1.6;
+        sc += dx * A / 600;
+        sc -= d / 1100;
+        var lf = laneFree(p, m, p.t);
+        if (lf < 18) sc -= .9;else if (lf < 34) sc -= .3;
+        if (m.role === 'gk') sc -= .8;
+        if (sc > bs) {
+          bs = sc;
+          best = m;
+        }
+      }
+    } catch (err) {
+      _iterator1.e(err);
+    } finally {
+      _iterator1.f();
+    }
+    if (best) best.sc = bs;
+    return best;
+  }
+  function doPass(p, ux, uy) {
+    var m = bestMate(p, ux, uy);
+    if (!m) return;
+    var lead = 10,
+      tx = m.x + m.vx * lead,
+      ty = m.y + m.vy * lead,
+      dx = tx - ball.x,
+      dy = ty - ball.y,
+      d = hyp(dx, dy) || 1;
+    var v = clamp(d * (1 - FR) * 1.35 + 2.4, 5.5, 13.5);
+    release(p, dx / d * v, dy / d * v, d > 260 ? 1.6 : 0);
+    ball.passTo = m;
+    kickS(.3);
+    var _iterator10 = _createForOfIteratorHelper(_humans),
+      _step10;
+    try {
+      for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+        var h = _step10.value;
+        if (h === p.t && m.role === 'f') setCtrl(h, m);
+      }
+    } catch (err) {
+      _iterator10.e(err);
+    } finally {
+      _iterator10.f();
+    }
+  }
+  function doShoot(p, c, aimY) {
+    ST.shots++;
+    if (Math.abs(dirOf(p.t) * HX - ball.x) > 260) ST.far++;
+    var A = dirOf(p.t),
+      gk = P.find(function (q) {
+        return q.t !== p.t && q.role === 'gk';
+      });
+    var ty;
+    if (aimY != null && Math.abs(aimY) > .2) ty = aimY * GY * .85;else ty = (gk && gk.y > 0 ? -1 : 1) * GY * .55;
+    var sk = skill[p.t],
+      hum = isHum(p);
+    if (!hum) ty += (Math.random() - .5) * (1.3 - sk) * 95;
+    ty = hum ? clamp(ty, -GY + 7, GY - 7) : clamp(ty, -GY - 26, GY + 26);
+    var tx = A * (HX + 12),
+      dx = tx - ball.x,
+      dy = ty - ball.y,
+      d = hyp(dx, dy) || 1,
+      v = (hum ? 10 : 8.6 + sk * 1.6) + c * 6.2;
+    release(p, dx / d * v, dy / d * v, 1 + c * 2.3);
+    ball.passTo = null;
+    ball.shot = Math.round(Math.abs(tx - ball.x));
+    kickS(1);
+    for (var i = 0; i < 8; i++) parts.push({
+      x: ball.x,
+      y: ball.y,
+      vx: (Math.random() - .5) * 2.4,
+      vy: (Math.random() - .5) * 2.4,
+      l: 18,
+      c: '#d8f0c0',
+      z: 2
+    });
+  }
+  function startSlide(p) {
+    if (p.slide > 0 || p.rec > 0) return;
+    p.slide = 15;
+    var m = hyp(p.fx, p.fy) || 1;
+    p.vx = p.fx / m * 5.4;
+    p.vy = p.fy / m * 5.4;
+    K.beep(110, .12, 'sawtooth', .04, -40);
+  }
+  function humanControl(h, f) {
+    var I = IN[h];
+    var p = P[ctrl[h]];
+    if (switchCool[h] > 0) switchCool[h] -= f;
+    var o = ball.owner;
+    if (!(o && o.t === p.t) && switchCool[h] <= 0 && ball.passTo !== p) {
+      var bx = ball.x + ball.vx * 8,
+        by = ball.y + ball.vy * 8;
+      var n = null,
+        nd = 1e9;
+      var _iterator11 = _createForOfIteratorHelper(P),
+        _step11;
+      try {
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+          var q = _step11.value;
+          if (q.t === p.t && q.role === 'f') {
+            var d = hyp(q.x - bx, q.y - by);
+            if (d < nd) {
+              nd = d;
+              n = q;
+            }
+          }
+        }
+      } catch (err) {
+        _iterator11.e(err);
+      } finally {
+        _iterator11.f();
+      }
+      if (n && n !== p && hyp(p.x - bx, p.y - by) > nd + 55) setCtrl(h, n);
+    }
+    if (I.pp && o !== p) {
+      var _n2 = P.find(function (q) {
+        return q.t === p.t && q.role === 'f' && q !== p;
+      });
+      if (_n2) {
+        ctrl[h] = P.indexOf(_n2);
+        switchCool[h] = 40;
+      }
+    }
+    p = P[ctrl[h]];
+    var mv = hyp(I.jx, I.jy);
+    if (p.slide <= 0 && p.rec <= 0) {
+      var sp = p.speed * (ball.owner === p ? .9 : 1) * (p.charge > 0 ? .75 : 1);
+      p.dx = I.jx * sp;
+      p.dy = I.jy * sp;
+      if (ball.passTo === p && mv < .2) {
+        moveTo(p, ball.x + ball.vx * 6, ball.y + ball.vy * 6, p.speed);
+      }
+    }
+    if (ball.owner === p) {
+      if (I.pp) {
+        doPass(p, mv > .2 ? I.jx : p.fx, mv > .2 ? I.jy : p.fy);
+        return;
+      }
+      if (I.sh && !(I.ps && false)) {
+        p.charge = Math.min(1, (p.charge || 0) + f / 36);
+        if (p.charge >= 1) doShoot(p, 1, mv > .2 ? I.jy : null);
+      } else if (p.charge > 0) {
+        doShoot(p, p.charge, mv > .2 ? I.jy : null);
+      }
+    } else {
+      p.charge = 0;
+      if (I.ps) startSlide(p);
+    }
+  }
+  function moveTo(p, tx, ty, sp, urg) {
+    var dx = tx - p.x,
+      dy = ty - p.y,
+      d = hyp(dx, dy);
+    if (d < 3) {
+      p.dx = 0;
+      p.dy = 0;
+      return;
+    }
+    var v = sp * Math.min(1, d / (urg ? 6 : 28));
+    p.dx = dx / d * v;
+    p.dy = dy / d * v;
+  }
+  function chaser(t) {
+    var n = null,
+      nd = 1e9;
+    var bx = ball.x + ball.vx * 6,
+      by = ball.y + ball.vy * 6;
+    var _iterator12 = _createForOfIteratorHelper(P),
+      _step12;
+    try {
+      for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+        var q = _step12.value;
+        if (q.t === t && q.role === 'f') {
+          var d = hyp(q.x - bx, q.y - by) - (q.slide > 0 ? 40 : 0);
+          if (d < nd) {
+            nd = d;
+            n = q;
+          }
+        }
+      }
+    } catch (err) {
+      _iterator12.e(err);
+    } finally {
+      _iterator12.f();
+    }
+    return n;
+  }
+  function ai(p, f) {
+    if (p.slide > 0 || p.rec > 0) return;
+    var t = p.t,
+      A = dirOf(t),
+      sk = skill[t],
+      sp = p.speed;
+    if (p.role === 'gk') return aiGK(p, f);
+    var o = ball.owner;
+    if (o === p) return aiOwner(p, f);
+    var tx, ty;
+    if (ball.passTo === p) {
+      tx = ball.x + ball.vx * 7;
+      ty = ball.y + ball.vy * 7;
+    } else if (o && o.t === t) {
+      tx = clamp(o.x + A * 125, -HX + 60, HX - 60);
+      ty = (o.y > 0 ? -1 : 1) * (80 + Math.sin(animT / 90 + p.i) * 30);
+      if (o.role === 'gk') {
+        tx = A * -50;
+        ty = p.i === 1 ? -100 : 100;
+      }
+    } else {
+      var ch = chaser(t);
+      if (ch === p) {
+        var lead = o ? 5 : 9;
+        tx = ball.x + ball.vx * lead;
+        ty = ball.y + ball.vy * lead;
+        if (o && o.t !== t && dist(p, o) < 32 && o.hold <= 0 && Math.random() < (.003 + .012 * sk) * f) {
+          var dx = o.x - p.x,
+            dy = o.y - p.y,
+            d = hyp(dx, dy) || 1;
+          p.fx = dx / d;
+          p.fy = dy / d;
+          startSlide(p);
+          return;
+        }
+      } else {
+        var g = -A * HX;
+        tx = g + (ball.x - g) * .45;
+        ty = ball.y * .5;
+        if (Math.abs(tx - g) < 70) tx = g + A * 70;
+      }
+    }
+    moveTo(p, tx, ty, sp * (o && o.t === t ? .92 : 1));
+  }
+  function aiOwner(p, f) {
+    var t = p.t,
+      A = dirOf(t),
+      sk = skill[t],
+      gx = A * HX,
+      dx = gx - p.x,
+      dy = -p.y,
+      dG = hyp(dx, dy) || 1;
+    p.ownT += f;
+    var opp = null,
+      dO = 1e9;
+    var _iterator13 = _createForOfIteratorHelper(opps(t)),
+      _step13;
+    try {
+      for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+        var q = _step13.value;
+        var d = dist(p, q);
+        if (d < dO) {
+          dO = d;
+          opp = q;
+        }
+      }
+    } catch (err) {
+      _iterator13.e(err);
+    } finally {
+      _iterator13.f();
+    }
+    if (dG < 175 + sk * 80 && p.ownT > 14 && (dG < 105 || laneFree(p, {
+      x: gx,
+      y: 0
+    }, t) > 16) && Math.random() < (.025 + .03 * sk) * f) {
+      doShoot(p, .35 + Math.random() * .4 + sk * .25, null);
+      return;
+    }
+    if (dO < 52 && p.ownT > 16 && Math.random() < (.02 + .05 * sk) * f) {
+      var _m = bestMate(p, 0, 0);
+      if (_m && _m.role === 'f' && laneFree(p, _m, t) > 30) {
+        doPass(p, 0, 0);
+        return;
+      }
+    }
+    if (p.ownT > 260) {
+      if (dG < 350) doShoot(p, .8, null);else doPass(p, A, 0);
+      return;
+    }
+    var ux = dx / dG,
+      uy = dy / dG * .7;
+    if (opp && dO < 95) {
+      var ax = p.x - opp.x,
+        ay = p.y - opp.y,
+        w = (95 - dO) / 95 * (.6 + sk * .7);
+      ux += ax / dO * w * .6;
+      uy += ay / dO * w * 1.5;
+      if (Math.abs(p.y) > HY - 50) uy -= Math.sign(p.y) * .8;
+    }
+    var m = hyp(ux, uy) || 1;
+    p.dx = ux / m * p.speed * .9;
+    p.dy = uy / m * p.speed * .9;
+  }
+  function aiGK(p, f) {
+    var t = p.t,
+      A = dirOf(t),
+      sk = skill[t],
+      g = -A * HX;
+    if (ball.owner === p) {
+      p.dx = p.dy = 0;
+      p.hold -= f;
+      if (p.hold <= 0) {
+        var m = bestMate(p, A, 0);
+        if (m && laneFree(p, m, t) > 26) doPass(p, 0, 0);else {
+          var _ty = (Math.random() - .5) * 200;
+          release(p, A * 11, _ty / 40, 2.2);
+          kickS(.8);
+        }
+      }
+      return;
+    }
+    var tx = g + A * 20,
+      ty = clamp(ball.y * .7, -GY + 10, GY - 10),
+      sp = p.speed;
+    p.dive = false;
+    var spd = hyp(ball.vx, ball.vy);
+    if (!ball.owner && ball.vx * A < -.4 && spd > 4.5 && (g - ball.x) / ball.vx > 0 && (g - ball.x) / ball.vx < 75 && Math.abs(ball.y + ball.vy * (g - ball.x) / ball.vx) < GY + 18) {
+      var tl = (g - ball.x) / ball.vx,
+        cy = ball.y + ball.vy * tl;
+      var best = null,
+        bd = 1e9;
+      for (var k = 0; k <= tl; k += 2) {
+        var bx = ball.x + ball.vx * k,
+          by = ball.y + ball.vy * k;
+        if ((bx - g) * A > 60) continue;
+        var dd = hyp(bx - p.x, by - p.y) - k * (p.speed * 1.8);
+        if (dd < bd) {
+          bd = dd;
+          best = [bx, by];
+        }
+      }
+      if (!best) best = [g + A * 6, cy];
+      tx = best[0];
+      ty = clamp(best[1], -GY - 14, GY + 14);
+      sp *= 1.5 + sk * .35;
+      p.dive = true;
+    } else if (Math.abs(ball.x - g) < 45 && Math.abs(ball.y) < GY + 50) {
+      tx = g + A * 9;
+      ty = clamp(ball.y, -GY + 6, GY - 6);
+    } else if (!ball.owner && Math.abs(ball.x - g) < 125 && Math.abs(ball.y) < 140 && spd < 6) {
+      tx = ball.x;
+      ty = ball.y;
+      sp *= 1.1;
+    } else if (ball.owner && ball.owner.t !== t && Math.abs(ball.x - g) < 160) {
+      tx = g + A * 42;
+      ty = clamp(ball.y * .6, -GY, GY);
+    }
+    tx = g + A * clamp((tx - g) * A, p.dive ? 2 : 8, 125);
+    moveTo(p, tx, ty, sp, p.dive);
+  }
+  function goal(t) {
+    if (state !== 'play') return;
+    score[t]++;
+    ST.goals++;
+    if (ball.shot) {
+      ST.gs = (ST.gs || 0) + 1;
+      ST.gd = ST.gd || [];
+      ST.gd.push(ball.shot);
+    } else ST.go = (ST.go || 0) + 1;
+    if (ball.last && ball.last.t !== t) ST.own = (ST.own || 0) + 1;
+    goalTeam = t;
+    state = 'goal';
+    timer = 150;
+    msg = {
+      s: 'GOOOL!',
+      t: 0
+    };
+    K.jingle([523, 659, 784, 1047, 784, 1047], 110);
+    whistle(1);
+    var tm = T[t];
+    for (var i = 0; i < 70; i++) conf.push({
+      x: Math.random() * K.W,
+      y: -Math.random() * K.H * .5,
+      vx: (Math.random() - .5) * 1.5,
+      vy: 1.5 + Math.random() * 2.5,
+      r: Math.random() * 6.28,
+      c: [tm.c, tm.c2, '#f2c230', '#ffffff'][i % 4],
+      l: 200
+    });
+  }
+  function physBall(f) {
+    var b = ball;
+    if (b.owner) {
+      var o = b.owner,
+        m = hyp(o.fx, o.fy) || 1,
+        tx = o.x + o.fx / m * (PR + BR + 1),
+        ty = o.y + o.fy / m * (PR + BR + 1),
+        k = Math.min(1, .55 * f);
+      b.x += (tx - b.x) * k;
+      b.y += (ty - b.y) * k;
+      b.vx = o.vx;
+      b.vy = o.vy;
+      b.z = 0;
+      b.roll += hyp(o.vx, o.vy) * f * .5;
+    } else {
+      b.x += b.vx * f;
+      b.y += b.vy * f;
+      var fr = Math.pow(b.z > 0 ? .994 : FR, f);
+      b.vx *= fr;
+      b.vy *= fr;
+      b.roll += hyp(b.vx, b.vy) * f * .5;
+      if (b.z > 0 || b.vz > 0) {
+        b.vz -= .22 * f;
+        b.z += b.vz * f;
+        if (b.z < 0) {
+          b.z = 0;
+          b.vz = -b.vz * .45;
+          if (b.vz < .7) b.vz = 0;
+        }
+      }
+    }
+    if (b.y > HY - BR) {
+      b.y = HY - BR;
+      b.vy = -Math.abs(b.vy) * .72;
+    }
+    if (b.y < -HY + BR) {
+      b.y = -HY + BR;
+      b.vy = Math.abs(b.vy) * .72;
+    }
+    for (var _i5 = 0, _arr3 = [1, -1]; _i5 < _arr3.length; _i5++) {
+      var sg = _arr3[_i5];
+      var lx = sg * HX;
+      if (sg * b.x > HX - BR) {
+        if (Math.abs(b.y) < GY - BR * .3) {
+          if (sg * b.x > HX + GD - BR) {
+            b.x = sg * (HX + GD - BR);
+            b.vx = -b.vx * .2;
+            b.vy *= .5;
+          }
+          if (sg * b.x > HX) {
+            if (b.y > GY - BR) {
+              b.y = GY - BR;
+              b.vy = -Math.abs(b.vy) * .4;
+            }
+            if (b.y < -GY + BR) {
+              b.y = -GY + BR;
+              b.vy = Math.abs(b.vy) * .4;
+            }
+          }
+          if (sg * b.x > HX + BR && state === 'play') goal(sg > 0 ? 0 : 1);
+        } else if (sg * b.x < HX + 4) {
+          b.x = sg * (HX - BR);
+          b.vx = -sg * Math.abs(b.vx) * .72;
+          if (b.owner) b.owner = null;
+        }
+      }
+      for (var _i6 = 0, _arr4 = [GY, -GY]; _i6 < _arr4.length; _i6++) {
+        var py = _arr4[_i6];
+        var dx = b.x - lx,
+          dy = b.y - py,
+          d = hyp(dx, dy);
+        if (d < BR + 4 && d > 0) {
+          var nx = dx / d,
+            ny = dy / d,
+            vn = b.vx * nx + b.vy * ny;
+          if (vn < 0) {
+            b.vx -= 1.8 * vn * nx;
+            b.vy -= 1.8 * vn * ny;
+            K.beep(900, .05, 'triangle', .05);
+          }
+          b.x = lx + nx * (BR + 4);
+          b.y = py + ny * (BR + 4);
+        }
+      }
+    }
+  }
+  function contacts(f) {
+    var b = ball;
+    if (state !== 'play') return;
+    var order = P.slice().sort(function () {
+      return Math.random() - .5;
+    });
+    var _iterator14 = _createForOfIteratorHelper(order),
+      _step14;
+    try {
+      for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+        var p = _step14.value;
+        if (p.cool > 0) continue;
+        var reach = PR + BR + (p.role === 'gk' ? 11 : 3) + (p.slide > 0 ? 4 : 0),
+          d = hyp(p.x - b.x, p.y - b.y);
+        if (d > reach || b.z > 16) continue;
+        var o = b.owner;
+        if (!o) {
+          var spd = hyp(b.vx, b.vy);
+          if (p.role === 'gk') {
+            var inArea = Math.abs(p.x - dirOf(p.t) * -HX) < 115;
+            var pc = spd < 6 ? 1 : (.6 + skill[p.t] * .35) * (b.z > 9 ? .6 : 1);
+            if (inArea && Math.random() < pc) {
+              if (spd >= 6) ST.saves++;
+              take(p);
+              b.x = p.x + dirOf(p.t) * (PR + 2);
+              b.y = p.y;
+              return;
+            }
+            ST.parry++;
+            var A = dirOf(p.t),
+              sy = b.y - p.y || Math.random() - .5;
+            b.vx = A * (1.8 + Math.abs(b.vx) * .25);
+            b.vy = (sy > 0 ? 1 : -1) * (3.2 + Math.random() * 2.8);
+            b.vz = 1.4;
+            p.cool = 22;
+            K.beep(300, .08, 'square', .06);
+            return;
+          }
+          if (spd < 7.5 || b.passTo === p || Math.random() < .35 * f) {
+            if (b.last === p && b.passTo && b.passTo !== p) continue;
+            take(p);
+            return;
+          }
+          b.vx *= .8;
+          b.vy *= .8;
+          p.cool = 5;
+          continue;
+        }
+        if (o.t !== p.t && o.hold <= 0 && o.prot <= 0) {
+          var pr = p.slide > 0 ? .85 : (p.role === 'gk' ? .2 : isHum(p) ? .075 : .02 + .045 * skill[p.t]) * f;
+          if (Math.random() < pr) {
+            o.cool = 34;
+            o.charge = 0;
+            if (p.slide > 0) {
+              var m = hyp(p.vx, p.vy) || 1;
+              b.owner = null;
+              b.vx = p.vx / m * 4.2 + (Math.random() - .5);
+              b.vy = p.vy / m * 4.2 + (Math.random() - .5);
+              b.last = p;
+              p.cool = 6;
+              K.beep(200, .08, 'square', .06);
+            } else {
+              take(p);
+              p.prot = 26;
+            }
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      _iterator14.e(err);
+    } finally {
+      _iterator14.f();
+    }
+  }
+  function update(f) {
+    animT += f;
+    readInput();
+    var _iterator15 = _createForOfIteratorHelper(parts),
+      _step15;
+    try {
+      for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+        var q = _step15.value;
+        q.x += q.vx * f;
+        q.y += q.vy * f;
+        q.l -= f;
+      }
+    } catch (err) {
+      _iterator15.e(err);
+    } finally {
+      _iterator15.f();
+    }
+    parts = parts.filter(function (q) {
+      return q.l > 0;
+    });
+    var _iterator16 = _createForOfIteratorHelper(conf),
+      _step16;
+    try {
+      for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+        var _c = _step16.value;
+        _c.x += _c.vx * f;
+        _c.y += _c.vy * f;
+        _c.r += .1 * f;
+        _c.l -= f;
+      }
+    } catch (err) {
+      _iterator16.e(err);
+    } finally {
+      _iterator16.f();
+    }
+    conf = conf.filter(function (c) {
+      return c.l > 0 && c.y < K.H + 20;
+    });
+    if (msg) msg.t += f;
+    if (state === 'kick') {
+      timer -= f;
+      if (timer <= 0) {
+        state = 'play';
+        msg = null;
+        whistle(1);
+      }
+      return;
+    }
+    if (state === 'goal' || state === 'over') {
+      timer -= f;
+      physBall(f);
+      var _iterator17 = _createForOfIteratorHelper(P),
+        _step17;
+      try {
+        for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+          var p = _step17.value;
+          p.vx *= .9;
+          p.vy *= .9;
+          p.x += p.vx * f;
+          p.y += p.vy * f;
+          if (state === 'goal' && p.t === goalTeam) {
+            p.anim += .3 * f;
+          }
+        }
+      } catch (err) {
+        _iterator17.e(err);
+      } finally {
+        _iterator17.f();
+      }
+      if (timer <= 0) {
+        if (state === 'over') return endMatch();
+        msg = null;
+        if (clock <= 0) {
+          state = 'over';
+          timer = 1;
+          return;
+        }
+        kickoff(1 - goalTeam);
+      }
+      return;
+    }
+    if (state !== 'play') return;
+    clock -= f / 60;
+    if (clock <= 0) {
+      clock = 0;
+      state = 'over';
+      timer = 110;
+      whistle(3);
+      msg = {
+        s: 'FINE PARTITA',
+        t: 0
+      };
+      return;
+    }
+    var _iterator18 = _createForOfIteratorHelper(P),
+      _step18;
+    try {
+      for (_iterator18.s(); !(_step18 = _iterator18.n()).done;) {
+        var _p2 = _step18.value;
+        if (_p2.cool > 0) _p2.cool -= f;
+        if (_p2.prot > 0) _p2.prot -= f;
+      }
+    } catch (err) {
+      _iterator18.e(err);
+    } finally {
+      _iterator18.f();
+    }
+    var _iterator19 = _createForOfIteratorHelper(_humans),
+      _step19;
+    try {
+      for (_iterator19.s(); !(_step19 = _iterator19.n()).done;) {
+        var h = _step19.value;
+        humanControl(h, f);
+      }
+    } catch (err) {
+      _iterator19.e(err);
+    } finally {
+      _iterator19.f();
+    }
+    var _iterator20 = _createForOfIteratorHelper(P),
+      _step20;
+    try {
+      for (_iterator20.s(); !(_step20 = _iterator20.n()).done;) {
+        var _p3 = _step20.value;
+        if (!isHum(_p3)) ai(_p3, f);
+      }
+    } catch (err) {
+      _iterator20.e(err);
+    } finally {
+      _iterator20.f();
+    }
+    var _iterator21 = _createForOfIteratorHelper(P),
+      _step21;
+    try {
+      for (_iterator21.s(); !(_step21 = _iterator21.n()).done;) {
+        var _p4 = _step21.value;
+        if (_p4.slide > 0) {
+          _p4.slide -= f;
+          _p4.vx *= Math.pow(.96, f);
+          _p4.vy *= Math.pow(.96, f);
+          if (_p4.slide <= 0) _p4.rec = 20;
+        } else {
+          if (_p4.rec > 0) {
+            _p4.rec -= f;
+            _p4.dx *= .3;
+            _p4.dy *= .3;
+          }
+          var k = Math.min(1, (_p4.dive ? .45 : .22) * f);
+          _p4.vx += (_p4.dx - _p4.vx) * k;
+          _p4.vy += (_p4.dy - _p4.vy) * k;
+        }
+        _p4.x += _p4.vx * f;
+        _p4.y += _p4.vy * f;
+        var lim = ball.owner === _p4 ? HX - PR - BR - 3 : HX - PR * .6;
+        _p4.x = clamp(_p4.x, -lim, lim);
+        _p4.y = clamp(_p4.y, -HY + PR, HY - PR);
+        var v = hyp(_p4.vx, _p4.vy);
+        if (v > .35 && _p4.slide <= 0) {
+          var _k = Math.min(1, .3 * f);
+          _p4.fx += (_p4.vx / v - _p4.fx) * _k;
+          _p4.fy += (_p4.vy / v - _p4.fy) * _k;
+          var m = hyp(_p4.fx, _p4.fy) || 1;
+          _p4.fx /= m;
+          _p4.fy /= m;
+        }
+        _p4.anim += v * .16 * f;
+      }
+    } catch (err) {
+      _iterator21.e(err);
+    } finally {
+      _iterator21.f();
+    }
+    for (var i = 0; i < P.length; i++) for (var j = i + 1; j < P.length; j++) {
+      var a = P[i],
+        c = P[j],
+        dx = c.x - a.x,
+        dy = c.y - a.y,
+        d = hyp(dx, dy);
+      if (d > 0 && d < PR * 2) {
+        var push = (PR * 2 - d) / 2,
+          nx = dx / d,
+          ny = dy / d;
+        a.x -= nx * push;
+        a.y -= ny * push;
+        c.x += nx * push;
+        c.y += ny * push;
+      }
+    }
+    physBall(f);
+    contacts(f);
+    if (ball.passTo && hyp(ball.vx, ball.vy) < 1.2 && !ball.owner) ball.passTo = null;
+  }
+  var PROG = K.load('calcio-prog', {
+    open: 0,
+    won: {}
+  });
+  if (!PROG.won) PROG.won = {};
+  function endMatch() {
+    state = 'end';
+    K.stop();
+    K.del('calcio-run');
+    var r = {
+      score: score.slice(),
+      mode: mode
+    };
+    var pts = function pts(a, b) {
+      return a > b ? 3 : a === b ? 1 : 0;
+    };
+    if (mode === 1) {
+      var w = score[0] > score[1];
+      K.addScore('calcio', names[0], {
+        pts: pts(score[0], score[1]),
+        partite: 1,
+        vittorie: w ? 1 : 0,
+        gol: score[0]
+      });
+      if (w) {
+        PROG.won[oppIdx] = 1;
+        if (PROG.open < oppIdx + 1) PROG.open = Math.min(5, oppIdx + 1);
+        K.save('calcio-prog', PROG);
+      }
+      r.win = w;
+      r.draw = score[0] === score[1];
+    } else {
+      K.addScore('calcio', names[0], {
+        pts: pts(score[0], score[1]),
+        partite: 1,
+        vittorie: score[0] > score[1] ? 1 : 0,
+        gol: score[0]
+      });
+      K.addScore('calcio', names[1], {
+        pts: pts(score[1], score[0]),
+        partite: 1,
+        vittorie: score[1] > score[0] ? 1 : 0,
+        gol: score[1]
+      });
+    }
+    results = r;
+    showResults();
+  }
+  function showResults() {
+    var r = results;
+    $('resScore').innerHTML = '<span class="sw" style="background:' + T[0].c + '"></span> ' + T[0].n + '  <b>' + r.score[0] + ' – ' + r.score[1] + '</b>  ' + T[1].n + ' <span class="sw" style="background:' + T[1].c + '"></span>';
+    if (mode === 1) {
+      $('resTitle').textContent = r.win ? 'HAI VINTO! 🏆' : r.draw ? 'Pareggio!' : 'Hai perso… riprova!';
+      var nx = oppIdx + 1;
+      $('resNext').hidden = !(r.win && nx < 6);
+      $('resNote').textContent = r.win ? nx < 6 ? 'Hai sbloccato: ' + TEAMS[nx + 1].n + '!' : 'Hai battuto tutte le squadre: sei il campione del torneo! 🏆' : 'Vinci la partita per sbloccare la squadra successiva.';
+    } else {
+      $('resTitle').textContent = r.score[0] === r.score[1] ? 'Pareggio!' : 'Vince ' + (r.score[0] > r.score[1] ? names[0] : names[1]) + '!';
+      $('resNext').hidden = true;
+      $('resNote').textContent = '';
+    }
+    K.wantMusic = 'cwin';
+    $('res').hidden = false;
+    setTimeout(function () {
+      if (K.wantMusic === 'cwin') K.wantMusic = null;
+    }, 2600);
+  }
+  function ell(x, y, rx, ry) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(rx, ry);
+    ctx.beginPath();
+    ctx.arc(0, 0, 1, 0, 6.2832);
+    ctx.restore();
+    ctx.fill();
+  }
+  function rrect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.lineTo(x + w - r, y);
+    c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h);
+    c.quadraticCurveTo(x, y + h, x, y + h - r);
+    c.lineTo(x, y + r);
+    c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+  }
+  function buildBg() {
+    var W = K.W,
+      H = K.H,
+      d = K.dpr;
+    bg = document.createElement('canvas');
+    bg.width = Math.round(W * d);
+    bg.height = Math.round(H * d);
+    var x = bg.getContext('2d');
+    x.setTransform(d, 0, 0, d, 0, 0);
+    var gr = x.createLinearGradient(0, 0, 0, H);
+    gr.addColorStop(0, '#1b2433');
+    gr.addColorStop(1, '#10151f');
+    x.fillStyle = gr;
+    x.fillRect(0, 0, W, H);
+    var L = ox - (HX + 40) * s,
+      R = ox + (HX + 40) * s,
+      Tt = oy - (HY + 30) * s,
+      B = oy + (HY + 30) * s;
+    var COLS = ['#f07a2a', '#ffffff', '#f2c230', '#3f86d4', '#e0373f', '#5fbf4a', '#ee8fc6', '#9aa2b5', '#7b4fc4'];
+    var st = Math.max(7, 9 * s);
+    var n = 0;
+    for (var yy = 6; yy < H; yy += st) for (var xx = 4; xx < W; xx += st) {
+      if (xx > L - 6 && xx < R + 6 && yy > Tt - 6 && yy < B + 6) continue;
+      var r = K.rnd(xx, yy, 3);
+      var row = Math.floor(yy / st);
+      x.fillStyle = row % 2 ? '#232c3d' : '#1e2636';
+      x.fillRect(xx - st / 2, yy - st / 2, st, st);
+      if (r < .78) {
+        x.fillStyle = COLS[Math.floor(K.rnd(xx, yy, 7) * COLS.length)];
+        x.fillRect(xx - st * .32, yy - st * .12, st * .64, st * .5);
+        x.fillStyle = SKIN[Math.floor(r * 6) % 6];
+        x.beginPath();
+        x.arc(xx, yy - st * .22, st * .22, 0, 6.283);
+        x.fill();
+        n++;
+      }
+    }
+    x.save();
+    x.translate(ox, oy);
+    x.scale(s, s);
+    x.fillStyle = 'rgba(0,0,0,.45)';
+    x.fillRect(-HX - 40, -HY - 30, 2 * HX + 80, 2 * HY + 60);
+    var ads = ['SALA DI TOM', '⚽ GOL!', 'TOMMY FC', 'FORZA!'];
+    var AC = ['#f07a2a', '#2f74c9', '#5fbf4a', '#e0373f'];
+    x.font = "700 13px 'Pixelify Sans', monospace";
+    x.textAlign = 'center';
+    x.textBaseline = 'middle';
+    for (var i = 0; i < 10; i++) {
+      var w = (2 * HX + 80) / 10,
+        _xx = -HX - 40 + i * w;
+      x.fillStyle = AC[i % 4];
+      x.fillRect(_xx + 1, -HY - 30, w - 2, 14);
+      x.fillRect(_xx + 1, HY + 16, w - 2, 14);
+      x.fillStyle = '#fff';
+      x.fillText(ads[i % 4], _xx + w / 2, -HY - 23);
+      x.fillText(ads[(i + 2) % 4], _xx + w / 2, HY + 23);
+    }
+    var gx0 = -HX - 26,
+      gy0 = -HY - 16,
+      gw = 2 * HX + 52,
+      gh = 2 * HY + 32;
+    x.fillStyle = '#3a9440';
+    x.fillRect(gx0, gy0, gw, gh);
+    var N = 14,
+      sw = gw / N;
+    for (var _i7 = 0; _i7 < N; _i7++) {
+      x.fillStyle = _i7 % 2 ? '#3f9c45' : '#47a84c';
+      x.fillRect(gx0 + _i7 * sw, gy0, sw + .5, gh);
+    }
+    for (var _i8 = 0; _i8 < 6; _i8++) {
+      x.fillStyle = 'rgba(255,255,255,' + (_i8 % 2 ? .025 : 0) + ')';
+      x.fillRect(gx0, gy0 + _i8 * gh / 6, gw, gh / 6);
+    }
+    for (var _i9 = 0; _i9 < 900; _i9++) {
+      x.fillStyle = 'rgba(0,40,0,' + (.05 + K.rnd(_i9, 1, 5) * .08) + ')';
+      x.fillRect(gx0 + K.rnd(_i9, 2, 5) * gw, gy0 + K.rnd(_i9, 3, 5) * gh, 1.6, 1.6);
+    }
+    x.strokeStyle = 'rgba(255,255,255,.88)';
+    x.lineWidth = 2.6;
+    x.strokeRect(-HX, -HY, 2 * HX, 2 * HY);
+    x.beginPath();
+    x.moveTo(0, -HY);
+    x.lineTo(0, HY);
+    x.stroke();
+    x.beginPath();
+    x.arc(0, 0, 56, 0, 6.283);
+    x.stroke();
+    x.fillStyle = 'rgba(255,255,255,.9)';
+    x.beginPath();
+    x.arc(0, 0, 3.5, 0, 6.283);
+    x.fill();
+    for (var _i0 = 0, _arr5 = [1, -1]; _i0 < _arr5.length; _i0++) {
+      var sg = _arr5[_i0];
+      x.strokeRect(sg > 0 ? HX - 88 : -HX, -125, 88, 250);
+      x.strokeRect(sg > 0 ? HX - 32 : -HX, -82, 32, 164);
+      x.beginPath();
+      x.arc(sg * (HX - 64), 0, 3, 0, 6.283);
+      x.fill();
+      x.beginPath();
+      x.arc(sg * (HX - 64), 0, 40, sg > 0 ? Math.PI * .69 : -Math.PI * .31, sg > 0 ? Math.PI * 1.31 : Math.PI * .31);
+      x.stroke();
+      for (var _i1 = 0, _arr6 = [1, -1]; _i1 < _arr6.length; _i1++) {
+        var sy = _arr6[_i1];
+        x.beginPath();
+        x.arc(sg * HX, sy * HY, 10, 0, 6.283);
+        x.stroke();
+      }
+    }
+    for (var _i10 = 0, _arr7 = [1, -1]; _i10 < _arr7.length; _i10++) {
+      var _sg = _arr7[_i10];
+      var x0 = _sg > 0 ? HX : -HX - GD;
+      x.fillStyle = 'rgba(0,0,0,.25)';
+      x.fillRect(x0 + (_sg > 0 ? 4 : -4), -GY + 5, GD, 2 * GY);
+      x.fillStyle = 'rgba(235,240,250,.22)';
+      x.fillRect(x0, -GY, GD, 2 * GY);
+      x.strokeStyle = 'rgba(255,255,255,.45)';
+      x.lineWidth = .8;
+      for (var _yy = -GY; _yy <= GY; _yy += 6) {
+        x.beginPath();
+        x.moveTo(x0, _yy);
+        x.lineTo(x0 + GD, _yy);
+        x.stroke();
+      }
+      for (var _xx2 = 0; _xx2 <= GD; _xx2 += 6) {
+        x.beginPath();
+        x.moveTo(x0 + _xx2, -GY);
+        x.lineTo(x0 + _xx2, GY);
+        x.stroke();
+      }
+      x.strokeStyle = '#f6f7fb';
+      x.lineWidth = 3;
+      x.beginPath();
+      x.moveTo(_sg * HX, -GY);
+      x.lineTo(_sg * (HX + GD), -GY);
+      x.lineTo(_sg * (HX + GD), GY);
+      x.lineTo(_sg * HX, GY);
+      x.stroke();
+      x.lineWidth = 5;
+      x.strokeStyle = '#ffffff';
+      x.beginPath();
+      x.moveTo(_sg * HX, -GY);
+      x.lineTo(_sg * HX, GY);
+      x.stroke();
+      x.strokeStyle = 'rgba(0,0,0,.3)';
+      x.lineWidth = 2;
+      x.beginPath();
+      x.moveTo(_sg * HX + 3, -GY + 3);
+      x.lineTo(_sg * HX + 3, GY + 3);
+      x.stroke();
+      x.fillStyle = '#ffffff';
+      for (var _i11 = 0, _arr8 = [GY, -GY]; _i11 < _arr8.length; _i11++) {
+        var py = _arr8[_i11];
+        x.beginPath();
+        x.arc(_sg * HX, py, 4, 0, 6.283);
+        x.fill();
+      }
+    }
+    x.restore();
+    var vg = x.createRadialGradient(ox, oy, Math.min(W, H) * .2, ox, oy, Math.max(W, H) * .75);
+    vg.addColorStop(0, 'rgba(255,255,230,.06)');
+    vg.addColorStop(1, 'rgba(0,0,0,.45)');
+    x.fillStyle = vg;
+    x.fillRect(0, 0, W, H);
+    bgKey = W + 'x' + H;
+  }
+  function drawPlayer(p, ring) {
+    var tm = T[p.t],
+      a = Math.atan2(p.fy, p.fx),
+      v = hyp(p.vx, p.vy),
+      ph = Math.sin(p.anim) * Math.min(1, v / 1.8),
+      gk = p.role === 'gk';
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.scale(1.15, 1.15);
+    ctx.fillStyle = 'rgba(0,0,0,.28)';
+    ell(3, 4, PR * 1.05, PR * .72);
+    if (ring) {
+      ctx.strokeStyle = ring;
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.arc(0, 0, PR + 5, 0, 6.283);
+      ctx.stroke();
+      ctx.globalAlpha = .25;
+      ctx.fillStyle = ring;
+      ctx.beginPath();
+      ctx.arc(0, 0, PR + 5, 0, 6.283);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    ctx.rotate(a);
+    var sock = gk ? '#1d1f2b' : tm.c2,
+      cel = state === 'goal' && p.t === goalTeam;
+    var L1 = p.slide > 0 ? 10 : ph * 7,
+      L2 = p.slide > 0 ? 7 : -ph * 7;
+    ctx.fillStyle = sock;
+    ell(L1, -4.6, 4.4, 2.7);
+    ell(L2, 4.6, 4.4, 2.7);
+    ctx.fillStyle = '#1d1f2b';
+    ell(L1 + 3.2, -4.6, 2.4, 2.3);
+    ell(L2 + 3.2, 4.6, 2.4, 2.3);
+    var arm = cel ? Math.sin(animT * .4) * 3 : -ph * 4;
+    ctx.fillStyle = gk ? '#f6f7fb' : p.skin;
+    ell(arm + (cel ? 5 : 0), -10.2, gk ? 3.4 : 2.8, gk ? 3.4 : 2.8);
+    ell(-arm + (cel ? 5 : 0), 10.2, gk ? 3.4 : 2.8, gk ? 3.4 : 2.8);
+    ctx.fillStyle = gk ? tm.gk : tm.c;
+    ell(0, 0, 7.2, 11.2);
+    ctx.strokeStyle = 'rgba(0,0,0,.35)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = gk ? '#1d1f2b' : tm.c2;
+    ctx.fillRect(-7, -1.3, 2.5, 2.6);
+    ctx.fillRect(-7, -8, 2, 2);
+    ctx.fillRect(-7, 6, 2, 2);
+    ctx.fillStyle = p.skin;
+    ctx.beginPath();
+    ctx.arc(1.2, 0, 5.4, 0, 6.283);
+    ctx.fill();
+    ctx.fillStyle = p.hair;
+    ctx.beginPath();
+    ctx.arc(.6, 0, 5.7, Math.PI * .55, Math.PI * 1.45);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-.4, 0, 4.9, 0, 6.283);
+    ctx.fill();
+    ctx.restore();
+  }
+  function drawBall() {
+    var b = ball,
+      z = b.z,
+      r = BR * 1.12 * (1 + z / 55);
+    ctx.fillStyle = 'rgba(0,0,0,' + (.32 - Math.min(.2, z / 120)) + ')';
+    ell(b.x + 2 + z * .3, b.y + 3 + z * .4, BR * (1 - z / 140), BR * .8 * (1 - z / 140));
+    var x = b.x,
+      y = b.y - z * .85;
+    ctx.fillStyle = '#fbfbfd';
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 6.283);
+    ctx.fill();
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 6.283);
+    ctx.clip();
+    var ux = b.vx,
+      uy = b.vy;
+    var m = hyp(ux, uy);
+    if (m > .05) {
+      ux /= m;
+      uy /= m;
+      b.ux = ux;
+      b.uy = uy;
+    } else {
+      ux = b.ux || 1;
+      uy = b.uy || 0;
+    }
+    ctx.fillStyle = '#1d1f2b';
+    for (var k = 0; k < 3; k++) {
+      var u = (b.roll + k * 4.4) % 13.2;
+      if (u < 0) u += 13.2;
+      u -= 6.6;
+      var w = (k - 1) * 3.4,
+        sz = 1.9 * Math.sqrt(Math.max(.08, 1 - u * u / (r * r)));
+      ctx.beginPath();
+      ctx.arc(x + (ux * u - uy * w) * r / BR, y + (uy * u + ux * w) * r / BR, sz * r / BR, 0, 6.283);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    ctx.beginPath();
+    ctx.arc(x - r * .35, y - r * .38, r * .32, 0, 6.283);
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(20,21,29,.75)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 6.283);
+    ctx.stroke();
+  }
+  var RING = ['#f2e33a', '#7fe0ff'];
+  function drawControls() {
+    for (var h = 0; h < CTL.length; h++) {
+      var C = CTL[h],
+        I = IN[h],
+        j = C.joy,
+        p = P[ctrl[h]],
+        has = ball && ball.owner === p;
+      ctx.fillStyle = 'rgba(255,255,255,.1)';
+      ctx.beginPath();
+      ctx.arc(j.x, j.y, j.R, 0, 6.283);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.45)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = I.tj ? 'rgba(242,194,48,.85)' : 'rgba(255,255,255,.55)';
+      ctx.beginPath();
+      ctx.arc(j.x + j.kx, j.y + j.ky, j.R * .45, 0, 6.283);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(20,21,29,.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      var _iterator22 = _createForOfIteratorHelper(C.btns),
+        _step22;
+      try {
+        for (_iterator22.s(); !(_step22 = _iterator22.n()).done;) {
+          var b = _step22.value;
+          var on = I[b.k];
+          ctx.fillStyle = on ? 'rgba(242,194,48,.92)' : b.k === 'shoot' ? 'rgba(224,55,63,.78)' : 'rgba(63,134,212,.78)';
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, 6.283);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,.85)';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          var lab = b.k === 'shoot' ? has ? 'TIRA' : 'RUBA' : has ? 'PASSA' : 'CAMBIA';
+          ctx.save();
+          ctx.translate(b.x, b.y);
+          ctx.rotate(C.rot);
+          K.text(lab, 0, b.r * .16, Math.round(b.r * (lab.length > 4 ? .36 : .42)), on ? '#1d1f2b' : '#fff', 'center', !on);
+          if (b.k === 'shoot' && has && p.charge > 0) {
+            ctx.strokeStyle = '#f2e33a';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(0, 0, b.r + 6, -Math.PI / 2, -Math.PI / 2 + p.charge * 6.283);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      } catch (err) {
+        _iterator22.e(err);
+      } finally {
+        _iterator22.f();
+      }
+      if (mode === 2) {
+        ctx.save();
+        ctx.translate(j.x, j.y - j.R - 12);
+        ctx.rotate(C.rot);
+        if (C.rot) ctx.translate(0, -2 * (j.R + 12) + 0);
+        K.text(names[h], 0, 0, 15, RING[h], 'center');
+        ctx.restore();
+      }
+    }
+  }
+  function scoreboard() {
+    var W = K.W;
+    var w = Math.min(360, W * .52),
+      cx = W / 2;
+    if (!face && cx + w / 2 > W - 250) {
+      w = Math.max(230, Math.min(360, W - 270));
+      cx = 8 + w / 2;
+    }
+    var y = face ? top - 46 : 5;
+    ctx.fillStyle = 'rgba(14,16,26,.86)';
+    rrect(ctx, cx - w / 2, y, w, 38, 9);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.25)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    for (var t = 0; t < 2; t++) {
+      var sx = t ? cx + w / 2 - 24 : cx - w / 2 + 8;
+      ctx.fillStyle = T[t].c;
+      rrect(ctx, sx, y + 9, 16, 20, 4);
+      ctx.fill();
+      ctx.fillStyle = T[t].c2;
+      ctx.fillRect(sx + 6, y + 9, 4, 20);
+      K.text(T[t].s, t ? cx + w / 2 - 32 : cx - w / 2 + 32, y + 26, 17, '#fff', t ? 'right' : 'left', false);
+      K.text(String(score[t]), t ? cx + 42 : cx - 42, y + 28, 24, '#f2c230', 'center', false);
+    }
+    ctx.fillStyle = '#f2c230';
+    rrect(ctx, cx - 25, y + 7, 50, 24, 5);
+    ctx.fill();
+    K.text(K.fmt(Math.ceil(clock)), cx, y + 25, 15, '#1d1f2b', 'center', false);
+  }
+  function draw() {
+    var W = K.W,
+      H = K.H,
+      d = K.dpr;
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+    if (state === 'menu' || !ball) {
+      ctx.fillStyle = '#14151d';
+      ctx.fillRect(0, 0, W, H);
+      return;
+    }
+    if (!bg || bgKey !== W + 'x' + H) buildBg();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(bg, 0, 0);
+    ctx.setTransform(d * s, 0, 0, d * s, d * ox, d * oy);
+    var _iterator23 = _createForOfIteratorHelper(parts),
+      _step23;
+    try {
+      for (_iterator23.s(); !(_step23 = _iterator23.n()).done;) {
+        var q = _step23.value;
+        ctx.globalAlpha = Math.min(1, q.l / 12);
+        ctx.fillStyle = q.c;
+        ctx.fillRect(q.x - 1.5, q.y - 1.5, 3, 3);
+      }
+    } catch (err) {
+      _iterator23.e(err);
+    } finally {
+      _iterator23.f();
+    }
+    ctx.globalAlpha = 1;
+    var list = P.slice().sort(function (a, b) {
+      return a.y - b.y;
+    });
+    var ballDrawn = false;
+    var _iterator24 = _createForOfIteratorHelper(list),
+      _step24;
+    try {
+      for (_iterator24.s(); !(_step24 = _iterator24.n()).done;) {
+        var p = _step24.value;
+        if (!ballDrawn && ball.y < p.y - 2) {
+          drawBall();
+          ballDrawn = true;
+        }
+        var h = humanOf(p);
+        drawPlayer(p, h >= 0 ? RING[h] : null);
+      }
+    } catch (err) {
+      _iterator24.e(err);
+    } finally {
+      _iterator24.f();
+    }
+    if (!ballDrawn) drawBall();
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+    var _iterator25 = _createForOfIteratorHelper(_humans),
+      _step25;
+    try {
+      for (_iterator25.s(); !(_step25 = _iterator25.n()).done;) {
+        var _h3 = _step25.value;
+        var _p5 = P[ctrl[_h3]];
+        if (!_p5) continue;
+        var sx = ox + _p5.x * s,
+          sy = oy + _p5.y * s - (PR + 12) * s;
+        ctx.fillStyle = RING[_h3];
+        ctx.beginPath();
+        ctx.moveTo(sx - 6, sy - 9);
+        ctx.lineTo(sx + 6, sy - 9);
+        ctx.lineTo(sx, sy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#1d1f2b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        if (mode === 2 || K.time < 400) K.text(names[_h3], sx, sy - 13, 13, '#fff', 'center');
+        if (_p5.charge > 0) {
+          var bw = 34;
+          ctx.fillStyle = 'rgba(20,21,29,.8)';
+          ctx.fillRect(sx - bw / 2 - 2, sy + (PR * 2 + 22) * s, bw + 4, 8);
+          ctx.fillStyle = _p5.charge > .8 ? '#e0373f' : '#f2e33a';
+          ctx.fillRect(sx - bw / 2, sy + (PR * 2 + 22) * s + 2, bw * _p5.charge, 4);
+        }
+      }
+    } catch (err) {
+      _iterator25.e(err);
+    } finally {
+      _iterator25.f();
+    }
+    scoreboard();
+    if (state === 'kick') K.text(timer > 40 ? "Calcio d'inizio" : 'Pronti…', W / 2, oy - HY * s * .45, Math.round(Math.min(44, W * .05)), '#fff', 'center');
+    if (msg) {
+      var k = Math.min(1, msg.t / 10),
+        sc = 1 + Math.sin(msg.t * .25) * .06;
+      ctx.save();
+      ctx.translate(W / 2, oy - HY * s * .3);
+      ctx.scale(k * sc, k * sc);
+      K.text(msg.s, 0, 0, Math.round(Math.min(84, W * .1)), state === 'goal' ? '#f2c230' : '#fff', 'center');
+      if (state === 'goal') K.text(T[goalTeam].n, 0, Math.min(48, W * .06), Math.round(Math.min(30, W * .04)), '#fff', 'center');
+      ctx.restore();
+    }
+    var _iterator26 = _createForOfIteratorHelper(conf),
+      _step26;
+    try {
+      for (_iterator26.s(); !(_step26 = _iterator26.n()).done;) {
+        var c = _step26.value;
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.rotate(c.r);
+        ctx.fillStyle = c.c;
+        ctx.fillRect(-4, -2, 8, 4);
+        ctx.restore();
+      }
+    } catch (err) {
+      _iterator26.e(err);
+    } finally {
+      _iterator26.f();
+    }
+    drawControls();
+  }
+  function snap() {
+    if (!ball || state === 'end' || state === 'menu') return null;
+    return {
+      v: 1,
+      mode: mode,
+      opp: oppIdx,
+      team2: team2,
+      dur: dur,
+      names: names,
+      clock: clock,
+      score: score,
+      kickTeam: kickTeam,
+      state: state,
+      goalTeam: goalTeam,
+      P: P.map(function (p) {
+        return {
+          x: p.x,
+          y: p.y,
+          fx: p.fx,
+          fy: p.fy
+        };
+      }),
+      ball: {
+        x: ball.x,
+        y: ball.y,
+        owner: ball.owner ? P.indexOf(ball.owner) : -1
+      },
+      ctrl: ctrl
+    };
+  }
+  function begin() {
+    T = [TEAMS[0], mode === 1 ? TEAMS[oppIdx + 1] : TEAMS[team2]];
+    skill = [.6, mode === 1 ? TEAMS[oppIdx + 1].sk : .6];
+    _humans = mode === 2 ? [0, 1] : [0];
+    setupMatch();
+    layout();
+    for (var k in TT) delete TT[k];
+    refresh();
+  }
+  function restore(sv) {
+    mode = sv.mode;
+    oppIdx = sv.opp;
+    team2 = sv.team2;
+    dur = sv.dur;
+    names = sv.names;
+    begin();
+    score = sv.score;
+    clock = sv.clock;
+    if (sv.state === 'goal' || sv.state === 'over') {
+      if (clock <= 0) {
+        state = 'over';
+        timer = 1;
+      } else kickoff(1 - sv.goalTeam);
+    } else {
+      kickoff(sv.kickTeam);
+      sv.P.forEach(function (o, i) {
+        return Object.assign(P[i], o);
+      });
+      ball.owner = sv.ball.owner >= 0 ? P[sv.ball.owner] : null;
+      ball.x = sv.ball.x;
+      ball.y = sv.ball.y;
+      ctrl = sv.ctrl;
+      timer = 60;
+    }
+  }
+  function startGame() {
+    $('menu').hidden = true;
+    $('res').hidden = true;
+    K.start();
+    K.time = 0;
+    K.wantMusic = 'calcio';
+  }
+  function renderMenu() {
+    K.playerPicker($('players'), 0);
+    document.querySelectorAll('[data-mode]').forEach(function (b) {
+      b.classList.toggle('sel', +b.dataset.mode === mode);
+      b.onclick = function () {
+        mode = +b.dataset.mode;
+        saveOpt();
+        renderMenu();
+      };
+    });
+    document.querySelectorAll('[data-dur]').forEach(function (b) {
+      b.classList.toggle('sel', +b.dataset.dur === dur);
+      b.onclick = function () {
+        dur = +b.dataset.dur;
+        saveOpt();
+        renderMenu();
+      };
+    });
+    $('tourRow').hidden = mode !== 1;
+    $('p2Row').hidden = mode !== 2;
+    var me0 = K.player(0),
+      others = K.players().filter(function (n) {
+        return n !== me0;
+      });
+    if (others.indexOf(names[1]) < 0) names[1] = others[0] || 'Ospite';
+    var p2 = $('p2');
+    p2.innerHTML = '';
+    (others.length ? others : ['Ospite']).forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kpl' + (n === names[1] ? ' sel' : '');
+      b.textContent = (n === names[1] ? '✔ ' : '') + n;
+      b.onclick = function () {
+        names[1] = n;
+        saveOpt();
+        renderMenu();
+      };
+      p2.appendChild(b);
+    });
+    var sw = function sw(t) {
+      return '<span class="sw" style="background:' + t.c + ';border-color:' + t.sh + '"><i style="background:' + t.c2 + '"></i></span>';
+    };
+    var tb = $('teams2');
+    tb.innerHTML = '';
+    TEAMS.forEach(function (t, i) {
+      if (!i) return;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lvl tm' + (i === team2 ? ' sel' : '');
+      b.innerHTML = sw(t) + t.n;
+      b.onclick = function () {
+        team2 = i;
+        saveOpt();
+        renderMenu();
+      };
+      tb.appendChild(b);
+    });
+    $('play2').onclick = function () {
+      K.del('calcio-run');
+      names[0] = K.player(0);
+      begin();
+      kickoff(0);
+      startGame();
+    };
+    var box = $('tour');
+    box.innerHTML = '';
+    var _loop2 = function _loop2(i) {
+      var t = TEAMS[i + 1],
+        open = i <= PROG.open,
+        won = PROG.won[i];
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lvl tm' + (won ? ' done' : '') + (open ? '' : ' lock');
+      b.innerHTML = sw(t) + '<b>' + (i + 1) + '</b>' + t.n + '<small>' + (open ? won ? '🏆 Battuti!' : 'Squadra ' + SUB[i] : '🔒 vinci la partita prima') + '</small>';
+      b.onclick = function () {
+        if (!open) return;
+        K.del('calcio-run');
+        oppIdx = i;
+        names[0] = K.player(0);
+        begin();
+        kickoff(0);
+        startGame();
+      };
+      box.appendChild(b);
+    };
+    for (var i = 0; i < 6; i++) {
+      _loop2(i);
+    }
+    var sv = K.load('calcio-run', null),
+      cb = $('cont');
+    if (sv && sv.v === 1) {
+      cb.hidden = false;
+      cb.innerHTML = '▶ Continua la partita<small>' + TEAMS[0].s + ' ' + sv.score[0] + ' – ' + sv.score[1] + ' ' + (sv.mode === 1 ? TEAMS[sv.opp + 1] : TEAMS[sv.team2]).s + ' · mancano ' + K.fmt(Math.ceil(sv.clock)) + '</small>';
+      cb.onclick = function () {
+        restore(sv);
+        startGame();
+      };
+    } else cb.hidden = true;
+  }
+  function saveOpt() {
+    K.save('calcio-opt', {
+      mode: mode,
+      dur: dur,
+      p2: names[1],
+      team2: team2
+    });
+  }
+  function showMenu() {
+    K.stop();
+    $('res').hidden = true;
+    state = 'menu';
+    ball = null;
+    CTL = [];
+    document.body.classList.remove('cface');
+    renderMenu();
+    $('menu').hidden = false;
+    K.wantMusic = null;
+  }
+  $('resAgain').onclick = function () {
+    begin();
+    kickoff(0);
+    startGame();
+  };
+  $('resNext').onclick = function () {
+    oppIdx++;
+    begin();
+    kickoff(0);
+    startGame();
+  };
+  $('resMenu').onclick = showMenu;
+  $('boardBtn').onclick = function () {
+    var all = K.boardOf('calcio');
+    var sec = [{
+      title: 'Punti di tutte le partite',
+      cols: [{
+        h: 'Giocatore',
+        f: function f(r) {
+          return r.name;
+        }
+      }, {
+        h: 'Punti',
+        f: function f(r) {
+          return r.pts || 0;
+        }
+      }, {
+        h: 'Partite',
+        f: function f(r) {
+          return r.partite || 0;
+        }
+      }, {
+        h: 'Vittorie',
+        f: function f(r) {
+          return r.vittorie || 0;
+        }
+      }, {
+        h: 'Gol',
+        f: function f(r) {
+          return r.gol || 0;
+        }
+      }],
+      rows: all
+    }];
+    sec.games = ['calcio'];
+    K.showBoard('Classifica Calcetto', sec, 'Vittoria 3 punti · pareggio 1 punto');
+  };
+  var OPT = K.load('calcio-opt', {
+    mode: 1,
+    dur: 3,
+    p2: '',
+    team2: 5
+  });
+  mode = OPT.mode || 1;
+  dur = OPT.dur || 3;
+  names[1] = OPT.p2 || '';
+  team2 = OPT.team2 || 5;
+  K.buttons([]);
+  K.game = {
+    update: update,
+    draw: draw,
+    save: function save() {
+      var sv = snap();
+      return sv ? K.save('calcio-run', sv) : true;
+    },
+    exit: showMenu
+  };
+  K.initUI();
+  K.run();
+  showMenu();
+  window.__CA = {
+    ST: ST,
+    get P() {
+      return P;
+    },
+    get ball() {
+      return ball;
+    },
+    get score() {
+      return score;
+    },
+    get state() {
+      return state;
+    },
+    set state(v) {
+      state = v;
+    },
+    get clock() {
+      return clock;
+    },
+    set clock(v) {
+      clock = v;
+    },
+    IN: IN,
+    get ctrl() {
+      return ctrl;
+    },
+    get CTL() {
+      return CTL;
+    },
+    update: update,
+    begin: begin,
+    kickoff: kickoff,
+    set mode(v) {
+      mode = v;
+    },
+    set oppIdx(v) {
+      oppIdx = v;
+    },
+    get skill() {
+      return skill;
+    },
+    set skill(v) {
+      skill = v;
+    },
+    humans: function humans() {
+      return _humans;
+    },
+    set humans(v) {
+      _humans = v;
+    }
+  };
+})();</script>
+</body>
+</html>

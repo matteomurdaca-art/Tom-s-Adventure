@@ -22,7 +22,7 @@ a.game:active{transform:translate(3px,3px);box-shadow:3px 3px 0 rgba(0,0,0,.45)}
 .ic{font-size:64px;line-height:1.1}
 a.game b{font-size:22px;margin:6px 0 4px}
 a.game span{font-size:14px;color:#5d6273}
-.g1{background:#fff3c4!important}.g2{background:#ffe0cc!important}.g3{background:#e6dcff!important}.g4{background:#d9f2ff!important}.g5{background:#dff5dd!important}.g6{background:#f5dcd6!important}.g7{background:#e9e1d0!important}.g8{background:#dcecff!important}.g9{background:#ffe6f0!important}.g10{background:#f3e3cf!important}.g11{background:#dcd9ef!important}.g12{background:#e2dcff!important}.g13{background:#ffe2ef!important}.g14{background:#dff3e4!important}.g15{background:#e9f7cf!important}.g16{background:#d8f3ee!important}.g17{background:#ffe3d6!important}.g18{background:#fff0c8!important}.g19{background:#d9e8ff!important}
+.g1{background:#fff3c4!important}.g2{background:#ffe0cc!important}.g3{background:#e6dcff!important}.g4{background:#d9f2ff!important}.g5{background:#dff5dd!important}.g6{background:#f5dcd6!important}.g7{background:#e9e1d0!important}.g8{background:#dcecff!important}.g9{background:#ffe6f0!important}.g10{background:#f3e3cf!important}.g11{background:#dcd9ef!important}.g12{background:#e2dcff!important}.g13{background:#ffe2ef!important}.g14{background:#dff3e4!important}.g15{background:#e9f7cf!important}.g16{background:#d8f3ee!important}.g17{background:#ffe3d6!important}.g18{background:#fff0c8!important}.g20{background:#d8f5d0!important}.g19{background:#d9e8ff!important}
 .note{text-align:center;color:#9aa0b5;font-size:13px;max-width:700px;margin:18px auto 0}
 .who{text-align:center;font-size:26px;margin:4px 0 6px}
 .players{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;margin:0 auto 14px;max-width:900px}
@@ -56,6 +56,7 @@ a.game span{font-size:14px;color:#5d6273}
   <a class="game g17" href="pittura.html"><div class="ic">🎨</div><b>Pittura per Numeri</b><span>10 quadri in bianco e nero: scegli il colore giusto per ogni numero e dipingili</span></a>
   <a class="game g18" href="sasso.html"><div class="ic">✊</div><b>Sasso, Carta, Forbici</b><span>Contro il computer (anche quello furbo!) o in due faccia a faccia</span></a>
   <a class="game g19" href="bolidi.html"><div class="ic">🚗</div><b>Mini Bolidi</b><span>Auto, moto, kart e camioncini in 10 piste di casa, con rampe da saltare. Anche in due!</span></a>
+  <a class="game g20" href="calcio.html"><div class="ic">⚽</div><b>Calcetto 3 contro 3</b><span>Partite di calcio viste dall'alto: passa, tira e segna! Torneo contro 6 squadre, anche in due.</span></a>
 </div>
 <p class="note">Ogni gioco ha Pausa e Indietro: quando esci la partita si salva e la ritrovi in "Continua". Giochi originali fatti per Tommy.</p>
 <script>
@@ -76,7 +77,7 @@ a.game span{font-size:14px;color:#5d6273}
   render();
 })();
 </script>
-<p class="note" id="upd">Versione 58<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
+<p class="note" id="upd">Versione 59<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
 <script>
 (function(){
   var info=document.getElementById('updInfo'), m=/OS (\d+)_(\d+)/.exec(navigator.userAgent||''), sw=('serviceWorker' in navigator)&&/github\.io$/.test(location.hostname);
