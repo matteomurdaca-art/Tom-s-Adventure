@@ -2497,7 +2497,7 @@ var K = function () {
   function layout() {
     var W = K.W,
       H = K.H;
-    face = mode === 2 && H > W * 1.05;
+    face = mode === 2;
     document.body.classList.toggle('cface', face);
     var R = Math.max(38, Math.min(64, Math.min(W, H) * .085)),
       band = Math.round(R * 2.35 + 14);

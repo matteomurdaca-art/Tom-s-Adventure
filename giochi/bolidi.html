@@ -2441,25 +2441,23 @@ var K = function () {
     theme: 'garage',
     w: 150,
     veh: 'camion',
-    pts: [[250, 250], [1000, 220], [1750, 260], [1780, 650], [1350, 640], [1300, 1000], [1750, 1080], [800, 1100], [400, 1050], [200, 700]],
+    pts: [[250, 250], [1000, 220], [1750, 260], [1780, 620], [1350, 630], [1290, 950], [1680, 930], [1850, 1030], [1690, 1150], [800, 1110], [400, 1050], [200, 700]],
     walls: true,
     slip: [{
       c: [1000, 225, 85]
     }, {
-      c: [1300, 1000, 80]
+      c: [1300, 960, 75]
     }],
     solid: [{
       r: [600, 420, 320, 170, 'toolbox']
     }, {
-      c: [1580, 860, 70, 'tire']
-    }, {
-      c: [1580, 860, 70, 'tire']
+      c: [1560, 785, 62, 'tire']
     }, {
       c: [1060, 820, 60, 'tire']
     }, {
       cap: [700, 760, 1000, 840, 14, 'wrench']
     }, {
-      r: [1860, 1150, 100, 110, 'can2']
+      r: [1880, 1190, 85, 85, 'can2']
     }],
     on: [[.15, .55, 18, 'cone'], [.16, -.55, 18, 'cone'], [.4, 0, 16, 'bolt'], [.62, .5, 18, 'cone'], [.85, -.5, 18, 'cone']],
     ramps: [.3, .74]
@@ -2819,10 +2817,11 @@ var K = function () {
     }
     return false;
   }
-  function nearIdx(c) {
+  function nearIdx(c, f) {
     var best = c.idx,
       bd = 1e9;
-    for (var k = -25; k <= 25; k++) {
+    var ahead = Math.ceil(4 * Math.max(1, Math.min(3, f || 1)));
+    for (var k = -6; k <= ahead; k++) {
       var j = (c.idx + k + NP) % NP,
         d = (TP[j][0] - c.x) * (TP[j][0] - c.x) + (TP[j][1] - c.y) * (TP[j][1] - c.y);
       if (d < bd) {
@@ -2965,9 +2964,17 @@ var K = function () {
       if (brake) _gas = -.6;
       return [st, _gas];
     }
-    var sp = Math.hypot(c.vx, c.vy),
-      look = 8 + Math.floor(sp * 2.2),
-      T0 = TP[(c.idx + look) % NP],
+    var sp = Math.hypot(c.vx, c.vy);
+    var look = 8 + Math.floor(sp * 2.2);
+    while (look > 5) {
+      var A = TP[(c.idx + look) % NP],
+        M = TP[(c.idx + (look >> 1)) % NP],
+        mx = (c.x + A[0]) / 2,
+        my = (c.y + A[1]) / 2;
+      if (Math.hypot(mx - M[0], my - M[1]) < TR.w * .28) break;
+      look = Math.floor(look * .75);
+    }
+    var T0 = TP[(c.idx + look) % NP],
       T = [T0[0], T0[1]];
     var _iterator11 = _createForOfIteratorHelper(solids),
       _step11;
@@ -2996,6 +3003,7 @@ var K = function () {
     while (d < -Math.PI) d += 2 * Math.PI;
     var lead = c.lap * NP + c.idx - (me.lap * NP + me.idx);
     var gas = Math.abs(d) > .7 ? .55 : 1;
+    if (look < 8 && sp > 3.6) gas = Math.min(gas, .35);
     if (lead > NP * .25) gas *= .82;else if (lead < -NP * .2) gas *= 1.06;
     d += Math.sin(K.time * .02 + c.wob) * .12;
     return [Math.max(-1, Math.min(1, d * 3)), gas * c.skill];
@@ -3017,7 +3025,7 @@ var K = function () {
     var air = c.air > 0,
       g = air ? .02 : grip(c),
       rg = !air && rough(c),
-      _nearIdx = nearIdx(c),
+      _nearIdx = nearIdx(c, f),
       _nearIdx2 = _slicedToArray(_nearIdx, 2),
       ni = _nearIdx2[0],
       dist = _nearIdx2[1];
@@ -3077,6 +3085,22 @@ var K = function () {
         respawn(c);
       }
     } else c.stuck = 0;
+    if (!air && !c.fall && countdown <= 0 && dist > TR.w / 2 + 55) {
+      c.cut = (c.cut || 0) + f;
+      if (c.cut > (dist > TR.w / 2 + 110 ? 8 : 30)) {
+        c.cut = 0;
+        c.idx = (c.idx + 3) % NP;
+        respawn(c);
+        if (c.human) {
+          msg = {
+            t: 70,
+            s: 'Fuori pista!',
+            who: c
+          };
+          K.beep(240, .25, 'square', .05, -120);
+        }
+      }
+    } else c.cut = 0;
     if (!air && offTable(c.x, c.y) && !c.fall) {
       c.fall = 55;
       K.beep(500, .5, 'triangle', .05, -400);
@@ -3530,7 +3554,7 @@ var K = function () {
       return [p[0] - Math.sin(a) * d, p[1] + Math.cos(a) * d];
     });
   }
-  function buildBg() {
+  function _buildBg() {
     var c = document.createElement('canvas');
     c.width = WW;
     c.height = WH;
@@ -4715,7 +4739,7 @@ var K = function () {
       ctx.fillRect(0, 0, W, H);
       return;
     }
-    if (!bg) buildBg();
+    if (!bg) _buildBg();
     var z = cam.z;
     ctx.fillStyle = '#1d1820';
     ctx.fillRect(0, 0, W, H);
@@ -5151,6 +5175,12 @@ var K = function () {
   K.run();
   showMenu();
   window.__BO = {
+    get bg() {
+      return bg;
+    },
+    buildBg: function buildBg() {
+      return _buildBg();
+    },
     TRACKS: TRACKS,
     get cars() {
       return cars;
