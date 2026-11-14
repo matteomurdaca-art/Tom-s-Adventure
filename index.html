@@ -13310,5 +13310,6 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return navigator.serviceWorker.register('sw.js').catch(function () {});
   });
 }</script>
+<script>/*stay-in-app*/(function(){ if(!window.navigator.standalone) return; document.addEventListener("click",function(e){ var a=e.target; while(a&&a.nodeName!=="A") a=a.parentNode; if(!a||!a.href||a.target==="_blank") return; var h=a.getAttribute("href")||""; if(h.charAt(0)==="#"||h.indexOf("mailto:")===0) return; if(a.host!==location.host) return; e.preventDefault(); location.href=a.href; },true); })();</script>
 </body>
 </html>

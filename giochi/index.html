@@ -77,7 +77,7 @@ a.game span{font-size:14px;color:#5d6273}
   render();
 })();
 </script>
-<p class="note" id="upd">Versione 64<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
+<p class="note" id="upd">Versione 65<span id="updInfo"></span> <button type="button" id="updBtn" style="font:inherit;padding:4px 10px;border:2px solid #14151d;background:#fff;color:#1d1f2b;cursor:pointer">🔄 Aggiorna i giochi</button></p>
 <script>
 (function(){
   var info=document.getElementById('updInfo'), m=/OS (\d+)_(\d+)/.exec(navigator.userAgent||''), sw=('serviceWorker' in navigator)&&/github\.io$/.test(location.hostname);
@@ -103,5 +103,6 @@ a.game span{font-size:14px;color:#5d6273}
   navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(r){ try{ r.update(); }catch(e){} }).catch(function(){});
 })();
 </script>
+<script>/*stay-in-app*/(function(){ if(!window.navigator.standalone) return; document.addEventListener("click",function(e){ var a=e.target; while(a&&a.nodeName!=="A") a=a.parentNode; if(!a||!a.href||a.target==="_blank") return; var h=a.getAttribute("href")||""; if(h.charAt(0)==="#"||h.indexOf("mailto:")===0) return; if(a.host!==location.host) return; e.preventDefault(); location.href=a.href; },true); })();</script>
 </body>
 </html>
