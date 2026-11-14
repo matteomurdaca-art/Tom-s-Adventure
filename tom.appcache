@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v65 a68e758600
+# v66 a0c8a63da2
 
 CACHE:
 ./
@@ -11,6 +11,7 @@ giochi/bruco.html
 giochi/calcio.html
 giochi/chalk.html
 giochi/corsa.html
+giochi/draghetto.html
 giochi/ember.html
 giochi/folla.html
 giochi/gessetto.html
