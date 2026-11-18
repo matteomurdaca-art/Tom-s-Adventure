@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8">
+<html lang="it" manifest="../tom.appcache"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Sala di Tom">
@@ -11,7 +11,7 @@ body{background:#2b1d5c;background:-webkit-linear-gradient(top,#3a2a7a,#1d1f2b);
 button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-appearance:none}
 [hidden]{display:none!important}
 .scr{position:absolute;top:0;left:0;right:0;bottom:0}
-#menu{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px 40px;text-align:center;z-index:5}
+#menu{background:#2b1d5c;background:-webkit-linear-gradient(top,#3a2a7a,#1d1f2b);background:linear-gradient(180deg,#3a2a7a,#1d1f2b);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px 40px;text-align:center;z-index:5}
 h1{font-size:40px;margin:6px 0 0;letter-spacing:-.5px}
 .hands{font-size:56px;margin:4px 0}
 .sub{color:#c7ccd8;margin:0 auto 14px;font-size:17px;max-width:620px;line-height:1.35}
@@ -261,7 +261,7 @@ function drawBro(x,y,s,anim,sad,cool){
   if(go&&Math.floor(t*4)%2) txt('BRO!',x+s*1.45,hy0-s*.5,s*.36,'#f2c230'); }
 function hearts(x,y,n,s){ for(var i=0;i<n;i++){ var hx=x+i*s*1.25; ctx.fillStyle='#ff5a7a'; ctx.beginPath(); ctx.arc(hx-s*.25,y,s*.28,Math.PI,0); ctx.arc(hx+s*.25,y,s*.28,Math.PI,0); ctx.lineTo(hx,y+s*.55); ctx.closePath(); ctx.fill(); } }
 var LAY={};
-function draw(){ ctx.setTransform(DPR,0,0,DPR,0,0); ctx.clearRect(0,0,W,H); if(!G) return;
+function draw(){ ctx.setTransform(DPR,0,0,DPR,0,0); ctx.clearRect(0,0,W,H); if(!G||!$('menu').hidden) return;
   var prog=G.phase==='show'?Math.min(1,G.t/G.dur):null, c=G.phase==='show'?G.card:(G.gap>.3?G.last:null), Y=LAY;
   if(G.mode===1){
     txt('Punti '+G.score[0],W/2,30,24,'#fff'); txt('Livello '+G.lvl,W/2,58,17,'#ffe48a','center','700'); hearts(W/2-((G.lives-1)*1.25*20)/2,84,G.lives,20);
@@ -335,4 +335,5 @@ layout(); renderMenu();
 window.__SS={get G(){ return G; },press:press,update:update};
 })();
 </script>
+<script>/*stay-in-app*/(function(){ if(!window.navigator.standalone) return; document.addEventListener("click",function(e){ var a=e.target; while(a&&a.nodeName!=="A") a=a.parentNode; if(!a||!a.href||a.target==="_blank") return; var h=a.getAttribute("href")||""; if(h.charAt(0)==="#"||h.indexOf("mailto:")===0) return; if(a.host!==location.host) return; e.preventDefault(); location.href=a.href; },true); })();</script>
 </body></html>

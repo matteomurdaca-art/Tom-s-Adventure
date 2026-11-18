@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v66 a0c8a63da2
+# v67 e0c9ef28f4
 
 CACHE:
 ./
@@ -23,6 +23,8 @@ giochi/pianeti.html
 giochi/pittura.html
 giochi/robot.html
 giochi/sasso.html
+giochi/seisette.html
+giochi/sixseven.html
 giochi/sparabolle.html
 giochi/tavolo.html
 giochi/vichinghi.html
