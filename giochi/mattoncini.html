@@ -50,7 +50,7 @@ h2{font-size:19px;margin:14px 0 8px;color:#ffe48a}
 .ov .box{display:inline-block;background:#f6f7fb;color:#1d1f2b;border:3px solid #14151d;border-radius:20px;padding:20px 22px;max-width:520px;width:100%;box-shadow:6px 6px 0 rgba(0,0,0,.5)}
 .ov h1{color:#1d1f2b;text-shadow:none;font-size:30px}
 .ov .stars{font-size:46px;color:#f2a900;letter-spacing:4px}
-#nogl{position:absolute;top:40%;left:0;right:0;text-align:center;font-size:20px;padding:20px;z-index:20}
+#nogl{position:absolute;top:35%;left:10%;right:10%;text-align:center;font-size:20px;padding:20px;z-index:20;background:#1d1f2b;border:3px solid #f2c230;border-radius:16px}
 </style></head><body>
 
 <section id="menu">
@@ -148,7 +148,7 @@ function makeMesh(p,ghost){ var g=new THREE.Group(), sh=shape(p);
   g.position.set(p.x,p.y*PL,p.z); return g; }
 function initGL(){ if(renderer) return true; try{
     renderer=new THREE.WebGLRenderer({canvas:$('gl'),antialias:true}); renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5)); renderer.setClearColor(0x9fd0ff);
-  }catch(e){ $('nogl').hidden=false; return false; }
+  }catch(e){ renderer=null; noGL('Questo dispositivo non riesce a mostrare il 3D 😕'); return false; }
   scene=new THREE.Scene(); scene.fog=new THREE.Fog(0x9fd0ff,40,90);
   camera=new THREE.PerspectiveCamera(38,1,.1,200);
   scene.add(new THREE.HemisphereLight(0xffffff,0x8090a0,.75)); var dl=new THREE.DirectionalLight(0xffffff,.65); dl.position.set(6,14,9); scene.add(dl);
@@ -301,7 +301,11 @@ window.addEventListener('resize',function(){ setTimeout(layout,60); }); window.a
 /* ---------- menu e salvataggi ---------- */
 function save(){ if(G&&!G.done) S('mattoncini-run',{who:ME,id:G.m.id,step:G.step,placed:G.placed,errors:G.errors}); }
 function showGame(on){ $('menu').hidden=on; ['bBack','bPause','bTurn','book','tray'].forEach(function(id){ $(id).hidden=!on; }); }
-function start(mi,resume){ if(!initGL()) return; layout(); anims=[]; conf=[]; newBuild(mi,resume); playing=true; paused=false; showGame(true); $('doneOv').hidden=true; layout(); }
+function ensureThree(cb){ if(window.THREE) return cb(); var sc=document.createElement('script'); sc.src='https://matteomurdaca-art.github.io/Tom-s-Adventure/three.min.js?v=18';
+  showMsg('Carico il 3D…',4000); sc.onload=function(){ $('msg').hidden=true; cb(); }; sc.onerror=function(){ noGL('Non riesco a caricare il 3D: apri il gioco dalla Sala di Tom (serve internet la prima volta).'); }; document.getElementsByTagName('head')[0].appendChild(sc); }
+function noGL(t){ var n=$('nogl'); n.textContent=t+' (tocca per chiudere)'; n.hidden=false; n.onclick=function(){ n.hidden=true; }; }
+function start(mi,resume){ ensureThree(function(){ start2(mi,resume); }); }
+function start2(mi,resume){ if(!initGL()) return; layout(); anims=[]; conf=[]; newBuild(mi,resume); playing=true; paused=false; showGame(true); $('doneOv').hidden=true; layout(); }
 function prog(){ var P=L('mattoncini-prog',{}); return (P[ME]&&P[ME].done)||{}; }
 function renderMenu(){ var pl=players(), box=$('players'); box.innerHTML='';
   pl.forEach(function(n){ var b=document.createElement('button'); b.type='button'; b.className='pill'+(n===ME?' on':''); b.textContent=(n===ME?'✔ ':'')+n; b.onclick=function(){ ME=n; S('sala-player',n); renderMenu(); }; box.appendChild(b); });
