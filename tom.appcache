@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v68 a2b156c79a
+# v69 18b645b987
 
 CACHE:
 ./
@@ -18,6 +18,7 @@ giochi/gessetto.html
 giochi/index.html
 giochi/kart.html
 giochi/labirinto.html
+giochi/mattoncini.html
 giochi/outrun.html
 giochi/pianeti.html
 giochi/pittura.html
