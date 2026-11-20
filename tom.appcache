@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v71 d0932a2890
+# v72 807cbf3286
 
 CACHE:
 ./
@@ -9,6 +9,7 @@ giochi/bolidi.html
 giochi/bollegiganti.html
 giochi/bruco.html
 giochi/calcio.html
+giochi/casa.html
 giochi/chalk.html
 giochi/corsa.html
 giochi/draghetto.html

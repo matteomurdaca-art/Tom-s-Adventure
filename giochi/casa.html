@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8">
+<html lang="it" manifest="../tom.appcache"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Sala di Tom">
@@ -553,4 +553,5 @@ layout(); renderMenu(); requestAnimationFrame(loop);
 window.__CASA={get ST(){ return ST; },get CH(){ return CH; },update:update,onTap:onTap,center:center,corner:corner,objMenu:objMenu,get speed(){ return speed; }};
 })();
 </script>
+<script>/*stay-in-app*/(function(){ if(!window.navigator.standalone) return; document.addEventListener("click",function(e){ var a=e.target; while(a&&a.nodeName!=="A") a=a.parentNode; if(!a||!a.href||a.target==="_blank") return; var h=a.getAttribute("href")||""; if(h.charAt(0)==="#"||h.indexOf("mailto:")===0) return; if(a.host!==location.host) return; e.preventDefault(); location.href=a.href; },true); })();</script>
 </body></html>
