@@ -572,7 +572,7 @@ function dishAct(a,d){ return {n:a.n+': '+d.n,need:'fame',r:a.r,dur:a.dur,pose:'
 var JOKES=[['Qual è il colmo per un elettricista?','Non essere al corrente!'],['Perché i pesci non vanno a scuola?','Perché sono già in un banco!'],['Che cosa dice uno zero a un otto?','Che bella cintura!'],['Qual è il colmo per un idraulico?','Non capire un tubo!'],
  ['Perché il libro di matematica è triste?','Perché ha tanti problemi!'],['Che cosa fa un\'ape in palestra?','Zum-ba!'],['Cosa dice un muro a un altro muro?','Ci vediamo all\'angolo!'],['Qual è il colmo per un pollo?','Avere la pelle d\'oca!'],
  ['Perché il pomodoro è diventato rosso?','Perché ha visto l\'insalata che si condiva!'],['Qual è il colmo per un sarto?','Perdere il filo del discorso!'],['Qual è il colmo per una mucca?','Fare il muuuuuso lungo!'],['Qual è il colmo per un pesce?','Avere l\'acqua alla gola!']];
-function jokeItem(who){ return {n:'😄 Racconta una barzelletta',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); if(who.npc){ who.path=[]; who.state='idle'; who.think=8; }
+function jokeItem(who){ return {n:'😄 Racconta una barzelletta',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); stopFor(who,8); if(who.npc){ who.path=[]; who.state='idle'; who.think=8; }
   var i=ST.jokeI||0, j=JOKES[i%JOKES.length]; ST.jokeI=i+1; startAction(c,{type:'__bun',x:Math.round(who.x),y:Math.round(who.y)},{n:'Racconta una barzelletta a '+(who.id==='milly'?'mamma':who.id==='papone'?'papà':who.name),dur:6,social:2.5,diver:1.2,pose:'stand',joke:j,who:who.id}); }}; }
 function tellJoke(c,a){ var j=a.joke, w=CH[a.who]; say(c,j[0],3.2); toast('😄 '+j[0],3200,true);
   setTimeout(function(){ if(!ST) return; say(c,j[1],3.5); toast('😂 '+j[1],3800,true); if(w&&w.state!=='away'){ say(w,['Ahahah! 😂','Che ridere!','Questa è fortissima!','Ahah, bravo Tommy!'][Math.floor(Math.random()*4)],3.5); if(w.needs&&w.needs.diver!=null) w.needs.diver=clamp(w.needs.diver+15); }
@@ -645,15 +645,16 @@ function parentSay(s){ var p=parent(); if(p) say(p,s,3.5); }
 function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 function addHab(k){ ST.hab[k]=(ST.hab[k]||0)+1; MEDALS.forEach(function(m){ if(m.id===k&&!ST.medals[k]&&ST.hab[k]>=m.k){ ST.medals[k]=1; ST.money+=30; jingle([523,659,784,1047,1319]); toast('🏅 Nuova medaglia: '+m.n+'! (+30 monete)',4000); } }); }
 function habit(ev){ if(!ST) return; var r=getR(), h=hNow();
+  if(ev==='riordina'){ r.tidy=true; if(r.played&&(h>=17||h<4)) toast('✔ Giochi a posto! Che ordine',2400); }
   if(ev==='denti'||ev==='mani'||ev==='aiuto'||ev==='riordina'||ev==='compiti') addHab(ev);
   if(ev==='carota'||ev==='coccole') addHab('carotino');
   if(ev==='mani'){ var late=ST.min-ST.handsT; ST.handsT=ST.min; if(ST.needHands){ ST.needHands=false; toast('Mani pulite! Bravo 👏'); } }
   if(PRAISE[ev]&&Math.random()<.7) parentSay(pick(PRAISE[ev]));
-  if(mornActive()){ var nx=MORN[r.m]; if(ev===nx.ev){ r.m++; tone(880,.08,'triangle',.05); if(r.m>=MORN.length){ r.mDone=true; addHab('mattino'); ST.money+=15; jingle([523,659,784,1047]); toast('🌟 Routine del mattino fatta! Giornata partita alla grande (+15 monete)',3800); parentSay('Bravissimo, campione!'); goalEvent('mattino'); } else toast('✔ Fatto! Ora: '+MORN[r.m].n,2600); }
+  if(mornActive()){ var nx=MORN[r.m]; if(ev===nx.ev){ r.m++; tone(880,.08,'triangle',.05); if(r.m>=MORN.length){ r.mDone=true; addHab('mattino'); ST.money+=15; jingle([523,659,784,1047]); toast('🌟 Routine del mattino fatta! Giornata partita alla grande (+15 monete)',3800); parentSay('Bravissimo, campione!'); goalEvent('mattino'); if(schoolPending()) setTimeout(function(){ if(!ST) return; toast('🎒 Ora si va a scuola! Tocca la porta di casa (entro le 10)',4200,true); parentSay('Zaino in spalla, si va a scuola!'); },2500); } else toast('✔ Fatto! Ora: '+MORN[r.m].n,2600); }
     else { for(var i=r.m+1;i<MORN.length;i++) if(MORN[i].ev===ev){ toast('Ricorda l\'ordine: prima '+nx.n.slice(2).toLowerCase()+'!',2800); break; } } }
   else if(eveActive()&&(ev==='denti'||ev==='pigiama')&&h>=18){ r.e[ev]=1; tone(880,.08,'triangle',.05); toast('✔ '+(ev==='denti'?'Denti lavati':'Pigiama messo')+'! '+(r.e.denti&&r.e.pigiama?'Ora tutti a nanna 🛏️':''),2600); } }
 function goToBed(){ var r=getR(), h=hNow(); if(r.eDone||!(h>=18||h<2)) return;
-  if(r.e.denti&&r.e.pigiama&&h>=18&&h<21.5){ r.eDone=true; ST.rested=r.day+1; addHab('sera'); ST.money+=15; toast('🌙 Routine della sera perfetta! Domani Tommy sarà riposatissimo (+15 monete)',3800); goalEvent('sera'); }
+  if(r.e.denti&&r.e.pigiama&&(!r.played||r.tidy)&&h>=18&&h<21.5){ r.eDone=true; ST.rested=r.day+1; addHab('sera'); ST.money+=15; toast('🌙 Routine della sera perfetta! Domani Tommy sarà riposatissimo (+15 monete)',3800); goalEvent('sera'); }
   else if(!r.e.denti||!r.e.pigiama){ toast('Ops, prima di dormire: '+(!r.e.denti?'denti':'')+(!r.e.denti&&!r.e.pigiama?' e ':'')+(!r.e.pigiama?'pigiama':'')+'. Domani ci ricordiamo! 😉',3500); }
   else toast('Un po\' tardi stasera… domani proviamo ad andare a letto prima! 😉',3500); }
 function wake(first){ var r=getR(), t=CH.tommy, day=Math.floor(ST.min/1440);
@@ -663,14 +664,21 @@ function wake(first){ var r=getR(), t=CH.tommy, day=Math.floor(ST.min/1440);
   $('qSub').textContent=(hNow()<12?'Buongiorno! Per cominciare: lava la faccia, fai colazione, lava i denti e vestiti.':'')+(ST.rested===null&&!first?'':''); paused=true; $('quoteOv').hidden=false; say(t,'Buongiorno!',3); }
 $('bQuote').onclick=function(){ $('quoteOv').hidden=true; paused=false; lastT=0; };
 function isFun(a){ return !!(a.park||a.scr||(a.need==='diver'&&a.r>0)||a.play); }
+var TOYEV={giochi:1,lego:1,trenino:1};
+function bedMissing(){ var r=getR(), m=[]; if(!r.e.denti) m.push('lavare i denti'); if(!r.e.pigiama) m.push('mettere il pigiama'); if(r.played&&!r.tidy) m.push('mettere a posto i giochi'); return m; }
+function weekday(){ return (Math.floor(ST.min/1440)%7)<5; }
+function schoolPending(){ var h=hNow(), day=Math.floor(ST.min/1440); return weekday()&&h>=5&&h<10&&ST.schoolDay!==day; }
 function blockWhy(a){ if(!a) return null;
+  if(a.pose==='sleep'&&a.need==='sonno'){ var hb=hNow(); if(hb>=18.5||hb<4){ var miss=bedMissing(); if(miss.length){ parentSay('Prima di dormire: '+miss.join(', ')+'!'); return '🌙 Prima di andare a dormire devi: '+miss.join(', ')+'!'; } } }
   if(a.when){ var h=hNow(); if(h<a.when[0]||h>=a.when[1]) return a.ev==='colazione'?'La colazione si fa la mattina! Ora prova una merenda dal frigo':a.ev==='tavola'?'Il pranzo è tra le 11:30 e le 15, la cena tra le 18 e le 21:30. Intanto prova una merenda dal frigo!':a.ev==='pigiama'?'Il pigiama si mette la sera, dopo le 18':'Adesso non è il momento giusto'; }
   if(mornActive()&&(isFun(a)||a.school)){ var nx=MORN[getR().m]; parentSay('Prima la routine del mattino, campione!'); return 'Prima la routine del mattino! Ora: '+nx.n+' ('+nx.w+')'; }
   if(a.scr&&ST.min<ST.scrUntil){ var mm=Math.ceil(ST.scrUntil-ST.min); return 'Gli schermi stanno riposando (ancora '+(mm>=60?Math.floor(mm/60)+' h ':'')+(mm%60)+' min). Prova l\'altalena, un libro o le costruzioni!'; }
   return null; }
 function updateRoutine(){ var el=$('routine'), r=getR(), html='';
-  if(CH.tommy.state!=='away'&&mornActive()){ html='<b>☀️ Routine del mattino</b>'; MORN.forEach(function(s,i){ html+='<div class="rs'+(i<r.m?' ok':i===r.m?' nx':'')+'">'+(i<r.m?'✅ ':i===r.m?'👉 ':'⬜ ')+s.n.slice(2)+(i===r.m?' <small>('+s.w+')</small>':'')+'</div>'; }); }
-  else if(CH.tommy.state!=='away'&&eveActive()&&hNow()>=18){ html='<b>🌙 Routine della sera</b>'; EVE.forEach(function(s){ var ok=s.ev!=='nanna'&&r.e[s.ev]; html+='<div class="rs'+(ok?' ok':'')+'">'+(ok?'✅ ':'⬜ ')+s.n.slice(2)+'</div>'; }); }
+  if(CH.tommy.state!=='away'&&mornActive()){ html='<b>☀️ Routine del mattino</b>'; MORN.forEach(function(s,i){ html+='<div class="rs'+(i<r.m?' ok':i===r.m?' nx':'')+'">'+(i<r.m?'✅ ':i===r.m?'👉 ':'⬜ ')+s.n.slice(2)+(i===r.m?' <small>('+s.w+')</small>':'')+'</div>'; }); if(schoolPending()) html+='<div class="rs">⬜ Poi: scuola entro le 10</div>'; }
+  else if(CH.tommy.state!=='away'&&schoolPending()){ html='<b>🎒 Si va a scuola!</b><div class="rs nx">👉 Tocca la porta di casa <small>(entro le 10)</small></div>'; }
+  else if(CH.tommy.state!=='away'&&eveActive()&&hNow()>=18){ html='<b>🌙 Prima della nanna</b>'; var ev2=[['denti','Lava i denti',!!r.e.denti],['pigiama','Metti il pigiama',!!r.e.pigiama]]; if(r.played) ev2.push(['giochi','Metti a posto i giochi',!!r.tidy]); ev2.push(['nanna','A letto entro le 21:30',false]);
+    ev2.forEach(function(s){ html+='<div class="rs'+(s[2]?' ok':'')+'">'+(s[2]?'✅ ':'⬜ ')+s[1]+(s[0]==='giochi'&&!s[2]?' <small>(cesta dei giochi)</small>':'')+'</div>'; }); }
   if(html){ if(el.innerHTML!==html) el.innerHTML=html; el.hidden=false; } else el.hidden=true; }
 $('bAlb').onclick=function(){ var h=''; MEDALS.forEach(function(m){ var n=ST.hab[m.id]||0, ok=!!ST.medals[m.id]; h+='<div class="med'+(ok?'':' no')+'"><div class="ic">'+m.ic+'</div>'+m.n+'<small>'+m.t+': '+Math.min(n,m.k)+' / '+m.k+(ok?' ✅':'')+'</small></div>'; }); $('albList').innerHTML=h; $('albOv').hidden=false; };
 $('bAlbClose').onclick=function(){ $('albOv').hidden=true; };
@@ -728,7 +736,8 @@ function update(dt){ if(!ST) return;
       if(c2.bunny) bunnyThink(c2); else if(c2.kind==='skater') skaterThink(c2); else if(c2.kind==='guest') guestThink(c2); else if(c2.npc) kidThink(c2); else if(c2.id!=='tommy') adultThink(c2);
       else if(Math.random()<.25){ var lowN=null,lv=101; NEEDS.forEach(function(n){ if(c2.needs[n]<lv){ lv=c2.needs[n]; lowN=n; } }); say(c2,lv<35?(NEEDINFO[lowN][0]+' '+{fame:'Ho fame!',sonno:'Che sonno…',diver:'Mi annoio!',pulizia:'Mi serve un bagnetto!',bagno:'Devo andare in bagno!',amici:'Mi sento solo…'}[lowN]):GIB[Math.floor(Math.random()*GIB.length)],2.5); } } }
   if(Math.floor(ST.min/1440)!==ST.day-1){ ST.day=Math.floor(ST.min/1440)+1; toast('☀️ Buongiorno! Giorno '+ST.day+((ST.day-1)%7>=5?' · è il weekend!':''),3000); }
-  var dn=Math.floor(ST.min/1440); if(h>=21&&h<23&&ST.nanna!==dn&&tm.state!=='away'&&!sleeping){ ST.nanna=dn; toast('🌙 Sono le 9 di sera: è ora di mettere Tommy a letto!',3500); say(CH.milly.state!=='away'?CH.milly:tm,'A nanna, Tommy!',3); }
+  var dn=Math.floor(ST.min/1440); if(h>=9&&schoolPending()&&ST.schoolRem!==dn&&tm.state!=='away'){ ST.schoolRem=dn; toast('⏰ Sono le 9: Tommy, la scuola inizia! Tocca la porta di casa',4000,true); parentSay('Tommy, è tardi! Corri a scuola!'); }
+  if(h>=21&&h<23&&ST.nanna!==dn&&tm.state!=='away'&&!sleeping){ ST.nanna=dn; toast('🌙 Sono le 9 di sera: è ora di mettere Tommy a letto!',3500); say(CH.milly.state!=='away'?CH.milly:tm,'A nanna, Tommy!',3); }
   guestsTick(); skatersTick(); fallTick(dmin);
   goalEvent('_'); }
 
@@ -790,7 +799,13 @@ function objMenu(ob,px,py){ var t=T[ob.type], items=[];
 function feedBunny(){ var c=CH.tommy, b=CH.carotino; if(ST.carrots<=0) return; var r=find('recinto'); c.act=null; if(c.state==='act') endAction(c,false);
   startAction(c,{type:'__bun',x:Math.round(b.x),y:Math.round(b.y)},{n:'Dai una carota a Carotino',need:'amici',r:.8,dur:6,pose:'stand',feed:1,ev:'carota'}); }
 T.__bun={name:'Carotino',w:1,d:1,acts:[],flat:1};
+function stopFor(w,dur){ if(!w||w.npc||w.bunny) return; if(w.state==='act') endAction(w,false); if(w.state!=='away'){ w.path=[]; w.state='idle'; w.think=(dur||6)/4+5; } }
+function wakeParent(w,px,py){ var mom=w.id==='milly', hh=hNow(); endAction(w,false); w.path=[]; w.state='idle';
+  if(hh>=21||hh<6.5){ say(w,'Tommy, è notte! Torna a letto, giochiamo domani 😴',4); w.think=2; toast((mom?'La mamma':'Papà')+' dice che è ora di dormire',3000,true); return; }
+  w.think=10; say(w,mom?'Mmm… mi hai svegliata! Va bene, giochiamo!':'Uaaah… mi hai svegliato! Va bene, giochiamo!',3.5); setTimeout(function(){ if(ST&&w.state!=='away') socialMenu(w,px,py); },700); }
 function socialMenu(ch,px,py){ var items=[];
+  if(!ch.npc&&!ch.bunny&&ch.state==='act'&&ch.act&&ch.act.pose==='sleep'){ var mom=ch.id==='milly', nm=mom?'La mamma':'Papà';
+    showPop(px,py,'😴 '+nm+' sta dormendo. Vuoi '+(mom?'svegliarla':'svegliarlo')+' comunque?',[{n:'⏰ Sì, '+(mom?'svegliala':'sveglialo'),f:function(){ wakeParent(ch,px,py); }},{n:'🤫 No, '+(mom?'lasciala':'lascialo')+' dormire',f:function(){ toast('Bravo! Lasci riposare '+(mom?'la mamma':'papà')+' 💛',2600,true); }}]); return; }
   if(ch.kind==='guest'){ var gk=ch, tgt=function(){ return {type:'__bun',x:Math.round(gk.x),y:Math.round(gk.y)}; }, bw3=blockWhy({play:1});
     var mk3=function(n,dur,soc,div,ev,txt,extra){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); gk.path=[]; gk.state='idle'; gk.think=dur/3+4; var a={n:n,dur:dur,social:soc,diver:div,pose:'stand',ev:ev,act:div?1:0}; if(extra) for(var k in extra) a[k]=extra[k]; startAction(c,tgt(),a); say(gk,txt,3); }}; };
     var lg=find('lego'), it1={n:'🏗️ Costruite insieme con i mattoncini',f:function(){ if(!lg){ toast('Non trovo il tavolo dei mattoncini'); return; } var c=CH.tommy; if(c.state==='act') endAction(c,false); tommyDo(lg,{n:'Costruisce con '+gk.name,act:1,need:'diver',r:2,dur:30,pose:'stand',ev:'lego',social:1.5}); goToObj(gk,lg); gk.think=25; say(gk,'Facciamo un castello enorme!',3); }};
@@ -807,7 +822,7 @@ function socialMenu(ch,px,py){ var items=[];
   if(ch.bunny){ items.push({n:'Dai una carota ('+ST.carrots+')',no:ST.carrots<=0,why:'Non hai carote: raccoglile nell\'orto!',f:feedBunny});
     items.push({n:'Accarezza Carotino',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); startAction(c,{type:'__bun',x:Math.round(ch.x),y:Math.round(ch.y)},{n:'Accarezza Carotino',need:'amici',r:1.6,dur:12,pose:'stand',bun:'coccole',ev:'coccole'}); }});
     showPop(px,py,'Carotino 🐰 (fame '+Math.round(ch.needs.fame)+'%, coccole '+Math.round(ch.needs.coccole)+'%)',items); return; }
-  var who=ch, mk=function(n,dur,soc,div,ev,txt){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); var tgt={type:'__bun',x:Math.round(who.x),y:Math.round(who.y)}; startAction(c,tgt,{n:n+' '+(who.id==='milly'?'la mamma':'papà'),dur:dur,social:soc,diver:div,pose:'stand',ev:ev,act:div?1:0}); say(who,txt,3); who.needs.amici=clamp(who.needs.amici+20); }}; };
+  var who=ch, mk=function(n,dur,soc,div,ev,txt){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); stopFor(who,dur); var tgt={type:'__bun',x:Math.round(who.x),y:Math.round(who.y)}; startAction(c,tgt,{n:n+' '+(who.id==='milly'?'la mamma':'papà'),dur:dur,social:soc,diver:div,pose:'stand',ev:ev,act:div?1:0}); say(who,txt,3); who.needs.amici=clamp(who.needs.amici+20); }}; };
   items.push(mk('Abbraccia',4,5,0,who.id==='milly'?'abbraccio':'abbraccio','Ti voglio bene!'));
   items.push(mk('Chiacchiera con',12,1.8,0,'chiacchiera','Racconta, com\'è andata?'));
   var gi=mk('Gioca con',20,1.2,1.5,who.id==='papone'?'giocapapa':'giocamamma','Prendimi se ci riesci!'); var bw=blockWhy({play:1}); if(bw){ gi.no=1; gi.why=bw; } items.push(gi); items.push(jokeItem(who));
@@ -815,7 +830,8 @@ function socialMenu(ch,px,py){ var items=[];
   showPop(px,py,who.name,items); }
 /* il "bersaglio" di un'azione su Carotino o su una persona è la casella dove si trova */
 var _spots=spotsOf; spotsOf=function(ob){ if(ob.type==='__bun'){ var out=[]; [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){ var x=ob.x+d[0], y=ob.y+d[1]; if(passable(x,y)&&!wallBetween(x,y,ob.x,ob.y)) out.push([x,y]); }); return out; } return _spots(ob); };
-var _begin=beginAct; beginAct=function(c){ var a=c.act&&c.act.a; if(a&&a.feed){ ST.carrots--; var b=CH.carotino; b.needs.fame=clamp(b.needs.fame+40); b.say={s:'♥ Gnam!',t:2.5}; } if(a&&a.cost&&c.id==='tommy'){ ST.money-=a.cost; } _begin(c); if(a&&c.id==='tommy'){ if(a.dish) say(c,a.dish.e+' Gnam!',3); if(a.joke) tellJoke(c,a);
+var _begin=beginAct; beginAct=function(c){ var a=c.act&&c.act.a; if(a&&a.feed){ ST.carrots--; var b=CH.carotino; b.needs.fame=clamp(b.needs.fame+40); b.say={s:'♥ Gnam!',t:2.5}; } if(a&&a.cost&&c.id==='tommy'){ ST.money-=a.cost; } _begin(c); if(a&&c.id==='tommy'&&TOYEV[a.ev]){ var rp=getR(); rp.played=true; rp.tidy=false; }
+  if(a&&c.id==='tommy'){ if(a.dish) say(c,a.dish.e+' Gnam!',3); if(a.joke) tellJoke(c,a);
     if(a.befriend&&CH[a.befriend]) befriend(CH[a.befriend]); if(a.helpKid&&CH[a.helpKid]) helpDone(CH[a.helpKid]); if(a.inviteName) inviteFriend(a.inviteName);
     if(a.ride){ c.ride=a.ride; c.helmet='#e0373f'; toast('⛑️ Casco in testa e via! Con '+RIDES[a.ride]+' vai più veloce',3000,true); goalEvent('ride'); }
     if(a.ret&&c.ride){ toast('Hai riconsegnato '+RIDES[c.ride],2400); c.ride=null; }
