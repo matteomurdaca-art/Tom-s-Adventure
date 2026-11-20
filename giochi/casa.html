@@ -37,7 +37,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
 #pop h3{margin:2px 6px 6px;font-size:17px}
 #pop button{display:block;width:100%;text-align:left;margin:5px 0;border:2px solid #14151d;border-radius:11px;background:#e8f1ff;padding:10px 12px;font-size:17px;font-weight:700}
 #pop button.no{background:#eee;color:#888}
-#toast{position:absolute;z-index:10;left:50%;top:60px;-webkit-transform:translateX(-50%);transform:translateX(-50%);background:#1d1f2b;color:#fff;border:3px solid #f2c230;border-radius:14px;padding:9px 16px;font-size:17px;font-weight:700;pointer-events:none;max-width:90%;text-align:center}
+#toast{position:absolute;z-index:10;left:50%;bottom:100px;-webkit-transform:translateX(-50%);transform:translateX(-50%);background:#1d1f2b;color:#fff;border:3px solid #f2c230;border-radius:14px;padding:9px 16px;font-size:17px;font-weight:700;pointer-events:none;max-width:90%;text-align:center}
 .ov{position:absolute;top:0;left:0;right:0;bottom:0;z-index:15;background:rgba(10,14,30,.6);text-align:center;padding:30px 12px;overflow-y:auto}
 .ov .box{display:inline-block;background:#fffdf5;border:3px solid #14151d;border-radius:20px;padding:16px 18px;max-width:640px;width:100%;box-shadow:6px 6px 0 rgba(0,0,0,.45);text-align:left}
 .ov h2{margin:4px 0 10px;text-align:center}
@@ -103,14 +103,14 @@ function jingle(n){ for(var i=0;i<n.length;i++) tone(n[i],.15,'triangle',.06,i*.
 function blip(){ tone(880,.06,'square',.03); }
 
 /* ================= LA CASA ================= */
-var GW=34, GH=30, HX=11, HY=2;
+var GW=34, GH=36, HX=11, HY=2;
 var HOUSE=['TTTTBBBGGGGG','TTTTBBBGGGGG','TTTTBBBGGGGG','TTTTHHHGGGGG','HHHHHHHHHHHH','SSSSSSKKKKKK','SSSSSSKKKKKK','SSSSSSKKKKKK','SSSSSSKKKKKK'];
 var MAP=[];
 (function(){ var x,y,row,c; for(y=0;y<GH;y++){ row=[]; for(x=0;x<GW;x++){ if(y<=17) c=(x<=8||x>=27)?'n':'.'; else if(y===18||y===21) c='W'; else if(y===19||y===20) c=(x===21||x===22)?'Z':'R'; else c='p'; row.push(c); } MAP.push(row); }
   for(y=0;y<9;y++) for(x=0;x<12;x++) MAP[HY+y][HX+x]=HOUSE[y].charAt(x);
   for(y=6;y<=10;y++) for(x=23;x<=26;x++) MAP[y][x]='A';
   for(y=11;y<=17;y++){ MAP[y][24]='D'; MAP[y][25]='D'; MAP[y][22]='w'; }
-  for(y=22;y<GH;y++){ MAP[y][21]='q'; MAP[y][22]='q'; } for(x=0;x<=26;x++) MAP[26][x]='q'; })();
+  for(y=22;y<GH;y++){ MAP[y][21]='q'; MAP[y][22]='q'; } for(x=0;x<=26;x++) MAP[26][x]='q'; for(y=30;y<GH;y++) for(x=0;x<=20;x++) MAP[y][x]='k'; })();
 var ROOMNAME={T:'Cameretta di Tommy',B:'Bagno',G:'Mamma e papà',H:'Corridoio',S:'Soggiorno',K:'Cucina',A:'Garage','.':'Giardino'};
 function LD(s){ var a=s.split('|'), p=a[0].split(','), q=a[1].split(','); return (+p[0]+HX)+','+(+p[1]+HY)+'|'+(+q[0]+HX)+','+(+q[1]+HY); }
 var DOORS=['2,3|2,4','5,2|5,3','8,3|8,4','2,4|2,5','8,4|8,5','5,6|6,6','5,7|6,7','11,8|11,9','2,8|2,9','11,4|12,4'].map(LD).concat(['24,10|24,11','25,10|25,11','22,17|22,18','24,17|24,18','25,17|25,18','21,21|21,22','22,21|22,22']);
@@ -118,7 +118,7 @@ var GATES={'22,17|22,18':1,'24,17|24,18':1,'25,17|25,18':1};
 var DOORSET={}; DOORS.forEach(function(d){ var a=d.split('|'); DOORSET[a[0]+'|'+a[1]]=1; DOORSET[a[1]+'|'+a[0]]=1; });
 function room(x,y){ if(x<0||y<0||x>=GW||y>=GH) return null; return MAP[y][x]; }
 var HOUSEL='TBGHSKA';
-function zone(c){ if(c===null||c===undefined) return null; if(HOUSEL.indexOf(c)>=0) return c; if(c==='.'||c==='D'||c==='w') return 'L'; if(c==='W'||c==='Z'||c==='R') return 'X'; if(c==='p'||c==='q') return 'P'; return 'N'; }
+function zone(c){ if(c===null||c===undefined) return null; if(HOUSEL.indexOf(c)>=0) return c; if(c==='.'||c==='D'||c==='w') return 'L'; if(c==='W'||c==='Z'||c==='R') return 'X'; if(c==='p'||c==='q'||c==='k') return 'P'; return 'N'; }
 function inHouse(x,y){ var r=room(x,y); return r!==null&&HOUSEL.indexOf(r)>=0; }
 function wallBetween(x1,y1,x2,y2){ var a=zone(room(x1,y1)), b=zone(room(x2,y2)); if(a===b) return false; return !DOORSET[x1+','+y1+'|'+x2+','+y2]; }
 function walkable(x,y){ var r=room(x,y); return r!==null&&r!=='R'&&r!=='n'; }
@@ -144,7 +144,7 @@ var T={
  divano:{name:'Divano',w:2,d:1,acts:[{n:'Siediti e riposa',need:'sonno',r:.4,dur:20,pose:'sit',on:1},{n:'Fai un pisolino',need:'sonno',r:.5,dur:60,pose:'sleep',on:1}]},
  consolle:{name:'Videogiochi',w:1,d:1,acts:[{n:'Gioca ai videogiochi',scr:1,need:'diver',r:2,dur:180,pose:'stand',ev:'consolle'}]},
  libreria:{name:'Libreria',w:1,d:1,acts:[{n:'Leggi un libro',act:1,need:'diver',r:.9,dur:30,pose:'stand',ev:'libro'}]},
- telefono:{name:'Telefono',w:1,d:1,acts:[{n:'Chiama un amico',need:'amici',r:2,dur:15,pose:'stand',ev:'telefono'}]},
+ telefono:{name:'Telefono',w:1,d:1,acts:[{n:'Chiama un amico',need:'amici',r:2,dur:15,pose:'stand',ev:'telefono'},{n:'🏠 Invita un amico a casa',invite:1,play:1}]},
  pianta:{name:'Pianta',w:1,d:1,acts:[{n:'Annaffia la pianta',need:'diver',r:.5,dur:5,pose:'stand',ev:'annaffia'}]},
  porta:{name:'Porta di casa',w:1,d:1,door:1,fixed:1,flat:1,acts:[{n:'Vai a scuola (a piedi, sulle strisce)',school:1}]},
  recinto:{name:'Recinto di Carotino',w:2,d:2,out:1,acts:[{n:'Pulisci il recinto',need:'pulizia',r:-.3,dur:15,pose:'stand',bun:'pul',ev:'recinto'}]},
@@ -166,6 +166,12 @@ var T={
  fiori:{name:'Aiuola di fiori',w:1,d:1,price:30,out:1,flat:1,acts:[]},
  albero:{name:'Albero',w:1,d:1,price:40,out:1,hm:4.6,acts:[]},
  panchina:{name:'Panchina',w:2,d:1,price:70,out:1,acts:[{n:'Siediti sulla panchina',need:'sonno',r:.3,dur:15,pose:'sit',on:1}]},
+ lego:{name:'Tavolo dei mattoncini',w:1,d:1,hm:2.6,acts:[{n:'Costruisci con i mattoncini',act:1,need:'diver',r:1.6,dur:30,pose:'stand',ev:'lego'},{n:'🏗️ Apri il gioco "I Mattoncini di Tom"',open:'mattoncini.html'}]},
+ noleggio:{name:'Noleggio bici e pattini',w:2,d:1,fixed:1,hm:3.6,acts:[{n:'🚲 Prendi la bici',ride:'bici',play:1,dur:2,pose:'stand'},{n:'Prendi il monopattino',ride:'mono',play:1,dur:2,pose:'stand'},{n:'Metti i roller',ride:'roller',play:1,dur:2,pose:'stand'},{n:'🏁 Fai un giro della pista',giro:1,play:1,dur:1,pose:'stand'},{n:'Riconsegna',ret:1,dur:1,pose:'stand'}]},
+ halfpipe:{name:'Half-pipe',w:4,d:2,fixed:1,hm:2.6,acts:[{n:'Fai un\'acrobazia sull\'half-pipe',needRide:1,act:1,need:'diver',r:2.8,dur:12,pose:'jump',ev:'acrobazia'}]},
+ rampa:{name:'Rampa',w:2,d:1,fixed:1,hm:2,acts:[{n:'Salta sulla rampa',needRide:1,act:1,need:'diver',r:2.6,dur:10,pose:'jump',ev:'salto'}]},
+ rail:{name:'Corrimano da skate',w:3,d:1,fixed:1,hm:1.6,acts:[{n:'Fai la scivolata sul corrimano',needRide:1,act:1,need:'diver',r:2.4,dur:10,pose:'jump'}]},
+ birilli:{name:'Birilli',w:3,d:1,fixed:1,hm:1.4,acts:[{n:'Fai lo slalom tra i birilli',needRide:1,act:1,need:'diver',r:2.4,dur:12,pose:'stand',ev:'slalom'}]},
  /* quartiere (fissi) */
  auto:{name:'La macchina di papà',w:2,d:3,fixed:1,hm:2.2,acts:[]},
  carY:{name:'Auto',w:2,d:3,fixed:1,hm:2.2,acts:[]},
@@ -184,14 +190,15 @@ var T={
 var CATALOG=['tappeto','lampada','poltrona','acquario','trenino','arcade','castello','canestro','piscina','trampolino','casetta','fiori','albero','panchina'];
 var START=[['lettoT',0,0],['scrivania',3,0],['giochi',0,3],['armadio',3,2],['doccia',4,0],['wc',6,0],['lavandino',6,2],['lettoG',9,0],['armadio',11,3],['telefono',0,4],['pianta',10,4],
  ['tv',0,5],['divano',2,7],['consolle',1,5],['libreria',5,5],['frigo',11,5],['fornelli',10,5],['lavello',9,5],['tavolo',8,7],['porta',11,8],['lampada',0,8],['lampada',0,2],
- ['recinto',3,10],['orto',6,10],['altalena',12,1],['sabbiera',9,10]].map(function(s){ return [s[0],s[1]+HX,s[2]+HY]; });
+ ['recinto',3,10],['orto',6,10],['altalena',12,1],['sabbiera',9,10],['lego',2,0]].map(function(s){ return [s[0],s[1]+HX,s[2]+HY]; });
 var WORLD=[['auto',24,7],['albero',10,14],['albero',19,16],['vicino1',1,3],['vicino2',28,3],['alberoP',0,14],['alberoP',7,15],['alberoP',33,13],['alberoP',27,15],['alberoP',4,1],['alberoP',31,1],
  ['lampione',8,17],['lampione',27,17],['lampione',2,17],['lampione',33,17],['lampione',14,22],['lampione',29,22],
  ['scivolo',3,23],['giostra',8,23],['panchinaP',13,23],['fontana',17,24],['gelati',17,28],['panchinaP',3,28],['alberoP',0,22],['alberoP',11,28],['alberoP',25,23],['alberoP',19,23],['alberoP',24,28],['alberoP',6,28],['scuola',27,23]];
+var WORLD2=[['halfpipe',1,31],['rampa',8,31],['rampa',14,33],['rail',14,31],['birilli',8,34],['noleggio',18,30],['panchinaP',1,34],['alberoP',25,31],['alberoP',30,33],['alberoP',26,35],['alberoP',33,30],['lampione',11,30],['lampione',20,35]];
 
 /* ================= STATO ================= */
 var ST=null;
-function newState(){ var objs=START.concat(WORLD).map(function(s,i){ return {id:i+1,type:s[0],x:s[1],y:s[2]}; });
+function newState(){ var objs=START.concat(WORLD).concat(WORLD2).map(function(s,i){ return {id:i+1,type:s[0],x:s[1],y:s[2]}; });
   return {v:2,day:1,min:7*60+30,money:300,stars:0,carrots:2,nextId:200,objs:objs,goals:{},carOut:false,chars:{
     tommy:{x:12,y:3,needs:{fame:70,sonno:85,diver:60,pulizia:80,bagno:70,amici:70}},
     milly:{x:19,y:8,needs:{fame:70,sonno:80,diver:70,pulizia:80,bagno:80,amici:80}},
@@ -224,7 +231,7 @@ function bfs(sx,sy,goalFn,okFn){ var q=[[sx,sy]], qi=0, prev={}, k0=sx+','+sy; p
   while(qi<q.length){ var c=q[qi++]; if(goalFn(c[0],c[1])){ var path=[], k=c[0]+','+c[1]; while(prev[k]!==null&&prev[k]!==undefined){ var p=k.split(','); path.unshift([+p[0],+p[1]]); k=prev[k]; } return path; }
     for(var i=0;i<4;i++){ var nx=c[0]+D[i][0], ny=c[1]+D[i][1], nk=nx+','+ny; if(prev.hasOwnProperty(nk)) continue; if(!passable(nx,ny)) continue; if(okFn&&!okFn(nx,ny)) continue; if(wallBetween(c[0],c[1],nx,ny)) continue; prev[nk]=c[0]+','+c[1]; q.push([nx,ny]); } }
   return null; }
-function okFor(c){ if(c.bunny) return function(x,y){ return room(x,y)==='.'; }; if(c.npc) return function(x,y){ return zone(room(x,y))==='P'; }; return null; }
+function okFor(c){ if(c.bunny) return function(x,y){ return room(x,y)==='.'; }; if(c.kind==='skater') return function(x,y){ return room(x,y)==='k'; }; if(c.kind==='guest') return function(x,y){ var z=zone(room(x,y)); return z==='L'||HOUSEL.indexOf(z)>=0||(x===22&&y===18); }; if(c.npc) return function(x,y){ var r=room(x,y); return zone(r)==='P'&&r!=='k'; }; return null; }
 function spotsOf(ob){ var t=T[ob.type], out=[]; for(var i=-1;i<=t.w;i++) for(var j=-1;j<=t.d;j++){ var edge=(i===-1||i===t.w)!==(j===-1||j===t.d); if(!edge) continue; var x=ob.x+i, y=ob.y+j; if(!passable(x,y)) continue;
       var ix=Math.max(ob.x,Math.min(ob.x+t.w-1,x)), iy=Math.max(ob.y,Math.min(ob.y+t.d-1,y)); if(wallBetween(x,y,ix,iy)) continue; out.push([x,y]); } return out; }
 function goTo(c,tx,ty){ var sx=Math.round(c.x), sy=Math.round(c.y); var p=bfs(sx,sy,function(x,y){ return x===tx&&y===ty; },okFor(c)); if(!p) return false; c.path=p; c.state='walk'; return true; }
@@ -255,7 +262,7 @@ function ibox(x,u,v,w,d,z0,h,col){ var A=P(u,v,z0+h),B=P(u+w,v,z0+h),C=P(u+w,v+d
   poly(x,[D,C,C0,D0],shade(col,.82)); poly(x,[C,B,B0,C0],shade(col,.66)); poly(x,[A,B,C,D],shade(col,1.06)); }
 function icyl(x,u,v,r,z0,h,col){ var c0=P(u,v,z0), c1=P(u,v,z0+h), rx=r*TW*.7, ry=rx/2; x.fillStyle=shade(col,.75); x.fillRect(c0[0]-rx,c1[1],rx*2,c0[1]-c1[1]); x.beginPath(); x.save(); x.translate(c0[0],c0[1]); x.scale(rx,ry); x.arc(0,0,1,0,Math.PI); x.restore(); x.fill(); x.beginPath(); x.save(); x.translate(c1[0],c1[1]); x.scale(rx,ry); x.arc(0,0,1,0,6.3); x.restore(); x.fillStyle=shade(col,1.08); x.fill(); x.strokeStyle='rgba(0,0,0,.25)'; x.stroke(); }
 function dot(x,px,py,r,col){ x.fillStyle=col; x.beginPath(); x.arc(px,py,r,0,6.3); x.fill(); }
-var FLOOR={T:'#e9c48e',B:'#dff3ff',G:'#e3c09a',H:'#ead9b8',S:'#cf9a62',K:'#f4f4f4',A:'#b8bcc2','.':'#7cc462','n':'#86c06c','p':'#8ad06a','q':'#e6d3a6','W':'#d6d6d0','R':'#5a5e66','Z':'#5a5e66','D':'#c9c0b2','w':'#7cc462'};
+var FLOOR={T:'#e9c48e',B:'#dff3ff',G:'#e3c09a',H:'#ead9b8',S:'#cf9a62',K:'#f4f4f4',A:'#b8bcc2','.':'#7cc462','n':'#86c06c','p':'#8ad06a','q':'#e6d3a6','W':'#d6d6d0','R':'#5a5e66','Z':'#5a5e66','D':'#c9c0b2','w':'#7cc462','k':'#c9ccd2'};
 function hsh(x,y){ var n=(x*374761393+y*668265263)|0; n=Math.imul?Math.imul(n^(n>>>13),1274126177):(n^(n>>>13))*1274126177|0; return ((n^(n>>>16))>>>0)%1000/1000; }
 var bgOX=0,bgOY=0,bgTW=0;
 function buildBg(){ if(!bg) bg=document.createElement('canvas'); if(bg.width!==cv.width) bg.width=cv.width; if(bg.height!==cv.height) bg.height=cv.height; var x=bg.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); bgOX=OX; bgOY=OY; bgTW=TW;
@@ -278,7 +285,7 @@ function drawTile(x,xx,y){ var r=room(xx,y), c=corner(xx,y), col=FLOOR[r]||'#86c
   if((r==='K'||r==='B')&&(xx+y)%2) col=shade(col,.92);
   poly(x,q,col,false); x.lineWidth=1;
   if(r==='T'||r==='G'||r==='S'||r==='H'){ x.strokeStyle='rgba(90,50,20,.15)'; x.beginPath(); for(var k=1;k<4;k++){ var a=P(0,k/4,0), b=P(1,k/4,0); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); } var s=((xx*3+y)%4)/4+.12, s1=P(s,0,0), s2=P(s,.25,0), s3=P((s+.5)%1,.5,0), s4=P((s+.5)%1,.75,0); x.moveTo(s1[0],s1[1]); x.lineTo(s2[0],s2[1]); x.moveTo(s3[0],s3[1]); x.lineTo(s4[0],s4[1]); x.stroke(); }
-  else if(r==='K'||r==='B'||r==='W'||r==='D'){ x.strokeStyle=r==='W'?'rgba(0,0,0,.14)':'rgba(0,0,0,.08)'; x.beginPath(); var m1=P(.5,0,0),m2=P(.5,1,0),m3=P(0,.5,0),m4=P(1,.5,0); x.moveTo(m1[0],m1[1]); x.lineTo(m2[0],m2[1]); x.moveTo(m3[0],m3[1]); x.lineTo(m4[0],m4[1]); x.stroke(); }
+  else if(r==='K'||r==='B'||r==='W'||r==='D'||r==='k'){ x.strokeStyle=r==='W'?'rgba(0,0,0,.14)':'rgba(0,0,0,.08)'; x.beginPath(); var m1=P(.5,0,0),m2=P(.5,1,0),m3=P(0,.5,0),m4=P(1,.5,0); x.moveTo(m1[0],m1[1]); x.lineTo(m2[0],m2[1]); x.moveTo(m3[0],m3[1]); x.lineTo(m4[0],m4[1]); x.stroke(); }
   else if(r==='A'){ if(h<.25){ x.fillStyle='rgba(0,0,0,.12)'; var o=P(.5,.5,0); x.beginPath(); x.save(); x.translate(o[0],o[1]); x.scale(TW*.15,TH*.15); x.arc(0,0,1,0,6.3); x.restore(); x.fill(); } }
   else if(r==='R'){ if(y===19&&xx%2===0){ var l1=P(.15,1,0), l2=P(.85,1,0); x.strokeStyle='#f2e9c8'; x.lineWidth=Math.max(1.5,TW*.05); x.beginPath(); x.moveTo(l1[0],l1[1]); x.lineTo(l2[0],l2[1]); x.stroke(); } }
   else if(r==='Z'){ for(var k2=0;k2<3;k2++){ var u0=k2/3+.05, u1=u0+.2; poly(x,[P(u0,.06,0),P(u1,.06,0),P(u1,.94,0),P(u0,.94,0)],'#f4f4f0',false); } }
@@ -379,6 +386,15 @@ function drawObj(x,ty,t,lit,k2){ var h=TH, w=t.w, d=t.d;
   case 'fontana': icyl(x,.5,.5,.3,0,h*.25,'#a9adb6'); icyl(x,.5,.5,.1,h*.25,h*.6,'#8a8f99'); var fw=P(.5,.5,h*.95); dot(x,fw[0],fw[1],TW*.06,'#5fbfff'); break;
   case 'gelati': ibox(x,.1,.15,1.8,.7,0,h*1.1,'#ffffff'); ibox(x,.1,.15,1.8,.7,0,h*.25,'#ff8ab0'); [[.2,.2],[1.8,.2],[.2,.8],[1.8,.8]].forEach(function(q){ var a=P(q[0],q[1],h*1.1), b=P(q[0],q[1],h*1.5); x.strokeStyle='#cccccc'; x.lineWidth=2; x.beginPath(); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.stroke(); });
     for(var gs=0;gs<6;gs++) ibox(x,.05+gs*.3,.05,.3,.9,h*1.5,h*.12,gs%2?'#ffffff':'#ff6a9a'); var ic=P(1,.5,h*2.3); x.fillStyle='#e8b060'; x.beginPath(); x.moveTo(ic[0]-TW*.08,ic[1]); x.lineTo(ic[0]+TW*.08,ic[1]); x.lineTo(ic[0],ic[1]+TW*.22); x.closePath(); x.fill(); dot(x,ic[0],ic[1]-TW*.04,TW*.1,'#ff8ab0'); break;
+  case 'lego': ibox(x,.15,.15,.7,.7,h*.55,h*.08,'#c89a62'); [[.2,.2],[.72,.2],[.2,.72],[.72,.72]].forEach(function(q){ ibox(x,q[0],q[1],.08,.08,0,h*.55,'#8a6a42'); }); ibox(x,.3,.3,.25,.15,h*.63,h*.18,'#e0373f'); ibox(x,.3,.3,.25,.15,h*.81,h*.18,'#3f86d4'); ibox(x,.55,.5,.15,.25,h*.63,h*.18,'#f2c230'); ibox(x,.3,.55,.2,.2,h*.63,h*.36,'#5fd06a'); ibox(x,.3,.3,.25,.15,h*.99,h*.18,'#f2c230'); break;
+  case 'noleggio': ibox(x,.1,.15,1.8,.7,0,h*1.2,'#3f86d4'); faceV(x,.3,1.7,.85,h*.55,h*1.05,'#bfe8ff'); [[.2,.2],[1.8,.2],[.2,.8],[1.8,.8]].forEach(function(q){ var a=P(q[0],q[1],h*1.2), b=P(q[0],q[1],h*1.6); x.strokeStyle='#cccccc'; x.lineWidth=2; x.beginPath(); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.stroke(); });
+    for(var ns=0;ns<6;ns++) ibox(x,.05+ns*.3,.05,.3,.9,h*1.6,h*.12,ns%2?'#ffffff':'#f2c230'); x.save(); var no=P(.3,.85,h*.25); x.translate(no[0],no[1]); x.transform(1,.5,0,1,0,0); x.fillStyle='#ffffff'; x.font='900 '+Math.round(TW*.19)+'px -apple-system,Helvetica,Arial,sans-serif'; x.textAlign='left'; x.fillText('NOLEGGIO',0,0); x.restore(); break;
+  case 'halfpipe': var hp=h*1.2; ibox(x,0,0,.35,2,0,hp,'#8a929e'); poly(x,[P(.35,0,hp),P(.35,2,hp),P(1.4,2,0),P(1.4,0,0)],'#b8c0cc'); poly(x,[P(.35,2,0),P(.35,2,hp),P(1.4,2,0)],'#7a828e');
+    poly(x,[P(2.6,0,0),P(2.6,2,0),P(3.65,2,hp),P(3.65,0,hp)],'#9aa3b0'); poly(x,[P(2.6,2,0),P(3.65,2,hp),P(3.65,2,0)],'#7a828e'); ibox(x,3.65,0,.35,2,0,hp,'#8a929e');
+    x.strokeStyle='#3a3f4a'; x.lineWidth=Math.max(2,TW*.05); var hc1=P(.35,0,hp), hc2=P(.35,2,hp), hc3=P(3.65,0,hp), hc4=P(3.65,2,hp); x.beginPath(); x.moveTo(hc1[0],hc1[1]); x.lineTo(hc2[0],hc2[1]); x.moveTo(hc3[0],hc3[1]); x.lineTo(hc4[0],hc4[1]); x.stroke(); break;
+  case 'rampa': var rh2=h*.9; poly(x,[P(0,0,rh2),P(0,1,rh2),P(2,1,0),P(2,0,0)],'#c8a060'); poly(x,[P(0,1,0),P(0,1,rh2),P(2,1,0)],'#9a7a48'); x.strokeStyle='rgba(0,0,0,.15)'; x.lineWidth=1; x.beginPath(); for(var rk=1;rk<5;rk++){ var ra=P(rk*.4,0,rh2*(1-rk*.2)), rb=P(rk*.4,1,rh2*(1-rk*.2)); x.moveTo(ra[0],ra[1]); x.lineTo(rb[0],rb[1]); } x.stroke(); break;
+  case 'rail': [[.3,.5],[2.7,.5]].forEach(function(q){ var a=P(q[0],q[1],0), b=P(q[0],q[1],h*.6); x.strokeStyle='#555555'; x.lineWidth=Math.max(2,TW*.05); x.beginPath(); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.stroke(); }); var rl1=P(.2,.5,h*.6), rl2=P(2.8,.5,h*.6); x.strokeStyle='#e0373f'; x.lineWidth=Math.max(3,TW*.08); x.beginPath(); x.moveTo(rl1[0],rl1[1]); x.lineTo(rl2[0],rl2[1]); x.stroke(); break;
+  case 'birilli': for(var bi=0;bi<4;bi++){ var bp=P(.35+bi*.75,.5,0), bt=P(.35+bi*.75,.5,h*.75); x.fillStyle='#ff8a2a'; x.beginPath(); x.moveTo(bp[0]-TW*.08,bp[1]); x.lineTo(bp[0]+TW*.08,bp[1]); x.lineTo(bt[0],bt[1]); x.closePath(); x.fill(); x.fillStyle='#ffffff'; x.fillRect(bp[0]-TW*.045,bp[1]-h*.42,TW*.09,h*.1); } break;
   case 'vicino1': drawHouse(x,t,'#f2d38a','#c8402a',lit); break;
   case 'vicino2': drawHouse(x,t,'#a8d0e8','#4a5a7a',lit); break;
   case 'scuola': drawSchool(x,t,lit); break;
@@ -386,6 +402,7 @@ function drawObj(x,ty,t,lit,k2){ var h=TH, w=t.w, d=t.d;
 
 /* ---- personaggi ---- */
 function drawPerson(c,px,py){ var bob=c.state==='walk'?Math.abs(Math.sin(c.bob*10))*2:0, s=TW/64, pose=c.state==='act'&&c.act&&c.act.pose;
+  if(c.fallen) pose='sit';
   if(c.bunny) return drawBunny(c,px,py,s);
   var kid=c.kid, hgt=(kid?40:52)*s, y0=py-bob, fx=c.face;
   ctx.fillStyle='rgba(0,0,0,.2)'; ctx.beginPath(); ctx.save(); ctx.translate(px,py); ctx.scale(12*s,5*s); ctx.arc(0,0,1,0,6.3); ctx.restore(); ctx.fill();
@@ -395,6 +412,12 @@ function drawPerson(c,px,py){ var bob=c.state==='walk'?Math.abs(Math.sin(c.bob*1
   var jump=pose==='jump'?Math.abs(Math.sin(Date.now()/180))*18*s:0; y0-=jump;
   var sit=pose==='sit'?8*s:0, legH=(kid?12:16)*s-sit, bodyH=(kid?14:18)*s;
   var step=c.state==='walk'?Math.sin(c.bob*10)*3*s:0;
+  if(c.ride&&pose!=='sleep'&&!c.fallen){ var rcol=c.helmet||'#e0373f', g0=y0;
+    if(c.ride==='bici'){ y0-=7*s; ctx.strokeStyle='#1d1f2b'; ctx.lineWidth=Math.max(1.5,1.6*s); ctx.beginPath(); ctx.arc(px-8*s,g0-4*s,4*s,0,6.3); ctx.stroke(); ctx.beginPath(); ctx.arc(px+8*s,g0-4*s,4*s,0,6.3); ctx.stroke();
+      ctx.strokeStyle=rcol; ctx.lineWidth=Math.max(1.5,1.5*s); ctx.beginPath(); ctx.moveTo(px-8*s,g0-4*s); ctx.lineTo(px,y0); ctx.lineTo(px+8*s,g0-4*s); ctx.moveTo(px,y0); ctx.lineTo(px+7*s*fx,y0-12*s); ctx.lineTo(px+4*s*fx,y0-13*s); ctx.stroke(); }
+    else if(c.ride==='mono'){ ctx.fillStyle='#3a3f4a'; ctx.fillRect(px-8*s,g0-2*s,16*s,2*s); circ(px-7*s,g0,1.8*s,'#1d1f2b'); circ(px+7*s,g0,1.8*s,'#1d1f2b'); ctx.strokeStyle=rcol; ctx.lineWidth=Math.max(1.5,1.4*s); ctx.beginPath(); ctx.moveTo(px+7*s*fx,g0-2*s); ctx.lineTo(px+7*s*fx,g0-26*s); ctx.moveTo(px+4*s*fx,g0-26*s); ctx.lineTo(px+10*s*fx,g0-26*s); ctx.stroke(); y0-=2*s; }
+    else if(c.ride==='skate'){ ctx.fillStyle=rcol; ctx.fillRect(px-8*s,g0-2.5*s,16*s,2*s); circ(px-5*s,g0,1.4*s,'#1d1f2b'); circ(px+5*s,g0,1.4*s,'#1d1f2b'); y0-=2.5*s; }
+    else { circ(px-5*s,g0,1.1*s,'#f2c230'); circ(px-2*s,g0,1.1*s,'#f2c230'); circ(px+2*s,g0,1.1*s,'#f2c230'); circ(px+5*s,g0,1.1*s,'#f2c230'); y0-=2*s; } }
   if(c.cape){ ctx.fillStyle=c.cape; ctx.beginPath(); ctx.moveTo(px-6*s,y0-legH-bodyH+1*s); ctx.lineTo(px+6*s,y0-legH-bodyH+1*s); ctx.lineTo(px+9*s-fx*2*s,y0-3*s); ctx.lineTo(px-9*s-fx*2*s,y0-3*s); ctx.closePath(); ctx.fill(); }
   if(c.shorts){ ctx.fillStyle=c.skin; ctx.fillRect(px-5*s,y0-legH,4*s,legH); ctx.fillRect(px+1*s,y0-legH,4*s,legH); ctx.fillStyle=c.socks||'#ffffff'; ctx.fillRect(px-5*s,y0-legH*.5,4*s,legH*.5); ctx.fillRect(px+1*s,y0-legH*.5,4*s,legH*.5); ctx.fillStyle=c.pants; ctx.fillRect(px-5.5*s,y0-legH,11*s,legH*.4); }
   else { ctx.fillStyle=c.pants; ctx.fillRect(px-5*s,y0-legH,4*s,legH); ctx.fillRect(px+1*s,y0-legH,4*s,legH); if(c.pj){ ctx.fillStyle=c.pj; for(var pq=1;pq<4;pq++) ctx.fillRect(px-5*s,y0-legH+pq*legH/4,10*s,1.2*s); } }
@@ -411,6 +434,7 @@ function drawPerson(c,px,py){ var bob=c.state==='walk'?Math.abs(Math.sin(c.bob*1
   ctx.fillStyle=c.skin; ctx.beginPath(); ctx.arc(px,hy,hr,0,6.3); ctx.fill(); ctx.strokeStyle='rgba(0,0,0,.22)'; ctx.lineWidth=1; ctx.stroke();
   ctx.fillStyle=c.hair; if(c.bald){ ctx.beginPath(); ctx.arc(px,hy+1*s,hr,Math.PI*.9,Math.PI*1.1); ctx.fill(); } else { ctx.beginPath(); ctx.arc(px,hy-1*s,hr,Math.PI*1.05,Math.PI*1.95); ctx.fill(); if(c.kid){ ctx.beginPath(); ctx.moveTo(px-3*s,hy-hr); ctx.lineTo(px,hy-hr-5*s); ctx.lineTo(px+3*s,hy-hr+1*s); ctx.fill(); } }
   if(c.hat==='safari'){ ctx.fillStyle='#c8a874'; ctx.beginPath(); ctx.save(); ctx.translate(px,hy-hr*.5); ctx.scale(hr*1.55,hr*.38); ctx.arc(0,0,1,0,6.3); ctx.restore(); ctx.fill(); ctx.beginPath(); ctx.arc(px,hy-hr*.5,hr*.85,Math.PI,0); ctx.fill(); ctx.fillStyle='#7a5a3a'; ctx.fillRect(px-hr*.85,hy-hr*.72,hr*1.7,1.6*s); }
+  if(c.ride&&!c.fallen){ ctx.fillStyle=c.helmet||'#e0373f'; ctx.beginPath(); ctx.arc(px,hy-1*s,hr+1.2*s,Math.PI*1.02,Math.PI*1.98); ctx.closePath(); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.55)'; ctx.fillRect(px-2*s,hy-hr-.5*s,4*s,2*s); }
   if(c.beard){ ctx.fillStyle=c.hair; ctx.beginPath(); ctx.arc(px,hy+3*s,hr*.85,.15,Math.PI-.15); ctx.fill(); }
   if(c.mask){ ctx.fillStyle=c.mask; ctx.fillRect(px-hr+1*s,hy-2.6*s,hr*2-2*s,5*s); }
   circ(px-2.6*s+fx*1.5*s,hy,1.9*s,'#ffffff'); circ(px+2.6*s+fx*1.5*s,hy,1.9*s,'#ffffff'); circ(px-2.3*s+fx*2*s,hy+.3*s,1.1*s,'#1d1f2b'); circ(px+2.9*s+fx*2*s,hy+.3*s,1.1*s,'#1d1f2b');
@@ -498,6 +522,7 @@ function endAction(c,completed){ var a=c.act&&c.act.a; if(c.onObj&&c.prevPos){ c
     if(a.dish&&a.dish.v){ addHab('sano'); goalEvent('verdure'); if(Math.random()<.7) parentSay(['Bravo! Frutta e verdura ti fanno diventare forte!','Che bravo, mangi tutto!','Così cresci sano e forte!'][Math.floor(Math.random()*3)]); }
     if(a.outfit){ applyOutfit(c,a.outfit); ST.outfit=a.outfit; if(!ST.looks) ST.looks={}; if(!ST.looks[a.outfit]){ ST.looks[a.outfit]=1; addHab('look'); } goalEvent('look_'+a.outfit); toast('👕 Che stile! Tommy ora è vestito da '+OUTFITS[a.outfit].n.toLowerCase(),3000); }
     if(a.ev==='pigiama'){ applyOutfit(c,'pigiama'); ST.outfit='pigiama'; }
+    if(a.race){ var rk=CH[a.race]; if(Math.random()<.55){ ST.money+=5; toast('🏆 Hai vinto la gara! +5 monete',3000); } else toast('Ha vinto '+(rk?rk.name:'il tuo amico')+'! La prossima volta ce la fai 💪',3000); }
     if(a.ev==='bagno'){ ST.handsT=-1e9; toast('💧 Ora lavati le mani!',2600); }
     if(a.pose==='sleep'&&(c.act.ob.type==='lettoT'||c.act.ob.type==='castello')){ var hh=hNow(); if(hh>=5&&hh<12){ c.act=null; c.state='idle'; c.onObj=false; wake(false); updateDoing(); return; } } } }
   c.act=null; c.state='idle'; if(c.id==='tommy') updateDoing(); }
@@ -521,7 +546,7 @@ var GOALS=[
  {id:'g10',n:'Fai i compiti alla scrivania',ev:'compiti',prize:30},{id:'g11',n:'Mangia a tavola',ev:'tavola',prize:20},{id:'g12',n:'Gioca con papà',ev:'giocapapa',prize:30},
  {id:'g13',n:'Accarezza Carotino',ev:'coccole',prize:20},{id:'g14',n:'Gioca al parco con Leo o Sofia',ev:'parco',prize:30},{id:'g15',n:'Tutti i bisogni di Tommy sopra metà',ev:'_',check:function(){ var c=CH.tommy; return NEEDS.every(function(n){ return c.needs[n]>=50; }); },prize:60},
  {id:'g16',n:'Compra il trampolino',ev:'buy_trampolino',prize:80},{id:'g17',n:'Compra il letto a castello',ev:'buy_castello',prize:80},{id:'g18',n:'Arriva a 5 stelline di scuola',ev:'_',check:function(){ return ST.stars>=5; },prize:100},
- {id:'g19',n:'Completa la routine del mattino',ev:'mattino',prize:40},{id:'g20',n:'Completa la routine della sera',ev:'sera',prize:40},{id:'g21',n:'Riordina i giochi',ev:'riordina',prize:20},{id:'g22',n:'Aiuta in casa',ev:'aiuto',prize:20},{id:'g23',n:'Racconta una barzelletta',ev:'barzelletta',prize:20},{id:'g24',n:'Mangia un piatto con frutta o verdura',ev:'verdure',prize:20},{id:'g25',n:'Vestiti da supereroe',ev:'look_eroe',prize:30}];
+ {id:'g19',n:'Completa la routine del mattino',ev:'mattino',prize:40},{id:'g20',n:'Completa la routine della sera',ev:'sera',prize:40},{id:'g21',n:'Riordina i giochi',ev:'riordina',prize:20},{id:'g22',n:'Aiuta in casa',ev:'aiuto',prize:20},{id:'g23',n:'Racconta una barzelletta',ev:'barzelletta',prize:20},{id:'g24',n:'Mangia un piatto con frutta o verdura',ev:'verdure',prize:20},{id:'g25',n:'Vestiti da supereroe',ev:'look_eroe',prize:30},{id:'g26',n:'Gioca con i mattoncini',ev:'lego',prize:20},{id:'g27',n:'Invita un amico a casa',ev:'invito',prize:30},{id:'g28',n:'Fai un nuovo amico al parco',ev:'amico',prize:30},{id:'g29',n:'Aiuta un bambino in difficoltà',ev:'aiutobimbo',prize:40},{id:'g30',n:'Fai un giro della pista',ev:'giro',prize:20}];
 /* ================= VESTITI, PIATTI, BARZELLETTE ================= */
 var OUTFITS={casual:{n:'Maglietta e jeans',shirt:'#f07a2a',pants:'#3a6ab0'},
  sport:{n:'Tuta sportiva',shirt:'#2f6ad0',sleeve:'#2f6ad0',pants:'#2f6ad0',shoes:'#e0373f',zip:'#ffffff'},
@@ -553,13 +578,63 @@ function tellJoke(c,a){ var j=a.joke, w=CH[a.who]; say(c,j[0],3.2); toast('😄 
   setTimeout(function(){ if(!ST) return; say(c,j[1],3.5); toast('😂 '+j[1],3800,true); if(w&&w.state!=='away'){ say(w,['Ahahah! 😂','Che ridere!','Questa è fortissima!','Ahah, bravo Tommy!'][Math.floor(Math.random()*4)],3.5); if(w.needs&&w.needs.diver!=null) w.needs.diver=clamp(w.needs.diver+15); }
     for(var k=0;k<5;k++) tone(500+k*90,.09,'square',.03,k*.08); addHab('barzelletta'); goalEvent('barzelletta'); },3000); }
 
+/* ================= AMICI, OSPITI E SKATE PARK ================= */
+var BASEFRIENDS=['Arianna','Micky','Emma'];
+var GUESTLOOK={Arianna:{hair:'#2b1d14',long:1,shirt:'#f2c230',pants:'#3a6ab0',skin:'#e8b48a'},Micky:{hair:'#c8602a',shirt:'#3fae4a',pants:'#3a3a4a',skin:'#f6d2b0'},Emma:{hair:'#f2d36a',long:1,shirt:'#ff8ab0',pants:'#9a5cff',skin:'#f6d2b0'}};
+var SKNAMES=['Luca','Giulia','Marco','Sara','Nina','Tobia','Giorgio','Alice','Pietro','Viola'], GIRLS={Giulia:1,Sara:1,Nina:1,Alice:1,Viola:1,Arianna:1,Emma:1,Sofia:1};
+function nameHash(n){ var h=7; for(var i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))%100003; return h; }
+function lookFor(name){ if(GUESTLOOK[name]) return GUESTLOOK[name]; var h=nameHash(name), HA=['#2b1d14','#6b3f22','#c8602a','#e8c050','#1d1f2b'], SH=['#e0373f','#3f86d4','#5fd06a','#9a5cff','#ff8a2a','#f2c230','#ff6a9a','#3fc0c0'], PA=['#3a6ab0','#3a3a4a','#5a3a8a','#2b3a67','#7a4a2a'], SK=['#f6d2b0','#e8b48a','#c88a5a','#8a5a3a'];
+  return {hair:HA[h%5],shirt:SH[Math.floor(h/5)%8],pants:PA[Math.floor(h/40)%5],skin:SK[Math.floor(h/200)%4],long:GIRLS[name]?1:0}; }
+function makeNpc(id,name,kind,x,y){ var l=lookFor(name), c={id:id,name:name,kind:kind,kid:1,npc:1,hair:l.hair,shirt:l.shirt,pants:l.pants,skin:l.skin,long:l.long,x:x,y:y,path:[],act:null,state:'idle',away:null,face:1,bob:0,think:1,say:null,needs:{}}; CH[id]=c; return c; }
+function isFriend(n){ return BASEFRIENDS.indexOf(n)>=0||(!!ST.friends&&ST.friends.indexOf(n)>=0); }
+function allFriends(){ return BASEFRIENDS.concat(ST.friends||[]); }
+function addFriend(n){ if(isFriend(n)) return false; if(!ST.friends) ST.friends=[]; ST.friends.push(n); addHab('amico'); goalEvent('amico'); return true; }
+/* ospiti a casa */
+function inviteFriend(name){ var id='g_'+name; if(CH[id]) return; var c=makeNpc(id,name,'guest',22,18); c.state='away'; c.away={where:'casa',back:1e15}; c.arriveAt=ST.min+20; c.leaveAt=ST.min+200; toast('📞 '+name+': "Arrivo tra poco!"',3000,true); goalEvent('invito'); }
+function guestsTick(){ for(var id in CH){ var c=CH[id]; if(c.kind!=='guest') continue;
+    if(c.state==='away'){ if(ST.min>=c.arriveAt){ c.state='idle'; c.away=null; c.x=22; c.y=18; c.think=0; say(c,'Ciao Tommy! Eccomi!',3); toast('🔔 '+c.name+(GIRLS[c.name]?' è arrivata':' è arrivato')+' a casa tua!',3000); } continue; }
+    if(!c.leaving&&(ST.min>=c.leaveAt||hNow()>=19.5)&&c.state==='idle'){ c.leaving=true; c.think=0; say(c,'Devo tornare a casa. Ciao, grazie!',3); } } }
+function guestThink(c){ if(c.leaving){ if(Math.round(c.x)===22&&Math.round(c.y)===18) delete CH[c.id]; else if(!goTo(c,22,18)) delete CH[c.id]; return; }
+  var t=CH.tommy, tz=zone(room(Math.round(t.x),Math.round(t.y)));
+  if(t.state!=='away'&&(tz==='L'||HOUSEL.indexOf(tz)>=0)&&Math.random()<.6){ var D=[[1,0],[0,1],[-1,0],[0,-1]]; for(var i=0;i<4;i++){ var gx=Math.round(t.x)+D[i][0], gy=Math.round(t.y)+D[i][1]; if(passable(gx,gy)&&goTo(c,gx,gy)){ c.think=3+Math.random()*3; return; } } }
+  for(var k=0;k<6;k++){ var rx=HX+Math.floor(Math.random()*12), ry=HY+Math.floor(Math.random()*9); if(passable(rx,ry)&&goTo(c,rx,ry)) return; } }
+/* skate park */
+var RIDES={bici:'la bici',mono:'il monopattino',roller:'i roller',skate:'lo skateboard'};
+function randSkate(){ for(var i=0;i<30;i++){ var x=Math.floor(Math.random()*21), y=30+Math.floor(Math.random()*6); if(passable(x,y)) return [x,y]; } return [6,33]; }
+function skatersTick(){ var on=parkHours(), day=Math.floor(ST.min/1440);
+  for(var i=0;i<3;i++){ var id='sk'+i, c=CH[id];
+    if(!on){ if(c) delete CH[id]; continue; }
+    if(c&&c.day===day) continue; if(c) delete CH[id];
+    var nm=SKNAMES[(day*3+i*4)%SKNAMES.length], p=randSkate(); c=makeNpc(id,nm,'skater',p[0],p[1]); c.day=day; c.ride=['bici','mono','roller','skate'][(day+i)%4]; c.helmet=['#3f86d4','#f2c230','#5fd06a'][i]; } }
+function skaterThink(c){ if(c.fallen) return; var p=randSkate(); goTo(c,p[0],p[1]); c.think=1+Math.random()*2; }
+function loopPath(c){ var W2=[[6,30],[16,30],[16,35],[6,35],[6,30]], cur=[Math.round(c.x),Math.round(c.y)], out=[];
+  W2.forEach(function(w){ var pth=bfs(cur[0],cur[1],function(x,y){ return x===w[0]&&y===w[1]; }); if(pth){ out=out.concat(pth); cur=w; } }); return out; }
+var FALLS=[
+ {t:'{n} è caduto dalla bici e si è sbucciato il ginocchio!',ok:['Lo aiuto ad alzarsi e chiamo un adulto per il cerotto'],no:['Rido perché è caduto','Prendo la sua bici e scappo','Faccio finta di non vedere']},
+ {t:'{n} è caduto con i roller e piange.',ok:['Gli chiedo se sta bene e lo consolo'],no:['Gli dico che è una frana','Vado via a giocare','Lo prendo in giro con gli altri']},
+ {t:'{n} ha perso il casco e non sa dove l\'ha messo.',ok:['Lo aiuto a cercarlo'],no:['Gli dico che sono affari suoi','Mi metto il suo casco io']},
+ {t:'{n} è caduto dal monopattino e ha paura di riprovare.',ok:['Lo incoraggio: "Dai, riprova piano piano, ti sto vicino!"'],no:['Gli dico che è un fifone','Gli rubo il monopattino']},
+ {t:'{n} è inciampato e gli sono cadute tutte le figurine.',ok:['Lo aiuto a raccoglierle'],no:['Me ne prendo qualcuna di nascosto','Ci cammino sopra per ridere']}];
+var fallT=40;
+function fallTick(dmin){ var t=CH.tommy, list=[], any=null; for(var id in CH){ var c=CH[id]; if(c.kind==='skater'&&c.state!=='away'){ if(c.fallen) any=c; else list.push(c); } }
+  if(any){ any.say={s:'Ahia! 😢',t:1}; if(ST.min-any.fallen.at>120){ any.fallen=null; any.say={s:'Sto meglio, grazie!',t:2.5}; } return; }
+  if(t.state==='away'||zone(room(Math.round(t.x),Math.round(t.y)))!=='P') return;
+  fallT-=dmin; if(fallT>0||!list.length) return; fallT=50+Math.random()*80; var k=list[Math.floor(Math.random()*list.length)]; k.path=[]; k.state='idle'; k.fallen={sc:FALLS[Math.floor(Math.random()*FALLS.length)],at:ST.min}; toast('😮 Oh no! Un bambino è caduto: toccalo per aiutarlo!',3500,true); }
+function helpMenu(k,px,py){ var sc=k.fallen.sc, nm=isFriend(k.name)?k.name:'Un bambino', txt=sc.t.replace('{n}',nm), opts=[];
+  sc.ok.forEach(function(o){ opts.push({n:o,good:1}); }); sc.no.forEach(function(o){ opts.push({n:o}); }); opts.sort(function(){ return Math.random()-.5; });
+  showPop(px,py,txt+' Cosa fai?',opts.map(function(o){ return {n:o.n,f:function(){ if(!o.good){ say(k,'😢',2.5); toast('Mmm… così non lo aiuti. Pensa a come ti sentiresti tu: riprova!',3500,true); return; }
+    var c=CH.tommy; if(c.state==='act') endAction(c,false); startAction(c,{type:'__bun',x:Math.round(k.x),y:Math.round(k.y)},{n:'Aiuta '+nm.toLowerCase().replace('un bambino','un bambino'),dur:5,social:3,pose:'stand',helpKid:k.id}); }}; })); }
+function helpDone(k){ if(!k.fallen) return; k.fallen=null; ST.money+=15; jingle([523,659,784,1047]); say(k,'Grazie Tommy! Io sono '+k.name+'!',3.5); toast('💛 Bravo! Aiutare chi è in difficoltà è da veri amici (+15 monete)',3800,true); addHab('gentile'); goalEvent('aiutobimbo');
+  if(addFriend(k.name)) toast('👫 '+k.name+' è diventato tuo amico: ora puoi invitarlo a casa!',3500); }
+function befriend(k){ say(CH.tommy,'Ciao! Facciamo amicizia?',3); setTimeout(function(){ if(!ST||!CH[k.id]) return; say(k,'Sì! Io sono '+k.name+' 😊',3.5); if(addFriend(k.name)){ ST.money+=5; toast('👫 Nuovo amico: '+k.name+'! Ora puoi invitarlo a casa col telefono (+5 monete)',3800,true); jingle([660,880,1047]); } },1800); }
+
 /* ================= BUONE ABITUDINI ================= */
 var MORN=[{ev:'faccia',n:'💧 Lava la faccia',w:'lavandino in bagno'},{ev:'colazione',n:'🍞 Fai colazione',w:'tavolo in cucina'},{ev:'denti',n:'😁 Lava i denti',w:'lavandino in bagno'},{ev:'vestiti',n:'👕 Vestiti',w:'armadio'}];
 var EVE=[{ev:'denti',n:'😁 Lava i denti',w:'lavandino'},{ev:'pigiama',n:'🌙 Metti il pigiama',w:'armadio'},{ev:'nanna',n:'🛏️ A letto entro le 21:30',w:'il tuo letto'}];
 var QUOTES=['Sbagliare va bene: è così che si impara!','Se una cosa è difficile, provaci un passo alla volta.','Chiedere aiuto è da coraggiosi.','Essere gentili fa stare bene anche te.','Oggi prova a fare un complimento a qualcuno!','Non serve essere i migliori: basta fare del proprio meglio.','Quando sei arrabbiato, fai tre respiri lunghi lunghi.','Ogni giorno impari una cosa nuova, anche piccola.','Se un amico è triste, una parola gentile fa miracoli.','Le cose belle richiedono pazienza.','Dire grazie e per favore apre tutte le porte.','Anche i campioni hanno cominciato da principianti.','Se cadi, ti rialzi e ci riprovi. Sempre!','Prenditi cura delle cose: durano di più.','Gli animali hanno bisogno del nostro amore: trattali con dolcezza.','Ascoltare gli altri è un superpotere.','Va bene avere paura: il coraggio è andare avanti lo stesso.','Ridere insieme è la medicina più buona.','Se hai combinato un guaio, chiedere scusa sistema tante cose.','Muoversi e giocare all\'aria aperta fa bene al corpo e alla testa.','Leggere un libro è come fare un viaggio.','Condividere i giochi rende il gioco più bello.','Sei unico: nessuno è uguale a te!','Le giornate storte passano. Domani si riparte!','Un sorriso al mattino rende la giornata più leggera.','Dormire bene ti dà la carica per tutto il giorno.','Mettere in ordine ti aiuta a trovare tutto.','Ogni volta che ci provi diventi più bravo.','La famiglia è una squadra: ci si aiuta sempre.','Credi in te stesso: puoi fare grandi cose!'];
 var PRAISE={compiti:['Bravo! Ogni giorno impari qualcosa di nuovo.','Compiti fatti: ora il gioco è ancora più bello!'],aiuto:['Grazie dell\'aiuto! In famiglia ci si aiuta.','Che bravo aiutante!'],riordina:['Che ordine! Così ritrovi subito i tuoi giochi.'],carota:['Carotino ti ringrazia: ti vuole un mondo di bene!'],coccole:['Carotino è felicissimo delle coccole!']};
 var MEDALS=[{id:'mattino',ic:'☀️',n:'Campione del mattino',t:'Routine del mattino',k:5},{id:'sera',ic:'🌙',n:'Nanna puntuale',t:'Routine della sera',k:5},{id:'denti',ic:'😁',n:'Sorriso splendente',t:'Denti lavati',k:10},{id:'mani',ic:'💧',n:'Mani pulite',t:'Mani lavate',k:10},
- {id:'attivo',ic:'👀',n:'Occhi riposati',t:'Giochi senza schermo',k:10},{id:'carotino',ic:'🐰',n:'Amico degli animali',t:'Cure a Carotino',k:10},{id:'aiuto',ic:'👍',n:'Aiutante di casa',t:'Aiuti in casa',k:5},{id:'riordina',ic:'📦',n:'Re dell\'ordine',t:'Giochi riordinati',k:5},{id:'compiti',ic:'📚',n:'Bravo a scuola',t:'Compiti fatti',k:5},{id:'barzelletta',ic:'😂',n:'Comico di casa',t:'Barzellette raccontate',k:5},{id:'sano',ic:'🍎',n:'Pappa sana',t:'Piatti con frutta e verdura',k:5},{id:'look',ic:'👕',n:'Stilista',t:'Vestiti diversi provati',k:5}];
+ {id:'attivo',ic:'👀',n:'Occhi riposati',t:'Giochi senza schermo',k:10},{id:'carotino',ic:'🐰',n:'Amico degli animali',t:'Cure a Carotino',k:10},{id:'aiuto',ic:'👍',n:'Aiutante di casa',t:'Aiuti in casa',k:5},{id:'riordina',ic:'📦',n:'Re dell\'ordine',t:'Giochi riordinati',k:5},{id:'compiti',ic:'📚',n:'Bravo a scuola',t:'Compiti fatti',k:5},{id:'barzelletta',ic:'😂',n:'Comico di casa',t:'Barzellette raccontate',k:5},{id:'sano',ic:'🍎',n:'Pappa sana',t:'Piatti con frutta e verdura',k:5},{id:'look',ic:'👕',n:'Stilista',t:'Vestiti diversi provati',k:5},{id:'amico',ic:'👫',n:'Amico di tutti',t:'Nuovi amici al parco',k:3},{id:'gentile',ic:'💛',n:'Cuore d\'oro',t:'Bambini aiutati',k:3}];
 function ensureEdu(){ if(!ST.hab) ST.hab={}; if(!ST.medals) ST.medals={}; if(ST.scrUsed==null) ST.scrUsed=0; if(ST.scrUntil==null) ST.scrUntil=0; if(ST.handsT==null) ST.handsT=-1e9; }
 function hNow(){ return ST.min/60%24; }
 function getR(){ var d=Math.floor((ST.min-240)/1440); if(!ST.rt||ST.rt.day!==d) ST.rt={day:d,m:0,mDone:false,e:{},eDone:false}; return ST.rt; }
@@ -635,10 +710,11 @@ function update(dt){ if(!ST) return;
   for(var id2 in CH){ var c2=CH[id2];
     if(c2.say){ c2.say.t-=dt; if(c2.say.t<=0) c2.say=null; }
     if(c2.state==='away'){ if(!c2.npc&&ST.min>=c2.away.back) comeBack(c2); continue; }
-    if(c2.state==='walk'){ var ws=(c2.bunny?2.2:2.6)*Math.min(3,Math.max(1,spd*.6))*dt; c2.bob+=dt;
+    if(c2.state==='walk'){ var ws=(c2.bunny?2.2:2.6)*(c2.ride?1.7:1)*Math.min(3,Math.max(1,spd*.6))*dt; c2.bob+=dt;
       while(ws>0&&c2.path.length){ var nx=c2.path[0][0], ny=c2.path[0][1], dx=nx-c2.x, dy=ny-c2.y, dd=Math.sqrt(dx*dx+dy*dy); if(Math.abs(dx-dy)>.01) c2.face=(dx-dy)>0?1:-1; if(dd<=ws){ c2.x=nx; c2.y=ny; c2.path.shift(); ws-=dd; } else { c2.x+=dx/dd*ws; c2.y+=dy/dd*ws; ws=0; } }
+      if(c2.id==='tommy'&&c2.ride&&zone(room(Math.round(c2.x),Math.round(c2.y)))!=='P'){ toast('Hai riconsegnato '+RIDES[c2.ride]+' al noleggio',2600); c2.ride=null; }
       if(c2.id==='tommy'&&!ST.crossTip&&room(Math.round(c2.x),Math.round(c2.y))==='Z'){ ST.crossTip=1; toast('🚸 Bravo! La strada si attraversa sempre sulle strisce',3200); }
-      if(!c2.path.length){ c2.state='idle'; if(c2.act){ if(c2.act.a.work){ goAway(c2,'lavoro'); } else beginAct(c2); } else if(c2.chat){ c2.chat=false; var t3=CH.tommy; if(t3.state!=='away'){ say(c2,['Come va, campione?','Giochiamo dopo?','Ti voglio bene!','Hai fatto i compiti?'][Math.floor(Math.random()*4)],3); t3.needs.amici=clamp(t3.needs.amici+15); } } } continue; }
+      if(!c2.path.length){ c2.state='idle'; if(c2.giro){ c2.giro=false; c2.needs.diver=clamp(c2.needs.diver+30); toast('🏁 Che giro! Divertimento alle stelle',2600); goalEvent('giro'); addHab('attivo'); } if(c2.act){ if(c2.act.a.work){ goAway(c2,'lavoro'); } else beginAct(c2); } else if(c2.chat){ c2.chat=false; var t3=CH.tommy; if(t3.state!=='away'){ say(c2,['Come va, campione?','Giochiamo dopo?','Ti voglio bene!','Hai fatto i compiti?'][Math.floor(Math.random()*4)],3); t3.needs.amici=clamp(t3.needs.amici+15); } } } continue; }
     if(c2.state==='act'){ var a=c2.act.a; c2.act.t+=dmin;
       if(a.need){ c2.needs[a.need]=clamp(c2.needs[a.need]+a.r*dmin*(a.r<0?.5:1)); if(a.clean) c2.needs.pulizia=clamp(c2.needs.pulizia+a.clean*dmin); }
       if(c2.id==='tommy'){ if(a.scr){ ST.scrUsed+=dmin; if(ST.scrUsed>=45){ ST.scrUsed=0; ST.scrUntil=ST.min+120; endAction(c2,true); tone(330,.3,'sine',.06); toast('📺 Lo schermo si è spento: gli occhi hanno bisogno di riposare! Che ne dici dell\'altalena o di un libro?',4500,true); parentSay('Basta schermi per un po\', andiamo a giocare!'); continue; } } }
@@ -649,10 +725,11 @@ function update(dt){ if(!ST) return;
       if(done) endAction(c2,true); else if(c2.id==='tommy') updateDoing(); continue; }
     // idle
     c2.think-=dt; if(c2.think<=0){ c2.think=c2.bunny?2+Math.random()*4:2+Math.random()*3;
-      if(c2.bunny) bunnyThink(c2); else if(c2.npc) kidThink(c2); else if(c2.id!=='tommy') adultThink(c2);
+      if(c2.bunny) bunnyThink(c2); else if(c2.kind==='skater') skaterThink(c2); else if(c2.kind==='guest') guestThink(c2); else if(c2.npc) kidThink(c2); else if(c2.id!=='tommy') adultThink(c2);
       else if(Math.random()<.25){ var lowN=null,lv=101; NEEDS.forEach(function(n){ if(c2.needs[n]<lv){ lv=c2.needs[n]; lowN=n; } }); say(c2,lv<35?(NEEDINFO[lowN][0]+' '+{fame:'Ho fame!',sonno:'Che sonno…',diver:'Mi annoio!',pulizia:'Mi serve un bagnetto!',bagno:'Devo andare in bagno!',amici:'Mi sento solo…'}[lowN]):GIB[Math.floor(Math.random()*GIB.length)],2.5); } } }
   if(Math.floor(ST.min/1440)!==ST.day-1){ ST.day=Math.floor(ST.min/1440)+1; toast('☀️ Buongiorno! Giorno '+ST.day+((ST.day-1)%7>=5?' · è il weekend!':''),3000); }
   var dn=Math.floor(ST.min/1440); if(h>=21&&h<23&&ST.nanna!==dn&&tm.state!=='away'&&!sleeping){ ST.nanna=dn; toast('🌙 Sono le 9 di sera: è ora di mettere Tommy a letto!',3500); say(CH.milly.state!=='away'?CH.milly:tm,'A nanna, Tommy!',3); }
+  guestsTick(); skatersTick(); fallTick(dmin);
   goalEvent('_'); }
 
 /* ================= INTERFACCIA ================= */
@@ -699,6 +776,11 @@ function objMenu(ob,px,py){ var t=T[ob.type], items=[];
     if(t.noTommy){ it.no=1; it.why='Questo è il letto di mamma e papà!'; }
     if(!it.no){ var bw=blockWhy(a); if(bw){ it.no=1; it.why=bw; } }
     if(a.scr&&!it.no&&ST.min>=ST.scrUntil) it.n=a.n+' 📺';
+    if(a.needRide&&!CH.tommy.ride&&!it.no){ it.no=1; it.why='Prima prendi la bici, il monopattino o i roller al noleggio!'; }
+    if(a.giro&&!CH.tommy.ride&&!it.no){ it.no=1; it.why='Prima prendi la bici, il monopattino o i roller!'; }
+    if(a.ret&&!CH.tommy.ride){ it.no=1; it.why='Non hai niente da riconsegnare'; }
+    if(a.ride&&CH.tommy.ride===a.ride&&!it.no){ it.no=1; it.why='Ce l\'hai già!'; }
+    if(a.invite&&!it.no){ var hh=hNow(); if(hh<9||hh>=18){ it.no=1; it.why='Gli amici possono venire a giocare dalle 9 alle 18'; } else it.f=function(){ showPop(px,py,'Chi inviti a casa?',allFriends().map(function(n){ return {n:n,no:!!CH['g_'+n],why:n+' è già qui!',f:function(){ tommyDo(ob,{n:'Telefona a '+n,need:'amici',r:2,dur:5,pose:'stand',inviteName:n}); }}; })); }; }
     if(!it.no&&a.menu) it.f=function(){ showPop(px,py,a.n+': cosa mangi?',MENU[a.menu].map(function(dd){ return {n:dd.e+' '+dd.n,f:function(){ tommyDo(ob,dishAct(a,dd)); }}; })); };
     if(!it.no&&a.ev==='vestiti') it.f=function(){ openOutfits(function(id){ var a2={}; for(var k in a) a2[k]=a[k]; a2.outfit=id; a2.n='Si mette: '+OUTFITS[id].n; tommyDo(ob,a2); }); };
     items.push(it); });
@@ -709,6 +791,16 @@ function feedBunny(){ var c=CH.tommy, b=CH.carotino; if(ST.carrots<=0) return; v
   startAction(c,{type:'__bun',x:Math.round(b.x),y:Math.round(b.y)},{n:'Dai una carota a Carotino',need:'amici',r:.8,dur:6,pose:'stand',feed:1,ev:'carota'}); }
 T.__bun={name:'Carotino',w:1,d:1,acts:[],flat:1};
 function socialMenu(ch,px,py){ var items=[];
+  if(ch.kind==='guest'){ var gk=ch, tgt=function(){ return {type:'__bun',x:Math.round(gk.x),y:Math.round(gk.y)}; }, bw3=blockWhy({play:1});
+    var mk3=function(n,dur,soc,div,ev,txt,extra){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); gk.path=[]; gk.state='idle'; gk.think=dur/3+4; var a={n:n,dur:dur,social:soc,diver:div,pose:'stand',ev:ev,act:div?1:0}; if(extra) for(var k in extra) a[k]=extra[k]; startAction(c,tgt(),a); say(gk,txt,3); }}; };
+    var lg=find('lego'), it1={n:'🏗️ Costruite insieme con i mattoncini',f:function(){ if(!lg){ toast('Non trovo il tavolo dei mattoncini'); return; } var c=CH.tommy; if(c.state==='act') endAction(c,false); tommyDo(lg,{n:'Costruisce con '+gk.name,act:1,need:'diver',r:2,dur:30,pose:'stand',ev:'lego',social:1.5}); goToObj(gk,lg); gk.think=25; say(gk,'Facciamo un castello enorme!',3); }};
+    var it2=mk3('Giocate a nascondino',20,2,2,'giocamico','Conto fino a dieci!');
+    if(bw3){ it1.no=1; it1.why=bw3; it2.no=1; it2.why=bw3; }
+    showPop(px,py,gk.name+(GIRLS[gk.name]?' è venuta a giocare':' è venuto a giocare'),[it1,it2,mk3('Fate merenda insieme',12,1.5,0,'merenda','Gnam, che buono!',{need:'fame',r:1.5}),jokeItem(gk),{n:'👋 Saluta: ci vediamo!',f:function(){ gk.leaveAt=0; }}]); return; }
+  if(ch.kind==='skater'){ var sk=ch; if(sk.fallen){ helpMenu(sk,px,py); return; } var its=[], fr=isFriend(sk.name);
+    if(!fr) its.push({n:'👋 "Ciao, facciamo amicizia?"',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); sk.path=[]; sk.state='idle'; sk.think=6; startAction(c,{type:'__bun',x:Math.round(sk.x),y:Math.round(sk.y)},{n:'Saluta un bambino nuovo',dur:3,social:3,pose:'stand',befriend:sk.id}); }});
+    else { its.push({n:'🏁 Fate una gara!',no:!CH.tommy.ride,why:'Prima prendi la bici, il monopattino o i roller al noleggio!',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); sk.path=[]; sk.state='idle'; sk.think=8; startAction(c,{type:'__bun',x:Math.round(sk.x),y:Math.round(sk.y)},{n:'Gara con '+sk.name,dur:15,social:2,diver:2.5,pose:'stand',ev:'gara',act:1,race:sk.id}); say(sk,'Pronti… partenza… via!',3); }}); its.push(jokeItem(sk)); }
+    showPop(px,py,fr?sk.name+' · tuo amico':'Un bambino che non conosci ancora',its); return; }
   if(ch.npc){ var kd=ch, mk2=function(n,dur,soc,div,txt){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); kd.path=[]; kd.state='idle'; kd.think=dur/4+4; startAction(c,{type:'__bun',x:Math.round(kd.x),y:Math.round(kd.y)},{n:n,dur:dur,social:soc,diver:div,pose:'stand',ev:'parco',act:div?1:0}); say(kd,txt,3); }}; };
     var g1=mk2('Gioca a pallone con '+kd.name,20,1.6,2,'Passa la palla!'), g2=mk2('Gioca a nascondino con '+kd.name,20,1.6,2,'Uno, due, tre... arrivo!'), bw2=blockWhy({play:1}); if(bw2){ g1.no=1; g2.no=1; g1.why=bw2; g2.why=bw2; }
     items.push(g1); items.push(g2); items.push(jokeItem(kd)); items.push(mk2('Saluta '+kd.name,3,5,0,'Ciao Tommy!')); showPop(px,py,kd.name+' · bambino del quartiere',items); return; }
@@ -723,7 +815,12 @@ function socialMenu(ch,px,py){ var items=[];
   showPop(px,py,who.name,items); }
 /* il "bersaglio" di un'azione su Carotino o su una persona è la casella dove si trova */
 var _spots=spotsOf; spotsOf=function(ob){ if(ob.type==='__bun'){ var out=[]; [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){ var x=ob.x+d[0], y=ob.y+d[1]; if(passable(x,y)&&!wallBetween(x,y,ob.x,ob.y)) out.push([x,y]); }); return out; } return _spots(ob); };
-var _begin=beginAct; beginAct=function(c){ var a=c.act&&c.act.a; if(a&&a.feed){ ST.carrots--; var b=CH.carotino; b.needs.fame=clamp(b.needs.fame+40); b.say={s:'♥ Gnam!',t:2.5}; } if(a&&a.cost&&c.id==='tommy'){ ST.money-=a.cost; } _begin(c); if(a&&c.id==='tommy'){ if(a.dish) say(c,a.dish.e+' Gnam!',3); if(a.joke) tellJoke(c,a); } };
+var _begin=beginAct; beginAct=function(c){ var a=c.act&&c.act.a; if(a&&a.feed){ ST.carrots--; var b=CH.carotino; b.needs.fame=clamp(b.needs.fame+40); b.say={s:'♥ Gnam!',t:2.5}; } if(a&&a.cost&&c.id==='tommy'){ ST.money-=a.cost; } _begin(c); if(a&&c.id==='tommy'){ if(a.dish) say(c,a.dish.e+' Gnam!',3); if(a.joke) tellJoke(c,a);
+    if(a.befriend&&CH[a.befriend]) befriend(CH[a.befriend]); if(a.helpKid&&CH[a.helpKid]) helpDone(CH[a.helpKid]); if(a.inviteName) inviteFriend(a.inviteName);
+    if(a.ride){ c.ride=a.ride; c.helmet='#e0373f'; toast('⛑️ Casco in testa e via! Con '+RIDES[a.ride]+' vai più veloce',3000,true); goalEvent('ride'); }
+    if(a.ret&&c.ride){ toast('Hai riconsegnato '+RIDES[c.ride],2400); c.ride=null; }
+    if(a.giro){ var lp=loopPath(c); c.act=null; c.onObj=false; if(lp.length){ c.path=lp; c.state='walk'; c.giro=true; } else c.state='idle'; updateDoing(); }
+    if(a.open){ save(); setTimeout(function(){ location.href=a.open; },200); } } };
 /* catalogo */
 var buildMode=false;
 function setBuild(on){ buildMode=on; $('bShop').className=on?'on':''; $('bShop').textContent=on?'✔ Fine arreda':'🛋️ Arreda'; if(!on){ placing=null; placeTiles=[]; } else toast('Modalità arreda: tocca un mobile per spostarlo, oppure compra cose nuove',3500,true); }
@@ -774,7 +871,9 @@ function loop(ts){ requestAnimationFrame(loop); var dt=lastT?Math.min(.1,(ts-las
   draw(); }
 function save(){ if(!ST) return; if(CH.tommy) ST.outfit=CH.tommy.outfit; for(var id in CH){ var c=CH[id]; if(c.npc) continue; ST.chars[id]={x:Math.round(c.x),y:Math.round(c.y),needs:c.needs,away:c.away}; } S(SAVEKEY,ST); }
 function showGame(on){ $('menu').hidden=on; if(!on) $('routine').hidden=true; ['bBack','bPause','clock','side','needs','zoomb'].forEach(function(id){ $(id).hidden=!on; }); }
-function start(st){ CARS=[]; st=migrate(st); ST=st; ensureEdu(); if(!ST.chars.papone.away) ST.carOut=false; OCC=occ(); initChars(); kidsTick(); playing=true; paused=false; showGame(true); updateNeeds(); updateClock(); layout();
+function ensureWorld(){ OCC=occ(); WORLD2.forEach(function(w){ for(var i=0;i<ST.objs.length;i++){ var o=ST.objs[i]; if(o.type===w[0]&&o.x===w[1]&&o.y===w[2]) return; } var t=T[w[0]], free=true; for(var a=0;a<t.w;a++) for(var b=0;b<t.d;b++) if(OCC[(w[1]+a)+','+(w[2]+b)]) free=false; if(free){ ST.objs.push({id:ST.nextId++,type:w[0],x:w[1],y:w[2]}); OCC=occ(); } });
+  if(!find('lego')){ var sp=[[13,2],[12,2],[14,3],[13,4],[12,5]]; for(var k=0;k<sp.length;k++){ if(canPlace('lego',sp[k][0],sp[k][1],null)&&placeOk('lego',sp[k][0],sp[k][1],null)){ ST.objs.push({id:ST.nextId++,type:'lego',x:sp[k][0],y:sp[k][1]}); break; } } OCC=occ(); } }
+function start(st){ CARS=[]; st=migrate(st); ST=st; ensureEdu(); if(!ST.chars.papone.away) ST.carOut=false; OCC=occ(); initChars(); ensureWorld(); kidsTick(); playing=true; paused=false; showGame(true); updateNeeds(); updateClock(); layout();
   var t=CH.tommy; if(t.state!=='away') focusOn(t.x+.5,t.y+.5,false); else focusOn(17,7,false);
   if(t.state==='away'){ $('dark').hidden=false; $('dark').textContent='Tommy è fuori casa…'; } }
 function renderMenu(){ var sv=L(SAVEKEY,null), cb=$('bCont'); if(sv&&(sv.v===1||sv.v===2)){ cb.hidden=false; var d=Math.floor(sv.min/1440); cb.innerHTML='▶ Continua<small>Giorno '+(d+1)+' · 💰 '+sv.money+' monete · ⭐ '+sv.stars+'</small>'; cb.onclick=function(){ start(L(SAVEKEY,null)); }; } else cb.hidden=true; $('bSnd').textContent=SND?'🔊 Suono sì':'🔇 Suono no'; }
