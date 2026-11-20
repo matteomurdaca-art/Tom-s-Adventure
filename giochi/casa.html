@@ -52,6 +52,8 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
 #routine .rs{padding:1px 0;color:#555}#routine .rs.nx{color:#d0661a;font-size:15px}#routine .rs.ok{color:#2a8a3a;text-decoration:line-through}
 .qbox{text-align:center!important}.qbox .who{font-size:64px}.qbox .q{font-size:24px;font-weight:800;line-height:1.35;margin:10px 6px 4px}
 .med{display:inline-block;vertical-align:top;width:31%;min-width:150px;margin:1%;border:2px solid #14151d;border-radius:14px;background:#fff;padding:8px;text-align:center;font-weight:700;font-size:15px}
+.oc{display:inline-block;vertical-align:top;width:30%;min-width:140px;margin:1%;border:3px solid #14151d;border-radius:14px;background:#fff;padding:6px;text-align:center;font-weight:800;font-size:16px}
+.oc.on{background:#fff3c4}.oc canvas{width:96px;height:120px}
 .med .ic{font-size:40px}.med.no{opacity:.4}.med small{display:block;color:#3a6ac0}
 #zoomb{position:absolute;z-index:6;right:8px;bottom:110px;width:54px}
 #zoomb button{display:block;width:54px;height:50px;margin-top:8px;border:2px solid #14151d;border-radius:14px;background:#f6f7fb;font-size:28px;font-weight:900;line-height:1;padding:0;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
@@ -83,6 +85,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
 <div class="ov" id="goalOv" hidden><div class="box"><h2>🎯 Obiettivi</h2><div id="goalList"></div><button class="big alt" id="bGoalClose" type="button">Chiudi</button></div></div>
 <div class="ov" id="famOv" hidden><div class="box"><h2>👪 La famiglia</h2><div id="famList"></div><button class="big alt" id="bFamClose" type="button">Chiudi</button></div></div>
 <div class="ov" id="quoteOv" hidden><div class="box qbox"><div class="who" id="qWho"></div><p style="margin:2px;color:#3a6ac0;font-weight:800" id="qName"></p><div class="q" id="qText"></div><p id="qSub" style="color:#555"></p><button class="big" id="bQuote" type="button">☀️ Iniziamo la giornata!</button></div></div>
+<div class="ov" id="outfitOv" hidden><div class="box"><h2>👕 Scegli i vestiti di Tommy</h2><div id="outfitList" style="text-align:center"></div><button class="big alt" id="bOutfitClose" type="button">Chiudi</button></div></div>
 <div class="ov" id="albOv" hidden><div class="box"><h2>🏅 Album delle buone abitudini</h2><div id="albList"></div><button class="big alt" id="bAlbClose" type="button">Chiudi</button></div></div>
 <div class="ov" id="pauseOv" hidden><div class="box" style="text-align:center"><h2>Pausa</h2><button class="big" id="bResume" type="button">▶ Continua</button><button class="big alt" id="bExit" type="button">◀ Esci (la casa resta salvata)</button></div></div>
 
@@ -129,14 +132,14 @@ var T={
  lettoG:{name:'Letto grande',w:2,d:2,acts:[{n:'Dormi',need:'sonno',r:.22,dur:600,pose:'sleep',on:1,adult:1}],noTommy:1},
  scrivania:{name:'Scrivania',w:1,d:1,acts:[{n:'Fai i compiti (+10 monete)',need:'diver',r:-.1,dur:40,pose:'stand',money:10,ev:'compiti'},{n:'Disegna',act:1,need:'diver',r:.9,dur:30,pose:'stand'}]},
  giochi:{name:'Cesta dei giochi',w:1,d:1,acts:[{n:'Gioca con le costruzioni',need:'diver',r:1,dur:30,pose:'stand',ev:'giochi',act:1},{n:'Riordina i giochi (+5 monete)',need:'diver',r:-.1,dur:8,pose:'stand',money:5,ev:'riordina'}]},
- armadio:{name:'Armadio',w:1,d:1,acts:[{n:'Vestiti per la giornata',need:'pulizia',r:.8,dur:5,pose:'stand',ev:'vestiti',when:[5,17]},{n:'Metti il pigiama',need:'pulizia',r:.5,dur:5,pose:'stand',ev:'pigiama',when:[18,24]}]},
+ armadio:{name:'Armadio',w:1,d:1,acts:[{n:'👕 Scegli i vestiti',need:'pulizia',r:.8,dur:5,pose:'stand',ev:'vestiti',when:[5,20]},{n:'Metti il pigiama',need:'pulizia',r:.5,dur:5,pose:'stand',ev:'pigiama',when:[18,24]}]},
  doccia:{name:'Doccia',w:1,d:1,acts:[{n:'Fai la doccia',need:'pulizia',r:4,dur:20,pose:'stand',on:1,ev:'doccia'}]},
  wc:{name:'Gabinetto',w:1,d:1,acts:[{n:'Vai in bagno',need:'bagno',r:9,dur:8,pose:'stand',ev:'bagno'}]},
  lavandino:{name:'Lavandino',w:1,d:1,acts:[{n:'Lavati la faccia',need:'pulizia',r:2,dur:4,pose:'stand',ev:'faccia'},{n:'Lavati i denti',need:'pulizia',r:2.5,dur:5,pose:'stand',ev:'denti'},{n:'Lavati le mani',need:'pulizia',r:2,dur:4,pose:'stand',ev:'mani'}]},
- frigo:{name:'Frigorifero',w:1,d:1,acts:[{n:'Fai merenda',need:'fame',r:1.6,dur:15,pose:'stand',ev:'merenda'},{n:'Bevi un succo',need:'fame',r:.8,dur:5,pose:'stand'}]},
+ frigo:{name:'Frigorifero',w:1,d:1,acts:[{n:'Fai merenda',menu:'mer',need:'fame',r:1.6,dur:15,pose:'stand',ev:'merenda'},{n:'Bevi un succo',need:'fame',r:.8,dur:5,pose:'stand'}]},
  fornelli:{name:'Fornelli',w:1,d:1,acts:[{n:'Cucina la pasta con papà',need:'fame',r:2.2,dur:35,pose:'stand',ev:'cucina'}]},
  lavello:{name:'Lavello',w:1,d:1,acts:[{n:'Lava i piatti (+5 monete)',need:'diver',r:-.2,dur:15,pose:'stand',money:5,ev:'aiuto'}]},
- tavolo:{name:'Tavolo da pranzo',w:2,d:1,acts:[{n:'Fai colazione',need:'fame',r:2.4,dur:20,pose:'stand',ev:'colazione',when:[5,11]},{n:'Mangia a tavola',need:'fame',r:2.6,dur:25,pose:'stand',ev:'tavola'},{n:'Apparecchia la tavola (+5 monete)',need:'diver',r:-.1,dur:8,pose:'stand',money:5,ev:'aiuto'}]},
+ tavolo:{name:'Tavolo da pranzo',w:2,d:1,acts:[{n:'Colazione',menu:'col',need:'fame',r:2.4,dur:20,pose:'stand',ev:'colazione',when:[5,11]},{n:'Pranzo',menu:'pra',need:'fame',r:2.6,dur:25,pose:'stand',ev:'tavola',when:[11.5,15]},{n:'Cena',menu:'cen',need:'fame',r:2.6,dur:25,pose:'stand',ev:'tavola',when:[18,21.5]},{n:'Apparecchia la tavola (+5 monete)',need:'diver',r:-.1,dur:8,pose:'stand',money:5,ev:'aiuto'}]},
  tv:{name:'Televisione',w:1,d:1,acts:[{n:'Guarda i cartoni',scr:1,need:'diver',r:1.3,dur:180,pose:'stand',ev:'tv'}]},
  divano:{name:'Divano',w:2,d:1,acts:[{n:'Siediti e riposa',need:'sonno',r:.4,dur:20,pose:'sit',on:1},{n:'Fai un pisolino',need:'sonno',r:.5,dur:60,pose:'sleep',on:1}]},
  consolle:{name:'Videogiochi',w:1,d:1,acts:[{n:'Gioca ai videogiochi',scr:1,need:'diver',r:2,dur:180,pose:'stand',ev:'consolle'}]},
@@ -210,7 +213,8 @@ function initChars(){ CH={};
     c.id=k; c.x=s.x; c.y=s.y; c.path=[]; c.act=null; c.state=s.away?'away':'idle'; c.away=s.away||null; c.face=1; c.bob=0; c.think=0; c.say=null; c.needs=s.needs;
     if(c.npc){ c.state='away'; c.away={where:'casa',back:1e15}; }
     else if(c.state!=='away'&&!passable(Math.round(c.x),Math.round(c.y))){ c.x=22; c.y=11; }
-    CH[k]=c; } }
+    CH[k]=c; }
+  applyOutfit(CH.tommy,ST.outfit||'casual'); }
 
 /* ================= GRIGLIA E PERCORSI ================= */
 function occ(){ return occList(ST.objs); }
@@ -391,14 +395,24 @@ function drawPerson(c,px,py){ var bob=c.state==='walk'?Math.abs(Math.sin(c.bob*1
   var jump=pose==='jump'?Math.abs(Math.sin(Date.now()/180))*18*s:0; y0-=jump;
   var sit=pose==='sit'?8*s:0, legH=(kid?12:16)*s-sit, bodyH=(kid?14:18)*s;
   var step=c.state==='walk'?Math.sin(c.bob*10)*3*s:0;
-  ctx.fillStyle=c.pants; ctx.fillRect(px-5*s,y0-legH,4*s,legH+step*0); ctx.fillRect(px+1*s,y0-legH,4*s,legH);
-  ctx.fillStyle='#1d1f2b'; ctx.fillRect(px-6*s+step,y0-2*s,5*s,3*s); ctx.fillRect(px+1*s-step,y0-2*s,5*s,3*s);
+  if(c.cape){ ctx.fillStyle=c.cape; ctx.beginPath(); ctx.moveTo(px-6*s,y0-legH-bodyH+1*s); ctx.lineTo(px+6*s,y0-legH-bodyH+1*s); ctx.lineTo(px+9*s-fx*2*s,y0-3*s); ctx.lineTo(px-9*s-fx*2*s,y0-3*s); ctx.closePath(); ctx.fill(); }
+  if(c.shorts){ ctx.fillStyle=c.skin; ctx.fillRect(px-5*s,y0-legH,4*s,legH); ctx.fillRect(px+1*s,y0-legH,4*s,legH); ctx.fillStyle=c.socks||'#ffffff'; ctx.fillRect(px-5*s,y0-legH*.5,4*s,legH*.5); ctx.fillRect(px+1*s,y0-legH*.5,4*s,legH*.5); ctx.fillStyle=c.pants; ctx.fillRect(px-5.5*s,y0-legH,11*s,legH*.4); }
+  else { ctx.fillStyle=c.pants; ctx.fillRect(px-5*s,y0-legH,4*s,legH); ctx.fillRect(px+1*s,y0-legH,4*s,legH); if(c.pj){ ctx.fillStyle=c.pj; for(var pq=1;pq<4;pq++) ctx.fillRect(px-5*s,y0-legH+pq*legH/4,10*s,1.2*s); } }
+  ctx.fillStyle=c.shoes||'#1d1f2b'; ctx.fillRect(px-6*s+step,y0-2*s,5*s,3*s); ctx.fillRect(px+1*s-step,y0-2*s,5*s,3*s);
   var by=y0-legH-bodyH; ctx.fillStyle=c.shirt; if(c.long){ ctx.beginPath(); ctx.moveTo(px-7*s,by+bodyH+2*s); ctx.lineTo(px+7*s,by+bodyH+2*s); ctx.lineTo(px+5*s,by); ctx.lineTo(px-5*s,by); ctx.closePath(); ctx.fill(); } else ctx.fillRect(px-6*s,by,12*s,bodyH);
-  ctx.fillStyle=c.skin; var arm=c.act?Math.sin(Date.now()/200)*3*s:0; ctx.fillRect(px-9*s,by+2*s+arm,3*s,bodyH-4*s); ctx.fillRect(px+6*s,by+2*s-arm,3*s,bodyH-4*s);
+  if(c.pj){ ctx.fillStyle=c.pj; for(var pr=1;pr<4;pr++) ctx.fillRect(px-6*s,by+pr*bodyH/4,12*s,1.2*s); }
+  if(c.zip){ ctx.fillStyle=c.zip; ctx.fillRect(px-.5*s,by+1*s,1*s,bodyH-1*s); ctx.fillRect(px-6*s,by,12*s,1.5*s); }
+  if(c.belt){ ctx.fillStyle=c.belt; ctx.fillRect(px-6*s,by+bodyH-2*s,12*s,2*s); }
+  if(c.num){ ctx.fillStyle='#ffffff'; ctx.font='900 '+Math.round(8*s)+'px -apple-system,Helvetica,Arial,sans-serif'; ctx.textAlign='center'; ctx.fillText(c.num,px,by+bodyH*.7); }
+  if(c.star) star(px,by+bodyH*.42,4*s,1.8*s,c.star);
+  if(c.tie){ ctx.fillStyle=c.tie; ctx.beginPath(); ctx.moveTo(px,by+1.5*s); ctx.lineTo(px-3*s,by); ctx.lineTo(px-3*s,by+3*s); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(px,by+1.5*s); ctx.lineTo(px+3*s,by); ctx.lineTo(px+3*s,by+3*s); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle=c.sleeve||c.skin; var arm=c.act?Math.sin(Date.now()/200)*3*s:0; ctx.fillRect(px-9*s,by+2*s+arm,3*s,bodyH-4*s); ctx.fillRect(px+6*s,by+2*s-arm,3*s,bodyH-4*s); if(c.sleeve){ ctx.fillStyle=c.skin; ctx.fillRect(px-9*s,by+bodyH-4*s+arm,3*s,2*s); ctx.fillRect(px+6*s,by+bodyH-4*s-arm,3*s,2*s); }
   var hr=(kid?9:9)*s, hy=by-hr+1*s; if(c.long){ ctx.fillStyle=c.hair; ctx.fillRect(px-hr,hy,hr*2,hr*1.9); }
   ctx.fillStyle=c.skin; ctx.beginPath(); ctx.arc(px,hy,hr,0,6.3); ctx.fill(); ctx.strokeStyle='rgba(0,0,0,.22)'; ctx.lineWidth=1; ctx.stroke();
   ctx.fillStyle=c.hair; if(c.bald){ ctx.beginPath(); ctx.arc(px,hy+1*s,hr,Math.PI*.9,Math.PI*1.1); ctx.fill(); } else { ctx.beginPath(); ctx.arc(px,hy-1*s,hr,Math.PI*1.05,Math.PI*1.95); ctx.fill(); if(c.kid){ ctx.beginPath(); ctx.moveTo(px-3*s,hy-hr); ctx.lineTo(px,hy-hr-5*s); ctx.lineTo(px+3*s,hy-hr+1*s); ctx.fill(); } }
+  if(c.hat==='safari'){ ctx.fillStyle='#c8a874'; ctx.beginPath(); ctx.save(); ctx.translate(px,hy-hr*.5); ctx.scale(hr*1.55,hr*.38); ctx.arc(0,0,1,0,6.3); ctx.restore(); ctx.fill(); ctx.beginPath(); ctx.arc(px,hy-hr*.5,hr*.85,Math.PI,0); ctx.fill(); ctx.fillStyle='#7a5a3a'; ctx.fillRect(px-hr*.85,hy-hr*.72,hr*1.7,1.6*s); }
   if(c.beard){ ctx.fillStyle=c.hair; ctx.beginPath(); ctx.arc(px,hy+3*s,hr*.85,.15,Math.PI-.15); ctx.fill(); }
+  if(c.mask){ ctx.fillStyle=c.mask; ctx.fillRect(px-hr+1*s,hy-2.6*s,hr*2-2*s,5*s); }
   circ(px-2.6*s+fx*1.5*s,hy,1.9*s,'#ffffff'); circ(px+2.6*s+fx*1.5*s,hy,1.9*s,'#ffffff'); circ(px-2.3*s+fx*2*s,hy+.3*s,1.1*s,'#1d1f2b'); circ(px+2.9*s+fx*2*s,hy+.3*s,1.1*s,'#1d1f2b');
   circ(px-5*s+fx*s,hy+3*s,1.5*s,'rgba(255,120,120,.4)'); circ(px+5*s+fx*s,hy+3*s,1.5*s,'rgba(255,120,120,.4)');
   if(!c.beard){ ctx.strokeStyle='#7a3a2a'; ctx.lineWidth=Math.max(1,s); ctx.beginPath(); ctx.arc(px+fx*1.5*s,hy+3*s,2*s,.3,Math.PI-.3); ctx.stroke(); }
@@ -481,6 +495,9 @@ function beginAct(c){ var a=c.act.a, ob=c.act.ob; c.state='act'; c.act.t=0;
 function endAction(c,completed){ var a=c.act&&c.act.a; if(c.onObj&&c.prevPos){ c.x=c.prevPos[0]; c.y=c.prevPos[1]; } c.onObj=false; c.prevPos=null;
   if(completed&&a){ if(a.money){ ST.money+=a.money; toast('+'+a.money+' monete!'); } if(a.carrots){ ST.carrots+=a.carrots; toast('Hai raccolto '+a.carrots+' carote! Ora ne hai '+ST.carrots); } if(a.ev&&c.id==='tommy') goalEvent(a.ev); if(c.id==='tommy'){ tone(660,.1,'triangle',.05);
     if(a.act){ ST.money+=2; addHab('attivo'); if(Math.random()<.35) parentSay(pick(['Che bello giocare così!','Bravo, così gli occhi si riposano!','Muoversi fa bene!'])); }
+    if(a.dish&&a.dish.v){ addHab('sano'); goalEvent('verdure'); if(Math.random()<.7) parentSay(['Bravo! Frutta e verdura ti fanno diventare forte!','Che bravo, mangi tutto!','Così cresci sano e forte!'][Math.floor(Math.random()*3)]); }
+    if(a.outfit){ applyOutfit(c,a.outfit); ST.outfit=a.outfit; if(!ST.looks) ST.looks={}; if(!ST.looks[a.outfit]){ ST.looks[a.outfit]=1; addHab('look'); } goalEvent('look_'+a.outfit); toast('👕 Che stile! Tommy ora è vestito da '+OUTFITS[a.outfit].n.toLowerCase(),3000); }
+    if(a.ev==='pigiama'){ applyOutfit(c,'pigiama'); ST.outfit='pigiama'; }
     if(a.ev==='bagno'){ ST.handsT=-1e9; toast('💧 Ora lavati le mani!',2600); }
     if(a.pose==='sleep'&&(c.act.ob.type==='lettoT'||c.act.ob.type==='castello')){ var hh=hNow(); if(hh>=5&&hh<12){ c.act=null; c.state='idle'; c.onObj=false; wake(false); updateDoing(); return; } } } }
   c.act=null; c.state='idle'; if(c.id==='tommy') updateDoing(); }
@@ -504,14 +521,45 @@ var GOALS=[
  {id:'g10',n:'Fai i compiti alla scrivania',ev:'compiti',prize:30},{id:'g11',n:'Mangia a tavola',ev:'tavola',prize:20},{id:'g12',n:'Gioca con papà',ev:'giocapapa',prize:30},
  {id:'g13',n:'Accarezza Carotino',ev:'coccole',prize:20},{id:'g14',n:'Gioca al parco con Leo o Sofia',ev:'parco',prize:30},{id:'g15',n:'Tutti i bisogni di Tommy sopra metà',ev:'_',check:function(){ var c=CH.tommy; return NEEDS.every(function(n){ return c.needs[n]>=50; }); },prize:60},
  {id:'g16',n:'Compra il trampolino',ev:'buy_trampolino',prize:80},{id:'g17',n:'Compra il letto a castello',ev:'buy_castello',prize:80},{id:'g18',n:'Arriva a 5 stelline di scuola',ev:'_',check:function(){ return ST.stars>=5; },prize:100},
- {id:'g19',n:'Completa la routine del mattino',ev:'mattino',prize:40},{id:'g20',n:'Completa la routine della sera',ev:'sera',prize:40},{id:'g21',n:'Riordina i giochi',ev:'riordina',prize:20},{id:'g22',n:'Aiuta in casa',ev:'aiuto',prize:20}];
+ {id:'g19',n:'Completa la routine del mattino',ev:'mattino',prize:40},{id:'g20',n:'Completa la routine della sera',ev:'sera',prize:40},{id:'g21',n:'Riordina i giochi',ev:'riordina',prize:20},{id:'g22',n:'Aiuta in casa',ev:'aiuto',prize:20},{id:'g23',n:'Racconta una barzelletta',ev:'barzelletta',prize:20},{id:'g24',n:'Mangia un piatto con frutta o verdura',ev:'verdure',prize:20},{id:'g25',n:'Vestiti da supereroe',ev:'look_eroe',prize:30}];
+/* ================= VESTITI, PIATTI, BARZELLETTE ================= */
+var OUTFITS={casual:{n:'Maglietta e jeans',shirt:'#f07a2a',pants:'#3a6ab0'},
+ sport:{n:'Tuta sportiva',shirt:'#2f6ad0',sleeve:'#2f6ad0',pants:'#2f6ad0',shoes:'#e0373f',zip:'#ffffff'},
+ calcio:{n:'Calciatore',shirt:'#e0373f',num:'10',shorts:1,pants:'#ffffff',socks:'#e0373f',shoes:'#1d1f2b'},
+ esplo:{n:'Esploratore',shirt:'#5a8a3a',sleeve:'#5a8a3a',pants:'#c8a874',shoes:'#7a4a2a',hat:'safari',belt:'#7a4a2a'},
+ elegante:{n:'Elegante',shirt:'#ffffff',sleeve:'#ffffff',pants:'#2b3a67',shoes:'#3a2010',tie:'#e0373f',belt:'#1d1f2b'},
+ eroe:{n:'Supereroe',shirt:'#3fa0e8',sleeve:'#3fa0e8',pants:'#3fa0e8',shoes:'#e0373f',cape:'#e0373f',star:'#f2c230',mask:'#1d1f2b',belt:'#f2c230'},
+ pigiama:{n:'Pigiama',shirt:'#9fd0ff',sleeve:'#9fd0ff',pants:'#9fd0ff',pj:'#ffffff',shoes:'#f2a0c0'}};
+var OUTFIT_KEYS=['sport','calcio','esplo','elegante','eroe','casual'];
+function applyOutfit(c,id){ var o=OUTFITS[id]||OUTFITS.casual; ['shirt','sleeve','pants','shoes','zip','num','shorts','socks','hat','belt','tie','cape','star','mask','pj'].forEach(function(k){ c[k]=o[k]; }); c.outfit=id; }
+function drawPreview(cnv,id){ var sc=ctx, stw=TW, x=cnv.getContext('2d'); ctx=x; TW=320; x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,cnv.width,cnv.height); var f={id:'prev',kid:1,skin:'#f2c59a',hair:'#6b3f22',state:'idle',face:1,bob:0,act:null}; applyOutfit(f,id); try{ drawPerson(f,cnv.width/2,cnv.height-12); }catch(e){} ctx=sc; TW=stw; }
+function openOutfits(cb){ var box=$('outfitList'); box.innerHTML='';
+  OUTFIT_KEYS.forEach(function(id){ var d=document.createElement('button'); d.type='button'; d.className='oc'+(ST.outfit===id?' on':''); var cn=document.createElement('canvas'); cn.width=192; cn.height=240; drawPreview(cn,id); d.appendChild(cn); var nm=document.createElement('div'); nm.textContent=OUTFITS[id].n; d.appendChild(nm);
+    d.onclick=function(){ $('outfitOv').hidden=true; cb(id); }; box.appendChild(d); });
+  $('outfitOv').hidden=false; }
+$('bOutfitClose').onclick=function(){ $('outfitOv').hidden=true; };
+function star(x0,y0,r1,r2,col){ ctx.fillStyle=col; ctx.beginPath(); for(var i=0;i<10;i++){ var a=-Math.PI/2+i*Math.PI/5, r=i%2?r2:r1; ctx.lineTo(x0+Math.cos(a)*r,y0+Math.sin(a)*r); } ctx.closePath(); ctx.fill(); }
+var MENU={col:[{n:'Latte e biscotti',e:'🍪'},{n:'Latte e merendina',e:'🍰'},{n:'Latte e cereali',e:'🌾'},{n:'Fette biscottate e marmellata',e:'🍞'},{n:'Spremuta d\'arancia e cornetto',e:'🍊',v:1}],
+ pra:[{n:'Pasta al pomodoro',e:'🍝'},{n:'Lasagne al forno',e:'🍝'},{n:'Pizza margherita',e:'🍕'},{n:'Cotoletta con patatine',e:'🍟'},{n:'Risotto con le verdure',e:'🍚',v:1}],
+ cen:[{n:'Minestrone di verdure',e:'🍲',v:1},{n:'Pollo arrosto con patate',e:'🍗'},{n:'Pesce con le verdure',e:'🐟',v:1},{n:'Frittata e insalata',e:'🍳',v:1},{n:'Polpette al sugo',e:'🍖'}],
+ mer:[{n:'Yogurt alla fragola',e:'🍓'},{n:'Una mela',e:'🍎',v:1},{n:'Una banana',e:'🍌',v:1},{n:'Pane e marmellata',e:'🍞'},{n:'Una ciambella',e:'🍩'}]};
+function dishAct(a,d){ return {n:a.n+': '+d.n,need:'fame',r:a.r,dur:a.dur,pose:'stand',ev:a.ev,dish:d}; }
+var JOKES=[['Qual è il colmo per un elettricista?','Non essere al corrente!'],['Perché i pesci non vanno a scuola?','Perché sono già in un banco!'],['Che cosa dice uno zero a un otto?','Che bella cintura!'],['Qual è il colmo per un idraulico?','Non capire un tubo!'],
+ ['Perché il libro di matematica è triste?','Perché ha tanti problemi!'],['Che cosa fa un\'ape in palestra?','Zum-ba!'],['Cosa dice un muro a un altro muro?','Ci vediamo all\'angolo!'],['Qual è il colmo per un pollo?','Avere la pelle d\'oca!'],
+ ['Perché il pomodoro è diventato rosso?','Perché ha visto l\'insalata che si condiva!'],['Qual è il colmo per un sarto?','Perdere il filo del discorso!'],['Qual è il colmo per una mucca?','Fare il muuuuuso lungo!'],['Qual è il colmo per un pesce?','Avere l\'acqua alla gola!']];
+function jokeItem(who){ return {n:'😄 Racconta una barzelletta',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); if(who.npc){ who.path=[]; who.state='idle'; who.think=8; }
+  var i=ST.jokeI||0, j=JOKES[i%JOKES.length]; ST.jokeI=i+1; startAction(c,{type:'__bun',x:Math.round(who.x),y:Math.round(who.y)},{n:'Racconta una barzelletta a '+(who.id==='milly'?'mamma':who.id==='papone'?'papà':who.name),dur:6,social:2.5,diver:1.2,pose:'stand',joke:j,who:who.id}); }}; }
+function tellJoke(c,a){ var j=a.joke, w=CH[a.who]; say(c,j[0],3.2); toast('😄 '+j[0],3200,true);
+  setTimeout(function(){ if(!ST) return; say(c,j[1],3.5); toast('😂 '+j[1],3800,true); if(w&&w.state!=='away'){ say(w,['Ahahah! 😂','Che ridere!','Questa è fortissima!','Ahah, bravo Tommy!'][Math.floor(Math.random()*4)],3.5); if(w.needs&&w.needs.diver!=null) w.needs.diver=clamp(w.needs.diver+15); }
+    for(var k=0;k<5;k++) tone(500+k*90,.09,'square',.03,k*.08); addHab('barzelletta'); goalEvent('barzelletta'); },3000); }
+
 /* ================= BUONE ABITUDINI ================= */
 var MORN=[{ev:'faccia',n:'💧 Lava la faccia',w:'lavandino in bagno'},{ev:'colazione',n:'🍞 Fai colazione',w:'tavolo in cucina'},{ev:'denti',n:'😁 Lava i denti',w:'lavandino in bagno'},{ev:'vestiti',n:'👕 Vestiti',w:'armadio'}];
 var EVE=[{ev:'denti',n:'😁 Lava i denti',w:'lavandino'},{ev:'pigiama',n:'🌙 Metti il pigiama',w:'armadio'},{ev:'nanna',n:'🛏️ A letto entro le 21:30',w:'il tuo letto'}];
 var QUOTES=['Sbagliare va bene: è così che si impara!','Se una cosa è difficile, provaci un passo alla volta.','Chiedere aiuto è da coraggiosi.','Essere gentili fa stare bene anche te.','Oggi prova a fare un complimento a qualcuno!','Non serve essere i migliori: basta fare del proprio meglio.','Quando sei arrabbiato, fai tre respiri lunghi lunghi.','Ogni giorno impari una cosa nuova, anche piccola.','Se un amico è triste, una parola gentile fa miracoli.','Le cose belle richiedono pazienza.','Dire grazie e per favore apre tutte le porte.','Anche i campioni hanno cominciato da principianti.','Se cadi, ti rialzi e ci riprovi. Sempre!','Prenditi cura delle cose: durano di più.','Gli animali hanno bisogno del nostro amore: trattali con dolcezza.','Ascoltare gli altri è un superpotere.','Va bene avere paura: il coraggio è andare avanti lo stesso.','Ridere insieme è la medicina più buona.','Se hai combinato un guaio, chiedere scusa sistema tante cose.','Muoversi e giocare all\'aria aperta fa bene al corpo e alla testa.','Leggere un libro è come fare un viaggio.','Condividere i giochi rende il gioco più bello.','Sei unico: nessuno è uguale a te!','Le giornate storte passano. Domani si riparte!','Un sorriso al mattino rende la giornata più leggera.','Dormire bene ti dà la carica per tutto il giorno.','Mettere in ordine ti aiuta a trovare tutto.','Ogni volta che ci provi diventi più bravo.','La famiglia è una squadra: ci si aiuta sempre.','Credi in te stesso: puoi fare grandi cose!'];
 var PRAISE={compiti:['Bravo! Ogni giorno impari qualcosa di nuovo.','Compiti fatti: ora il gioco è ancora più bello!'],aiuto:['Grazie dell\'aiuto! In famiglia ci si aiuta.','Che bravo aiutante!'],riordina:['Che ordine! Così ritrovi subito i tuoi giochi.'],carota:['Carotino ti ringrazia: ti vuole un mondo di bene!'],coccole:['Carotino è felicissimo delle coccole!']};
 var MEDALS=[{id:'mattino',ic:'☀️',n:'Campione del mattino',t:'Routine del mattino',k:5},{id:'sera',ic:'🌙',n:'Nanna puntuale',t:'Routine della sera',k:5},{id:'denti',ic:'😁',n:'Sorriso splendente',t:'Denti lavati',k:10},{id:'mani',ic:'💧',n:'Mani pulite',t:'Mani lavate',k:10},
- {id:'attivo',ic:'👀',n:'Occhi riposati',t:'Giochi senza schermo',k:10},{id:'carotino',ic:'🐰',n:'Amico degli animali',t:'Cure a Carotino',k:10},{id:'aiuto',ic:'👍',n:'Aiutante di casa',t:'Aiuti in casa',k:5},{id:'riordina',ic:'📦',n:'Re dell\'ordine',t:'Giochi riordinati',k:5},{id:'compiti',ic:'📚',n:'Bravo a scuola',t:'Compiti fatti',k:5}];
+ {id:'attivo',ic:'👀',n:'Occhi riposati',t:'Giochi senza schermo',k:10},{id:'carotino',ic:'🐰',n:'Amico degli animali',t:'Cure a Carotino',k:10},{id:'aiuto',ic:'👍',n:'Aiutante di casa',t:'Aiuti in casa',k:5},{id:'riordina',ic:'📦',n:'Re dell\'ordine',t:'Giochi riordinati',k:5},{id:'compiti',ic:'📚',n:'Bravo a scuola',t:'Compiti fatti',k:5},{id:'barzelletta',ic:'😂',n:'Comico di casa',t:'Barzellette raccontate',k:5},{id:'sano',ic:'🍎',n:'Pappa sana',t:'Piatti con frutta e verdura',k:5},{id:'look',ic:'👕',n:'Stilista',t:'Vestiti diversi provati',k:5}];
 function ensureEdu(){ if(!ST.hab) ST.hab={}; if(!ST.medals) ST.medals={}; if(ST.scrUsed==null) ST.scrUsed=0; if(ST.scrUntil==null) ST.scrUntil=0; if(ST.handsT==null) ST.handsT=-1e9; }
 function hNow(){ return ST.min/60%24; }
 function getR(){ var d=Math.floor((ST.min-240)/1440); if(!ST.rt||ST.rt.day!==d) ST.rt={day:d,m:0,mDone:false,e:{},eDone:false}; return ST.rt; }
@@ -541,7 +589,7 @@ function wake(first){ var r=getR(), t=CH.tommy, day=Math.floor(ST.min/1440);
 $('bQuote').onclick=function(){ $('quoteOv').hidden=true; paused=false; lastT=0; };
 function isFun(a){ return !!(a.park||a.scr||(a.need==='diver'&&a.r>0)||a.play); }
 function blockWhy(a){ if(!a) return null;
-  if(a.when){ var h=hNow(); if(h<a.when[0]||h>=a.when[1]) return a.ev==='colazione'?'La colazione si fa la mattina! Ora prova "Mangia a tavola"':a.ev==='pigiama'?'Il pigiama si mette la sera, dopo le 18':'Adesso non è il momento giusto'; }
+  if(a.when){ var h=hNow(); if(h<a.when[0]||h>=a.when[1]) return a.ev==='colazione'?'La colazione si fa la mattina! Ora prova una merenda dal frigo':a.ev==='tavola'?'Il pranzo è tra le 11:30 e le 15, la cena tra le 18 e le 21:30. Intanto prova una merenda dal frigo!':a.ev==='pigiama'?'Il pigiama si mette la sera, dopo le 18':'Adesso non è il momento giusto'; }
   if(mornActive()&&(isFun(a)||a.school)){ var nx=MORN[getR().m]; parentSay('Prima la routine del mattino, campione!'); return 'Prima la routine del mattino! Ora: '+nx.n+' ('+nx.w+')'; }
   if(a.scr&&ST.min<ST.scrUntil){ var mm=Math.ceil(ST.scrUntil-ST.min); return 'Gli schermi stanno riposando (ancora '+(mm>=60?Math.floor(mm/60)+' h ':'')+(mm%60)+' min). Prova l\'altalena, un libro o le costruzioni!'; }
   return null; }
@@ -651,6 +699,8 @@ function objMenu(ob,px,py){ var t=T[ob.type], items=[];
     if(t.noTommy){ it.no=1; it.why='Questo è il letto di mamma e papà!'; }
     if(!it.no){ var bw=blockWhy(a); if(bw){ it.no=1; it.why=bw; } }
     if(a.scr&&!it.no&&ST.min>=ST.scrUntil) it.n=a.n+' 📺';
+    if(!it.no&&a.menu) it.f=function(){ showPop(px,py,a.n+': cosa mangi?',MENU[a.menu].map(function(dd){ return {n:dd.e+' '+dd.n,f:function(){ tommyDo(ob,dishAct(a,dd)); }}; })); };
+    if(!it.no&&a.ev==='vestiti') it.f=function(){ openOutfits(function(id){ var a2={}; for(var k in a) a2[k]=a[k]; a2.outfit=id; a2.n='Si mette: '+OUTFITS[id].n; tommyDo(ob,a2); }); };
     items.push(it); });
   if(ob.type==='recinto'||ob.type==='casetta'){ items.push({n:'Dai una carota a Carotino ('+ST.carrots+' rimaste)',no:ST.carrots<=0,why:'Non hai carote: raccoglile nell\'orto!',f:function(){ feedBunny(); }}); }
   if(buildMode){ items=[]; if(movable(ob)){ items.push({n:'↔ Sposta',f:function(){ startPlacing({type:ob.type,move:ob}); toast('Tocca una casella gialla per spostarlo'); }}); if(t.price) items.push({n:'Vendi (+'+Math.round(t.price/2)+' monete)',f:function(){ ST.objs.splice(ST.objs.indexOf(ob),1); ST.money+=Math.round(t.price/2); OCC=occ(); save(); toast('Venduto'); }}); else items.push({n:'Vendi',no:1,why:'Le cose che c\'erano già in casa si possono spostare, ma non vendere'}); } else items.push({n:'Questo non si può spostare',no:1,why:'Puoi spostare le cose dentro casa e nel tuo giardino'}); }
@@ -661,19 +711,19 @@ T.__bun={name:'Carotino',w:1,d:1,acts:[],flat:1};
 function socialMenu(ch,px,py){ var items=[];
   if(ch.npc){ var kd=ch, mk2=function(n,dur,soc,div,txt){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); kd.path=[]; kd.state='idle'; kd.think=dur/4+4; startAction(c,{type:'__bun',x:Math.round(kd.x),y:Math.round(kd.y)},{n:n,dur:dur,social:soc,diver:div,pose:'stand',ev:'parco',act:div?1:0}); say(kd,txt,3); }}; };
     var g1=mk2('Gioca a pallone con '+kd.name,20,1.6,2,'Passa la palla!'), g2=mk2('Gioca a nascondino con '+kd.name,20,1.6,2,'Uno, due, tre... arrivo!'), bw2=blockWhy({play:1}); if(bw2){ g1.no=1; g2.no=1; g1.why=bw2; g2.why=bw2; }
-    items.push(g1); items.push(g2); items.push(mk2('Saluta '+kd.name,3,5,0,'Ciao Tommy!')); showPop(px,py,kd.name+' · bambino del quartiere',items); return; }
+    items.push(g1); items.push(g2); items.push(jokeItem(kd)); items.push(mk2('Saluta '+kd.name,3,5,0,'Ciao Tommy!')); showPop(px,py,kd.name+' · bambino del quartiere',items); return; }
   if(ch.bunny){ items.push({n:'Dai una carota ('+ST.carrots+')',no:ST.carrots<=0,why:'Non hai carote: raccoglile nell\'orto!',f:feedBunny});
     items.push({n:'Accarezza Carotino',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); startAction(c,{type:'__bun',x:Math.round(ch.x),y:Math.round(ch.y)},{n:'Accarezza Carotino',need:'amici',r:1.6,dur:12,pose:'stand',bun:'coccole',ev:'coccole'}); }});
     showPop(px,py,'Carotino 🐰 (fame '+Math.round(ch.needs.fame)+'%, coccole '+Math.round(ch.needs.coccole)+'%)',items); return; }
   var who=ch, mk=function(n,dur,soc,div,ev,txt){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); var tgt={type:'__bun',x:Math.round(who.x),y:Math.round(who.y)}; startAction(c,tgt,{n:n+' '+(who.id==='milly'?'la mamma':'papà'),dur:dur,social:soc,diver:div,pose:'stand',ev:ev,act:div?1:0}); say(who,txt,3); who.needs.amici=clamp(who.needs.amici+20); }}; };
   items.push(mk('Abbraccia',4,5,0,who.id==='milly'?'abbraccio':'abbraccio','Ti voglio bene!'));
   items.push(mk('Chiacchiera con',12,1.8,0,'chiacchiera','Racconta, com\'è andata?'));
-  var gi=mk('Gioca con',20,1.2,1.5,who.id==='papone'?'giocapapa':'giocamamma','Prendimi se ci riesci!'); var bw=blockWhy({play:1}); if(bw){ gi.no=1; gi.why=bw; } items.push(gi);
+  var gi=mk('Gioca con',20,1.2,1.5,who.id==='papone'?'giocapapa':'giocamamma','Prendimi se ci riesci!'); var bw=blockWhy({play:1}); if(bw){ gi.no=1; gi.why=bw; } items.push(gi); items.push(jokeItem(who));
   var day=Math.floor(ST.min/1440); items.push({n:'Chiedi la paghetta',no:ST.allow===day,why:'La paghetta te l\'hanno già data oggi!',f:function(){ ST.allow=day; ST.money+=15; say(who,'Ecco 15 monete, non spenderle tutte!',3); toast('+15 monete di paghetta'); }});
   showPop(px,py,who.name,items); }
 /* il "bersaglio" di un'azione su Carotino o su una persona è la casella dove si trova */
 var _spots=spotsOf; spotsOf=function(ob){ if(ob.type==='__bun'){ var out=[]; [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){ var x=ob.x+d[0], y=ob.y+d[1]; if(passable(x,y)&&!wallBetween(x,y,ob.x,ob.y)) out.push([x,y]); }); return out; } return _spots(ob); };
-var _begin=beginAct; beginAct=function(c){ var a=c.act&&c.act.a; if(a&&a.feed){ ST.carrots--; var b=CH.carotino; b.needs.fame=clamp(b.needs.fame+40); b.say={s:'♥ Gnam!',t:2.5}; } if(a&&a.cost&&c.id==='tommy'){ ST.money-=a.cost; } _begin(c); };
+var _begin=beginAct; beginAct=function(c){ var a=c.act&&c.act.a; if(a&&a.feed){ ST.carrots--; var b=CH.carotino; b.needs.fame=clamp(b.needs.fame+40); b.say={s:'♥ Gnam!',t:2.5}; } if(a&&a.cost&&c.id==='tommy'){ ST.money-=a.cost; } _begin(c); if(a&&c.id==='tommy'){ if(a.dish) say(c,a.dish.e+' Gnam!',3); if(a.joke) tellJoke(c,a); } };
 /* catalogo */
 var buildMode=false;
 function setBuild(on){ buildMode=on; $('bShop').className=on?'on':''; $('bShop').textContent=on?'✔ Fine arreda':'🛋️ Arreda'; if(!on){ placing=null; placeTiles=[]; } else toast('Modalità arreda: tocca un mobile per spostarlo, oppure compra cose nuove',3500,true); }
@@ -722,7 +772,7 @@ var saveT=0, uiT=0;
 function loop(ts){ requestAnimationFrame(loop); var dt=lastT?Math.min(.1,(ts-lastT)/1000):0; lastT=ts;
   if(playing&&ST){ if(!paused){ update(dt); saveT+=dt; uiT+=dt; if(uiT>.4){ uiT=0; updateNeeds(); updateClock(); updateRoutine(); } if(saveT>10){ saveT=0; save(); } } camTick(dt); }
   draw(); }
-function save(){ if(!ST) return; for(var id in CH){ var c=CH[id]; if(c.npc) continue; ST.chars[id]={x:Math.round(c.x),y:Math.round(c.y),needs:c.needs,away:c.away}; } S(SAVEKEY,ST); }
+function save(){ if(!ST) return; if(CH.tommy) ST.outfit=CH.tommy.outfit; for(var id in CH){ var c=CH[id]; if(c.npc) continue; ST.chars[id]={x:Math.round(c.x),y:Math.round(c.y),needs:c.needs,away:c.away}; } S(SAVEKEY,ST); }
 function showGame(on){ $('menu').hidden=on; if(!on) $('routine').hidden=true; ['bBack','bPause','clock','side','needs','zoomb'].forEach(function(id){ $(id).hidden=!on; }); }
 function start(st){ CARS=[]; st=migrate(st); ST=st; ensureEdu(); if(!ST.chars.papone.away) ST.carOut=false; OCC=occ(); initChars(); kidsTick(); playing=true; paused=false; showGame(true); updateNeeds(); updateClock(); layout();
   var t=CH.tommy; if(t.state!=='away') focusOn(t.x+.5,t.y+.5,false); else focusOn(17,7,false);
@@ -731,7 +781,7 @@ function renderMenu(){ var sv=L(SAVEKEY,null), cb=$('bCont'); if(sv&&(sv.v===1||
 $('bNew').onclick=function(){ var sv=L(SAVEKEY,null); if(sv&&(sv.v===1||sv.v===2)&&!confirmNew()) return; ac(); var st=newState(); S(SAVEKEY,st); start(st); updateRoutine(); wake(true); toast('Benvenuto nella casa di Tommy! Segui la lista in alto a sinistra 👆',4000); toast('Trascina con un dito per guardarti intorno, usa due dita o + e − per lo zoom',4500); };
 var confirmT=0; function confirmNew(){ if(Date.now()-confirmT<4000) return true; confirmT=Date.now(); $('bNew').innerHTML='Sicuro? Tocca di nuovo<small>la casa vecchia verrà cancellata</small>'; setTimeout(function(){ $('bNew').textContent='🏡 Nuova casa'; },4000); return false; }
 $('bSnd').onclick=function(){ SND=!SND; S('casa-snd',SND); renderMenu(); };
-function toMenu(){ save(); playing=false; paused=false; $('pauseOv').hidden=true; $('pop').hidden=true; $('quoteOv').hidden=true; $('albOv').hidden=true; $('dark').hidden=true; setBuild(false); showGame(false); renderMenu(); }
+function toMenu(){ save(); playing=false; paused=false; $('pauseOv').hidden=true; $('pop').hidden=true; $('quoteOv').hidden=true; $('albOv').hidden=true; $('outfitOv').hidden=true; $('dark').hidden=true; setBuild(false); showGame(false); renderMenu(); }
 $('bBack').onclick=toMenu; $('bExit').onclick=toMenu;
 $('bPause').onclick=function(){ paused=true; $('pauseOv').hidden=false; };
 $('bResume').onclick=function(){ paused=false; $('pauseOv').hidden=true; lastT=0; };
