@@ -54,6 +54,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
 .med{display:inline-block;vertical-align:top;width:31%;min-width:150px;margin:1%;border:2px solid #14151d;border-radius:14px;background:#fff;padding:8px;text-align:center;font-weight:700;font-size:15px}
 .oc{display:inline-block;vertical-align:top;width:30%;min-width:140px;margin:1%;border:3px solid #14151d;border-radius:14px;background:#fff;padding:6px;text-align:center;font-weight:800;font-size:16px}
 .oc.on{background:#fff3c4}.oc canvas{width:96px;height:120px}
+.tab{display:inline-block;margin:3px;border:2px solid #14151d;border-radius:12px;padding:8px 11px;font-size:16px;font-weight:800;background:#e8edf7}.tab.on{background:#f2c230}
 .med .ic{font-size:40px}.med.no{opacity:.4}.med small{display:block;color:#3a6ac0}
 #zoomb{position:absolute;z-index:6;right:8px;bottom:110px;width:54px}
 #zoomb button{display:block;width:54px;height:50px;margin-top:8px;border:2px solid #14151d;border-radius:14px;background:#f6f7fb;font-size:28px;font-weight:900;line-height:1;padding:0;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
@@ -74,14 +75,14 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
 <button class="hud" id="bBack" type="button" hidden>◀ Indietro</button>
 <button class="hud" id="bPause" type="button" hidden>❚❚ Pausa</button>
 <div class="hud" id="clock" hidden></div>
-<div id="side" hidden><button id="bShop" type="button">🛋️ Arreda</button><button id="bGoals" type="button">🎯 Obiettivi</button><button id="bFam" type="button">👪 Famiglia</button><button id="bAlb" type="button">🏅 Album</button></div>
+<div id="side" hidden><button id="bShop" type="button">🛍️ Negozio</button><button id="bGoals" type="button">🎯 Obiettivi</button><button id="bFam" type="button">👪 Famiglia</button><button id="bAlb" type="button">🏅 Album</button></div>
 <div id="routine" hidden></div>
 <div id="zoomb" hidden><button id="zIn" type="button">+</button><button id="zOut" type="button">&minus;</button><button id="zMe" type="button">🎯</button></div>
 <div id="needs" hidden></div>
 <div id="pop" hidden></div>
 <div id="toast" hidden></div>
 <div id="dark" hidden></div>
-<div class="ov" id="shopOv" hidden><div class="box"><h2>🛋️ Arreda la casa</h2><p id="shopMoney" style="text-align:center;font-weight:800"></p><div id="shopList"></div><button class="big alt" id="bShopClose" type="button">Chiudi</button></div></div>
+<div class="ov" id="shopOv" hidden><div class="box"><h2>🛍️ Negozio di Tommy</h2><p id="shopMoney" style="text-align:center;font-weight:800;margin:4px"></p><div id="shopTabs" style="text-align:center;margin-bottom:6px"></div><p id="shopHint" style="text-align:center;margin:4px;color:#3a6ac0;font-weight:700"></p><div id="shopList"></div><button class="big alt" id="bShopClose" type="button">Chiudi</button></div></div>
 <div class="ov" id="goalOv" hidden><div class="box"><h2>🎯 Obiettivi</h2><div id="goalList"></div><button class="big alt" id="bGoalClose" type="button">Chiudi</button></div></div>
 <div class="ov" id="famOv" hidden><div class="box"><h2>👪 La famiglia</h2><div id="famList"></div><button class="big alt" id="bFamClose" type="button">Chiudi</button></div></div>
 <div class="ov" id="quoteOv" hidden><div class="box qbox"><div class="who" id="qWho"></div><p style="margin:2px;color:#3a6ac0;font-weight:800" id="qName"></p><div class="q" id="qText"></div><p id="qSub" style="color:#555"></p><button class="big" id="bQuote" type="button">☀️ Iniziamo la giornata!</button></div></div>
@@ -172,6 +173,10 @@ var T={
  rampa:{name:'Rampa',w:2,d:1,fixed:1,hm:2,acts:[{n:'Salta sulla rampa',needRide:1,act:1,need:'diver',r:2.6,dur:10,pose:'jump',ev:'salto'}]},
  rail:{name:'Corrimano da skate',w:3,d:1,fixed:1,hm:1.6,acts:[{n:'Fai la scivolata sul corrimano',needRide:1,act:1,need:'diver',r:2.4,dur:10,pose:'jump'}]},
  birilli:{name:'Birilli',w:3,d:1,fixed:1,hm:1.4,acts:[{n:'Fai lo slalom tra i birilli',needRide:1,act:1,need:'diver',r:2.4,dur:12,pose:'stand',ev:'slalom'}]},
+ robot:{name:'Robot telecomandato',w:1,d:1,price:120,toy:1,acts:[{n:'Gioca col robot',act:1,need:'diver',r:2,dur:25,pose:'stand',ev:'robot'}]},
+ pista:{name:'Pista delle macchinine',w:2,d:2,price:100,flat:1,toy:1,acts:[{n:'Gioca con le macchinine',act:1,need:'diver',r:2,dur:25,pose:'stand',ev:'pista'}]},
+ peluche:{name:'Orsetto di peluche gigante',w:1,d:1,price:60,toy:1,acts:[{n:'Coccola l\'orsetto',need:'amici',r:1.5,dur:10,pose:'stand',ev:'peluche'}]},
+ tenda:{name:'Tenda per giocare',w:2,d:2,price:150,hm:3.6,toy:1,acts:[{n:'Gioca nella tenda',act:1,need:'diver',r:2,dur:25,pose:'stand',on:1,ev:'tenda'}]},
  /* quartiere (fissi) */
  auto:{name:'La macchina di papà',w:2,d:3,fixed:1,hm:2.2,acts:[]},
  carY:{name:'Auto',w:2,d:3,fixed:1,hm:2.2,acts:[]},
@@ -187,7 +192,7 @@ var T={
  panchinaP:{name:'Panchina del parco',w:2,d:1,fixed:1,acts:[{n:'Siediti sulla panchina',need:'sonno',r:.3,dur:15,pose:'sit',on:1}]},
  alberoP:{name:'Albero',w:1,d:1,fixed:1,hm:4.6,acts:[]}
 };
-var CATALOG=['tappeto','lampada','poltrona','acquario','trenino','arcade','castello','canestro','piscina','trampolino','casetta','fiori','albero','panchina'];
+var CATALOG=['tappeto','lampada','poltrona','acquario','castello','canestro','piscina','trampolino','casetta','fiori','albero','panchina','trenino','arcade'];
 var START=[['lettoT',0,0],['scrivania',3,0],['giochi',0,3],['armadio',3,2],['doccia',4,0],['wc',6,0],['lavandino',6,2],['lettoG',9,0],['armadio',11,3],['telefono',0,4],['pianta',10,4],
  ['tv',0,5],['divano',2,7],['consolle',1,5],['libreria',5,5],['frigo',11,5],['fornelli',10,5],['lavello',9,5],['tavolo',8,7],['porta',11,8],['lampada',0,8],['lampada',0,2],
  ['recinto',3,10],['orto',6,10],['altalena',12,1],['sabbiera',9,10],['lego',2,0]].map(function(s){ return [s[0],s[1]+HX,s[2]+HY]; });
@@ -395,6 +400,10 @@ function drawObj(x,ty,t,lit,k2){ var h=TH, w=t.w, d=t.d;
   case 'rampa': var rh2=h*.9; poly(x,[P(0,0,rh2),P(0,1,rh2),P(2,1,0),P(2,0,0)],'#c8a060'); poly(x,[P(0,1,0),P(0,1,rh2),P(2,1,0)],'#9a7a48'); x.strokeStyle='rgba(0,0,0,.15)'; x.lineWidth=1; x.beginPath(); for(var rk=1;rk<5;rk++){ var ra=P(rk*.4,0,rh2*(1-rk*.2)), rb=P(rk*.4,1,rh2*(1-rk*.2)); x.moveTo(ra[0],ra[1]); x.lineTo(rb[0],rb[1]); } x.stroke(); break;
   case 'rail': [[.3,.5],[2.7,.5]].forEach(function(q){ var a=P(q[0],q[1],0), b=P(q[0],q[1],h*.6); x.strokeStyle='#555555'; x.lineWidth=Math.max(2,TW*.05); x.beginPath(); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.stroke(); }); var rl1=P(.2,.5,h*.6), rl2=P(2.8,.5,h*.6); x.strokeStyle='#e0373f'; x.lineWidth=Math.max(3,TW*.08); x.beginPath(); x.moveTo(rl1[0],rl1[1]); x.lineTo(rl2[0],rl2[1]); x.stroke(); break;
   case 'birilli': for(var bi=0;bi<4;bi++){ var bp=P(.35+bi*.75,.5,0), bt=P(.35+bi*.75,.5,h*.75); x.fillStyle='#ff8a2a'; x.beginPath(); x.moveTo(bp[0]-TW*.08,bp[1]); x.lineTo(bp[0]+TW*.08,bp[1]); x.lineTo(bt[0],bt[1]); x.closePath(); x.fill(); x.fillStyle='#ffffff'; x.fillRect(bp[0]-TW*.045,bp[1]-h*.42,TW*.09,h*.1); } break;
+  case 'robot': ibox(x,.3,.35,.4,.3,0,h*.12,'#3a3f4a'); ibox(x,.32,.37,.36,.26,h*.12,h*.55,'#a9b4c2'); ibox(x,.36,.4,.28,.22,h*.67,h*.32,'#c8d0da'); var re1=P(.45,.62,h*.85), re2=P(.58,.62,h*.85); dot(x,re1[0],re1[1],TW*.03,'#3fd0ff'); dot(x,re2[0],re2[1],TW*.03,'#3fd0ff'); var ra=P(.5,.5,h*.99), rb=P(.5,.5,h*1.3); x.strokeStyle='#555555'; x.lineWidth=2; x.beginPath(); x.moveTo(ra[0],ra[1]); x.lineTo(rb[0],rb[1]); x.stroke(); dot(x,rb[0],rb[1],TW*.035,'#e0373f'); break;
+  case 'pista': poly(x,[P(.1,.1,1),P(1.9,.1,1),P(1.9,1.9,1),P(.1,1.9,1)],'#5fd06a'); x.strokeStyle='#3a3f4a'; x.lineWidth=Math.max(3,TW*.12); x.beginPath(); var pc=P(1,1,2); x.save(); x.translate(pc[0],pc[1]); x.scale(TW*.6,TW*.3); x.arc(0,0,1,0,6.3); x.restore(); x.stroke(); x.strokeStyle='#ffffff'; x.lineWidth=1; x.stroke(); var pk1=P(1.6,1,3), pk2=P(.5,.6,3); dot(x,pk1[0],pk1[1],TW*.05,'#e0373f'); dot(x,pk2[0],pk2[1],TW*.05,'#3f86d4'); break;
+  case 'peluche': var bb=P(.5,.5,h*.45), bh=P(.5,.5,h*1.05); dot(x,bb[0],bb[1],TW*.22,'#b07a4a'); dot(x,bh[0],bh[1],TW*.17,'#b07a4a'); dot(x,bh[0]-TW*.13,bh[1]-TW*.12,TW*.07,'#b07a4a'); dot(x,bh[0]+TW*.13,bh[1]-TW*.12,TW*.07,'#b07a4a'); dot(x,bh[0],bh[1]+TW*.05,TW*.07,'#e8c8a0'); dot(x,bh[0]-TW*.06,bh[1]-TW*.03,TW*.02,'#1d1f2b'); dot(x,bh[0]+TW*.06,bh[1]-TW*.03,TW*.02,'#1d1f2b'); dot(x,bb[0],bb[1]+TW*.02,TW*.11,'#e8c8a0'); break;
+  case 'tenda': var tt=P(1,1,h*2.6); poly(x,[P(.1,1.9,0),P(1.9,1.9,0),tt],'#f2c230'); poly(x,[P(1.9,.1,0),P(1.9,1.9,0),tt],'#e0a020'); poly(x,[P(.75,1.9,0),P(1.25,1.9,0),P(1,1.9,h*1.2)],'#7a4a2a'); x.strokeStyle='#e0373f'; x.lineWidth=Math.max(2,TW*.05); x.beginPath(); var t1=P(.4,1.9,h*.6), t2=P(1.6,1.9,h*.6); x.moveTo(t1[0],t1[1]); x.lineTo(t2[0],t2[1]); x.stroke(); x.strokeStyle='#8a5a3a'; x.beginPath(); x.moveTo(tt[0],tt[1]); x.lineTo(tt[0]-TW*.12,tt[1]-TW*.2); x.moveTo(tt[0],tt[1]); x.lineTo(tt[0]+TW*.12,tt[1]-TW*.2); x.stroke(); break;
   case 'vicino1': drawHouse(x,t,'#f2d38a','#c8402a',lit); break;
   case 'vicino2': drawHouse(x,t,'#a8d0e8','#4a5a7a',lit); break;
   case 'scuola': drawSchool(x,t,lit); break;
@@ -423,6 +432,8 @@ function drawPerson(c,px,py){ var bob=c.state==='walk'?Math.abs(Math.sin(c.bob*1
   else { ctx.fillStyle=c.pants; ctx.fillRect(px-5*s,y0-legH,4*s,legH); ctx.fillRect(px+1*s,y0-legH,4*s,legH); if(c.pj){ ctx.fillStyle=c.pj; for(var pq=1;pq<4;pq++) ctx.fillRect(px-5*s,y0-legH+pq*legH/4,10*s,1.2*s); } }
   ctx.fillStyle=c.shoes||'#1d1f2b'; ctx.fillRect(px-6*s+step,y0-2*s,5*s,3*s); ctx.fillRect(px+1*s-step,y0-2*s,5*s,3*s);
   var by=y0-legH-bodyH; ctx.fillStyle=c.shirt; if(c.long){ ctx.beginPath(); ctx.moveTo(px-7*s,by+bodyH+2*s); ctx.lineTo(px+7*s,by+bodyH+2*s); ctx.lineTo(px+5*s,by); ctx.lineTo(px-5*s,by); ctx.closePath(); ctx.fill(); } else ctx.fillRect(px-6*s,by,12*s,bodyH);
+  if(c.stripes){ ctx.fillStyle=c.stripes; for(var st2=0;st2<4;st2++) ctx.fillRect(px-6*s,by+1*s+st2*bodyH/4,12*s,1.6*s); }
+  if(c.vest){ ctx.fillStyle=c.vest; ctx.fillRect(px-6*s,by,4*s,bodyH); ctx.fillRect(px+2*s,by,4*s,bodyH); }
   if(c.pj){ ctx.fillStyle=c.pj; for(var pr=1;pr<4;pr++) ctx.fillRect(px-6*s,by+pr*bodyH/4,12*s,1.2*s); }
   if(c.zip){ ctx.fillStyle=c.zip; ctx.fillRect(px-.5*s,by+1*s,1*s,bodyH-1*s); ctx.fillRect(px-6*s,by,12*s,1.5*s); }
   if(c.belt){ ctx.fillStyle=c.belt; ctx.fillRect(px-6*s,by+bodyH-2*s,12*s,2*s); }
@@ -430,9 +441,20 @@ function drawPerson(c,px,py){ var bob=c.state==='walk'?Math.abs(Math.sin(c.bob*1
   if(c.star) star(px,by+bodyH*.42,4*s,1.8*s,c.star);
   if(c.tie){ ctx.fillStyle=c.tie; ctx.beginPath(); ctx.moveTo(px,by+1.5*s); ctx.lineTo(px-3*s,by); ctx.lineTo(px-3*s,by+3*s); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(px,by+1.5*s); ctx.lineTo(px+3*s,by); ctx.lineTo(px+3*s,by+3*s); ctx.closePath(); ctx.fill(); }
   ctx.fillStyle=c.sleeve||c.skin; var arm=c.act?Math.sin(Date.now()/200)*3*s:0; ctx.fillRect(px-9*s,by+2*s+arm,3*s,bodyH-4*s); ctx.fillRect(px+6*s,by+2*s-arm,3*s,bodyH-4*s); if(c.sleeve){ ctx.fillStyle=c.skin; ctx.fillRect(px-9*s,by+bodyH-4*s+arm,3*s,2*s); ctx.fillRect(px+6*s,by+bodyH-4*s-arm,3*s,2*s); }
+  if(c.state==='act'&&c.act&&c.act.a){ var spa=c.act.a, tq=Date.now()/1000;
+    if(spa.sport==='calcio'){ var cbx=px+9*s*fx, cby=y0-2.5*s-Math.abs(Math.sin(tq*5))*7*s; circ(cbx,cby,2.6*s,'#ffffff'); circ(cbx,cby,1*s,'#1d1f2b'); }
+    if(spa.sport==='basket'){ circ(px+8*s*fx,by-5*s-Math.abs(Math.sin(tq*4))*10*s,3*s,'#ff8a2a'); }
+    if(spa.sport==='tennis'){ var thx=px+8*s, thy=by+bodyH-4*s; ctx.strokeStyle='#555555'; ctx.lineWidth=Math.max(1.5,1.2*s); ctx.beginPath(); ctx.moveTo(thx,thy); ctx.lineTo(thx+4*s,thy-8*s); ctx.stroke(); ctx.strokeStyle='#e0373f'; ctx.beginPath(); ctx.save(); ctx.translate(thx+5*s,thy-12*s); ctx.scale(3*s,4.5*s); ctx.arc(0,0,1,0,6.3); ctx.restore(); ctx.stroke(); circ(px+18*s*Math.sin(tq*3),by-14*s,1.4*s,'#e8f04a'); }
+    if(spa.kite){ var kx=px+26*s+Math.sin(tq*1.3)*5*s, ky=by-40*s+Math.sin(tq*2)*4*s; ctx.strokeStyle='#888888'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(px+8*s,by+bodyH-4*s); ctx.lineTo(kx,ky+6*s); ctx.stroke(); ctx.fillStyle='#e0373f'; ctx.beginPath(); ctx.moveTo(kx,ky-7*s); ctx.lineTo(kx+5*s,ky); ctx.lineTo(kx,ky+7*s); ctx.lineTo(kx-5*s,ky); ctx.closePath(); ctx.fill(); ctx.fillStyle='#f2c230'; ctx.beginPath(); ctx.moveTo(kx,ky-7*s); ctx.lineTo(kx+5*s,ky); ctx.lineTo(kx,ky); ctx.closePath(); ctx.fill(); } }
   var hr=(kid?9:9)*s, hy=by-hr+1*s; if(c.long){ ctx.fillStyle=c.hair; ctx.fillRect(px-hr,hy,hr*2,hr*1.9); }
+  if(c.hood) circ(px,hy+1*s,hr+2.2*s,c.shirt);
   ctx.fillStyle=c.skin; ctx.beginPath(); ctx.arc(px,hy,hr,0,6.3); ctx.fill(); ctx.strokeStyle='rgba(0,0,0,.22)'; ctx.lineWidth=1; ctx.stroke();
   ctx.fillStyle=c.hair; if(c.bald){ ctx.beginPath(); ctx.arc(px,hy+1*s,hr,Math.PI*.9,Math.PI*1.1); ctx.fill(); } else { ctx.beginPath(); ctx.arc(px,hy-1*s,hr,Math.PI*1.05,Math.PI*1.95); ctx.fill(); if(c.kid){ ctx.beginPath(); ctx.moveTo(px-3*s,hy-hr); ctx.lineTo(px,hy-hr-5*s); ctx.lineTo(px+3*s,hy-hr+1*s); ctx.fill(); } }
+  if(c.hat==='fascia'){ ctx.fillStyle=c.hatc; ctx.fillRect(px-hr,hy-hr*.62,hr*2,2.4*s); }
+  if(c.hat==='bandana'){ ctx.fillStyle=c.hatc; ctx.beginPath(); ctx.arc(px,hy-1*s,hr+.6*s,Math.PI*1.02,Math.PI*1.98); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(px-hr,hy-2*s); ctx.lineTo(px-hr-4*s,hy+1*s); ctx.lineTo(px-hr-1*s,hy+2*s); ctx.closePath(); ctx.fill(); }
+  if(c.hat==='cowboy'){ ctx.fillStyle=c.hatc; ctx.beginPath(); ctx.save(); ctx.translate(px,hy-hr*.55); ctx.scale(hr*1.7,hr*.32); ctx.arc(0,0,1,0,6.3); ctx.restore(); ctx.fill(); ctx.fillRect(px-hr*.7,hy-hr*1.35,hr*1.4,hr*.85); ctx.fillStyle='#5a3a1a'; ctx.fillRect(px-hr*.7,hy-hr*.75,hr*1.4,1.6*s); }
+  if(c.hat==='cuffia'){ ctx.fillStyle=c.hatc; ctx.beginPath(); ctx.arc(px,hy-.5*s,hr+.8*s,Math.PI*1.0,Math.PI*2.0); ctx.closePath(); ctx.fill(); }
+  if(c.goggles){ circ(px-3*s,hy-hr*.55,2*s,'#3fa0e8'); circ(px+3*s,hy-hr*.55,2*s,'#3fa0e8'); }
   if(c.hat==='safari'){ ctx.fillStyle='#c8a874'; ctx.beginPath(); ctx.save(); ctx.translate(px,hy-hr*.5); ctx.scale(hr*1.55,hr*.38); ctx.arc(0,0,1,0,6.3); ctx.restore(); ctx.fill(); ctx.beginPath(); ctx.arc(px,hy-hr*.5,hr*.85,Math.PI,0); ctx.fill(); ctx.fillStyle='#7a5a3a'; ctx.fillRect(px-hr*.85,hy-hr*.72,hr*1.7,1.6*s); }
   if(c.ride&&!c.fallen){ ctx.fillStyle=c.helmet||'#e0373f'; ctx.beginPath(); ctx.arc(px,hy-1*s,hr+1.2*s,Math.PI*1.02,Math.PI*1.98); ctx.closePath(); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.55)'; ctx.fillRect(px-2*s,hy-hr-.5*s,4*s,2*s); }
   if(c.beard){ ctx.fillStyle=c.hair; ctx.beginPath(); ctx.arc(px,hy+3*s,hr*.85,.15,Math.PI-.15); ctx.fill(); }
@@ -546,7 +568,7 @@ var GOALS=[
  {id:'g10',n:'Fai i compiti alla scrivania',ev:'compiti',prize:30},{id:'g11',n:'Mangia a tavola',ev:'tavola',prize:20},{id:'g12',n:'Gioca con papà',ev:'giocapapa',prize:30},
  {id:'g13',n:'Accarezza Carotino',ev:'coccole',prize:20},{id:'g14',n:'Gioca al parco con Leo o Sofia',ev:'parco',prize:30},{id:'g15',n:'Tutti i bisogni di Tommy sopra metà',ev:'_',check:function(){ var c=CH.tommy; return NEEDS.every(function(n){ return c.needs[n]>=50; }); },prize:60},
  {id:'g16',n:'Compra il trampolino',ev:'buy_trampolino',prize:80},{id:'g17',n:'Compra il letto a castello',ev:'buy_castello',prize:80},{id:'g18',n:'Arriva a 5 stelline di scuola',ev:'_',check:function(){ return ST.stars>=5; },prize:100},
- {id:'g19',n:'Completa la routine del mattino',ev:'mattino',prize:40},{id:'g20',n:'Completa la routine della sera',ev:'sera',prize:40},{id:'g21',n:'Riordina i giochi',ev:'riordina',prize:20},{id:'g22',n:'Aiuta in casa',ev:'aiuto',prize:20},{id:'g23',n:'Racconta una barzelletta',ev:'barzelletta',prize:20},{id:'g24',n:'Mangia un piatto con frutta o verdura',ev:'verdure',prize:20},{id:'g25',n:'Vestiti da supereroe',ev:'look_eroe',prize:30},{id:'g26',n:'Gioca con i mattoncini',ev:'lego',prize:20},{id:'g27',n:'Invita un amico a casa',ev:'invito',prize:30},{id:'g28',n:'Fai un nuovo amico al parco',ev:'amico',prize:30},{id:'g29',n:'Aiuta un bambino in difficoltà',ev:'aiutobimbo',prize:40},{id:'g30',n:'Fai un giro della pista',ev:'giro',prize:20}];
+ {id:'g19',n:'Completa la routine del mattino',ev:'mattino',prize:40},{id:'g20',n:'Completa la routine della sera',ev:'sera',prize:40},{id:'g21',n:'Riordina i giochi',ev:'riordina',prize:20},{id:'g22',n:'Aiuta in casa',ev:'aiuto',prize:20},{id:'g23',n:'Racconta una barzelletta',ev:'barzelletta',prize:20},{id:'g24',n:'Mangia un piatto con frutta o verdura',ev:'verdure',prize:20},{id:'g25',n:'Vestiti da supereroe',ev:'look_eroe',prize:30},{id:'g26',n:'Gioca con i mattoncini',ev:'lego',prize:20},{id:'g27',n:'Invita un amico a casa',ev:'invito',prize:30},{id:'g28',n:'Fai un nuovo amico al parco',ev:'amico',prize:30},{id:'g29',n:'Aiuta un bambino in difficoltà',ev:'aiutobimbo',prize:40},{id:'g30',n:'Fai un giro della pista',ev:'giro',prize:20},{id:'g31',n:'Compra un vestito nuovo',ev:'buyoutfit',prize:20},{id:'g32',n:'Compra un giocattolo nuovo',ev:'buytoy',prize:20},{id:'g33',n:'Fai il primo allenamento',ev:'sport',prize:30},{id:'g34',n:'Fai un regalo a qualcuno',ev:'regalo',prize:30}];
 /* ================= VESTITI, PIATTI, BARZELLETTE ================= */
 var OUTFITS={casual:{n:'Maglietta e jeans',shirt:'#f07a2a',pants:'#3a6ab0'},
  sport:{n:'Tuta sportiva',shirt:'#2f6ad0',sleeve:'#2f6ad0',pants:'#2f6ad0',shoes:'#e0373f',zip:'#ffffff'},
@@ -555,11 +577,23 @@ var OUTFITS={casual:{n:'Maglietta e jeans',shirt:'#f07a2a',pants:'#3a6ab0'},
  elegante:{n:'Elegante',shirt:'#ffffff',sleeve:'#ffffff',pants:'#2b3a67',shoes:'#3a2010',tie:'#e0373f',belt:'#1d1f2b'},
  eroe:{n:'Supereroe',shirt:'#3fa0e8',sleeve:'#3fa0e8',pants:'#3fa0e8',shoes:'#e0373f',cape:'#e0373f',star:'#f2c230',mask:'#1d1f2b',belt:'#f2c230'},
  pigiama:{n:'Pigiama',shirt:'#9fd0ff',sleeve:'#9fd0ff',pants:'#9fd0ff',pj:'#ffffff',shoes:'#f2a0c0'}};
-var OUTFIT_KEYS=['sport','calcio','esplo','elegante','eroe','casual'];
-function applyOutfit(c,id){ var o=OUTFITS[id]||OUTFITS.casual; ['shirt','sleeve','pants','shoes','zip','num','shorts','socks','hat','belt','tie','cape','star','mask','pj'].forEach(function(k){ c[k]=o[k]; }); c.outfit=id; }
-function drawPreview(cnv,id){ var sc=ctx, stw=TW, x=cnv.getContext('2d'); ctx=x; TW=320; x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,cnv.width,cnv.height); var f={id:'prev',kid:1,skin:'#f2c59a',hair:'#6b3f22',state:'idle',face:1,bob:0,act:null}; applyOutfit(f,id); try{ drawPerson(f,cnv.width/2,cnv.height-12); }catch(e){} ctx=sc; TW=stw; }
+OUTFITS.tennis={n:'Completo da tennis',shirt:'#ffffff',pants:'#ffffff',shorts:1,socks:'#ffffff',shoes:'#ffffff',hat:'fascia',hatc:'#e0373f'};
+OUTFITS.basket={n:'Divisa da basket',shirt:'#f2c230',num:'23',pants:'#f2c230',shorts:1,socks:'#ffffff',shoes:'#e0373f'};
+OUTFITS.karate={n:'Kimono da karate',shirt:'#ffffff',sleeve:'#ffffff',pants:'#ffffff',belt:'#1d1f2b',shoes:'#f2c59a'};
+OUTFITS.nuoto={n:'Costume da nuoto',shirt:'#f2c59a',pants:'#3f86d4',shorts:1,socks:'#f2c59a',shoes:'#f2c59a',hat:'cuffia',hatc:'#f2c230',goggles:1};
+OUTFITS.pirata={n:'Pirata',shirt:'#ffffff',stripes:'#e0373f',pants:'#3a3a4a',shoes:'#1d1f2b',hat:'bandana',hatc:'#e0373f',belt:'#7a4a2a'};
+OUTFITS.cowboy={n:'Cowboy',shirt:'#c8402a',sleeve:'#c8402a',vest:'#7a4a2a',pants:'#3a6ab0',shoes:'#7a4a2a',hat:'cowboy',hatc:'#a0703a'};
+OUTFITS.felpa={n:'Felpa con cappuccio',shirt:'#9a5cff',sleeve:'#9a5cff',hood:1,pants:'#3a3a4a',shoes:'#ffffff',zip:'#c8b0ff'};
+OUTFITS.astro={n:'Astronauta',shirt:'#e8edf2',sleeve:'#e8edf2',pants:'#e8edf2',shoes:'#9aa3b0',belt:'#3f86d4',star:'#e0373f',hat:'cuffia',hatc:'#e8edf2',goggles:1};
+var OUTFIT_KEYS=['sport','calcio','esplo','elegante','eroe','pirata','cowboy','felpa','astro','tennis','basket','karate','nuoto','casual'];
+var SHOP_OUTFITS={pirata:60,cowboy:70,felpa:50,astro:120};
+var SPORTS={calcio:{n:'Calcio',e:'⚽',p:30,outfit:'calcio',gear:'Pallone da calcio',where:'out'},basket:{n:'Basket',e:'🏀',p:70,outfit:'basket',gear:'Pallone + divisa',where:'out'},tennis:{n:'Tennis',e:'🎾',p:90,outfit:'tennis',gear:'Racchetta, palline + completo',where:'out'},karate:{n:'Karate',e:'👊',p:80,outfit:'karate',gear:'Kimono e cintura',where:'any'},nuoto:{n:'Nuoto',e:'🏊',p:70,outfit:'nuoto',gear:'Costume, cuffia e occhialini',where:'pool'}};
+var GIFTS={fiori:{n:'Mazzo di fiori',e:'💐',p:15},cioccolatini:{n:'Cioccolatini',e:'🍫',p:12},libro:{n:'Un libro',e:'📘',p:20},tazza:{n:'Tazza "Al papà più forte"',e:'☕',p:18},braccialetto:{n:'Braccialetto colorato',e:'🎀',p:15},figurine:{n:'Bustina di figurine',e:'🃏',p:8}};
+var CARRY={aquilone:{n:'Aquilone',e:'🌈',p:35}};
+function applyOutfit(c,id){ var o=OUTFITS[id]||OUTFITS.casual; ['shirt','sleeve','pants','shoes','zip','num','shorts','socks','hat','belt','tie','cape','star','mask','pj','stripes','vest','hood','hatc','goggles'].forEach(function(k){ c[k]=o[k]; }); c.outfit=id; }
+function drawPreview(cnv,id){ var sc=ctx, stw=TW, x=cnv.getContext('2d'); ctx=x; TW=Math.round(cnv.height*1.3); x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,cnv.width,cnv.height); var f={id:'prev',kid:1,skin:'#f2c59a',hair:'#6b3f22',state:'idle',face:1,bob:0,act:null}; applyOutfit(f,id); try{ drawPerson(f,cnv.width/2,cnv.height-12); }catch(e){} ctx=sc; TW=stw; }
 function openOutfits(cb){ var box=$('outfitList'); box.innerHTML='';
-  OUTFIT_KEYS.forEach(function(id){ var d=document.createElement('button'); d.type='button'; d.className='oc'+(ST.outfit===id?' on':''); var cn=document.createElement('canvas'); cn.width=192; cn.height=240; drawPreview(cn,id); d.appendChild(cn); var nm=document.createElement('div'); nm.textContent=OUTFITS[id].n; d.appendChild(nm);
+  OUTFIT_KEYS.forEach(function(id){ if(!ST.owned||!ST.owned[id]) return; var d=document.createElement('button'); d.type='button'; d.className='oc'+(ST.outfit===id?' on':''); var cn=document.createElement('canvas'); cn.width=192; cn.height=240; drawPreview(cn,id); d.appendChild(cn); var nm=document.createElement('div'); nm.textContent=OUTFITS[id].n; d.appendChild(nm);
     d.onclick=function(){ $('outfitOv').hidden=true; cb(id); }; box.appendChild(d); });
   $('outfitOv').hidden=false; }
 $('bOutfitClose').onclick=function(){ $('outfitOv').hidden=true; };
@@ -628,14 +662,46 @@ function helpDone(k){ if(!k.fallen) return; k.fallen=null; ST.money+=15; jingle(
   if(addFriend(k.name)) toast('👫 '+k.name+' è diventato tuo amico: ora puoi invitarlo a casa!',3500); }
 function befriend(k){ say(CH.tommy,'Ciao! Facciamo amicizia?',3); setTimeout(function(){ if(!ST||!CH[k.id]) return; say(k,'Sì! Io sono '+k.name+' 😊',3.5); if(addFriend(k.name)){ ST.money+=5; toast('👫 Nuovo amico: '+k.name+'! Ora puoi invitarlo a casa col telefono (+5 monete)',3800,true); jingle([660,880,1047]); } },1800); }
 
+/* ================= REGALI, SPORT E ZAINO ================= */
+function giftCount(){ var n=0; for(var k in ST.gifts) n+=ST.gifts[k]; return n; }
+function whoName(w){ return w.id==='milly'?'la mamma':w.id==='papone'?'papà':w.name; }
+function toWho(w){ return w.id==='milly'?'alla mamma':w.id==='papone'?'a papà':'a '+w.name; }
+function giftItem(who){ return {n:'🎁 Fai un regalo',no:giftCount()<=0,why:'Non hai regali: comprali nel negozio (scheda 🎁 Regali)',f:function(){
+  var its=[]; for(var g in GIFTS){ if(ST.gifts[g]>0) (function(g){ its.push({n:GIFTS[g].e+' '+GIFTS[g].n+' (ne hai '+ST.gifts[g]+')',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); stopFor(who,6); if(who.npc){ who.path=[]; who.state='idle'; who.think=8; }
+    startAction(c,{type:'__bun',x:Math.round(who.x),y:Math.round(who.y)},{n:'Regala '+GIFTS[g].n.toLowerCase()+' '+toWho(who),dur:4,social:4,pose:'stand',gift:g,who:who.id}); }}); })(g); }
+  showPop(300,300,'Che regalo fai '+toWho(who)+'?',its); }}; }
+function giveGift(c,a){ var w=CH[a.who], g=a.gift; if(!ST.gifts[g]) return; ST.gifts[g]--; var G=GIFTS[g], line;
+  if(g==='fiori'&&a.who==='milly') line='Che fiori stupendi! Grazie amore mio 💐'; else if(g==='tazza'&&a.who==='papone') line='La userò ogni mattina, campione!'; else if(g==='cioccolatini'&&a.who==='papone') line='I miei preferiti! Ne mangiamo uno insieme?';
+  else line=['Che bel regalo, grazie Tommy!','Wow! Sei gentilissimo!','Mi piace tantissimo, grazie!','Che sorpresa! Grazie!'][Math.floor(Math.random()*4)];
+  if(w&&w.state!=='away'){ say(w,line,4); if(w.needs&&w.needs.amici!=null){ w.needs.amici=clamp(w.needs.amici+40); w.needs.diver=clamp(w.needs.diver+20); } }
+  c.needs.amici=clamp(c.needs.amici+20); jingle([660,880,1047,1319]); toast('🎁 Hai regalato '+G.n.toLowerCase()+' '+(w?toWho(w):'a un amico')+': fare regali rende felici tutti e due!',3800,true); addHab('regalo'); goalEvent('regalo'); }
+function tommyAt(px,py){ var c=CH.tommy; if(!c||c.state==='away') return false; var p=center(c.x,c.y); return Math.abs(px-p[0])<TW*.3&&py<p[1]+6&&py>p[1]-TW*.95; }
+function selfMenu(px,py){ var c=CH.tommy, items=[], tz=zone(room(Math.round(c.x),Math.round(c.y))), outdoor=(tz==='L'||tz==='P'), bw=blockWhy({play:1});
+  for(var id in SPORTS){ if(!ST.sports[id]) continue; (function(id){ var S2=SPORTS[id], it={n:S2.e+' Allenati a '+S2.n,f:function(){ startSport(id); }};
+      if(bw){ it.no=1; it.why=bw; } else if(S2.where==='out'&&!outdoor){ it.no=1; it.why='Per '+S2.n.toLowerCase()+' devi stare fuori: vai in giardino o al parco!'; } else if(S2.where==='pool'&&!find('piscina')){ it.no=1; it.why='Per nuotare ti serve la piscina: comprala nel negozio (scheda Casa)'; }
+      items.push(it); })(id); }
+  if(!items.length) items.push({n:'⚽ Fai sport',no:1,why:'Compra un kit sportivo nel negozio (scheda ⚽ Sport)'});
+  if(ST.carry.aquilone){ var ki={n:'🌈 Fai volare l\'aquilone',f:function(){ if(c.state==='act') endAction(c,false); startAction(c,{type:'__bun',x:Math.round(c.x),y:Math.round(c.y)},{n:'Fa volare l\'aquilone',act:1,need:'diver',r:1.8,dur:25,pose:'stand',kite:1,ev:'aquilone'}); }}; if(bw){ ki.no=1; ki.why=bw; } else if(!outdoor){ ki.no=1; ki.why='L\'aquilone si fa volare fuori, in giardino o al parco!'; } items.push(ki); }
+  items.push({n:'🎒 Guarda nello zaino',f:showBag});
+  showPop(px,py,'Tommy',items); }
+function startSport(id){ var c=CH.tommy, S2=SPORTS[id]; if(c.state==='act') endAction(c,false); applyOutfit(c,S2.outfit); ST.outfit=S2.outfit;
+  var a={n:'Allenamento di '+S2.n.toLowerCase(),act:1,need:'diver',r:2,dur:30,pose:(id==='karate'||id==='basket')?'jump':'stand',sport:id,ev:'sport',clean:-.6};
+  if(S2.where==='pool'){ var pool=find('piscina'); a.on=1; startAction(c,pool,a); } else startAction(c,{type:'__bun',x:Math.round(c.x),y:Math.round(c.y)},a);
+  toast(S2.e+' Tommy si cambia e si allena a '+S2.n.toLowerCase()+'!',3000,true); }
+function showBag(){ var its=[]; for(var g in GIFTS) if(ST.gifts[g]>0) its.push({n:GIFTS[g].e+' '+GIFTS[g].n+' × '+ST.gifts[g],no:1,why:'Per regalarlo tocca la persona e scegli "Fai un regalo"'});
+  for(var k in CARRY) if(ST.carry[k]) its.push({n:CARRY[k].e+' '+CARRY[k].n,no:1,why:'Tocca Tommy fuori casa per usarlo'});
+  for(var sp in SPORTS) if(ST.sports[sp]) its.push({n:SPORTS[sp].e+' Kit da '+SPORTS[sp].n.toLowerCase(),no:1,why:'Tocca Tommy e scegli "Allenati"'});
+  if(!its.length) its.push({n:'Lo zaino è vuoto: vai al negozio!',no:1});
+  showPop(300,300,'🎒 Lo zaino di Tommy',its); }
+
 /* ================= BUONE ABITUDINI ================= */
 var MORN=[{ev:'faccia',n:'💧 Lava la faccia',w:'lavandino in bagno'},{ev:'colazione',n:'🍞 Fai colazione',w:'tavolo in cucina'},{ev:'denti',n:'😁 Lava i denti',w:'lavandino in bagno'},{ev:'vestiti',n:'👕 Vestiti',w:'armadio'}];
 var EVE=[{ev:'denti',n:'😁 Lava i denti',w:'lavandino'},{ev:'pigiama',n:'🌙 Metti il pigiama',w:'armadio'},{ev:'nanna',n:'🛏️ A letto entro le 21:30',w:'il tuo letto'}];
 var QUOTES=['Sbagliare va bene: è così che si impara!','Se una cosa è difficile, provaci un passo alla volta.','Chiedere aiuto è da coraggiosi.','Essere gentili fa stare bene anche te.','Oggi prova a fare un complimento a qualcuno!','Non serve essere i migliori: basta fare del proprio meglio.','Quando sei arrabbiato, fai tre respiri lunghi lunghi.','Ogni giorno impari una cosa nuova, anche piccola.','Se un amico è triste, una parola gentile fa miracoli.','Le cose belle richiedono pazienza.','Dire grazie e per favore apre tutte le porte.','Anche i campioni hanno cominciato da principianti.','Se cadi, ti rialzi e ci riprovi. Sempre!','Prenditi cura delle cose: durano di più.','Gli animali hanno bisogno del nostro amore: trattali con dolcezza.','Ascoltare gli altri è un superpotere.','Va bene avere paura: il coraggio è andare avanti lo stesso.','Ridere insieme è la medicina più buona.','Se hai combinato un guaio, chiedere scusa sistema tante cose.','Muoversi e giocare all\'aria aperta fa bene al corpo e alla testa.','Leggere un libro è come fare un viaggio.','Condividere i giochi rende il gioco più bello.','Sei unico: nessuno è uguale a te!','Le giornate storte passano. Domani si riparte!','Un sorriso al mattino rende la giornata più leggera.','Dormire bene ti dà la carica per tutto il giorno.','Mettere in ordine ti aiuta a trovare tutto.','Ogni volta che ci provi diventi più bravo.','La famiglia è una squadra: ci si aiuta sempre.','Credi in te stesso: puoi fare grandi cose!'];
 var PRAISE={compiti:['Bravo! Ogni giorno impari qualcosa di nuovo.','Compiti fatti: ora il gioco è ancora più bello!'],aiuto:['Grazie dell\'aiuto! In famiglia ci si aiuta.','Che bravo aiutante!'],riordina:['Che ordine! Così ritrovi subito i tuoi giochi.'],carota:['Carotino ti ringrazia: ti vuole un mondo di bene!'],coccole:['Carotino è felicissimo delle coccole!']};
 var MEDALS=[{id:'mattino',ic:'☀️',n:'Campione del mattino',t:'Routine del mattino',k:5},{id:'sera',ic:'🌙',n:'Nanna puntuale',t:'Routine della sera',k:5},{id:'denti',ic:'😁',n:'Sorriso splendente',t:'Denti lavati',k:10},{id:'mani',ic:'💧',n:'Mani pulite',t:'Mani lavate',k:10},
- {id:'attivo',ic:'👀',n:'Occhi riposati',t:'Giochi senza schermo',k:10},{id:'carotino',ic:'🐰',n:'Amico degli animali',t:'Cure a Carotino',k:10},{id:'aiuto',ic:'👍',n:'Aiutante di casa',t:'Aiuti in casa',k:5},{id:'riordina',ic:'📦',n:'Re dell\'ordine',t:'Giochi riordinati',k:5},{id:'compiti',ic:'📚',n:'Bravo a scuola',t:'Compiti fatti',k:5},{id:'barzelletta',ic:'😂',n:'Comico di casa',t:'Barzellette raccontate',k:5},{id:'sano',ic:'🍎',n:'Pappa sana',t:'Piatti con frutta e verdura',k:5},{id:'look',ic:'👕',n:'Stilista',t:'Vestiti diversi provati',k:5},{id:'amico',ic:'👫',n:'Amico di tutti',t:'Nuovi amici al parco',k:3},{id:'gentile',ic:'💛',n:'Cuore d\'oro',t:'Bambini aiutati',k:3}];
-function ensureEdu(){ if(!ST.hab) ST.hab={}; if(!ST.medals) ST.medals={}; if(ST.scrUsed==null) ST.scrUsed=0; if(ST.scrUntil==null) ST.scrUntil=0; if(ST.handsT==null) ST.handsT=-1e9; }
+ {id:'attivo',ic:'👀',n:'Occhi riposati',t:'Giochi senza schermo',k:10},{id:'carotino',ic:'🐰',n:'Amico degli animali',t:'Cure a Carotino',k:10},{id:'aiuto',ic:'👍',n:'Aiutante di casa',t:'Aiuti in casa',k:5},{id:'riordina',ic:'📦',n:'Re dell\'ordine',t:'Giochi riordinati',k:5},{id:'compiti',ic:'📚',n:'Bravo a scuola',t:'Compiti fatti',k:5},{id:'barzelletta',ic:'😂',n:'Comico di casa',t:'Barzellette raccontate',k:5},{id:'sano',ic:'🍎',n:'Pappa sana',t:'Piatti con frutta e verdura',k:5},{id:'look',ic:'👕',n:'Stilista',t:'Vestiti diversi provati',k:5},{id:'amico',ic:'👫',n:'Amico di tutti',t:'Nuovi amici al parco',k:3},{id:'gentile',ic:'💛',n:'Cuore d\'oro',t:'Bambini aiutati',k:3},{id:'sport',ic:'🏅',n:'Sportivo',t:'Allenamenti fatti',k:5},{id:'regalo',ic:'🎁',n:'Cuore generoso',t:'Regali fatti',k:3}];
+function ensureEdu(){ if(!ST.owned) ST.owned={casual:1,sport:1,calcio:1,esplo:1,elegante:1,eroe:1}; if(!ST.sports) ST.sports={}; if(!ST.gifts) ST.gifts={}; if(!ST.carry) ST.carry={}; if(!ST.hab) ST.hab={}; if(!ST.medals) ST.medals={}; if(ST.scrUsed==null) ST.scrUsed=0; if(ST.scrUntil==null) ST.scrUntil=0; if(ST.handsT==null) ST.handsT=-1e9; }
 function hNow(){ return ST.min/60%24; }
 function getR(){ var d=Math.floor((ST.min-240)/1440); if(!ST.rt||ST.rt.day!==d) ST.rt={day:d,m:0,mDone:false,e:{},eDone:false}; return ST.rt; }
 function mornActive(){ var r=getR(), h=hNow(); return !r.mDone&&h>=5&&h<12; }
@@ -664,7 +730,7 @@ function wake(first){ var r=getR(), t=CH.tommy, day=Math.floor(ST.min/1440);
   $('qSub').textContent=(hNow()<12?'Buongiorno! Per cominciare: lava la faccia, fai colazione, lava i denti e vestiti.':'')+(ST.rested===null&&!first?'':''); paused=true; $('quoteOv').hidden=false; say(t,'Buongiorno!',3); }
 $('bQuote').onclick=function(){ $('quoteOv').hidden=true; paused=false; lastT=0; };
 function isFun(a){ return !!(a.park||a.scr||(a.need==='diver'&&a.r>0)||a.play); }
-var TOYEV={giochi:1,lego:1,trenino:1};
+var TOYEV={giochi:1,lego:1,trenino:1,robot:1,pista:1,tenda:1};
 function bedMissing(){ var r=getR(), m=[]; if(!r.e.denti) m.push('lavare i denti'); if(!r.e.pigiama) m.push('mettere il pigiama'); if(r.played&&!r.tidy) m.push('mettere a posto i giochi'); return m; }
 function weekday(){ return (Math.floor(ST.min/1440)%7)<5; }
 function schoolPending(){ var h=hNow(), day=Math.floor(ST.min/1440); return weekday()&&h>=5&&h<10&&ST.schoolDay!==day; }
@@ -769,9 +835,10 @@ function tommyDo(ob,a){ var c=CH.tommy; if(c.state==='act') endAction(c,false); 
 function onTap(px,py){ var p=$('pop'); if(!p.hidden){ p.hidden=true; return; } if(!ST||CH.tommy.state==='away') return;
   if(placing){ var tt=screenToTile(px,py); if(canPlace(placing.type,tt[0],tt[1],placing.move)){ if(!placeOk(placing.type,tt[0],tt[1],placing.move)){ toast('Così bloccheresti il passaggio! Scegli un altro posto',3000,true); return; }
       if(placing.move){ for(var id in CH){ var cc=CH[id]; if(cc.act&&cc.act.ob===placing.move&&cc.state==='act') endAction(cc,false); } placing.move.x=tt[0]; placing.move.y=tt[1]; toast('Spostato!'); tone(660,.1,'triangle',.05); }
-      else { ST.objs.push({id:ST.nextId++,type:placing.type,x:tt[0],y:tt[1]}); ST.money-=T[placing.type].price; toast('Comprato: '+T[placing.type].name+'!'); goalEvent('compra'); goalEvent('buy_'+placing.type); jingle([660,880,1047]); }
+      else { ST.objs.push({id:ST.nextId++,type:placing.type,x:tt[0],y:tt[1]}); ST.money-=T[placing.type].price; toast('Comprato: '+T[placing.type].name+'!'); goalEvent('compra'); goalEvent('buy_'+placing.type); if(TOYOBJ.indexOf(placing.type)>=0) goalEvent('buytoy'); jingle([660,880,1047]); }
       placing=null; placeTiles=[]; OCC=occ(); save(); } else toast('Qui non ci sta: scegli una casella gialla',2400,true); return; }
   var ch=charAt(px,py); if(ch){ socialMenu(ch,px,py); return; }
+  if(!buildMode&&tommyAt(px,py)){ selfMenu(px,py); return; }
   var ob=objAt(px,py); if(!ob){ var tt2=screenToTile(px,py), o2=OCC[tt2[0]+','+tt2[1]]; if(o2&&(buildMode?movable(o2):T[o2.type].acts.length)) ob=o2; } if(ob){ objMenu(ob,px,py); return; }
   if(buildMode) return;
   var t=screenToTile(px,py); if(t[0]<0||t[1]<0||t[0]>=GW||t[1]>=GH) return; var c=CH.tommy;
@@ -811,35 +878,35 @@ function socialMenu(ch,px,py){ var items=[];
     var lg=find('lego'), it1={n:'🏗️ Costruite insieme con i mattoncini',f:function(){ if(!lg){ toast('Non trovo il tavolo dei mattoncini'); return; } var c=CH.tommy; if(c.state==='act') endAction(c,false); tommyDo(lg,{n:'Costruisce con '+gk.name,act:1,need:'diver',r:2,dur:30,pose:'stand',ev:'lego',social:1.5}); goToObj(gk,lg); gk.think=25; say(gk,'Facciamo un castello enorme!',3); }};
     var it2=mk3('Giocate a nascondino',20,2,2,'giocamico','Conto fino a dieci!');
     if(bw3){ it1.no=1; it1.why=bw3; it2.no=1; it2.why=bw3; }
-    showPop(px,py,gk.name+(GIRLS[gk.name]?' è venuta a giocare':' è venuto a giocare'),[it1,it2,mk3('Fate merenda insieme',12,1.5,0,'merenda','Gnam, che buono!',{need:'fame',r:1.5}),jokeItem(gk),{n:'👋 Saluta: ci vediamo!',f:function(){ gk.leaveAt=0; }}]); return; }
+    showPop(px,py,gk.name+(GIRLS[gk.name]?' è venuta a giocare':' è venuto a giocare'),[it1,it2,mk3('Fate merenda insieme',12,1.5,0,'merenda','Gnam, che buono!',{need:'fame',r:1.5}),jokeItem(gk),giftItem(gk),{n:'👋 Saluta: ci vediamo!',f:function(){ gk.leaveAt=0; }}]); return; }
   if(ch.kind==='skater'){ var sk=ch; if(sk.fallen){ helpMenu(sk,px,py); return; } var its=[], fr=isFriend(sk.name);
     if(!fr) its.push({n:'👋 "Ciao, facciamo amicizia?"',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); sk.path=[]; sk.state='idle'; sk.think=6; startAction(c,{type:'__bun',x:Math.round(sk.x),y:Math.round(sk.y)},{n:'Saluta un bambino nuovo',dur:3,social:3,pose:'stand',befriend:sk.id}); }});
-    else { its.push({n:'🏁 Fate una gara!',no:!CH.tommy.ride,why:'Prima prendi la bici, il monopattino o i roller al noleggio!',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); sk.path=[]; sk.state='idle'; sk.think=8; startAction(c,{type:'__bun',x:Math.round(sk.x),y:Math.round(sk.y)},{n:'Gara con '+sk.name,dur:15,social:2,diver:2.5,pose:'stand',ev:'gara',act:1,race:sk.id}); say(sk,'Pronti… partenza… via!',3); }}); its.push(jokeItem(sk)); }
+    else { its.push({n:'🏁 Fate una gara!',no:!CH.tommy.ride,why:'Prima prendi la bici, il monopattino o i roller al noleggio!',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); sk.path=[]; sk.state='idle'; sk.think=8; startAction(c,{type:'__bun',x:Math.round(sk.x),y:Math.round(sk.y)},{n:'Gara con '+sk.name,dur:15,social:2,diver:2.5,pose:'stand',ev:'gara',act:1,race:sk.id}); say(sk,'Pronti… partenza… via!',3); }}); its.push(jokeItem(sk)); its.push(giftItem(sk)); }
     showPop(px,py,fr?sk.name+' · tuo amico':'Un bambino che non conosci ancora',its); return; }
   if(ch.npc){ var kd=ch, mk2=function(n,dur,soc,div,txt){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); kd.path=[]; kd.state='idle'; kd.think=dur/4+4; startAction(c,{type:'__bun',x:Math.round(kd.x),y:Math.round(kd.y)},{n:n,dur:dur,social:soc,diver:div,pose:'stand',ev:'parco',act:div?1:0}); say(kd,txt,3); }}; };
     var g1=mk2('Gioca a pallone con '+kd.name,20,1.6,2,'Passa la palla!'), g2=mk2('Gioca a nascondino con '+kd.name,20,1.6,2,'Uno, due, tre... arrivo!'), bw2=blockWhy({play:1}); if(bw2){ g1.no=1; g2.no=1; g1.why=bw2; g2.why=bw2; }
-    items.push(g1); items.push(g2); items.push(jokeItem(kd)); items.push(mk2('Saluta '+kd.name,3,5,0,'Ciao Tommy!')); showPop(px,py,kd.name+' · bambino del quartiere',items); return; }
+    items.push(g1); items.push(g2); items.push(jokeItem(kd)); items.push(giftItem(kd)); items.push(mk2('Saluta '+kd.name,3,5,0,'Ciao Tommy!')); showPop(px,py,kd.name+' · bambino del quartiere',items); return; }
   if(ch.bunny){ items.push({n:'Dai una carota ('+ST.carrots+')',no:ST.carrots<=0,why:'Non hai carote: raccoglile nell\'orto!',f:feedBunny});
     items.push({n:'Accarezza Carotino',f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); startAction(c,{type:'__bun',x:Math.round(ch.x),y:Math.round(ch.y)},{n:'Accarezza Carotino',need:'amici',r:1.6,dur:12,pose:'stand',bun:'coccole',ev:'coccole'}); }});
     showPop(px,py,'Carotino 🐰 (fame '+Math.round(ch.needs.fame)+'%, coccole '+Math.round(ch.needs.coccole)+'%)',items); return; }
   var who=ch, mk=function(n,dur,soc,div,ev,txt){ return {n:n,f:function(){ var c=CH.tommy; if(c.state==='act') endAction(c,false); stopFor(who,dur); var tgt={type:'__bun',x:Math.round(who.x),y:Math.round(who.y)}; startAction(c,tgt,{n:n+' '+(who.id==='milly'?'la mamma':'papà'),dur:dur,social:soc,diver:div,pose:'stand',ev:ev,act:div?1:0}); say(who,txt,3); who.needs.amici=clamp(who.needs.amici+20); }}; };
   items.push(mk('Abbraccia',4,5,0,who.id==='milly'?'abbraccio':'abbraccio','Ti voglio bene!'));
   items.push(mk('Chiacchiera con',12,1.8,0,'chiacchiera','Racconta, com\'è andata?'));
-  var gi=mk('Gioca con',20,1.2,1.5,who.id==='papone'?'giocapapa':'giocamamma','Prendimi se ci riesci!'); var bw=blockWhy({play:1}); if(bw){ gi.no=1; gi.why=bw; } items.push(gi); items.push(jokeItem(who));
+  var gi=mk('Gioca con',20,1.2,1.5,who.id==='papone'?'giocapapa':'giocamamma','Prendimi se ci riesci!'); var bw=blockWhy({play:1}); if(bw){ gi.no=1; gi.why=bw; } items.push(gi); items.push(jokeItem(who)); items.push(giftItem(who));
   var day=Math.floor(ST.min/1440); items.push({n:'Chiedi la paghetta',no:ST.allow===day,why:'La paghetta te l\'hanno già data oggi!',f:function(){ ST.allow=day; ST.money+=15; say(who,'Ecco 15 monete, non spenderle tutte!',3); toast('+15 monete di paghetta'); }});
   showPop(px,py,who.name,items); }
 /* il "bersaglio" di un'azione su Carotino o su una persona è la casella dove si trova */
 var _spots=spotsOf; spotsOf=function(ob){ if(ob.type==='__bun'){ var out=[]; [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){ var x=ob.x+d[0], y=ob.y+d[1]; if(passable(x,y)&&!wallBetween(x,y,ob.x,ob.y)) out.push([x,y]); }); return out; } return _spots(ob); };
 var _begin=beginAct; beginAct=function(c){ var a=c.act&&c.act.a; if(a&&a.feed){ ST.carrots--; var b=CH.carotino; b.needs.fame=clamp(b.needs.fame+40); b.say={s:'♥ Gnam!',t:2.5}; } if(a&&a.cost&&c.id==='tommy'){ ST.money-=a.cost; } _begin(c); if(a&&c.id==='tommy'&&TOYEV[a.ev]){ var rp=getR(); rp.played=true; rp.tidy=false; }
   if(a&&c.id==='tommy'){ if(a.dish) say(c,a.dish.e+' Gnam!',3); if(a.joke) tellJoke(c,a);
-    if(a.befriend&&CH[a.befriend]) befriend(CH[a.befriend]); if(a.helpKid&&CH[a.helpKid]) helpDone(CH[a.helpKid]); if(a.inviteName) inviteFriend(a.inviteName);
+    if(a.befriend&&CH[a.befriend]) befriend(CH[a.befriend]); if(a.gift) giveGift(c,a); if(a.sport){ addHab('sport'); } if(a.helpKid&&CH[a.helpKid]) helpDone(CH[a.helpKid]); if(a.inviteName) inviteFriend(a.inviteName);
     if(a.ride){ c.ride=a.ride; c.helmet='#e0373f'; toast('⛑️ Casco in testa e via! Con '+RIDES[a.ride]+' vai più veloce',3000,true); goalEvent('ride'); }
     if(a.ret&&c.ride){ toast('Hai riconsegnato '+RIDES[c.ride],2400); c.ride=null; }
     if(a.giro){ var lp=loopPath(c); c.act=null; c.onObj=false; if(lp.length){ c.path=lp; c.state='walk'; c.giro=true; } else c.state='idle'; updateDoing(); }
     if(a.open){ save(); setTimeout(function(){ location.href=a.open; },200); } } };
 /* catalogo */
 var buildMode=false;
-function setBuild(on){ buildMode=on; $('bShop').className=on?'on':''; $('bShop').textContent=on?'✔ Fine arreda':'🛋️ Arreda'; if(!on){ placing=null; placeTiles=[]; } else toast('Modalità arreda: tocca un mobile per spostarlo, oppure compra cose nuove',3500,true); }
+function setBuild(on){ buildMode=on; $('bShop').className=on?'on':''; $('bShop').textContent=on?'✔ Fine arreda':'🛍️ Negozio'; if(!on){ placing=null; placeTiles=[]; } else toast('Modalità arreda: tocca un mobile per spostarlo, oppure compra cose nuove',3500,true); }
 function startPlacing(pl){ placing=pl; OCC=occ(); if(pl.move){ var tm=T[pl.move.type]; for(var i=0;i<tm.w;i++) for(var j=0;j<tm.d;j++) delete OCC[(pl.move.x+i)+','+(pl.move.y+j)]; }
   placeTiles=[]; for(var y=0;y<18;y++) for(var x=9;x<27;x++) if(canPlace(pl.type,x,y,pl.move)) placeTiles.push([x,y]); }
 function canPlace(type,x,y,move){ var t=T[type], r0=room(x,y); for(var i=0;i<t.w;i++) for(var j=0;j<t.d;j++){ var xx=x+i, yy=y+j, r=room(xx,yy); if(r===null) return false; if(t.out){ if(r!=='.') return false; } else { if(HOUSEL.indexOf(r)<0||r!==r0) return false; } var o=OCC[xx+','+yy]; if(o&&o!==move) return false; for(var id in CH){ var c=CH[id]; if(c.state!=='away'&&Math.round(c.x)===xx&&Math.round(c.y)===yy) return false; } }
@@ -850,11 +917,28 @@ function reachSet(om){ var seen={}, q=[[22,18]], D=[[1,0],[-1,0],[0,1],[0,-1]]; 
 function placeOk(type,x,y,move){ var t=T[type]; if(t.flat) return true; var base=occ(), i, j, k; if(move){ var tm=T[move.type]; for(i=0;i<tm.w;i++) for(j=0;j<tm.d;j++) delete base[(move.x+i)+','+(move.y+j)]; }
   var before=reachSet(base), cells=[]; for(i=0;i<t.w;i++) for(j=0;j<t.d;j++){ k=(x+i)+','+(y+j); cells.push(k); base[k]=1; }
   var after=reachSet(base), nb=0, na=0, lost=0; for(k in before) nb++; for(k in after) na++; cells.forEach(function(c){ if(before[c]) lost++; }); return na===nb-lost; }
-function openShop(){ $('shopMoney').textContent='Monete: '+ST.money+' · tocca una cosa per comprarla, poi scegli dove metterla'; var box=$('shopList'); box.innerHTML='';
-  CATALOG.forEach(function(type){ var t=T[type], d=document.createElement('button'); d.type='button'; d.className='cat'+(ST.money<t.price?' no':''); var c=document.createElement('canvas'); c.width=200; c.height=160; var x=c.getContext('2d'), sp=sprite(type), sc=Math.min(200/(sp.c.width),160/(sp.c.height)); x.drawImage(sp.c,(200-sp.c.width*sc)/2,(160-sp.c.height*sc)/2,sp.c.width*sc,sp.c.height*sc);
-    d.appendChild(c); var n=document.createElement('div'); n.innerHTML=t.name+'<small>'+t.price+' monete'+(t.out?' · giardino':' · casa')+'</small>'; d.appendChild(n);
-    d.onclick=function(){ if(ST.money<t.price){ toast('Servono '+t.price+' monete: vai a scuola o fai i compiti!'); return; } $('shopOv').hidden=true; buildMode=true; $('bShop').className='on'; $('bShop').textContent='✔ Fine arreda'; startPlacing({type:type}); toast('Tocca una casella gialla per metterlo',3000,true); }; box.appendChild(d); });
-  var mv=document.createElement('button'); mv.type='button'; mv.className='big'; mv.textContent='↔ Sposta i mobili che ho già'; mv.onclick=function(){ $('shopOv').hidden=true; setBuild(true); }; box.appendChild(mv);
+var SHOPTAB='casa', TOYOBJ=['trenino','robot','pista','peluche','tenda','arcade'];
+function openShop(tab){ if(tab) SHOPTAB=tab; $('shopMoney').textContent='💰 Monete: '+ST.money;
+  var tabs=[['casa','🛋️ Casa'],['giochi','🚂 Giocattoli'],['vestiti','👕 Vestiti'],['sport','⚽ Sport'],['regali','🎁 Regali']], th='';
+  tabs.forEach(function(t){ th+='<button type="button" class="tab'+(SHOPTAB===t[0]?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>'; }); $('shopTabs').innerHTML=th;
+  var tb=$('shopTabs').getElementsByTagName('button'); for(var i=0;i<tb.length;i++) tb[i].onclick=function(){ openShop(this.getAttribute('data-t')); };
+  var box=$('shopList'); box.innerHTML='';
+  var HINT={casa:'Mobili e cose per il giardino: comprali e scegli dove metterli',giochi:'Giocattoli nuovi per la cameretta e da portare al parco',vestiti:'Vestiti nuovi: li trovi poi nell\'armadio',sport:'Ogni kit ha l\'attrezzatura e l\'abbigliamento giusto. Poi tocca Tommy per allenarti',regali:'Comprali e regalali: tocca una persona e scegli "Fai un regalo"'};
+  $('shopHint').textContent=HINT[SHOPTAB];
+  function card(o){ var d=document.createElement('button'); d.type='button'; d.className='cat'+((o.own||ST.money<o.price)?' no':''); var c=document.createElement('canvas'); c.width=200; c.height=160; o.draw(c); d.appendChild(c);
+    var n=document.createElement('div'); n.innerHTML=o.title+'<small>'+(o.own?'✅ '+o.own:o.price+' monete')+(o.sub?' · '+o.sub:'')+'</small>'; d.appendChild(n);
+    d.onclick=function(){ if(o.own){ toast(o.ownWhy||'Ce l\'hai già!',2600,true); return; } if(ST.money<o.price){ toast('Servono '+o.price+' monete: vai a scuola, fai i compiti, aiuta in casa o al parco!',3200,true); return; } o.buy(); }; box.appendChild(d); }
+  function spr(type){ return function(c){ var x=c.getContext('2d'), sp=sprite(type), sc=Math.min(200/sp.c.width,160/sp.c.height); x.drawImage(sp.c,(200-sp.c.width*sc)/2,(160-sp.c.height*sc)/2,sp.c.width*sc,sp.c.height*sc); }; }
+  function emo(e){ return function(c){ var x=c.getContext('2d'); x.font='90px -apple-system,"Apple Color Emoji",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(e,100,85); }; }
+  function outf(id,e){ return function(c){ drawPreview(c,id); if(e){ var x=c.getContext('2d'); x.setTransform(1,0,0,1,0,0); x.font='44px -apple-system,"Apple Color Emoji",sans-serif'; x.textAlign='left'; x.textBaseline='top'; x.fillText(e,6,6); } }; }
+  function buyObj(type){ return function(){ $('shopOv').hidden=true; buildMode=true; $('bShop').className='on'; $('bShop').textContent='✔ Fine arreda'; startPlacing({type:type}); toast('Tocca una casella gialla per metterlo',3000,true); }; }
+  if(SHOPTAB==='casa'||SHOPTAB==='giochi'){
+    CATALOG.concat(['robot','pista','peluche','tenda']).forEach(function(type){ var toy=TOYOBJ.indexOf(type)>=0; if((SHOPTAB==='giochi')!==toy) return; var t=T[type]; card({title:t.name,sub:t.out?'giardino':'casa',price:t.price,draw:spr(type),buy:buyObj(type)}); });
+    if(SHOPTAB==='giochi') for(var k in CARRY) (function(k){ var C=CARRY[k]; card({title:C.n,sub:'da usare fuori',price:C.p,draw:emo(C.e),own:ST.carry[k]?'nello zaino':null,ownWhy:'Ce l\'hai già: tocca Tommy fuori casa per usarlo',buy:function(){ ST.money-=C.p; ST.carry[k]=1; goalEvent('buytoy'); jingle([660,880,1047]); toast(C.e+' Comprato! Tocca Tommy in giardino o al parco per usarlo',3500,true); save(); openShop(); }}); })(k);
+    if(SHOPTAB==='casa'){ var mv=document.createElement('button'); mv.type='button'; mv.className='big'; mv.textContent='↔ Sposta i mobili che ho già'; mv.onclick=function(){ $('shopOv').hidden=true; setBuild(true); }; box.appendChild(mv); } }
+  else if(SHOPTAB==='vestiti'){ for(var id in SHOP_OUTFITS) (function(id){ var pr=SHOP_OUTFITS[id]; card({title:OUTFITS[id].n,price:pr,draw:outf(id),own:ST.owned[id]?'nell\'armadio':null,ownWhy:'Ce l\'hai già: lo trovi nell\'armadio',buy:function(){ ST.money-=pr; ST.owned[id]=1; goalEvent('buyoutfit'); jingle([660,880,1047]); toast('👕 Nuovo vestito! Per metterlo vai all\'armadio',3200,true); save(); openShop(); }}); })(id); }
+  else if(SHOPTAB==='sport'){ for(var sid in SPORTS) (function(sid){ var S2=SPORTS[sid]; card({title:'Kit '+S2.n,sub:S2.gear,price:S2.p,draw:outf(S2.outfit,S2.e),own:ST.sports[sid]?'già tuo':null,ownWhy:'Ce l\'hai già: tocca Tommy e scegli "Allenati a '+S2.n.toLowerCase()+'"',buy:function(){ ST.money-=S2.p; ST.sports[sid]=1; ST.owned[S2.outfit]=1; goalEvent('buytoy'); jingle([660,880,1047]); toast(S2.e+' Kit da '+S2.n.toLowerCase()+' comprato! Tocca Tommy per allenarti'+(S2.where==='pool'?' (serve la piscina)':''),3800,true); save(); openShop(); }}); })(sid); }
+  else { for(var g in GIFTS) (function(g){ var G=GIFTS[g]; card({title:G.n,sub:ST.gifts[g]?'ne hai '+ST.gifts[g]:'',price:G.p,draw:emo(G.e),buy:function(){ ST.money-=G.p; ST.gifts[g]=(ST.gifts[g]||0)+1; jingle([660,880]); toast(G.e+' Messo nello zaino! Tocca una persona per regalarlo',3200,true); save(); openShop(); }}); })(g); }
   $('shopOv').hidden=false; }
 $('bShop').onclick=function(){ if(buildMode){ setBuild(false); return; } openShop(); };
 $('bShopClose').onclick=function(){ $('shopOv').hidden=true; };
@@ -889,7 +973,7 @@ function save(){ if(!ST) return; if(CH.tommy) ST.outfit=CH.tommy.outfit; for(var
 function showGame(on){ $('menu').hidden=on; if(!on) $('routine').hidden=true; ['bBack','bPause','clock','side','needs','zoomb'].forEach(function(id){ $(id).hidden=!on; }); }
 function ensureWorld(){ OCC=occ(); WORLD2.forEach(function(w){ for(var i=0;i<ST.objs.length;i++){ var o=ST.objs[i]; if(o.type===w[0]&&o.x===w[1]&&o.y===w[2]) return; } var t=T[w[0]], free=true; for(var a=0;a<t.w;a++) for(var b=0;b<t.d;b++) if(OCC[(w[1]+a)+','+(w[2]+b)]) free=false; if(free){ ST.objs.push({id:ST.nextId++,type:w[0],x:w[1],y:w[2]}); OCC=occ(); } });
   if(!find('lego')){ var sp=[[13,2],[12,2],[14,3],[13,4],[12,5]]; for(var k=0;k<sp.length;k++){ if(canPlace('lego',sp[k][0],sp[k][1],null)&&placeOk('lego',sp[k][0],sp[k][1],null)){ ST.objs.push({id:ST.nextId++,type:'lego',x:sp[k][0],y:sp[k][1]}); break; } } OCC=occ(); } }
-function start(st){ CARS=[]; st=migrate(st); ST=st; ensureEdu(); if(!ST.chars.papone.away) ST.carOut=false; OCC=occ(); initChars(); ensureWorld(); kidsTick(); playing=true; paused=false; showGame(true); updateNeeds(); updateClock(); layout();
+function start(st){ setTimeout(function(){ if(ST&&!ST.tipSelf){ ST.tipSelf=1; toast('Novità: tocca Tommy per fare sport, far volare l\'aquilone e guardare nello zaino!',4500); } },5000); CARS=[]; st=migrate(st); ST=st; ensureEdu(); if(!ST.chars.papone.away) ST.carOut=false; OCC=occ(); initChars(); ensureWorld(); kidsTick(); playing=true; paused=false; showGame(true); updateNeeds(); updateClock(); layout();
   var t=CH.tommy; if(t.state!=='away') focusOn(t.x+.5,t.y+.5,false); else focusOn(17,7,false);
   if(t.state==='away'){ $('dark').hidden=false; $('dark').textContent='Tommy è fuori casa…'; } }
 function renderMenu(){ var sv=L(SAVEKEY,null), cb=$('bCont'); if(sv&&(sv.v===1||sv.v===2)){ cb.hidden=false; var d=Math.floor(sv.min/1440); cb.innerHTML='▶ Continua<small>Giorno '+(d+1)+' · 💰 '+sv.money+' monete · ⭐ '+sv.stars+'</small>'; cb.onclick=function(){ start(L(SAVEKEY,null)); }; } else cb.hidden=true; $('bSnd').textContent=SND?'🔊 Suono sì':'🔇 Suono no'; }
