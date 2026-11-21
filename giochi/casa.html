@@ -56,6 +56,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
 .oc.on{background:#fff3c4}.oc canvas{width:96px;height:120px}
 .tab{display:inline-block;margin:3px;border:2px solid #14151d;border-radius:12px;padding:8px 11px;font-size:16px;font-weight:800;background:#e8edf7}.tab.on{background:#f2c230}
 .med .ic{font-size:40px}.med.no{opacity:.4}.med small{display:block;color:#3a6ac0}
+#bRot{position:absolute;z-index:9;left:50%;top:60px;-webkit-transform:translateX(-50%);transform:translateX(-50%);border:3px solid #14151d;border-radius:16px;background:#f2c230;padding:10px 22px;font-size:22px;font-weight:900;box-shadow:3px 3px 0 rgba(0,0,0,.4)}
 #zoomb{position:absolute;z-index:6;right:8px;bottom:110px;width:54px}
 #zoomb button{display:block;width:54px;height:50px;margin-top:8px;border:2px solid #14151d;border-radius:14px;background:#f6f7fb;font-size:28px;font-weight:900;line-height:1;padding:0;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
 #cv{touch-action:none}
@@ -77,6 +78,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
 <div class="hud" id="clock" hidden></div>
 <div id="side" hidden><button id="bShop" type="button">🛍️ Negozio</button><button id="bGoals" type="button">🎯 Obiettivi</button><button id="bFam" type="button">👪 Famiglia</button><button id="bAlb" type="button">🏅 Album</button></div>
 <div id="routine" hidden></div>
+<button id="bRot" type="button" hidden>↻ Ruota</button>
 <div id="zoomb" hidden><button id="zIn" type="button">+</button><button id="zOut" type="button">&minus;</button><button id="zMe" type="button">🎯</button></div>
 <div id="needs" hidden></div>
 <div id="pop" hidden></div>
@@ -202,6 +204,7 @@ function trickPos(c,ob,k,t){ var u=0,v=0,l=0,p,q;
   else if(k==='slide'){ p=(t%3)/3; if(p<.3){ q=p/.3; u=.35; v=.5; l=q*1.75; } else if(p<.55){ q=(p-.3)/.25; u=.6+1.6*q; v=.5; l=1.75*(1-q); } else { q=(p-.55)/.45; u=2.2-1.85*q; v=1.3; } }
   else if(k==='merry'){ u=1+Math.cos(t*2)*.55; v=1+Math.sin(t*2)*.55; l=.3; }
   else if(k==='swing'){ var sw=Math.sin(t*2.6); u=.5+sw*.45; v=.9; l=.45+Math.abs(sw)*.35; }
+  if(ob.r){ var tq=T[ob.type]; ROT=ob.r; RW=tq.w; RD=tq.d; var rq=rotPt(u,v); ROT=0; u=rq[0]; v=rq[1]; }
   var nx=ob.x+u-.5, ny=ob.y+v-.5, dxy=(nx-c.x)-(ny-c.y); if(Math.abs(dxy)>.002) c.face=dxy>0?1:-1; c.x=nx; c.y=ny; c.lift=l; }
 var CATALOG=['tappeto','lampada','poltrona','acquario','castello','canestro','piscina','trampolino','casetta','fiori','albero','panchina','trenino','arcade'];
 var START=[['lettoT',0,0],['scrivania',3,0],['giochi',0,3],['armadio',3,2],['doccia',4,0],['wc',6,0],['lavandino',6,2],['lettoG',9,0],['armadio',11,3],['telefono',0,4],['pianta',10,4],
@@ -221,7 +224,7 @@ function newState(){ var objs=START.concat(WORLD).concat(WORLD2).map(function(s,
     papone:{x:14,y:8,needs:{fame:70,sonno:80,diver:70,pulizia:80,bagno:80,amici:80}},
     carotino:{x:15,y:11,needs:{fame:70,coccole:70}}},paid:{}}; }
 /* le case salvate con la versione senza quartiere vengono spostate dentro la mappa nuova */
-function occList(arr){ var o={}; arr.forEach(function(ob){ var t=T[ob.type]; if(t.flat) return; for(var i=0;i<t.w;i++) for(var j=0;j<t.d;j++) o[(ob.x+i)+','+(ob.y+j)]=ob; }); return o; }
+function occList(arr){ var o={}; arr.forEach(function(ob){ var t=T[ob.type]; if(t.flat) return; var D=odims(ob); for(var i=0;i<D[0];i++) for(var j=0;j<D[1];j++) o[(ob.x+i)+','+(ob.y+j)]=ob; }); return o; }
 function migrate(st){ if(st.v===2) return st; CH={}; ST=st;
   st.objs.forEach(function(o){ o.x+=HX; o.y+=HY; }); for(var k in st.chars){ st.chars[k].x+=HX; st.chars[k].y+=HY; }
   var keep=[]; st.objs.forEach(function(o){ var t=T[o.type]; if(!t) return; OCC=occList(keep); if(t.fixed||t.door||canPlace(o.type,o.x,o.y,null)){ keep.push(o); return; }
@@ -248,8 +251,8 @@ function bfs(sx,sy,goalFn,okFn){ var q=[[sx,sy]], qi=0, prev={}, k0=sx+','+sy; p
     for(var i=0;i<4;i++){ var nx=c[0]+D[i][0], ny=c[1]+D[i][1], nk=nx+','+ny; if(prev.hasOwnProperty(nk)) continue; if(!passable(nx,ny)) continue; if(okFn&&!okFn(nx,ny)) continue; if(wallBetween(c[0],c[1],nx,ny)) continue; prev[nk]=c[0]+','+c[1]; q.push([nx,ny]); } }
   return null; }
 function okFor(c){ if(c.bunny) return function(x,y){ return room(x,y)==='.'; }; if(c.kind==='skater') return function(x,y){ return room(x,y)==='k'; }; if(c.kind==='guest') return function(x,y){ var z=zone(room(x,y)); return z==='L'||HOUSEL.indexOf(z)>=0||(x===22&&y===18); }; if(c.npc) return function(x,y){ var r=room(x,y); return zone(r)==='P'&&r!=='k'; }; return null; }
-function spotsOf(ob){ var t=T[ob.type], out=[]; for(var i=-1;i<=t.w;i++) for(var j=-1;j<=t.d;j++){ var edge=(i===-1||i===t.w)!==(j===-1||j===t.d); if(!edge) continue; var x=ob.x+i, y=ob.y+j; if(!passable(x,y)) continue;
-      var ix=Math.max(ob.x,Math.min(ob.x+t.w-1,x)), iy=Math.max(ob.y,Math.min(ob.y+t.d-1,y)); if(wallBetween(x,y,ix,iy)) continue; out.push([x,y]); } return out; }
+function spotsOf(ob){ var D=odims(ob), out=[]; for(var i=-1;i<=D[0];i++) for(var j=-1;j<=D[1];j++){ var edge=(i===-1||i===D[0])!==(j===-1||j===D[1]); if(!edge) continue; var x=ob.x+i, y=ob.y+j; if(!passable(x,y)) continue;
+      var ix=Math.max(ob.x,Math.min(ob.x+D[0]-1,x)), iy=Math.max(ob.y,Math.min(ob.y+D[1]-1,y)); if(wallBetween(x,y,ix,iy)) continue; out.push([x,y]); } return out; }
 function goTo(c,tx,ty){ var sx=Math.round(c.x), sy=Math.round(c.y); var p=bfs(sx,sy,function(x,y){ return x===tx&&y===ty; },okFor(c)); if(!p) return false; c.path=p; c.state='walk'; return true; }
 function goToObj(c,ob){ var sp=spotsOf(ob), set={}; sp.forEach(function(s){ set[s[0]+','+s[1]]=1; }); var sx=Math.round(c.x), sy=Math.round(c.y); if(set[sx+','+sy]){ c.path=[]; return true; }
   var p=bfs(sx,sy,function(x,y){ return !!set[x+','+y]; },okFor(c)); if(!p) return false; c.path=p; c.state='walk'; return true; }
@@ -272,9 +275,13 @@ function camTick(dt){ if(camLerp){ var k=Math.min(1,dt*5); FX+=(camLerp.x-FX)*k;
   else if(ST&&!dragging&&Date.now()-lastManual>3500){ var t=CH.tommy; if(t&&t.state==='walk'){ var p=center(t.x,t.y), va=viewArea(); if(p[0]<va.cx-va.w*.42||p[0]>va.cx+va.w*.42||p[1]<va.cy-va.h*.42||p[1]>va.cy+va.h*.42) camLerp={x:t.x+.5,y:t.y+.5}; } } }
 function shade(hex,f){ var n=parseInt(hex.slice(1),16), r=(n>>16)&255, g=(n>>8)&255, b=n&255; return 'rgb('+Math.min(255,Math.round(r*f))+','+Math.min(255,Math.round(g*f))+','+Math.min(255,Math.round(b*f))+')'; }
 /* parallelepipedo isometrico in coordinate locali (u,v in caselle, z in pixel) */
-function P(u,v,z){ return [(u-v)*TW/2,(u+v)*TH/2-z]; }
+var ROT=0, RW=1, RD=1;
+function rotPt(u,v){ if(ROT===1) return [RD-v,u]; if(ROT===2) return [RW-u,RD-v]; if(ROT===3) return [v,RW-u]; return [u,v]; }
+function P(u,v,z){ if(ROT){ var q=rotPt(u,v); u=q[0]; v=q[1]; } return [(u-v)*TW/2,(u+v)*TH/2-z]; }
+function dimsOf(type,r){ var t=T[type]; return (r&1)?[t.d,t.w]:[t.w,t.d]; }
+function odims(ob){ return dimsOf(ob.type,ob.r||0); }
 function poly(x,pts,fill,stroke){ x.beginPath(); for(var i=0;i<pts.length;i++){ if(i) x.lineTo(pts[i][0],pts[i][1]); else x.moveTo(pts[i][0],pts[i][1]); } x.closePath(); x.fillStyle=fill; x.fill(); if(stroke!==false){ x.strokeStyle='rgba(0,0,0,.28)'; x.lineWidth=1; x.stroke(); } }
-function ibox(x,u,v,w,d,z0,h,col){ var A=P(u,v,z0+h),B=P(u+w,v,z0+h),C=P(u+w,v+d,z0+h),D=P(u,v+d,z0+h),B0=P(u+w,v,z0),C0=P(u+w,v+d,z0),D0=P(u,v+d,z0);
+function ibox(x,u,v,w,d,z0,h,col){ if(ROT){ var ra=rotPt(u,v), rb=rotPt(u+w,v+d), rr=ROT; ROT=0; ibox(x,Math.min(ra[0],rb[0]),Math.min(ra[1],rb[1]),Math.abs(rb[0]-ra[0]),Math.abs(rb[1]-ra[1]),z0,h,col); ROT=rr; return; } var A=P(u,v,z0+h),B=P(u+w,v,z0+h),C=P(u+w,v+d,z0+h),D=P(u,v+d,z0+h),B0=P(u+w,v,z0),C0=P(u+w,v+d,z0),D0=P(u,v+d,z0);
   poly(x,[D,C,C0,D0],shade(col,.82)); poly(x,[C,B,B0,C0],shade(col,.66)); poly(x,[A,B,C,D],shade(col,1.06)); }
 function icyl(x,u,v,r,z0,h,col){ var c0=P(u,v,z0), c1=P(u,v,z0+h), rx=r*TW*.7, ry=rx/2; x.fillStyle=shade(col,.75); x.fillRect(c0[0]-rx,c1[1],rx*2,c0[1]-c1[1]); x.beginPath(); x.save(); x.translate(c0[0],c0[1]); x.scale(rx,ry); x.arc(0,0,1,0,Math.PI); x.restore(); x.fill(); x.beginPath(); x.save(); x.translate(c1[0],c1[1]); x.scale(rx,ry); x.arc(0,0,1,0,6.3); x.restore(); x.fillStyle=shade(col,1.08); x.fill(); x.strokeStyle='rgba(0,0,0,.25)'; x.stroke(); }
 function dot(x,px,py,r,col){ x.fillStyle=col; x.beginPath(); x.arc(px,py,r,0,6.3); x.fill(); }
@@ -324,10 +331,10 @@ function drawWall(x,w){ var a=corner(w.a[0],w.a[1]), b=corner(w.b[0],w.b[1]), z0
 function post(x,p,h){ x.fillStyle='#8a5a3a'; x.fillRect(p[0]-TW*.04,p[1]-h,TW*.08,h); x.fillStyle='#f2c230'; x.fillRect(p[0]-TW*.05,p[1]-h-TW*.04,TW*.1,TW*.05); }
 
 /* ---- disegni degli oggetti (ogni oggetto ha il suo piccolo quadro, preparato una volta) ---- */
-function sprite(type,lit,k2){ var key=type+(lit?'L':'')+(k2||''); var s=SPR[key]; if(s) return s; var t=T[type], HM=TH*(t.hm||3.2), cw=(t.w+t.d)*TW/2+8, chh=(t.w+t.d)*TH/2+HM+8, sd=DPR; if(cw*sd>1500) sd=1500/cw; if(chh*sd>1500) sd=Math.min(sd,1500/chh);
-  var c=document.createElement('canvas'); c.width=Math.ceil(cw*sd); c.height=Math.ceil(chh*sd); var x=c.getContext('2d'); x.setTransform(sd,0,0,sd,0,0); x.translate(t.d*TW/2+4,HM+4);
+function sprite(type,lit,k2,rot){ rot=rot||0; var key=type+(lit?'L':'')+(k2||'')+(rot?'R'+rot:''); var s=SPR[key]; if(s) return s; var t=T[type], DM=dimsOf(type,rot), HM=TH*(t.hm||3.2), cw=(t.w+t.d)*TW/2+8, chh=(t.w+t.d)*TH/2+HM+8, sd=DPR; if(cw*sd>1500) sd=1500/cw; if(chh*sd>1500) sd=Math.min(sd,1500/chh);
+  var c=document.createElement('canvas'); c.width=Math.ceil(cw*sd); c.height=Math.ceil(chh*sd); var x=c.getContext('2d'); x.setTransform(sd,0,0,sd,0,0); x.translate(DM[1]*TW/2+4,HM+4); ROT=rot; RW=t.w; RD=t.d;
   if(!t.flat&&type!=='lampione'){ var sc=P(t.w/2+.1,t.d/2+.1,0), rr0=(t.w+t.d)/2; x.fillStyle='rgba(0,0,0,.13)'; x.beginPath(); x.save(); x.translate(sc[0],sc[1]); x.scale(rr0*TW*.36,rr0*TH*.36); x.arc(0,0,1,0,6.3); x.restore(); x.fill(); }
-  drawObj(x,type,t,lit,k2); s={c:c,ox:t.d*TW/2+4,oy:HM+4,sd:sd,w:cw,h:chh}; SPR[key]=s; return s; }
+  try{ drawObj(x,type,t,lit,k2); }catch(e){} ROT=0; s={c:c,ox:DM[1]*TW/2+4,oy:HM+4,sd:sd,w:cw,h:chh}; SPR[key]=s; return s; }
 function faceV(x,ua,ub,v,za,zb,col){ poly(x,[P(ua,v,za),P(ub,v,za),P(ub,v,zb),P(ua,v,zb)],col); }
 function faceU(x,u,va,vb,za,zb,col){ poly(x,[P(u,va,za),P(u,vb,za),P(u,vb,zb),P(u,va,zb)],col); }
 function roof(x,u,v,w,d,z,rh,col,wall){ var A=P(u,v,z),B=P(u+w,v,z),C=P(u+w,v+d,z),D=P(u,v+d,z),R1=P(u,v+d/2,z+rh),R2=P(u+w,v+d/2,z+rh);
@@ -502,13 +509,13 @@ function draw(){ ctx.setTransform(DPR,0,0,DPR,0,0); if(!ST){ ctx.fillStyle='#86c
   ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(bg,Math.round(ox*DPR),Math.round(oy*DPR)); ctx.setTransform(DPR,0,0,DPR,0,0);
   if(placing){ for(var pi=0;pi<placeTiles.length;pi++){ var pt=placeTiles[pi], pc=corner(pt[0],pt[1]); ctx.save(); ctx.translate(pc[0],pc[1]); poly(ctx,[P(0,0,0),P(1,0,0),P(1,1,0),P(0,1,0)],'rgba(255,240,80,.4)',false); ctx.restore(); } }
   var list=[], dk=darkness();
-  ST.objs.forEach(function(ob){ var t=T[ob.type]; if(ob.type==='auto'&&ST.carOut) return; var c=corner(ob.x,ob.y), L0=c[0]-t.d*TW/2-4, R0=c[0]+t.w*TW/2+4, T0=c[1]-TH*(t.hm||3.2)-4, B0=c[1]+(t.w+t.d)*TH/2+4; if(R0<0||L0>W||B0<0||T0>H) return;
-    list.push({k:t.flat?-1+ob.x+ob.y:(ob.x+t.w/2)+(ob.y+t.d/2),ob:ob}); });
+  ST.objs.forEach(function(ob){ var t=T[ob.type]; if(ob.type==='auto'&&ST.carOut) return; var D=dimsOf(ob.type,(placing&&placing.move===ob)?placing.rot:(ob.r||0)), c=corner(ob.x,ob.y), L0=c[0]-D[1]*TW/2-4, R0=c[0]+D[0]*TW/2+4, T0=c[1]-TH*(t.hm||3.2)-4, B0=c[1]+(t.w+t.d)*TH/2+4; if(R0<0||L0>W||B0<0||T0>H) return;
+    list.push({k:t.flat?-1+ob.x+ob.y:(ob.x+D[0]/2)+(ob.y+D[1]/2),ob:ob}); });
   for(var id in CH){ var ch=CH[id]; if(ch.state==='away') continue; list.push({k:ch.x+ch.y+1.05+(ch.onObj?.6:0)+(ch.trickOn?2.2:0),ch:ch}); }
   CARS.forEach(function(cr){ list.push({k:cr.x+cr.y+.2,car:cr}); });
   list.sort(function(a,b){ return a.k-b.k; });
   for(var i=0;i<list.length;i++){ var it=list[i];
-    if(it.ob){ var ob=it.ob, sp=sprite(ob.type,litObj(ob,dk)), cc=corner(ob.x,ob.y); ctx.drawImage(sp.c,cc[0]-sp.ox,cc[1]-sp.oy,sp.w,sp.h); }
+    if(it.ob){ var ob=it.ob, sp=sprite(ob.type,litObj(ob,dk),'',(placing&&placing.move===ob)?placing.rot:(ob.r||0)), cc=corner(ob.x,ob.y); ctx.drawImage(sp.c,cc[0]-sp.ox,cc[1]-sp.oy,sp.w,sp.h); }
     else if(it.car){ var cr=it.car, ty=cr.axis==='y'?'carY':'carX', t2=T[ty], sp2=sprite(ty,false,cr.dir+'|'+cr.col), c2=corner(cr.x-t2.w/2,cr.y-t2.d/2); ctx.drawImage(sp2.c,c2[0]-sp2.ox,c2[1]-sp2.oy,sp2.w,sp2.h); }
     else { var c3=it.ch, p=center(c3.x,c3.y); drawPerson(c3,p[0],p[1]-(c3.onObj?TH*.35:0)-(c3.lift||0)*TH); } }
   if(dk>0){ ctx.fillStyle='rgba(15,20,60,'+dk+')'; ctx.fillRect(0,0,W,H);
@@ -542,8 +549,8 @@ function say(c,s,dur){ c.say={s:s,t:dur||2.5}; }
 function startAction(c,ob,a){ c.act={ob:ob,a:a,t:0,pose:a.pose||'stand'}; if(a.school||a.park){ return goToObj(c,ob)?(c.state='walk',true):false; }
   if(!goToObj(c,ob)) return false; if(!c.path.length) beginAct(c); return true; }
 function beginAct(c){ var a=c.act.a, ob=c.act.ob; c.state='act'; c.act.t=0;
-  if(a.on){ var t=T[ob.type]; c.prevPos=[Math.round(c.x),Math.round(c.y)]; c.x=ob.x+(t.w-1)/2; c.y=ob.y+(t.d-1)/2; c.onObj=true; }
-  else { var t2=T[ob.type], ox=ob.x+(t2.w-1)/2, oy=ob.y+(t2.d-1)/2; c.face=(ox-oy)>(c.x-c.y)?1:-1; }
+  if(a.on){ var DO=odims(ob); c.prevPos=[Math.round(c.x),Math.round(c.y)]; c.x=ob.x+(DO[0]-1)/2; c.y=ob.y+(DO[1]-1)/2; c.onObj=true; }
+  else { var D2=odims(ob), ox=ob.x+(D2[0]-1)/2, oy=ob.y+(D2[1]-1)/2; c.face=(ox-oy)>(c.x-c.y)?1:-1; }
   if(a.school){ goAway(c,'scuola'); return; } if(a.park){ goAway(c,'parco'); return; }
   if(a.bun){ var b=CH.carotino; b.path=[]; }
   if(c.id==='tommy'){ blip(); updateDoing();
@@ -837,18 +844,18 @@ function updateClock(){ var h=Math.floor(ST.min/60)%24, m=Math.floor(ST.min%60),
 function screenToTile(px,py){ var dx=(px-OX)/(TW/2), dy=(py-OY)/(TH/2); var x=Math.floor((dx+dy)/2), y=Math.floor((dy-dx)/2); return [x,y]; }
 function movable(ob){ var t=T[ob.type]; return !t.fixed&&!t.door&&(inHouse(ob.x,ob.y)||zone(room(ob.x,ob.y))==='L'); }
 function objAt(px,py){ var best=null, bk=-1; ST.objs.forEach(function(ob){ var t=T[ob.type]; if(ob.type==='auto'&&ST.carOut) return; if(buildMode?!movable(ob):(!t.acts.length&&ob.type!=='recinto')) return;
-    var cc=corner(ob.x,ob.y), x0=cc[0]-t.d*TW/2-4, y0=cc[1]-TH*(t.hm||3.2)-4, w=(t.w+t.d)*TW/2+8, h=(t.w+t.d)*TH/2+TH*(t.hm||3.2)+8;
-    if(px<x0+4||px>x0+w-4||py<y0+4||py>y0+h-4) return; var sp=sprite(ob.type), x=sp.c.getContext('2d'), a=0; try{ a=x.getImageData(Math.round((px-x0)*sp.sd),Math.round((py-y0)*sp.sd),1,1).data[3]; }catch(e){ a=255; } if(a<20) return; var k=ob.x+ob.y; if(k>bk){ bk=k; best=ob; } }); return best; }
+    var DD=odims(ob), cc=corner(ob.x,ob.y), x0=cc[0]-DD[1]*TW/2-4, y0=cc[1]-TH*(t.hm||3.2)-4, w=(t.w+t.d)*TW/2+8, h=(t.w+t.d)*TH/2+TH*(t.hm||3.2)+8;
+    if(px<x0+4||px>x0+w-4||py<y0+4||py>y0+h-4) return; var sp=sprite(ob.type,false,'',ob.r||0), x=sp.c.getContext('2d'), a=0; try{ a=x.getImageData(Math.round((px-x0)*sp.sd),Math.round((py-y0)*sp.sd),1,1).data[3]; }catch(e){ a=255; } if(a<20) return; var k=ob.x+ob.y; if(k>bk){ bk=k; best=ob; } }); return best; }
 function charAt(px,py){ var best=null, bd=1e9; for(var id in CH){ var c=CH[id]; if(c.state==='away'||id==='tommy') continue; var p=center(c.x,c.y), d=Math.abs(px-p[0])+Math.abs(py-(p[1]-TH*.7)); if(d<TW*.45&&d<bd){ bd=d; best=c; } } return best; }
 function showPop(px,py,title,items){ var p=$('pop'); var h='<h3>'+title+'</h3>'; items.forEach(function(it,i){ h+='<button type="button" data-i="'+i+'" class="'+(it.no?'no':'')+'">'+it.n+'</button>'; }); h+='<button type="button" data-i="x" class="no">✖ Niente</button>'; p.innerHTML=h; p.hidden=false;
   var w=p.offsetWidth, hh=p.offsetHeight; p.style.left=Math.max(6,Math.min(W-w-6,px-w/2))+'px'; p.style.top=Math.max(50,Math.min(H-hh-6,py-hh-20))+'px';
   var bs=p.getElementsByTagName('button'); for(var j=0;j<bs.length;j++) bs[j].onclick=function(){ var i=this.getAttribute('data-i'); p.hidden=true; if(i==='x') return; var it=items[+i]; if(it.no){ if(it.why) toast(it.why,3500,true); return; } it.f(); }; }
 function tommyDo(ob,a){ var c=CH.tommy; if(c.state==='act') endAction(c,false); c.act=null; if(!startAction(c,ob,a)){ toast('Tommy non riesce ad arrivarci!'); c.act=null; } selTarget=null; updateDoing(); }
 function onTap(px,py){ var p=$('pop'); if(!p.hidden){ p.hidden=true; return; } if(!ST||CH.tommy.state==='away') return;
-  if(placing){ var tt=screenToTile(px,py); if(canPlace(placing.type,tt[0],tt[1],placing.move)){ if(!placeOk(placing.type,tt[0],tt[1],placing.move)){ toast('Così bloccheresti il passaggio! Scegli un altro posto',3000,true); return; }
-      if(placing.move){ for(var id in CH){ var cc=CH[id]; if(cc.act&&cc.act.ob===placing.move&&cc.state==='act') endAction(cc,false); } placing.move.x=tt[0]; placing.move.y=tt[1]; toast('Spostato!'); tone(660,.1,'triangle',.05); }
-      else { ST.objs.push({id:ST.nextId++,type:placing.type,x:tt[0],y:tt[1]}); ST.money-=T[placing.type].price; toast('Comprato: '+T[placing.type].name+'!'); goalEvent('compra'); goalEvent('buy_'+placing.type); if(TOYOBJ.indexOf(placing.type)>=0) goalEvent('buytoy'); jingle([660,880,1047]); }
-      placing=null; placeTiles=[]; OCC=occ(); save(); } else toast('Qui non ci sta: scegli una casella gialla',2400,true); return; }
+  if(placing){ var tt=screenToTile(px,py); if(canPlace(placing.type,tt[0],tt[1],placing.move,placing.rot)){ if(!placeOk(placing.type,tt[0],tt[1],placing.move,placing.rot)){ toast('Così bloccheresti il passaggio! Scegli un altro posto',3000,true); return; }
+      if(placing.move){ for(var id in CH){ var cc=CH[id]; if(cc.act&&cc.act.ob===placing.move&&cc.state==='act') endAction(cc,false); } placing.move.x=tt[0]; placing.move.y=tt[1]; placing.move.r=placing.rot; toast('Spostato!'); tone(660,.1,'triangle',.05); }
+      else { ST.objs.push({id:ST.nextId++,type:placing.type,x:tt[0],y:tt[1],r:placing.rot||0}); ST.money-=T[placing.type].price; toast('Comprato: '+T[placing.type].name+'!'); goalEvent('compra'); goalEvent('buy_'+placing.type); if(TOYOBJ.indexOf(placing.type)>=0) goalEvent('buytoy'); jingle([660,880,1047]); }
+      placing=null; placeTiles=[]; $('bRot').hidden=true; OCC=occ(); save(); } else toast('Qui non ci sta: scegli una casella gialla',2400,true); return; }
   var ch=charAt(px,py); if(ch){ socialMenu(ch,px,py); return; }
   if(!buildMode&&tommyAt(px,py)){ selfMenu(px,py); return; }
   var ob=objAt(px,py); if(!ob){ var tt2=screenToTile(px,py), o2=OCC[tt2[0]+','+tt2[1]]; if(o2&&(buildMode?movable(o2):T[o2.type].acts.length)) ob=o2; } if(ob){ objMenu(ob,px,py); return; }
@@ -873,7 +880,7 @@ function objMenu(ob,px,py){ var t=T[ob.type], items=[];
     if(!it.no&&a.ev==='vestiti') it.f=function(){ openOutfits(function(id){ var a2={}; for(var k in a) a2[k]=a[k]; a2.outfit=id; a2.n='Si mette: '+OUTFITS[id].n; tommyDo(ob,a2); }); };
     items.push(it); });
   if(ob.type==='recinto'||ob.type==='casetta'){ items.push({n:'Dai una carota a Carotino ('+ST.carrots+' rimaste)',no:ST.carrots<=0,why:'Non hai carote: raccoglile nell\'orto!',f:function(){ feedBunny(); }}); }
-  if(buildMode){ items=[]; if(movable(ob)){ items.push({n:'↔ Sposta',f:function(){ startPlacing({type:ob.type,move:ob}); toast('Tocca una casella gialla per spostarlo'); }}); if(t.price) items.push({n:'Vendi (+'+Math.round(t.price/2)+' monete)',f:function(){ ST.objs.splice(ST.objs.indexOf(ob),1); ST.money+=Math.round(t.price/2); OCC=occ(); save(); toast('Venduto'); }}); else items.push({n:'Vendi',no:1,why:'Le cose che c\'erano già in casa si possono spostare, ma non vendere'}); } else items.push({n:'Questo non si può spostare',no:1,why:'Puoi spostare le cose dentro casa e nel tuo giardino'}); }
+  if(buildMode){ items=[]; if(movable(ob)){ items.push({n:'↔ Sposta (e ruota)',f:function(){ startPlacing({type:ob.type,move:ob}); toast('Tocca una casella gialla per spostarlo. Con ↻ Ruota lo giri',3200,true); }}); if(!t.flat||ob.type==='tappeto'||t.w!==t.d) items.push({n:'↻ Ruota qui',f:function(){ rotateInPlace(ob); }}); if(t.price) items.push({n:'Vendi (+'+Math.round(t.price/2)+' monete)',f:function(){ ST.objs.splice(ST.objs.indexOf(ob),1); ST.money+=Math.round(t.price/2); OCC=occ(); save(); toast('Venduto'); }}); else items.push({n:'Vendi',no:1,why:'Le cose che c\'erano già in casa si possono spostare, ma non vendere'}); } else items.push({n:'Questo non si può spostare',no:1,why:'Puoi spostare le cose dentro casa e nel tuo giardino'}); }
   showPop(px,py,t.name,items); }
 function feedBunny(){ var c=CH.tommy, b=CH.carotino; if(ST.carrots<=0) return; var r=find('recinto'); c.act=null; if(c.state==='act') endAction(c,false);
   startAction(c,{type:'__bun',x:Math.round(b.x),y:Math.round(b.y)},{n:'Dai una carota a Carotino',need:'amici',r:.8,dur:6,pose:'stand',feed:1,ev:'carota'}); }
@@ -919,16 +926,20 @@ var _begin=beginAct; beginAct=function(c){ var a=c.act&&c.act.a; if(a&&a.feed){ 
     if(a.open){ save(); setTimeout(function(){ location.href=a.open; },200); } } };
 /* catalogo */
 var buildMode=false;
-function setBuild(on){ buildMode=on; $('bShop').className=on?'on':''; $('bShop').textContent=on?'✔ Fine arreda':'🛍️ Negozio'; if(!on){ placing=null; placeTiles=[]; } else toast('Modalità arreda: tocca un mobile per spostarlo, oppure compra cose nuove',3500,true); }
-function startPlacing(pl){ placing=pl; OCC=occ(); if(pl.move){ var tm=T[pl.move.type]; for(var i=0;i<tm.w;i++) for(var j=0;j<tm.d;j++) delete OCC[(pl.move.x+i)+','+(pl.move.y+j)]; }
-  placeTiles=[]; for(var y=0;y<18;y++) for(var x=9;x<27;x++) if(canPlace(pl.type,x,y,pl.move)) placeTiles.push([x,y]); }
-function canPlace(type,x,y,move){ var t=T[type], r0=room(x,y); for(var i=0;i<t.w;i++) for(var j=0;j<t.d;j++){ var xx=x+i, yy=y+j, r=room(xx,yy); if(r===null) return false; if(t.out){ if(r!=='.') return false; } else { if(HOUSEL.indexOf(r)<0||r!==r0) return false; } var o=OCC[xx+','+yy]; if(o&&o!==move) return false; for(var id in CH){ var c=CH[id]; if(c.state!=='away'&&Math.round(c.x)===xx&&Math.round(c.y)===yy) return false; } }
-  if(!t.flat){ for(var k=0;k<DOORS.length;k++){ var dd=DOORS[k].split('|'); for(var q=0;q<2;q++){ var p=dd[q].split(','); if(+p[0]>=x&&+p[0]<x+t.w&&+p[1]>=y&&+p[1]<y+t.d) return false; } } }
+function setBuild(on){ buildMode=on; $('bShop').className=on?'on':''; $('bShop').textContent=on?'✔ Fine arreda':'🛍️ Negozio'; if(!on){ placing=null; placeTiles=[]; $('bRot').hidden=true; } else toast('Modalità arreda: tocca un mobile per spostarlo, oppure compra cose nuove',3500,true); }
+function rotateInPlace(ob){ var nr=((ob.r||0)+1)%4; OCC=occ(); var D=odims(ob); for(var i=0;i<D[0];i++) for(var j=0;j<D[1];j++) delete OCC[(ob.x+i)+','+(ob.y+j)];
+  for(var tr=0;tr<3;tr++){ if(canPlace(ob.type,ob.x,ob.y,ob,nr)&&placeOk(ob.type,ob.x,ob.y,ob,nr)){ for(var id in CH){ var cc=CH[id]; if(cc.act&&cc.act.ob===ob&&cc.state==='act') endAction(cc,false); } ob.r=nr; OCC=occ(); save(); tone(700,.08,'triangle',.05); toast('↻ Girato!',1600,true); return; } nr=(nr+1)%4; if(nr===(ob.r||0)) break; }
+  OCC=occ(); toast('Qui non c\'è spazio per girarlo: usa "Sposta" e mettilo in un posto più libero',3500,true); }
+$('bRot').onclick=function(){ if(!placing) return; placing.rot=(placing.rot+1)%4; startPlacing(placing); tone(700,.06,'triangle',.04); toast(placeTiles.length?'↻ Girato! Ora tocca una casella gialla':'Girato così non ci sta da nessuna parte: gira ancora',2600,true); };
+function startPlacing(pl){ placing=pl; if(pl.rot==null) pl.rot=pl.move?(pl.move.r||0):0; OCC=occ(); if(pl.move){ var tm=odims(pl.move); for(var i=0;i<tm[0];i++) for(var j=0;j<tm[1];j++) delete OCC[(pl.move.x+i)+','+(pl.move.y+j)]; } $('bRot').hidden=false;
+  placeTiles=[]; for(var y=0;y<18;y++) for(var x=9;x<27;x++) if(canPlace(pl.type,x,y,pl.move,pl.rot)) placeTiles.push([x,y]); }
+function canPlace(type,x,y,move,rot){ var t=T[type], DC=dimsOf(type,rot||0), r0=room(x,y); for(var i=0;i<DC[0];i++) for(var j=0;j<DC[1];j++){ var xx=x+i, yy=y+j, r=room(xx,yy); if(r===null) return false; if(t.out){ if(r!=='.') return false; } else { if(HOUSEL.indexOf(r)<0||r!==r0) return false; } var o=OCC[xx+','+yy]; if(o&&o!==move) return false; for(var id in CH){ var c=CH[id]; if(c.state!=='away'&&Math.round(c.x)===xx&&Math.round(c.y)===yy) return false; } }
+  if(!t.flat){ for(var k=0;k<DOORS.length;k++){ var dd=DOORS[k].split('|'); for(var q=0;q<2;q++){ var p=dd[q].split(','); if(+p[0]>=x&&+p[0]<x+DC[0]&&+p[1]>=y&&+p[1]<y+DC[1]) return false; } } }
   return true; }
 function reachSet(om){ var seen={}, q=[[22,18]], D=[[1,0],[-1,0],[0,1],[0,-1]]; seen['22,18']=1;
   while(q.length){ var c=q.pop(); for(var i=0;i<4;i++){ var nx=c[0]+D[i][0], ny=c[1]+D[i][1], k=nx+','+ny; if(seen[k]||nx<9||nx>26||ny<0||ny>18) continue; if(!walkable(nx,ny)||om[k]) continue; if(wallBetween(c[0],c[1],nx,ny)) continue; seen[k]=1; q.push([nx,ny]); } } return seen; }
-function placeOk(type,x,y,move){ var t=T[type]; if(t.flat) return true; var base=occ(), i, j, k; if(move){ var tm=T[move.type]; for(i=0;i<tm.w;i++) for(j=0;j<tm.d;j++) delete base[(move.x+i)+','+(move.y+j)]; }
-  var before=reachSet(base), cells=[]; for(i=0;i<t.w;i++) for(j=0;j<t.d;j++){ k=(x+i)+','+(y+j); cells.push(k); base[k]=1; }
+function placeOk(type,x,y,move,rot){ var t=T[type], DP=dimsOf(type,rot||0); if(t.flat) return true; var base=occ(), i, j, k; if(move){ var tm=odims(move); for(i=0;i<tm[0];i++) for(j=0;j<tm[1];j++) delete base[(move.x+i)+','+(move.y+j)]; }
+  var before=reachSet(base), cells=[]; for(i=0;i<DP[0];i++) for(j=0;j<DP[1];j++){ k=(x+i)+','+(y+j); cells.push(k); base[k]=1; }
   var after=reachSet(base), nb=0, na=0, lost=0; for(k in before) nb++; for(k in after) na++; cells.forEach(function(c){ if(before[c]) lost++; }); return na===nb-lost; }
 var SHOPTAB='casa', TOYOBJ=['trenino','robot','pista','peluche','tenda','arcade'];
 function openShop(tab){ if(tab) SHOPTAB=tab; $('shopMoney').textContent='💰 Monete: '+ST.money;
@@ -993,7 +1004,7 @@ function renderMenu(){ var sv=L(SAVEKEY,null), cb=$('bCont'); if(sv&&(sv.v===1||
 $('bNew').onclick=function(){ var sv=L(SAVEKEY,null); if(sv&&(sv.v===1||sv.v===2)&&!confirmNew()) return; ac(); var st=newState(); S(SAVEKEY,st); start(st); updateRoutine(); wake(true); toast('Benvenuto nella casa di Tommy! Segui la lista in alto a sinistra 👆',4000); toast('Trascina con un dito per guardarti intorno, usa due dita o + e − per lo zoom',4500); };
 var confirmT=0; function confirmNew(){ if(Date.now()-confirmT<4000) return true; confirmT=Date.now(); $('bNew').innerHTML='Sicuro? Tocca di nuovo<small>la casa vecchia verrà cancellata</small>'; setTimeout(function(){ $('bNew').textContent='🏡 Nuova casa'; },4000); return false; }
 $('bSnd').onclick=function(){ SND=!SND; S('casa-snd',SND); renderMenu(); };
-function toMenu(){ save(); playing=false; paused=false; $('pauseOv').hidden=true; $('pop').hidden=true; $('quoteOv').hidden=true; $('albOv').hidden=true; $('outfitOv').hidden=true; $('dark').hidden=true; setBuild(false); showGame(false); renderMenu(); }
+function toMenu(){ save(); $('bRot').hidden=true; playing=false; paused=false; $('pauseOv').hidden=true; $('pop').hidden=true; $('quoteOv').hidden=true; $('albOv').hidden=true; $('outfitOv').hidden=true; $('dark').hidden=true; setBuild(false); showGame(false); renderMenu(); }
 $('bBack').onclick=toMenu; $('bExit').onclick=toMenu;
 $('bPause').onclick=function(){ paused=true; $('pauseOv').hidden=false; };
 $('bResume').onclick=function(){ paused=false; $('pauseOv').hidden=true; lastT=0; };
