@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v77 ba530cf0a2
+# v78 f663474c59
 
 CACHE:
 ./
@@ -14,6 +14,7 @@ giochi/chalk.html
 giochi/corsa.html
 giochi/draghetto.html
 giochi/ember.html
+giochi/flipper.html
 giochi/folla.html
 giochi/gessetto.html
 giochi/index.html
