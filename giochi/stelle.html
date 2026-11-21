@@ -31,6 +31,10 @@ input{font:inherit;-webkit-user-select:text;user-select:text}
 #soc button{display:inline-block;width:78px;height:78px;margin:0 3px;border-radius:18px;border:4px solid #0a1a2a;background:#5fb8e8;font-size:30px;font-weight:900;line-height:1;box-shadow:0 6px 0 #0a1a2a;touch-action:none;padding:0}
 #soc button small{display:block;font-size:12px;margin-top:4px}
 #soc button.att{background:#e85f7a}
+#soc button.gift{background:#f2a33a}
+#bMode{position:absolute;z-index:8;right:12px;bottom:96px;border:4px solid #0a1a2a;border-radius:18px;background:#7af0c8;color:#0a1a2a;font-size:17px;font-weight:900;padding:8px 12px;box-shadow:0 5px 0 #0a1a2a;text-align:center}
+#bMode small,#bShop small{display:block;font-size:11px;font-weight:700}
+#bShop{position:absolute;z-index:8;left:50%;bottom:110px;-webkit-transform:translateX(-50%);transform:translateX(-50%);border:4px solid #0a1a2a;border-radius:18px;background:#f2a33a;color:#1a1a2a;font-size:19px;font-weight:900;padding:8px 16px;box-shadow:0 5px 0 #0a1a2a}
 #soc button.want{background:#f2d94a;color:#1a1a2a;-webkit-animation:pul .6s infinite alternate;animation:pul .6s infinite alternate}
 #soc button.dim{opacity:.55}
 @-webkit-keyframes pul{from{-webkit-transform:scale(1)}to{-webkit-transform:scale(1.1)}}
@@ -86,7 +90,8 @@ input{font:inherit;-webkit-user-select:text;user-select:text}
 <canvas id="mm" width="280" height="224" hidden></canvas>
 <button id="bEvo" type="button" hidden>✨ Evolvi</button>
 <button id="bDash" type="button" hidden>SCATTO</button>
-<div id="soc" hidden><button type="button" data-a="canta">♪<small>Canta</small></button><button type="button" data-a="balla">★<small>Balla</small></button><button type="button" data-a="buffo">☺<small>Buffo</small></button><button type="button" class="att" data-a="att">⚔<small>Attacca</small></button></div>
+<div id="soc" hidden><button type="button" data-a="canta">♪<small>Canta</small></button><button type="button" data-a="balla">★<small>Balla</small></button><button type="button" data-a="buffo">☺<small>Buffo</small></button><button type="button" class="att" data-a="att">⚔<small>Attacca</small></button><button type="button" class="gift" data-a="gift" hidden>🎁<small>Regalo</small></button></div>
+<button id="bMode" type="button" hidden></button><button id="bShop" type="button" hidden>🏠 Villaggio<small>compra strumenti e membri</small></button>
 <div id="toast" style="opacity:0"></div>
 <section id="ed" hidden><canvas id="edc"></canvas><div id="edp"></div></section>
 <div class="ov" id="newOv" hidden><div class="box"><h2>Come mangia la tua creatura?</h2>
@@ -95,6 +100,7 @@ input{font:inherit;-webkit-user-select:text;user-select:text}
   <div class="hint" style="text-align:center">Potrai cambiare bocca più avanti nell'editor.</div>
   <button class="big alt" id="chNo" type="button">Annulla</button></div></div>
 <div class="ov" id="askOv" hidden><div class="box"><h2>Nuova specie?</h2><p style="font-size:18px">Se inventi una nuova specie, quella di adesso (<b id="askName"></b>) verrà persa.</p><button class="big" id="askYes" type="button">Sì, nuova specie</button><button class="big alt" id="askNo" type="button">No, tengo la mia</button></div></div>
+<div class="ov" id="shopOv" hidden><div class="box" id="shopBox"></div></div>
 <div class="ov" id="pauseOv" hidden><div class="box"><h2>Pausa</h2><button class="big" id="bResume" type="button">▶ Continua</button><button class="big alt" id="bExit" type="button">◀ Esci (la specie resta salvata)</button></div></div>
 <div class="ov" id="doneOv" hidden><div class="box"><h2 id="doneH">Ce l'hai fatta! 🌟</h2><div id="doneTxt" style="font-size:18px;line-height:1.5"></div><button class="big" id="bDoneCont" type="button"></button><button class="big alt" id="bDoneMenu" type="button">Menu</button></div></div>
 <script>
@@ -230,22 +236,30 @@ var LSP={
   topino:mk('Topini','#b0a090','ovale','no',[{t:'filtro',a:0},{t:'occhio',a:.5},{t:'zampa',a:1.6},{t:'coda',a:Math.PI},{t:'baffi',a:.25}])
 };
 var NESTS=[
-  {k:'saltimbecchi',n:'Saltimbecchi',x:650,y:1480,wants:['canta'],rw:'piume'},
-  {k:'pelosotti',n:'Pelosotti',x:1980,y:1450,wants:['balla'],rw:'ala'},
-  {k:'buffoni',n:'Buffoni',x:620,y:560,wants:['buffo'],rw:'corno'},
+  {k:'saltimbecchi',n:'Saltimbecchi',x:650,y:1480,fav:'canta',rw:'piume'},
+  {k:'pelosotti',n:'Pelosotti',x:1980,y:1450,fav:'balla',rw:'ala'},
+  {k:'buffoni',n:'Buffoni',x:620,y:560,fav:'buffo',rw:'corno'},
   {k:'zannoni',n:'Zannoni',x:2020,y:520,agg:true,rw:null},
-  {k:'cornuti',n:'Cornuti',x:1300,y:330,wants:['canta','balla','buffo'],rw:null}];
+  {k:'cornuti',n:'Cornuti',x:1300,y:330,agg:true,rw:null}];
+var TRIBES=[
+  {k:'buffoni',n:'Buffoni',x:620,y:560,fav:'buffo'},
+  {k:'pelosotti',n:'Pelosotti',x:1980,y:1450,fav:'balla'},
+  {k:'zannoni',n:'Zannoni',x:2020,y:520,agg:true},
+  {k:'cornuti',n:'Cornuti',x:1300,y:330,agg:true}];
+var TRIBE_NEED=3, raidT=50, incT=0;
+var TOOLS={membro:{n:'Nuovo membro',c:8,d:'Un aiutante in più nella tribù'},flauti:{n:'Flauti',c:12,d:'♪ Canto molto più forte'},tamburi:{n:'Tamburi',c:12,d:'★ Ballo molto più forte'},maschere:{n:'Maschere buffe',c:12,d:'☺ Buffo molto più forte'},lance:{n:'Lance',c:15,d:'Attacco più forte per tutta la tribù'},erbe:{n:'Erbe curative',c:10,d:'Al villaggio si guarisce il doppio più in fretta'}};
 var NEST_NEED=4, LWW=2600, LWH=2100, HOME={x:1300,y:1720};
 
 /* ================= STATO ================= */
 var cv=$('cv'), ctx=cv.getContext('2d'), W=0, H=0, DPR=1, BASE=1;
 var mode='menu', paused=false, SP=null, ST=null, STT=null, pl=null, npcs=[], foods=[], stars=[], clouds=[], fx=[], Sd=1, starT=10, saveT=0, dark=null, darkKey='', touch=null, keys={}, lastT=0, hinted={};
 var lm=[], allies=[], critters=[], meats=[], WD=null, enc=-1, attArm=null, mmT=0;
-function isLand(){ return ST&&(ST.ph==='land'||ST.ph==='landDone'); }
+function isLand(){ return !!ST&&(ST.ph==='land'||ST.ph==='landDone'||ST.ph==='tribe'||ST.ph==='tribeDone'); }
+function isTribe(){ return !!ST&&(ST.ph==='tribe'||ST.ph==='tribeDone'); }
 function scl(){ return Math.pow(1.35,ST.L); }
 function plR(){ return isLand()?22*STT.k:16*scl()*STT.k; }
 function maxHp(){ return Math.max(2,(isLand()?6+STT.spi:4+ST.L)+STT.hpb); }
-function newPl(){ return {x:0,y:0,vx:0,vy:0,h:0,hp:0,inv:1.5,biteCd:0,hurtT:0,dash:0,dashCd:0,open:0,regen:0,cloudT:0,walk:0,act:null,actT:0,actCd:0,atkCd:0,eatCd:0}; }
+function newPl(){ return {x:0,y:0,vx:0,vy:0,h:0,hp:0,inv:1.5,biteCd:0,hurtT:0,dash:0,dashCd:0,open:0,regen:0,cloudT:0,walk:0,act:null,actT:0,actCd:0,atkCd:0,eatCd:0,restT:0,warned:0}; }
 function viewR(){ return Math.sqrt(W*W+H*H)/2/(BASE/Sd); }
 function save(){ if(!ST||!SP) return; ST.sp={name:SP.name,col:SP.col,col2:SP.col2,shape:SP.shape,pat:SP.pat,size:SP.size,parts:SP.parts}; S('stelle-save',ST); }
 function toast(s,t){ var el=$('toast'); el.textContent=s; el.style.opacity='1'; clearTimeout(toast.h); toast.h=setTimeout(function(){ el.style.opacity='0'; },(t||2.6)*1000); }
@@ -264,7 +278,7 @@ function gain(g,dna,x,y){ ST.gr+=g; ST.dna+=dna; ST.tot+=dna; fx.push({t:'txt',s
 function hurtPl(n){ if(pl.inv>0) return; pl.hp--; pl.inv=1.2; pl.hurtT=.4; pl.regen=0; tone(160,.3,'sawtooth',.06);
   if(STT.spi>0&&n){ n.hp-=STT.spi*(isLand()?.6:1); n.fleeT=isLand()?0:3; n.hurtT=.3; tone(900,.08,'square',.04); fx.push({t:'txt',s:'Punto!',x:n.x,y:n.y-n.r,life:1,c:'#fff'}); if(n.hp<=0) (isLand()?killL(n):kill(n)); }
   if(pl.hp<=0){ pl.hp=maxHp(); pl.inv=2.5;
-    if(isLand()){ pl.x=HOME.x; pl.y=HOME.y+60; lm.forEach(function(m){ m.hp=m.hpMax; m.x=NESTS[m.ni].x+rnd(-60,60); m.y=NESTS[m.ni].y+rnd(-60,60); }); toast('Ahi! Sei svenuta e ti sei risvegliata al tuo nido. Riprova con più amici o parti più forti!',4); }
+    if(isLand()){ pl.x=HOME.x; pl.y=HOME.y+60; lm=lm.filter(function(m){ return !m.raid; }); lm.forEach(function(m){ var g=GN()[m.ni]; m.hp=m.hpMax; m.x=g.x+rnd(-60,60); m.y=g.y+rnd(-60,60); }); toast('Ahi! Sei svenuta e ti sei risvegliata '+(isTribe()?'al villaggio':'al tuo nido')+'. La prossima volta torna a riposare prima!',4); }
     else { ST.gr=Math.max(0,ST.gr-3); npcs.forEach(function(q){ if(q.role==='pred') q.fleeT=4; }); toast('Ahi! La tua cellula si è divisa ed è ripartita. Attenta ai predatori!',3.5); }
     jingle([392,330,262],.14); } }
 function kill(n){ n.dead=1; var pr=plR(), m=2+Math.round(n.r/pr); for(var i=0;i<m;i++) foods.push({x:n.x+rnd(-n.r,n.r)*.6,y:n.y+rnd(-n.r,n.r)*.6,r:16*scl()*rnd(.3,.42),k:'carne',ph:Math.random()*TAU}); fx.push({t:'pop',x:n.x,y:n.y,r:n.r,life:.4}); tone(300,.15,'triangle',.06); }
@@ -313,7 +327,7 @@ function cellUpdate(dt){ var s=scl(), pr=plR(), st=STT, i, n;
     if(sdd<pr+sr.r){ stars.splice(i,1); var u=left[0]; ST.unl.push(u); ST.dna+=5; ST.tot+=5; toast('Frammento di stella! Nuova parte: '+PARTS[u].n+'. Aprila in ✨ Evolvi',4); jingle([784,988,1175,1568],.1); save(); } }
   fxTick(dt,pr); fillWorld(false); }
 function timers(dt){ pl.inv=Math.max(0,pl.inv-dt); pl.hurtT=Math.max(0,pl.hurtT-dt); pl.biteCd=Math.max(0,pl.biteCd-dt); pl.open=Math.max(0,pl.open-dt*3); pl.dashCd=Math.max(0,pl.dashCd-dt); pl.actT=Math.max(0,pl.actT-dt); if(pl.actT<=0) pl.act=null; pl.actCd=Math.max(0,pl.actCd-dt); pl.atkCd=Math.max(0,pl.atkCd-dt); pl.eatCd=Math.max(0,pl.eatCd-dt);
-  pl.regen+=dt; if(pl.regen>8&&pl.hp<maxHp()){ pl.hp++; pl.regen=0; } }
+  if(!isLand()){ pl.regen+=dt; if(pl.regen>8&&pl.hp<maxHp()){ pl.hp++; pl.regen=0; } } }
 function fxTick(dt,pr){ fx.forEach(function(e){ e.life-=dt; if(e.t==='txt'||e.t==='note') e.y-=pr*1.2*dt; }); fx=fx.filter(function(e){ return e.life>0; }); }
 function phaseDone(){ if(ST.ph!=='cell') return; ST.ph='cellDone'; save(); boardUp(1); showCellDone(); jingle([523,659,784,1047,1319,1568,2093],.1); }
 function showCellDone(){ paused=true; touch=null; $('doneH').textContent='Pronta a uscire dall\'acqua! 🌟';
@@ -321,7 +335,7 @@ function showCellDone(){ paused=true; touch=null; $('doneH').textContent='Pronta
   $('bDoneCont').textContent='🌍 Esci dall\'acqua!'; $('bDoneCont').onclick=toLand; $('doneOv').hidden=false; }
 function boardUp(f){ var nm=L('sala-player','Tommy'), board=L('sala-board',{}); if(!board.stelle) board.stelle={}; var r=board.stelle[nm]||{pts:0,partite:0,max:{}}; r.partite=(r.partite||0)+1; r.pts=Math.max(r.pts||0,ST.tot); if(!r.max) r.max={}; r.max.fase=Math.max(r.max.fase||0,f); board.stelle[nm]=r; S('sala-board',board); }
 
-/* ================= FASE TERRA ================= */
+/* ================= FASE TERRA E TRIBU ================= */
 function genWorld(){ var s=777; function R(){ s=(s*16807)%2147483647; return (s-1)/2147483646; }
   var w={trees:[],rocks:[],bushes:[],flowers:[]}, k, x, y, i;
   var keep=[{x:HOME.x,y:HOME.y,r:240},{x:HOME.x,y:HOME.y+180,r:200}]; NESTS.forEach(function(n){ keep.push({x:n.x,y:n.y,r:260}); });
@@ -333,33 +347,59 @@ function genWorld(){ var s=777; function R(){ s=(s*16807)%2147483647; return (s-
   var g=document.createElement('canvas'); g.width=g.height=160; var x2=g.getContext('2d'); x2.fillStyle='#62b04f'; x2.fillRect(0,0,160,160);
   for(i=0;i<90;i++){ var gx=R()*160, gy=R()*160; x2.strokeStyle=R()<.5?'#559c43':'#74c25e'; x2.lineWidth=2; x2.beginPath(); x2.moveTo(gx,gy); x2.lineTo(gx+R()*4-2,gy-5-R()*4); x2.stroke(); }
   w.grass=g; w.pat=null; return w; }
-function makeMembers(){ lm=[]; NESTS.forEach(function(n,i){ var ns=ST.land.nests[i]; if(ns.st==='sconfitti') return; var m=n.agg?4:3, big=n.k==='cornuti'?1.15:(n.k==='zannoni'?1.1:1);
-  for(var k=0;k<m;k++){ var a=k/m*TAU, lead=k===0, hp=lead?(n.agg?6:7):(n.agg?4:5); lm.push({ni:i,lead:lead,sp:LSP[n.k],x:n.x+Math.cos(a)*70,y:n.y+Math.sin(a)*70,r:22*(lead?1.35:1)*big,hp:hp,hpMax:hp,h:Math.random()*TAU,walk:0,tx:n.x,ty:n.y,tT:0,hurtT:0,biteCd:0,tm:Math.random()*9,happy:0,act:null,actT:0,open:0}); } }); }
-function makeAllies(){ allies=[]; ST.land.allies.forEach(function(ni,k){ var n=NESTS[ni]; allies.push({ni:ni,sp:LSP[n.k],x:pl.x-40-k*30,y:pl.y+40,r:20,h:0,walk:0,tm:Math.random()*9,hit:0}); }); }
-function landStart(){ if(!WD) WD=genWorld(); if(!ST.land){ ST.land={nests:NESTS.map(function(){ return {st:'free',bar:0}; }),allies:[]}; }
-  pl=newPl(); pl.hp=maxHp(); pl.x=HOME.x; pl.y=HOME.y+120; pl.h=-Math.PI/2; Sd=1; critters=[]; meats=[]; fx=[]; enc=-1; attArm=null; makeMembers(); makeAllies(); }
+function GN(){ return isTribe()?TRIBES:NESTS; }
+function GSL(){ return isTribe()?ST.tribe.t:ST.land.nests; }
+function hostileM(m){ if(m.raid) return true; var s=GSL()[m.ni], d=GN()[m.ni]; return s.st==='hostile'||(!!d.agg&&s.st==='free'); }
+function mkMember(i,sp,x,y,r,hp,lead){ return {ni:i,lead:lead,sp:sp,x:x,y:y,r:r,hp:hp,hpMax:hp,h:Math.random()*TAU,walk:0,tx:x,ty:y,tT:0,hurtT:0,biteCd:0,tm:Math.random()*9,happy:0,act:null,actT:0,open:0}; }
+function mkAlly(sp,x,y,r,hp){ return {sp:sp,x:x,y:y,r:r,h:0,walk:0,tm:Math.random()*9,hit:0,hp:hp,hpMax:hp,hurtT:0,carry:0,tgtB:null}; }
+function makeMembers(){ lm=[]; var tr=isTribe(); GN().forEach(function(n,i){ var ns=GSL()[i]; if(ns.st==='sconfitti') return; var m=tr?4:(n.agg?4:3), big=n.k==='cornuti'?1.15:(n.k==='zannoni'?1.1:1);
+  for(var k=0;k<m;k++){ var a=k/m*TAU, lead=k===0, hp=(lead?(n.agg?6:7):(n.agg?4:5))+(tr?1:0), rr=tr?100:70; lm.push(mkMember(i,LSP[n.k],n.x+Math.cos(a)*rr,n.y+Math.sin(a)*rr,22*(lead?1.35:1)*big,hp,lead)); } }); }
+function makeAllies(){ allies=[]; if(isTribe()){ for(var k=0;k<ST.tribe.mem;k++) allies.push(mkAlly(SP,HOME.x+rnd(-60,60),HOME.y+rnd(-60,60),17,4)); return; }
+  ST.land.allies.forEach(function(ni,k){ allies.push(mkAlly(LSP[NESTS[ni].k],pl.x-40-k*30,pl.y+40,20,99)); }); }
+function landStart(){ if(!WD) WD=genWorld(); if(!ST.land) ST.land={nests:NESTS.map(function(){ return {st:'free',bar:0}; }),allies:[]};
+  pl=newPl(); pl.hp=maxHp(); pl.x=HOME.x; pl.y=HOME.y+120; pl.h=-Math.PI/2; Sd=1; critters=[]; meats=[]; fx=[]; enc=-1; attArm=null; raidT=50; incT=0; makeMembers(); makeAllies(); }
 function toLand(){ $('doneOv').hidden=true; paused=false;
   SP.parts=SP.parts.filter(function(p){ return PARTS[p.t].ph.indexOf('t')>=0; });
   if(!cnt(SP,'zampa')) SP.parts.push({t:'zampa',a:1.6}); if(!mouthOf(SP)) SP.parts.unshift({t:'filtro',a:0});
   LAND_UNL.forEach(function(u){ if(ST.unl.indexOf(u)<0) ST.unl.push(u); });
   ST.ph='land'; ST.dna+=20; ST.land=null; STT=stats(SP); landStart(); save(); openEditor('land'); }
-function doneCount(){ var n=0; ST.land.nests.forEach(function(s){ if(s.st==='amici'||s.st==='sconfitti') n++; }); return n; }
-function nestDone(i,how){ var ns=ST.land.nests[i], n=NESTS[i]; ns.st=how; enc=-1;
+function toTribe(){ $('doneOv').hidden=true; paused=false; ST.ph='tribe'; ST.tribe={food:6,mem:3,tools:{},t:TRIBES.map(function(){ return {st:'free',bar:0}; }),mode:'segui'}; ST.dna+=20; ST.tot+=20; STT=stats(SP); landStart(); save(); showUI(true); posBtns(); lastT=0;
+  toast('Hai fondato la tua tribù! Manda i membri a raccogliere cibo, compra strumenti al villaggio e fai amicizia (o guerra) con le 4 tribù rivali. Ne servono 3.',7); jingle([392,523,659,784,1047],.12); }
+function doneCount(){ var n=0; GSL().forEach(function(s){ if(s.st==='amici'||s.st==='sconfitti') n++; }); return n; }
+function groupDone(i,how){ if(isTribe()) tribeGroupDone(i,how); else nestDone(i,how); }
+function nestDone(i,how){ var ns=ST.land.nests[i], n=NESTS[i]; ns.st=how; ns.seq=null; enc=-1;
   var bonus=how==='amici'?25:20; ST.dna+=bonus; ST.tot+=bonus; var msg=(how==='amici'?'Ora i '+n.n+' sono tuoi amici!':'Hai sconfitto i '+n.n+'!')+' +'+bonus+' DNA';
   if(n.rw&&ST.unl.indexOf(n.rw)<0){ ST.unl.push(n.rw); msg+='. Nuova parte: '+PARTS[n.rw].n+'!'; }
-  if(how==='amici'&&ST.land.allies.length<3){ ST.land.allies.push(i); var lead=null; lm.forEach(function(m){ if(m.ni===i&&!m.lead&&!lead) lead=m; }); if(lead){ lead.dead=1; allies.push({ni:i,sp:lead.sp,x:lead.x,y:lead.y,r:20,h:0,walk:0,tm:0,hit:0}); msg+=' Uno di loro viene con te!'; } }
+  if(how==='amici'&&ST.land.allies.length<3){ ST.land.allies.push(i); var lead=null; lm.forEach(function(m){ if(m.ni===i&&!m.lead&&!lead) lead=m; }); if(lead){ lead.dead=1; allies.push(mkAlly(lead.sp,lead.x,lead.y,20,99)); msg+=' Uno di loro viene con te!'; } }
   toast(msg,4.5); jingle([523,659,784,1047,1319],.1); boardUp(2); save();
   if(doneCount()>=NEST_NEED&&ST.ph==='land'){ ST.ph='landDone'; save(); setTimeout(showLandDone,1800); } }
+function tribeGroupDone(i,how){ var ns=ST.tribe.t[i], n=TRIBES[i]; ns.st=how; ns.seq=null; enc=-1; var msg;
+  if(how==='amici'){ ST.tribe.food+=10; msg='La tribù dei '+n.n+' è vostra alleata! +10 cibo, e ogni tanto vi porterà dei regali.'; }
+  else { ST.tribe.food+=12; ST.dna+=20; ST.tot+=20; msg='Avete conquistato il villaggio dei '+n.n+'! +12 cibo. Lì adesso potete anche riposare.'; lm.forEach(function(m){ if(m.raid&&m.ni===i) m.dead=1; }); }
+  toast(msg,5); jingle([523,659,784,1047,1319],.1); boardUp(3); save();
+  if(doneCount()>=TRIBE_NEED&&ST.ph==='tribe'){ ST.ph='tribeDone'; save(); setTimeout(showTribeDone,1800); } }
 function showLandDone(){ paused=true; touch=null; $('doneH').textContent='Regina dell\'isola! 🌟'; boardUp(3);
   var f=0, d=0; ST.land.nests.forEach(function(s){ if(s.st==='amici') f++; if(s.st==='sconfitti') d++; });
-  $('doneTxt').innerHTML='La specie <b>'+esc(SP.name)+'</b> è diventata la più importante dell\'isola: '+f+' specie amiche e '+d+' sconfitte.<br>Il suo cervello è cresciuto tanto che adesso sa costruire un villaggio!<br><br>La <b>Fase Tribù</b> arriva nella prossima versione: la specie resta salvata.<br>DNA raccolto in tutto: <b>'+ST.tot+'</b>';
-  $('bDoneCont').textContent='▶ Continua a esplorare'; $('bDoneCont').onclick=function(){ $('doneOv').hidden=true; paused=false; lastT=0; }; $('doneOv').hidden=false; }
+  $('doneTxt').innerHTML='La specie <b>'+esc(SP.name)+'</b> è diventata la più importante dell\'isola: '+f+' specie amiche e '+d+' sconfitte.<br>Il suo cervello è cresciuto tanto che adesso sa costruire capanne e accendere il fuoco: è il momento di <b>fondare una tribù</b>!<br><br>DNA raccolto in tutto: <b>'+ST.tot+'</b>';
+  $('bDoneCont').textContent='🔥 Fonda la tribù!'; $('bDoneCont').onclick=toTribe; $('doneOv').hidden=false; }
+function showTribeDone(){ paused=true; touch=null; boardUp(4); $('doneH').textContent='Verso le stelle! 🚀';
+  $('doneTxt').innerHTML='La tribù di <b>'+esc(SP.name)+'</b> ha unito tutta l\'isola.<br><br>Passano mille e mille anni: le capanne diventano città, i flauti diventano radio, le lance diventano macchine... finché una notte la specie <b>'+esc(SP.name)+'</b> accende i motori della sua prima <b>astronave</b> e parte per le stelle! ✨<br><br><b>Hai finito il gioco!</b> Puoi continuare a giocare sull\'isola o inventare una nuova specie.<br>DNA raccolto in tutto: <b>'+ST.tot+'</b>';
+  $('bDoneCont').textContent='▶ Continua a giocare'; $('bDoneCont').onclick=function(){ $('doneOv').hidden=true; paused=false; lastT=0; }; $('doneOv').hidden=false; jingle([523,659,784,1047,1319,1568,2093,2637],.12); }
 function killL(m){ if(m.dead) return; m.dead=1; fx.push({t:'pop',x:m.x,y:m.y,r:m.r,life:.4}); tone(300,.15,'triangle',.06); for(var k=0;k<2;k++) meats.push({x:m.x+rnd(-15,15),y:m.y+rnd(-15,15),r:9});
-  if(m.ni!=null){ var left=0; lm.forEach(function(q){ if(q.ni===m.ni&&!q.dead) left++; }); if(left===0) nestDone(m.ni,'sconfitti'); } }
+  if(m.raid||m.ni==null) return; var left=0; lm.forEach(function(q){ if(q.ni===m.ni&&!q.dead&&!q.raid) left++; }); if(left===0) groupDone(m.ni,'sconfitti'); }
 function treeBlock(o,r){ for(var i=0;i<WD.trees.length;i++){ var t=WD.trees[i], dx=o.x-t.x, dy=o.y-t.y; if(Math.abs(dx)>t.r+r||Math.abs(dy)>t.r+r) continue; var d=Math.sqrt(dx*dx+dy*dy)||1, mn=t.r*.75+r*.7; if(d<mn){ o.x=t.x+dx/d*mn; o.y=t.y+dy/d*mn; } } }
 function clampW(o){ o.x=Math.max(70,Math.min(LWW-70,o.x)); o.y=Math.max(70,Math.min(LWH-70,o.y)); }
 function moveTo(o,tx,ty,spd,dt){ var dx=tx-o.x, dy=ty-o.y, d=Math.sqrt(dx*dx+dy*dy); if(d<4) return 0; var a=Math.atan2(dy,dx); o.h+=angDiff(a,o.h)*Math.min(1,dt*6); var st=Math.min(d,spd*dt); o.x+=Math.cos(o.h)*st; o.y+=Math.sin(o.h)*st; o.walk+=st/7; return d; }
-function landUpdate(dt){ var pr=plR(), st=STT, i, m;
+function nearestFoe(m,rng,c){ var best=null, bd=1e9; function ck(o){ if(o.dead) return; if(c&&dist(o,c)>rng) return; var d=dist(o,m); if(!c&&d>rng) return; if(d<bd){ bd=d; best=o; } } if(pl.inv<=0) ck(pl); allies.forEach(ck); return best; }
+function hurtAlly(a){ if(a.hpMax>50) return; a.hp--; a.hurtT=.3; tone(200,.1,'sawtooth',.03); if(a.hp<=0&&!a.dead){ a.dead=1; ST.tribe.mem=Math.max(0,ST.tribe.mem-1); toast('Un membro della tribù è stato sconfitto! Puoi averne un altro al villaggio.',3.5); save(); } }
+function fight(m,tg,dt,spd){ moveTo(m,tg.x,tg.y,spd,dt); var rr=tg===pl?plR():tg.r; if(dist(m,tg)<m.r+rr*.9&&m.biteCd<=0){ m.biteCd=1.3; m.open=1; if(tg===pl) hurtPl(m); else hurtAlly(tg); } }
+function wander(m,n,dt){ var lim=isTribe()?230:200; m.tT-=dt; if(m.tT<=0||dist(m,n)>lim){ m.tT=rnd(2,5); var a=Math.random()*TAU, rr=rnd(20,isTribe()?170:130); m.tx=n.x+Math.cos(a)*rr; m.ty=n.y+Math.sin(a)*rr; } moveTo(m,m.tx,m.ty,dist(m,n)>lim?60:22,dt); }
+function safeSpot(){ var best=HOME, bd=dist(HOME,pl); GN().forEach(function(n,ni){ var s=GSL()[ni].st; if(s==='amici'||(isTribe()&&s==='sconfitti')){ var d=dist(n,pl); if(d<bd){ bd=d; best=n; } } }); return best; }
+function follow(a,k,dt,st){ var bx=pl.x-Math.cos(pl.h+(k-1)*.7)*(60+k*12), by=pl.y-Math.sin(pl.h+(k-1)*.7)*(60+k*12), dd2=Math.sqrt((bx-a.x)*(bx-a.x)+(by-a.y)*(by-a.y)); moveTo(a,bx,by,dd2>300?st.lspd*1.6:Math.min(st.lspd*1.1,dd2*2),dt); if(dd2>700){ a.x=bx; a.y=by; } }
+function gather(a,dt){ if(a.carry){ moveTo(a,HOME.x,HOME.y,70,dt); if(dist(a,HOME)<60){ a.carry=0; ST.tribe.food++; fx.push({t:'txt',s:'+1 cibo',x:HOME.x,y:HOME.y-50,life:1,c:'#7af0c8'}); } return; }
+  if(!a.tgtB||a.tgtB.f<=0){ a.tgtB=null; var bd=1e9; WD.bushes.forEach(function(b){ if(b.f<=0) return; if(dist(b,HOME)>1200) return; var ok=true; TRIBES.forEach(function(n,ni){ var s=ST.tribe.t[ni].st; if(s!=='amici'&&s!=='sconfitti'&&dist(b,n)<380) ok=false; }); if(!ok) return; var dd=dist(b,a); if(dd<bd){ bd=dd; a.tgtB=b; } }); }
+  if(a.tgtB){ moveTo(a,a.tgtB.x,a.tgtB.y,70,dt); if(dist(a,a.tgtB)<a.tgtB.r+a.r){ if(a.tgtB.f>0){ a.tgtB.f--; a.carry=1; } a.tgtB=null; } } else moveTo(a,HOME.x,HOME.y+50,40,dt); }
+function landUpdate(dt){ var pr=plR(), st=STT, i, m, tr=isTribe(), GL=GN(), SL=GSL();
   var w=steer(), wx=w[0], wy=w[1];
   if(pl.dash>0){ pl.dash-=dt; if(!wx&&!wy){ wx=Math.cos(pl.h); wy=Math.sin(pl.h); } }
   var sp=st.lspd*(pl.dash>0?2.4:1), acc=Math.min(1,(st.lagi+(pl.dash>0?6:0))*dt*1.6);
@@ -367,8 +407,8 @@ function landUpdate(dt){ var pr=plR(), st=STT, i, m;
   var v=Math.sqrt(pl.vx*pl.vx+pl.vy*pl.vy); if(v>8){ pl.h+=angDiff(Math.atan2(pl.vy,pl.vx),pl.h)*Math.min(1,dt*(4+st.lagi)); pl.walk+=v*dt/7; }
   if(pl.dash<=0) treeBlock(pl,pr); clampW(pl);
   timers(dt);
-  WD.bushes.forEach(function(b){ if(b.f<3){ b.t+=dt; if(b.t>12){ b.t=0; b.f++; } }
-    if(b.f>0&&pl.eatCd<=0&&Math.abs(b.x-pl.x)<b.r+pr&&dist(b,pl)<b.r+pr){ if(st.d==='erb'||st.d==='onn'){ b.f--; pl.eatCd=.5; pl.open=1; eatL(b.x,b.y-20); } else if(!hinted.frutta){ hinted.frutta=1; toast('Con le mascelle non mangi la frutta: caccia i topini o cerca la carne!',3.5); } } });
+  WD.bushes.forEach(function(b){ if(b.f<3){ b.t+=dt; if(b.t>(tr?8:12)){ b.t=0; b.f++; } }
+    if(b.f>0&&pl.eatCd<=0&&Math.abs(b.x-pl.x)<b.r+pr&&dist(b,pl)<b.r+pr){ if(st.d==='erb'||st.d==='onn'){ if(pl.hp<maxHp()||!tr){ b.f--; pl.eatCd=.5; pl.open=1; eatL(b.x,b.y-20); } } else if(!hinted.frutta){ hinted.frutta=1; toast('Con le mascelle non mangi la frutta: caccia i topini o cerca la carne!',3.5); } } });
   for(i=meats.length-1;i>=0;i--){ var mt=meats[i]; if(dist(mt,pl)<pr+mt.r){ if(st.d==='carn'||st.d==='onn'){ meats.splice(i,1); pl.open=1; eatL(mt.x,mt.y-10); } } }
   while(critters.length<8){ var ca=Math.random()*TAU, cdd=rnd(500,900), cx=Math.max(100,Math.min(LWW-100,pl.x+Math.cos(ca)*cdd)), cy=Math.max(100,Math.min(LWH-100,pl.y+Math.sin(ca)*cdd)); critters.push({x:cx,y:cy,r:11,h:Math.random()*TAU,walk:0,tm:0,wa:Math.random()*TAU,hp:1}); }
   for(i=critters.length-1;i>=0;i--){ var c=critters[i]; c.tm+=dt; var cd=dist(c,pl);
@@ -378,53 +418,84 @@ function landUpdate(dt){ var pr=plR(), st=STT, i, m;
     clampW(c);
     if(cd<pr+c.r&&(st.d==='carn'||st.d==='onn')){ critters.splice(i,1); pl.open=1; eatL(c.x,c.y-10); tone(520,.06,'square',.04); } }
   enc=-1; var bd=1e9;
-  NESTS.forEach(function(n,ni){ var ns=ST.land.nests[ni]; if(ns.st!=='free'||n.agg) return; var d=dist(n,pl); if(d<290&&d<bd){ bd=d; enc=ni; } });
-  if(enc>=0){ var ens=ST.land.nests[enc]; if(!ens.req) ens.req=pick(NESTS[enc].wants); if(!hinted['enc'+enc]){ hinted['enc'+enc]=1; toast('Hai incontrato i '+NESTS[enc].n+'! Guarda cosa chiede il capo e rispondi col tasto giusto per diventare amici.',4.5); } }
-  for(i=lm.length-1;i>=0;i--){ m=lm[i]; if(m.dead){ lm.splice(i,1); continue; } var n=NESTS[m.ni], ns2=ST.land.nests[m.ni];
+  GL.forEach(function(n,ni){ var ns=SL[ni]; if(ns.st!=='free'||n.agg) return; var d=dist(n,pl); if(d<(tr?330:290)&&d<bd){ bd=d; enc=ni; } });
+  if(enc>=0){ var ens=SL[enc]; if(!ens.seq) newSeq(ens,GL[enc]); if(!hinted['enc'+enc]){ hinted['enc'+enc]=1; toast('Hai incontrato i '+GL[enc].n+'! Il capo ti mostra una serie di gesti nella nuvoletta: ripetili nell\'ordine giusto con ♪ ★ ☺.',5); } }
+  for(i=lm.length-1;i>=0;i--){ m=lm[i]; if(!m) continue; if(m.dead){ lm.splice(i,1); continue; } var n=GL[m.ni], ns2=SL[m.ni];
     m.tm+=dt; m.hurtT=Math.max(0,m.hurtT-dt); m.biteCd=Math.max(0,m.biteCd-dt); m.happy=Math.max(0,m.happy-dt); m.open=Math.max(0,m.open-dt*3); m.actT=Math.max(0,m.actT-dt); if(m.actT<=0) m.act=null;
-    var dpl=dist(m,pl), dnest=dist(m,n), hostile=ns2.st==='hostile'||(n.agg&&ns2.st==='free');
-    if(hostile&&(ns2.st==='hostile'?dist(pl,n)<560:dist(pl,n)<300)&&pl.inv<=0){ moveTo(m,pl.x,pl.y,n.agg?64:60,dt);
-      if(dpl<m.r+pr*.9&&m.biteCd<=0){ m.biteCd=1.3; m.open=1; hurtPl(m); } }
-    else if(enc===m.ni&&dpl<340){ m.h+=angDiff(Math.atan2(pl.y-m.y,pl.x-m.x),m.h)*Math.min(1,dt*4); }
-    else { m.tT-=dt; if(m.tT<=0||dnest>200){ m.tT=rnd(2,5); var a=Math.random()*TAU, rr=rnd(20,130); m.tx=n.x+Math.cos(a)*rr; m.ty=n.y+Math.sin(a)*rr; } moveTo(m,m.tx,m.ty,dnest>200?60:22,dt); }
-    if(hostile&&m.hp<m.hpMax&&dist(pl,n)>700) m.hp=Math.min(m.hpMax,m.hp+dt*.5);
-    if(dpl<m.r+pr*.8){ var dx=pl.x-m.x, dy=pl.y-m.y, dd=Math.sqrt(dx*dx+dy*dy)||1, push=(m.r+pr*.8-dd)/dd*.5; pl.x+=dx*push; pl.y+=dy*push; m.x-=dx*push; m.y-=dy*push; } }
-  allies.forEach(function(a,k){ a.tm+=dt; a.hit=Math.max(0,a.hit-dt); var tgt=null, td=280;
-    lm.forEach(function(m2){ var ns3=ST.land.nests[m2.ni], hs=ns3.st==='hostile'||(NESTS[m2.ni].agg&&ns3.st==='free'); if(!hs) return; var d2=dist(m2,a); if(d2<td&&dist(m2,pl)<400){ td=d2; tgt=m2; } });
-    if(tgt){ moveTo(a,tgt.x,tgt.y,90,dt); if(dist(a,tgt)<a.r+tgt.r+4&&a.hit<=0){ a.hit=1; tgt.hp-=.7; tgt.hurtT=.25; fx.push({t:'txt',s:'Pam!',x:tgt.x,y:tgt.y-tgt.r,life:.8,c:'#fff'}); if(tgt.hp<=0) killL(tgt); } }
-    else { var bx=pl.x-Math.cos(pl.h+(k-1)*.7)*(60+k*12), by=pl.y-Math.sin(pl.h+(k-1)*.7)*(60+k*12), dd2=Math.sqrt((bx-a.x)*(bx-a.x)+(by-a.y)*(by-a.y)); moveTo(a,bx,by,dd2>300?st.lspd*1.6:Math.min(st.lspd*1.1,dd2*2),dt); if(dd2>700){ a.x=bx; a.y=by; } }
+    if(m.raid){ var tg=nearestFoe(m,170,null); if(tg) fight(m,tg,dt,66); else { moveTo(m,HOME.x,HOME.y,58,dt); if(dist(m,HOME)<70){ m.dead=1; var stolen=Math.min(ST.tribe.food,3); ST.tribe.food-=stolen; toast(stolen?'I '+n.n+' hanno rubato '+stolen+' cibo al villaggio!':'I '+n.n+' non hanno trovato cibo da rubare!',3); } } }
+    else if(hostileM(m)){ var tg2=nearestFoe(m,ns2.st==='hostile'?560:300,n); if(tg2) fight(m,tg2,dt,n.agg?64:60); else wander(m,n,dt); if(m.hp<m.hpMax&&dist(pl,n)>700) m.hp=Math.min(m.hpMax,m.hp+dt*.5); }
+    else if(enc===m.ni&&dist(m,pl)<360){ m.h+=angDiff(Math.atan2(pl.y-m.y,pl.x-m.x),m.h)*Math.min(1,dt*4); }
+    else wander(m,n,dt);
+    var dpl=dist(m,pl); if(dpl<m.r+pr*.8){ var dx=pl.x-m.x, dy=pl.y-m.y, dd=Math.sqrt(dx*dx+dy*dy)||1, push=(m.r+pr*.8-dd)/dd*.5; pl.x+=dx*push; pl.y+=dy*push; m.x-=dx*push; m.y-=dy*push; } }
+  allies=allies.filter(function(a){ return !a.dead; });
+  allies.forEach(function(a,k){ a.tm+=dt; a.hit=Math.max(0,a.hit-dt); a.hurtT=Math.max(0,a.hurtT-dt); var tgt=null, td=280, gm=tr&&ST.tribe.mode==='raccogli';
+    lm.forEach(function(m2){ if(m2.dead||!hostileM(m2)) return; var d2=dist(m2,a); var near=gm?(d2<220):(d2<td&&dist(m2,pl)<400); if(near&&d2<td){ td=d2; tgt=m2; } });
+    if(tgt){ moveTo(a,tgt.x,tgt.y,90,dt); if(dist(a,tgt)<a.r+tgt.r+4&&a.hit<=0){ a.hit=1; tgt.hp-=(tr&&ST.tribe.tools.lance?1.1:.7); tgt.hurtT=.25; fx.push({t:'txt',s:'Pam!',x:tgt.x,y:tgt.y-tgt.r,life:.8,c:'#fff'}); if(tgt.hp<=0) killL(tgt); } }
+    else if(gm) gather(a,dt);
+    else follow(a,k,dt,st);
+    if(tr&&a.hp<a.hpMax&&dist(a,HOME)<140) a.hp=Math.min(a.hpMax,a.hp+dt*(ST.tribe.tools.erbe?.6:.3));
     treeBlock(a,a.r); });
+  if(tr){ raidT-=dt; if(raidT<=0){ raidT=rnd(55,75); var cand=[]; TRIBES.forEach(function(n2,ni){ if(n2.agg&&ST.tribe.t[ni].st!=='sconfitti') cand.push(ni); });
+      if(cand.length){ var ri=pick(cand), n3=TRIBES[ri]; for(var q=0;q<2;q++){ var rm=mkMember(ri,LSP[n3.k],n3.x+rnd(-40,40),n3.y+rnd(-40,40),22,4,false); rm.raid=true; lm.push(rm); } toast('Attenzione! I '+n3.n+' vengono a rubare il cibo del villaggio! Difendetelo! (freccia rossa)',4.5); tone(180,.4,'sawtooth',.05); } }
+    incT+=dt; if(incT>20){ incT=0; var al=0; ST.tribe.t.forEach(function(s){ if(s.st==='amici') al++; }); if(al){ ST.tribe.food+=al; fx.push({t:'txt',s:'+'+al+' cibo dagli alleati',x:HOME.x,y:HOME.y-70,life:1.5,c:'#7af0c8'}); } } }
+  var safe=safeSpot();
+  if(dist(safe,pl)<140&&pl.hp<maxHp()){ var foe=false; lm.forEach(function(m3){ if(!m3.dead&&hostileM(m3)&&dist(m3,pl)<260) foe=true; });
+    if(!foe){ pl.restT+=dt; if(pl.restT>(tr&&ST.tribe.tools.erbe?.5:1)){ pl.restT=0; pl.hp++; fx.push({t:'txt',s:'Zzz +1 ❤',x:pl.x,y:pl.y-pr*1.5,life:1,c:'#fff'}); if(!hinted.rest){ hinted.rest=1; toast('Stai riposando al sicuro: la vita torna piano piano.',3); } } } }
+  if(pl.hp<=Math.ceil(maxHp()*.35)){ if(!pl.warned){ pl.warned=1; toast('Sei molto ferita! Torna al tuo nido o da amici (freccia verde) per riposare, e mangia per guarire.',4.5); tone(220,.3,'square',.05); } } else if(pl.hp>=maxHp()) pl.warned=0;
   if(attArm&&attArm.t>0) attArm.t-=dt;
-  fxTick(dt,pr); updSoc(); }
+  fxTick(dt,pr); updSoc(); tribeUI(); }
 function eatL(x,y){ ST.dna+=1; ST.tot+=1; if(pl.hp<maxHp()) pl.hp++; fx.push({t:'txt',s:'+1 DNA',x:x,y:y,life:1,c:'#f2d94a'}); tone(660,.08,'sine',.05); tone(990,.08,'sine',.04,.06); if(!hinted.evo2&&ST.dna>=30){ hinted.evo2=1; toast('Hai tanto DNA: prova ✨ Evolvi per comprare parti nuove!',4); } }
+var ACTS=['canta','balla','buffo'];
+function newSeq(ns,d){ var len=Math.min(5,2+Math.floor(ns.bar/30)), s=[]; for(var i=0;i<len;i++) s.push(Math.random()<.35&&d.fav?d.fav:pick(ACTS)); ns.seq=s; ns.pos=0; }
+function socLvl(a){ var l=STT.soc[a]; if(isTribe()&&ST.tribe.tools[{canta:'flauti',balla:'tamburi',buffo:'maschere'}[a]]) l+=2; return Math.min(3,l); }
+function grpHappy(i,a){ lm.forEach(function(m){ if(m.ni===i&&!m.raid){ m.happy=.8; m.act=a; m.actT=.8; } }); }
 var lastSoc='';
-function updSoc(){ var req=enc>=0?ST.land.nests[enc].req:null, key=enc+'|'+req; if(key===lastSoc) return; lastSoc=key; var bs=$('soc').getElementsByTagName('button');
-  for(var i=0;i<bs.length;i++){ var a=bs[i].getAttribute('data-a'); bs[i].className=(a==='att'?'att':'')+(a!=='att'&&enc>=0&&a===req?' want':'')+(a!=='att'&&enc<0?' dim':''); } }
-function social(a){ if(!isLand()||paused||pl.actCd>0) return; pl.actCd=.6; pl.act=a; pl.actT=.8;
-  if(a==='canta') jingle([660,784,880],.08); else if(a==='balla') jingle([392,523,392,523],.07); else { tone(300,.2,'sine',.06); tone(600,.15,'sine',.05,.12); }
+function updSoc(){ var ns=enc>=0?GSL()[enc]:null, req=ns&&ns.seq?ns.seq[ns.pos]:null, key=enc+'|'+req+'|'+isTribe(); if(key===lastSoc) return; lastSoc=key; var bs=$('soc').getElementsByTagName('button');
+  for(var i=0;i<bs.length;i++){ var a=bs[i].getAttribute('data-a'); if(a==='gift'){ bs[i].hidden=!isTribe(); bs[i].className='gift'+(enc<0?' dim':''); continue; } bs[i].className=(a==='att'?'att':'')+(a!=='att'&&enc>=0&&a===req?' want':'')+(a!=='att'&&enc<0?' dim':''); } }
+function social(a){ if(!isLand()||paused||pl.actCd>0) return; pl.actCd=.4; pl.act=a; pl.actT=.7;
+  if(a==='canta') jingle([660,784,880],.07); else if(a==='balla') jingle([392,523,392],.06); else { tone(300,.2,'sine',.06); tone(600,.15,'sine',.05,.1); }
   fx.push({t:'note',s:ACT[a].ic,x:pl.x+rnd(-10,10),y:pl.y-plR(),life:1,c:'#fff'});
-  if(enc<0){ if(!hinted.far){ hinted.far=1; toast('Avvicinati a un nido di creature per fare amicizia!'); } return; }
-  var ns=ST.land.nests[enc], n=NESTS[enc], lvl=STT.soc[a];
-  if(a===ns.req){ var g=lvl?14+10*lvl:7; ns.bar=Math.min(100,ns.bar+g); lm.forEach(function(m){ if(m.ni===enc){ m.happy=.8; m.act=a; m.actT=.8; } }); fx.push({t:'txt',s:'+'+g+'%',x:n.x,y:n.y-80,life:1,c:'#7af0c8'});
-    if(!lvl&&!hinted['lv'+a]){ hinted['lv'+a]=1; toast('Gli piace, ma non sei bravissima: una parte "'+(a==='canta'?'Sacca canora':(a==='balla'?'Cresta':'Piume buffe'))+'" ti farebbe fare amicizia più in fretta!',4.5); }
-    ns.req=pick(n.wants); if(ns.bar>=100){ ns.bar=100; nestDone(enc,'amici'); } }
-  else { ns.bar=Math.max(0,ns.bar-8); toast('Non era quello! I '+n.n+' volevano: '+ACT[ns.req].ic+' '+ACT[ns.req].n); tone(180,.2,'square',.04); }
-  save(); }
+  if(enc<0){ if(!hinted.far){ hinted.far=1; toast('Avvicinati a un gruppo di creature per fare amicizia!'); } return; }
+  var ns=GSL()[enc], n=GN()[enc]; if(!ns.seq) newSeq(ns,n);
+  if(a===ns.seq[ns.pos]){ ns.pos++; grpHappy(enc,a);
+    if(ns.pos>=ns.seq.length){ var lv=0, miss=null; ns.seq.forEach(function(q){ var l=socLvl(q); lv+=l; if(!l) miss=q; }); var g=Math.round(8+5*ns.seq.length+3*lv); ns.bar=Math.min(100,ns.bar+g); fx.push({t:'txt',s:'Bravo! +'+g+'%',x:n.x,y:n.y-90,life:1.3,c:'#7af0c8'}); jingle([784,988,1175,1568],.07);
+      if(miss&&!hinted['lv'+miss]){ hinted['lv'+miss]=1; toast('Gli piace! Con '+(miss==='canta'?'la Sacca canora':(miss==='balla'?'la Cresta':'le Piume buffe'))+(isTribe()?' o gli strumenti del villaggio':'')+' faresti amicizia più in fretta.',4.5); }
+      if(ns.bar>=100){ ns.bar=100; groupDone(enc,'amici'); } else newSeq(ns,n); } }
+  else { ns.pos=0; ns.bar=Math.max(0,ns.bar-5); toast('Ops, gesto sbagliato! Ricomincia dal primo gesto della nuvoletta.',2.5); tone(180,.2,'square',.04); }
+  lastSoc=''; save(); }
+function gift(){ if(!isTribe()||paused) return; if(enc<0){ toast('Avvicinati a una tribù amichevole per farle un regalo.'); return; } if(ST.tribe.food<5){ toast('Servono 5 cibo per un regalo: mandate la tribù a raccogliere!'); return; }
+  ST.tribe.food-=5; var ns=ST.tribe.t[enc], n=TRIBES[enc]; ns.bar=Math.min(100,ns.bar+20); grpHappy(enc,'buffo'); fx.push({t:'txt',s:'Regalo! +20%',x:n.x,y:n.y-90,life:1.3,c:'#f2d94a'}); jingle([523,784,1047],.08);
+  if(ns.bar>=100) groupDone(enc,'amici'); else if(ns.pos===0) newSeq(ns,n); lastSoc=''; save(); }
 function attack(){ if(!isLand()||paused||pl.atkCd>0) return; var pr=plR(), best=null, bd=1e9, k;
-  for(k=0;k<lm.length;k++){ var m=lm[k], d=dist(m,pl)-m.r; if(d<pr*1.6&&d<bd&&ST.land.nests[m.ni].st!=='amici'){ bd=d; best=m; } }
+  for(k=0;k<lm.length;k++){ var m=lm[k]; if(m.dead) continue; if(!m.raid&&GSL()[m.ni].st==='amici') continue; var d=dist(m,pl)-m.r; if(d<pr*1.6&&d<bd){ bd=d; best=m; } }
   for(k=0;k<critters.length;k++){ var c=critters[k], dc=dist(c,pl)-c.r; if(dc<pr*1.6&&dc<bd){ bd=dc; best=c; } }
   pl.atkCd=.5; pl.open=1; tone(240,.1,'square',.05);
   if(!best){ if(!hinted.noatt){ hinted.noatt=1; toast('Non c\'è nessuno vicino da attaccare.'); } return; }
-  if(best.ni!=null){ var ns=ST.land.nests[best.ni], n=NESTS[best.ni];
-    if(ns.st==='free'&&!n.agg){ if(!attArm||attArm.ni!==best.ni||attArm.t<=0){ attArm={ni:best.ni,t:3}; toast('Vuoi davvero attaccare i '+n.n+'? Non saranno più amici. Premi ancora ⚔ per attaccare.',3.5); return; } ns.st='hostile'; ns.bar=0; toast('Hai attaccato i '+n.n+': ora ti attaccano tutti!',3); }
-    best.hp-=STT.latk; best.hurtT=.25; fx.push({t:'txt',s:'Morso!',x:best.x,y:best.y-best.r,life:.8,c:'#fff'}); if(best.hp<=0) killL(best); }
+  if(best.ni!=null){ if(!best.raid){ var ns=GSL()[best.ni], n=GN()[best.ni];
+      if(ns.st==='free'&&!n.agg){ if(!attArm||attArm.ni!==best.ni||attArm.t<=0){ attArm={ni:best.ni,t:3}; toast('Vuoi davvero attaccare i '+n.n+'? Non saranno più amici. Premi ancora ⚔ per attaccare.',3.5); return; } ns.st='hostile'; ns.bar=0; ns.seq=null; toast('Hai attaccato i '+n.n+': ora ti attaccano tutti!',3); } }
+    best.hp-=STT.latk+(isTribe()&&ST.tribe.tools.lance?.8:0); best.hurtT=.25; fx.push({t:'txt',s:'Morso!',x:best.x,y:best.y-best.r,life:.8,c:'#fff'}); if(best.hp<=0) killL(best); }
   else { var ci=critters.indexOf(best); if(ci>=0) critters.splice(ci,1); meats.push({x:best.x,y:best.y,r:9}); } }
+var lastTUI='';
+function tribeUI(){ var tr=isTribe(), near=tr&&dist(pl,HOME)<170, key=tr+'|'+near+'|'+(tr?ST.tribe.mode:''); if(key===lastTUI) return; lastTUI=key;
+  $('bMode').hidden=!tr||mode!=='play'; $('bShop').hidden=!near||mode!=='play'; if(tr) $('bMode').innerHTML=ST.tribe.mode==='segui'?'👣 Mi seguono<small>tocca: mandali a raccogliere</small>':'🍎 Raccolgono<small>tocca: fatti seguire</small>'; }
+function toggleMode(){ if(!isTribe()) return; ST.tribe.mode=ST.tribe.mode==='segui'?'raccogli':'segui'; allies.forEach(function(a){ a.tgtB=null; }); toast(ST.tribe.mode==='segui'?'La tribù ti segue e combatte con te.':'La tribù va a raccogliere frutta e la porta al villaggio (e lo difende).',3); lastTUI=''; tribeUI(); save(); }
+function renderShop(msg){ var h='<h2>Villaggio di '+esc(SP.name)+'</h2><div class="dna" style="text-align:center">Cibo: '+ST.tribe.food+' 🍎 · Membri: '+ST.tribe.mem+'/6</div>'+(msg?'<div class="hint" style="text-align:center;font-size:16px;color:#fff">'+msg+'</div>':'');
+  for(var k in TOOLS){ var t=TOOLS[k], own=k!=='membro'&&ST.tribe.tools[k], full=k==='membro'&&ST.tribe.mem>=6; h+='<button class="big'+(own||full?' alt':'')+'" data-k="'+k+'" type="button" style="min-width:0;width:100%">'+t.n+(own?' ✔':'')+'<small>'+(own?'Già costruito':(full?'Tribù al completo':t.c+' cibo · '+t.d))+'</small></button>'; }
+  h+='<button class="big alt" data-k="close" type="button" style="min-width:0;width:100%">◀ Torna a giocare</button>'; $('shopBox').innerHTML=h; }
+function openShop(){ if(!isTribe()) return; paused=true; touch=null; renderShop(''); $('shopOv').hidden=false; }
+function buy(k){ if(k==='close'){ $('shopOv').hidden=true; paused=false; lastT=0; return; } var t=TOOLS[k]; if(!t) return;
+  if(k!=='membro'&&ST.tribe.tools[k]) return; if(k==='membro'&&ST.tribe.mem>=6) return;
+  if(ST.tribe.food<t.c){ renderShop('Non basta il cibo: ne servono '+t.c+'. Manda la tribù a raccogliere!'); tone(200,.15,'square',.04); return; }
+  ST.tribe.food-=t.c; if(k==='membro'){ ST.tribe.mem++; allies.push(mkAlly(SP,HOME.x+rnd(-40,40),HOME.y+rnd(-40,40),17,4)); } else ST.tribe.tools[k]=1;
+  jingle([523,659,784],.08); save(); renderShop(t.n+': fatto!'); }
+$('shopBox').addEventListener('click',function(e){ var el=e.target; while(el&&el!==this&&!el.getAttribute('data-k')) el=el.parentNode; if(!el||el===this) return; buy(el.getAttribute('data-k')); });
 function bindBtn(el,fn){ el.addEventListener('touchstart',function(e){ if(e.cancelable) e.preventDefault(); ac(); fn(); },{passive:false}); el.addEventListener('mousedown',function(){ ac(); fn(); }); }
-(function(){ var bs=$('soc').getElementsByTagName('button'); for(var i=0;i<bs.length;i++)(function(b){ var a=b.getAttribute('data-a'); bindBtn(b,function(){ if(a==='att') attack(); else social(a); }); })(bs[i]); })();
+(function(){ var bs=$('soc').getElementsByTagName('button'); for(var i=0;i<bs.length;i++)(function(b){ var a=b.getAttribute('data-a'); bindBtn(b,function(){ if(a==='att') attack(); else if(a==='gift') gift(); else social(a); }); })(bs[i]); })();
+bindBtn($('bMode'),toggleMode); bindBtn($('bShop'),openShop);
 
 /* ================= DISEGNO ================= */
 function layout(){ W=window.innerWidth; H=window.innerHeight; DPR=Math.min(1.5,window.devicePixelRatio||1); cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); cv.style.width=W+'px'; cv.style.height=H+'px'; BASE=Math.min(W,H)/420; darkKey=''; if(mode==='ed') edLayout(); posBtns(); }
-function posBtns(){ var s=$('soc'); s.style.bottom=W<700?'130px':'14px'; }
+function posBtns(){ var s=$('soc'), hi=W<(isTribe()?760:700); s.style.bottom=hi?'130px':'14px'; $('bShop').style.bottom=hi?'226px':'110px'; }
 function buildDark(){ var e=STT?STT.eye:1, key=W+'x'+H+'e'+e; if(key===darkKey) return; darkKey=key; dark=document.createElement('canvas'); dark.width=Math.round(W/2); dark.height=Math.round(H/2); var x=dark.getContext('2d'), m=Math.min(W,H)/2, vis=m*(.42+.17*e), g=x.createRadialGradient(W/4,H/4,vis*.55,W/4,H/4,vis*1.25);
   g.addColorStop(0,'rgba(2,10,24,0)'); g.addColorStop(1,'rgba(2,10,24,'+(e?.82:.92)+')'); x.fillStyle=g; x.fillRect(0,0,dark.width,dark.height); }
 var FAR=[[120,140,90],[480,90,60],[600,420,120],[260,520,70],[80,380,50],[420,300,40]], SPECK=[];
@@ -456,7 +527,17 @@ function drawCell(){ var tm=Date.now()/1000, Z=BASE/Sd, pr=plR();
   if(touch){ ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(touch.x,touch.y,22,0,TAU); ctx.stroke(); } }
 function rrect(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r); c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h); c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r); c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath(); }
 function drawLC(o,sp,r,tm,extra){ ctx.save(); ctx.translate(o.x,o.y); ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.save(); ctx.translate(3,5); ctx.scale(1.15,.9); ctx.arc(0,0,r*1.05,0,TAU); ctx.restore(); ctx.fill(); ctx.rotate(o.h); drawCreature(ctx,sp,r,tm,extra); ctx.restore(); }
-function drawLand(){ var tm=Date.now()/1000, Z=BASE*1.08, pr=plR(), i;
+function hpBar(x,y,w,f){ ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(x-w/2,y,w,6); ctx.fillStyle=f>.4?'#7ad36a':'#e8404a'; ctx.fillRect(x-w/2,y,w*Math.max(0,f),6); }
+function nestG(x,y,col,broken){ ctx.fillStyle='rgba(0,0,0,.12)'; ctx.beginPath(); ctx.arc(x+4,y+6,62,0,TAU); ctx.fill(); ctx.strokeStyle=broken?'#7a6a5a':'#a07a3a'; ctx.lineWidth=20; ctx.beginPath(); ctx.arc(x,y,48,0,TAU); ctx.stroke(); ctx.strokeStyle=broken?'#5a4a3a':'#c89a4a'; ctx.lineWidth=3; for(var k=0;k<14;k++){ var a=k*.45; ctx.beginPath(); ctx.moveTo(x+Math.cos(a)*38,y+Math.sin(a)*38); ctx.lineTo(x+Math.cos(a+.5)*58,y+Math.sin(a+.5)*58); ctx.stroke(); } ctx.fillStyle='#7a5a2a'; ctx.beginPath(); ctx.arc(x,y,36,0,TAU); ctx.fill();
+  if(!broken){ ctx.fillStyle=col; ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=2; [[-10,-6],[10,-4],[0,10]].forEach(function(e){ ctx.beginPath(); ctx.save(); ctx.translate(x+e[0],y+e[1]); ctx.scale(.8,1); ctx.arc(0,0,10,0,TAU); ctx.restore(); ctx.fill(); ctx.stroke(); }); } }
+function village(x,y,flag,tm,food){ ctx.fillStyle='rgba(150,110,60,.45)'; ctx.beginPath(); ctx.arc(x,y,150,0,TAU); ctx.fill();
+  for(var k=0;k<3;k++){ var a=k*TAU/3+.5, hx=x+Math.cos(a)*92, hy=y+Math.sin(a)*92, j; ctx.fillStyle='rgba(0,0,0,.15)'; ctx.beginPath(); ctx.arc(hx+5,hy+6,37,0,TAU); ctx.fill(); ctx.fillStyle='#d8b46a'; ctx.beginPath(); ctx.arc(hx,hy,35,0,TAU); ctx.fill(); ctx.strokeStyle='#a8844a'; ctx.lineWidth=2; ctx.beginPath(); for(j=0;j<12;j++){ var b=j*TAU/12; ctx.moveTo(hx,hy); ctx.lineTo(hx+Math.cos(b)*35,hy+Math.sin(b)*35); } ctx.stroke(); ctx.fillStyle='#5a3a1a'; ctx.beginPath(); ctx.arc(hx-Math.cos(a)*28,hy-Math.sin(a)*28,9,0,TAU); ctx.fill(); ctx.fillStyle=flag; ctx.beginPath(); ctx.arc(hx,hy,8,0,TAU); ctx.fill(); }
+  ctx.fillStyle='#7a7a7a'; for(var s=0;s<8;s++){ var sa=s*TAU/8; ctx.beginPath(); ctx.arc(x+Math.cos(sa)*20,y+Math.sin(sa)*20,6,0,TAU); ctx.fill(); }
+  ctx.fillStyle='#ff8a2a'; ctx.beginPath(); ctx.arc(x,y,12+Math.sin(tm*12)*2,0,TAU); ctx.fill(); ctx.fillStyle='#ffe14a'; ctx.beginPath(); ctx.arc(x,y,6+Math.sin(tm*15)*1.5,0,TAU); ctx.fill();
+  var tx=x+42, ty=y-24, cols=['#8a5a3a','#c83a3a','#3a5ab0']; for(var q=0;q<3;q++){ ctx.fillStyle=cols[q]; ctx.fillRect(tx-9,ty-q*16-16,18,16); ctx.fillStyle='#fff'; ctx.fillRect(tx-6,ty-q*16-12,4,4); ctx.fillRect(tx+2,ty-q*16-12,4,4); ctx.fillStyle='#1d1f2b'; ctx.fillRect(tx-4,ty-q*16-6,8,2); }
+  ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(tx,ty-48); ctx.lineTo(tx,ty-72); ctx.stroke(); ctx.fillStyle=flag; ctx.beginPath(); ctx.moveTo(tx,ty-72); ctx.lineTo(tx+24+Math.sin(tm*4)*3,ty-64); ctx.lineTo(tx,ty-56); ctx.fill();
+  if(food!=null){ var n=Math.min(20,food); ctx.fillStyle='rgba(120,80,40,.6)'; ctx.beginPath(); ctx.arc(x-62,y+48,30,0,TAU); ctx.fill(); for(var f=0;f<n;f++){ var fa2=f*2.4, frr=7*Math.sqrt(f), fx2=x-62+Math.cos(fa2)*frr, fy2=y+48+Math.sin(fa2)*frr*.7; ctx.fillStyle='#e8404a'; ctx.beginPath(); ctx.arc(fx2,fy2,5,0,TAU); ctx.fill(); } } }
+function drawLand(){ var tm=Date.now()/1000, Z=BASE*1.08, pr=plR(), i, tr=isTribe(), GL=GN(), SL=GSL();
   ctx.setTransform(DPR,0,0,DPR,0,0); ctx.fillStyle='#2a7ab8'; ctx.fillRect(0,0,W,H);
   ctx.setTransform(DPR*Z,0,0,DPR*Z,DPR*(W/2-pl.x*Z),DPR*(H/2-pl.y*Z));
   var vx=W/2/Z+80, vy=H/2/Z+80;
@@ -466,36 +547,42 @@ function drawLand(){ var tm=Date.now()/1000, Z=BASE*1.08, pr=plR(), i;
   if(!WD.pat) WD.pat=ctx.createPattern(WD.grass,'repeat'); ctx.fillStyle=WD.pat; rrect(ctx,20,20,LWW-40,LWH-40,240); ctx.fill();
   WD.flowers.forEach(function(f){ if(!vis(f,4)) return; ctx.fillStyle=f.c; ctx.beginPath(); ctx.arc(f.x,f.y,3.5,0,TAU); ctx.fill(); });
   WD.rocks.forEach(function(r){ if(!vis(r,r.r)) return; ctx.fillStyle='#8a8a92'; ctx.beginPath(); ctx.arc(r.x,r.y,r.r,0,TAU); ctx.fill(); ctx.fillStyle='#a8a8b0'; ctx.beginPath(); ctx.arc(r.x-r.r*.3,r.y-r.r*.3,r.r*.5,0,TAU); ctx.fill(); });
-  function nest(x,y,col,broken){ ctx.fillStyle='rgba(0,0,0,.12)'; ctx.beginPath(); ctx.arc(x+4,y+6,62,0,TAU); ctx.fill(); ctx.strokeStyle=broken?'#7a6a5a':'#a07a3a'; ctx.lineWidth=20; ctx.beginPath(); ctx.arc(x,y,48,0,TAU); ctx.stroke(); ctx.strokeStyle=broken?'#5a4a3a':'#c89a4a'; ctx.lineWidth=3; for(var k=0;k<14;k++){ var a=k*.45; ctx.beginPath(); ctx.moveTo(x+Math.cos(a)*38,y+Math.sin(a)*38); ctx.lineTo(x+Math.cos(a+.5)*58,y+Math.sin(a+.5)*58); ctx.stroke(); } ctx.fillStyle='#7a5a2a'; ctx.beginPath(); ctx.arc(x,y,36,0,TAU); ctx.fill();
-    if(!broken){ ctx.fillStyle=col; ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=2; [[-10,-6],[10,-4],[0,10]].forEach(function(e){ ctx.beginPath(); ctx.save(); ctx.translate(x+e[0],y+e[1]); ctx.scale(.8,1); ctx.arc(0,0,10,0,TAU); ctx.restore(); ctx.fill(); ctx.stroke(); }); } }
-  nest(HOME.x,HOME.y,SP.col,false);
-  NESTS.forEach(function(n,ni){ if(!vis(n,80)) return; var ns=ST.land.nests[ni]; nest(n.x,n.y,LSP[n.k].col,ns.st==='sconfitti'); });
+  if(tr){ village(HOME.x,HOME.y,SP.col,tm,ST.tribe.food); GL.forEach(function(n,ni){ if(!vis(n,200)) return; var s=SL[ni].st; village(n.x,n.y,s==='sconfitti'?SP.col:LSP[n.k].col,tm,null); }); }
+  else { nestG(HOME.x,HOME.y,SP.col,false); GL.forEach(function(n,ni){ if(!vis(n,80)) return; nestG(n.x,n.y,LSP[n.k].col,SL[ni].st==='sconfitti'); }); }
   WD.bushes.forEach(function(b){ if(!vis(b,b.r)) return; ctx.fillStyle='#2e7a2e'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,TAU); ctx.fill(); ctx.fillStyle='#3e963a'; ctx.beginPath(); ctx.arc(b.x-6,b.y-6,b.r*.7,0,TAU); ctx.fill(); var fp=[[-10,-8],[9,-3],[-1,10]]; for(var k=0;k<b.f;k++){ ctx.fillStyle='#e8404a'; ctx.beginPath(); ctx.arc(b.x+fp[k][0],b.y+fp[k][1],6,0,TAU); ctx.fill(); ctx.fillStyle='#ffb0b0'; ctx.beginPath(); ctx.arc(b.x+fp[k][0]-2,b.y+fp[k][1]-2,2,0,TAU); ctx.fill(); } });
-  meats.forEach(function(m){ ctx.fillStyle='#d8505a'; ctx.beginPath(); ctx.arc(m.x,m.y,m.r,0,TAU); ctx.fill(); ctx.fillStyle='#f4ecd8'; ctx.fillRect(m.x-2,m.y-m.r-5,4,9); });
+  meats.forEach(function(m){ if(!vis(m,10)) return; ctx.fillStyle='#d8505a'; ctx.beginPath(); ctx.arc(m.x,m.y,m.r,0,TAU); ctx.fill(); ctx.fillStyle='#f4ecd8'; ctx.fillRect(m.x-2,m.y-m.r-5,4,9); });
   critters.forEach(function(c){ if(!vis(c,20)) return; drawLC(c,LSP.topino,c.r,c.tm,{walk:c.walk}); });
   lm.forEach(function(m){ if(!vis(m,m.r*2)) return; drawLC(m,m.sp,m.r,m.tm,{walk:m.walk,open:m.open,hurt:m.hurtT>0,act:m.act}); });
-  allies.forEach(function(a){ if(!vis(a,a.r*2)) return; drawLC(a,a.sp,a.r,a.tm,{walk:a.walk}); ctx.fillStyle='#ff5a7a'; ctx.font='900 14px sans-serif'; ctx.textAlign='center'; ctx.fillText('❤',a.x,a.y-a.r-8); });
-  if(!(pl.inv>0&&Math.floor(tm*10)%2)){ var fl=pl.dash>0; if(fl){ ctx.fillStyle='rgba(0,0,0,.15)'; ctx.beginPath(); ctx.arc(pl.x+20,pl.y+30,pr,0,TAU); ctx.fill(); } ctx.save(); ctx.translate(pl.x,pl.y-(fl?14:0)); if(fl) ctx.scale(1.15,1.15); ctx.translate(-pl.x,-pl.y); drawLC(pl,SP,pr,tm,{walk:pl.walk,open:pl.open,hurt:pl.hurtT>0,act:pl.act,fly:fl}); ctx.restore(); }
+  allies.forEach(function(a){ if(!vis(a,a.r*2)) return; drawLC(a,a.sp,a.r,a.tm,{walk:a.walk,hurt:a.hurtT>0});
+    if(tr){ if(a.carry){ ctx.fillStyle='#e8404a'; ctx.beginPath(); ctx.arc(a.x,a.y-a.r-6,6,0,TAU); ctx.fill(); } if(a.hp<a.hpMax) hpBar(a.x,a.y+a.r+4,a.r*2,a.hp/a.hpMax); }
+    else { ctx.fillStyle='#ff5a7a'; ctx.font='900 14px sans-serif'; ctx.textAlign='center'; ctx.fillText('❤',a.x,a.y-a.r-8); } });
+  if(!(pl.inv>0&&Math.floor(tm*10)%2)){ var fl=pl.dash>0; if(fl){ ctx.fillStyle='rgba(0,0,0,.15)'; ctx.beginPath(); ctx.arc(pl.x+20,pl.y+30,pr,0,TAU); ctx.fill(); } ctx.save(); ctx.translate(pl.x,pl.y-(fl?14:0)); if(fl) ctx.scale(1.15,1.15); ctx.translate(-pl.x,-pl.y); drawLC(pl,SP,pr,tm,{walk:pl.walk,open:pl.open,hurt:pl.hurtT>0,act:pl.act,fly:fl}); ctx.restore();
+    if(tr){ ctx.fillStyle='#f2d94a'; star5(ctx,pl.x,pl.y-pr-12,7); ctx.fill(); } }
   WD.trees.forEach(function(t){ if(!vis(t,t.r*1.3)) return; ctx.fillStyle='rgba(0,0,0,.2)'; ctx.beginPath(); ctx.arc(t.x+8,t.y+10,t.r*1.1,0,TAU); ctx.fill(); ctx.fillStyle=t.c?'#2a6a3a':'#3a8a3a'; ctx.beginPath(); ctx.arc(t.x,t.y,t.r*1.1,0,TAU); ctx.fill(); ctx.fillStyle=t.c?'#3a8a4a':'#4ea84a'; ctx.beginPath(); ctx.arc(t.x-t.r*.25,t.y-t.r*.25,t.r*.75,0,TAU); ctx.fill(); ctx.fillStyle=t.c?'#4a9a5a':'#62bc5a'; ctx.beginPath(); ctx.arc(t.x-t.r*.4,t.y-t.r*.4,t.r*.35,0,TAU); ctx.fill(); });
-  NESTS.forEach(function(n,ni){ var ns=ST.land.nests[ni]; if(!vis(n,200)) return; var lead=null; lm.forEach(function(m){ if(m.ni===ni&&m.lead) lead=m; }); var bx=lead?lead.x:n.x, by=(lead?lead.y-lead.r:n.y-50)-46;
+  GL.forEach(function(n,ni){ var ns=SL[ni]; if(!vis(n,240)) return; var lead=null; lm.forEach(function(m){ if(m.ni===ni&&m.lead&&!m.raid) lead=m; }); var ly=n.y+(tr?168:80);
     ctx.font='800 15px -apple-system,sans-serif'; ctx.textAlign='center';
-    var label=n.n+(ns.st==='amici'?' ❤':(ns.st==='sconfitti'?' (sconfitti)':(ns.st==='hostile'||n.agg?' ⚔':'')));
-    ctx.lineWidth=4; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.strokeText(label,n.x,n.y+80); ctx.fillStyle=ns.st==='amici'?'#ffb0c8':(ns.st==='hostile'||n.agg?'#ffb0a0':'#fff'); ctx.fillText(label,n.x,n.y+80);
-    if(enc===ni&&ns.req){ ctx.fillStyle='#fff'; ctx.strokeStyle='#0a1a2a'; ctx.lineWidth=3; rrect(ctx,bx-34,by-26,68,48,14); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(bx-8,by+22); ctx.lineTo(bx,by+34); ctx.lineTo(bx+8,by+22); ctx.fill(); ctx.fillStyle='#0a1a2a'; ctx.font='900 30px -apple-system,sans-serif'; ctx.fillText(ACT[ns.req].ic,bx,by+10+Math.sin(tm*6)*2); }
-    if(ns.st==='free'&&!n.agg&&(enc===ni||ns.bar>0)){ ctx.fillStyle='rgba(0,0,0,.5)'; rrect(ctx,n.x-60,n.y+90,120,14,7); ctx.fill(); if(ns.bar>0){ ctx.fillStyle='#ff8ab0'; rrect(ctx,n.x-58,n.y+92,Math.max(10,116*ns.bar/100),10,5); ctx.fill(); } } });
-  lm.forEach(function(m){ var ns=ST.land.nests[m.ni]; if(!(ns.st==='hostile'||NESTS[m.ni].agg)||m.hp>=m.hpMax) return; ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(m.x-m.r,m.y-m.r-14,m.r*2,6); ctx.fillStyle='#e8404a'; ctx.fillRect(m.x-m.r,m.y-m.r-14,m.r*2*Math.max(0,m.hp/m.hpMax),6); });
+    var label=(tr?'Tribù dei ':'')+n.n+(ns.st==='amici'?(tr?' (alleati) ❤':' ❤'):(ns.st==='sconfitti'?(tr?' (conquistati)':' (sconfitti)'):(ns.st==='hostile'||n.agg?' ⚔':'')));
+    ctx.lineWidth=4; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.strokeText(label,n.x,ly); ctx.fillStyle=ns.st==='amici'?'#ffb0c8':(ns.st==='hostile'||(n.agg&&ns.st==='free')?'#ffb0a0':'#fff'); ctx.fillText(label,n.x,ly);
+    if(enc===ni&&ns.seq){ var L2=ns.seq.length, bw=L2*36+16, bx=pl.x, by=pl.y-pr-62; ctx.font='800 13px -apple-system,sans-serif'; ctx.lineWidth=4; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.strokeText('I '+n.n+' chiedono:',bx,by-30); ctx.fillStyle='#fff'; ctx.fillText('I '+n.n+' chiedono:',bx,by-30); ctx.fillStyle='#fff'; ctx.strokeStyle='#0a1a2a'; ctx.lineWidth=3; rrect(ctx,bx-bw/2,by-24,bw,46,14); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(bx-8,by+21); ctx.lineTo(bx,by+33); ctx.lineTo(bx+8,by+21); ctx.fill();
+      for(var q=0;q<L2;q++){ var ix=bx-bw/2+8+q*36+18; if(q===ns.pos){ ctx.fillStyle='#f2d94a'; rrect(ctx,ix-16,by-19,32,36,8); ctx.fill(); } ctx.globalAlpha=q<ns.pos?.3:1; ctx.fillStyle=q<ns.pos?'#2e9a5a':'#0a1a2a'; ctx.font='900 26px -apple-system,sans-serif'; ctx.fillText(ACT[ns.seq[q]].ic,ix,by+(q===ns.pos?Math.sin(tm*8)*2:0)+8); ctx.globalAlpha=1; } }
+    if(ns.st==='free'&&!n.agg&&(enc===ni||ns.bar>0)){ ctx.fillStyle='rgba(0,0,0,.5)'; rrect(ctx,n.x-60,ly+10,120,14,7); ctx.fill(); if(ns.bar>0){ ctx.fillStyle='#ff8ab0'; rrect(ctx,n.x-58,ly+12,Math.max(10,116*ns.bar/100),10,5); ctx.fill(); } } });
+  lm.forEach(function(m){ if(!hostileM(m)||m.hp>=m.hpMax) return; hpBar(m.x,m.y-m.r-14,m.r*2,m.hp/m.hpMax); });
   lm.forEach(function(m){ if(m.happy>0){ ctx.fillStyle='#ff5a7a'; ctx.font='900 16px sans-serif'; ctx.textAlign='center'; ctx.fillText('❤',m.x,m.y-m.r-8-(.8-m.happy)*20); } });
   drawFx(pr);
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  var tn=null, td=1e9; NESTS.forEach(function(n,ni){ var s2=ST.land.nests[ni].st; if(s2==='amici'||s2==='sconfitti') return; var d=dist(n,pl); if(d<td){ td=d; tn=n; } }); if(tn) edgeArrow(tn.x,tn.y,Z,'#ffffff');
+  var tn=null, td=1e9; GL.forEach(function(n,ni){ var s2=SL[ni].st; if(s2==='amici'||s2==='sconfitti') return; var d=dist(n,pl); if(d<td){ td=d; tn=n; } }); if(tn) edgeArrow(tn.x,tn.y,Z,'#ffffff');
+  if(pl.hp<=Math.ceil(maxHp()*.35)){ var sf=safeSpot(); edgeArrow(sf.x,sf.y,Z,'#5aff7a'); }
+  if(tr){ var rd=null; lm.forEach(function(m){ if(m.raid&&!rd) rd=m; }); if(rd) edgeArrow(rd.x,rd.y,Z,'#ff4a4a'); }
   if(touch){ ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(touch.x,touch.y,22,0,TAU); ctx.stroke(); } }
 function drawMM(){ var c=$('mm'), x=c.getContext('2d'), sx=280/LWW, sy=224/LWH; x.fillStyle='#2a7ab8'; x.fillRect(0,0,280,224); x.fillStyle='#62b04f'; rrect(x,6,6,268,212,26); x.fill(); x.fillStyle='#3a8a3a'; WD.trees.forEach(function(t){ x.fillRect(t.x*sx-2,t.y*sy-2,4,4); });
-  x.fillStyle=SP.col; x.beginPath(); x.arc(HOME.x*sx,HOME.y*sy,9,0,TAU); x.fill();
-  NESTS.forEach(function(n,ni){ var s2=ST.land.nests[ni].st; x.fillStyle=s2==='amici'?'#ff8ab0':(s2==='sconfitti'?'#6a6a6a':(s2==='hostile'||n.agg?'#e8404a':'#ffffff')); x.beginPath(); x.arc(n.x*sx,n.y*sy,10,0,TAU); x.fill(); x.strokeStyle='#0a1a2a'; x.lineWidth=2; x.stroke(); });
+  x.fillStyle=SP.col; x.beginPath(); x.arc(HOME.x*sx,HOME.y*sy,11,0,TAU); x.fill(); x.strokeStyle='#fff'; x.lineWidth=3; x.stroke();
+  GN().forEach(function(n,ni){ var s2=GSL()[ni].st; x.fillStyle=s2==='amici'?'#ff8ab0':(s2==='sconfitti'?(isTribe()?SP.col:'#6a6a6a'):(s2==='hostile'||n.agg?'#e8404a':'#ffffff')); x.beginPath(); x.arc(n.x*sx,n.y*sy,10,0,TAU); x.fill(); x.strokeStyle='#0a1a2a'; x.lineWidth=2; x.stroke(); });
+  x.fillStyle='#e8404a'; lm.forEach(function(m){ if(m.raid){ x.beginPath(); x.arc(m.x*sx,m.y*sy,5,0,TAU); x.fill(); } });
   x.fillStyle='#f2d94a'; x.strokeStyle='#0a1a2a'; x.lineWidth=3; x.beginPath(); x.arc(pl.x*sx,pl.y*sy,8,0,TAU); x.fill(); x.stroke(); }
 var lastInfo='';
 function info(){ var h='DNA '+ST.dna+'  ·  '; for(var i=0;i<maxHp();i++) h+=i<pl.hp?'❤':'♡';
-  if(isLand()){ var d=doneCount(); h+='  ·  Nidi '+Math.min(d,NEST_NEED)+'/'+NEST_NEED; $('gfill').style.width=Math.min(100,d/NEST_NEED*100)+'%'; }
+  if(isTribe()){ var dt2=doneCount(); h+='  ·  🍎 '+ST.tribe.food+'  ·  Tribù '+Math.min(dt2,TRIBE_NEED)+'/'+TRIBE_NEED; $('gfill').style.width=Math.min(100,dt2/TRIBE_NEED*100)+'%'; }
+  else if(isLand()){ var d=doneCount(); h+='  ·  Nidi '+Math.min(d,NEST_NEED)+'/'+NEST_NEED; $('gfill').style.width=Math.min(100,d/NEST_NEED*100)+'%'; }
   else { h+='  ·  Livello '+(ST.L+1)+'/5'; $('gfill').style.width=Math.min(100,ST.gr/NEED[ST.L]*100)+'%'; }
   if(h!==lastInfo){ $('infoT').textContent=h; lastInfo=h; } }
 
@@ -588,10 +675,10 @@ function canDash(){ return STT&&(isLand()?STT.fly:STT.dash); }
 function dash(){ if(!canDash()||pl.dashCd>0||paused) return; pl.dash=isLand()?.9:.55; pl.dashCd=isLand()?3.5:3; tone(300,.25,'sawtooth',.05); tone(600,.2,'sawtooth',.03,.05); }
 bindBtn($('bDash'),dash);
 $('bEvo').onclick=function(){ save(); openEditor(null); };
-function showUI(on){ var land=isLand(); ['bBack','bPause','info','bEvo'].forEach(function(id){ $(id).hidden=!on; }); $('bDash').hidden=!(on&&canDash()); $('bDash').textContent=land?'VOLA':'SCATTO'; $('soc').hidden=!(on&&land); $('mm').hidden=!(on&&land); lastSoc=''; }
+function showUI(on){ var land=isLand(); ['bBack','bPause','info','bEvo'].forEach(function(id){ $(id).hidden=!on; }); $('bDash').hidden=!(on&&canDash()); $('bDash').textContent=land?'VOLA':'SCATTO'; $('soc').hidden=!(on&&land); $('mm').hidden=!(on&&land); lastSoc=''; lastTUI=''; if(on&&land) tribeUI(); else { $('bMode').hidden=true; $('bShop').hidden=true; } }
 function startPlay(){ STT=stats(SP); if(isLand()){ landStart(); return; } pl=newPl(); pl.hp=maxHp(); npcs=[]; foods=[]; stars=[]; clouds=[]; fx=[]; Sd=scl(); starT=ST.unl.indexOf('veleno')<0?10:30; fillWorld(true); }
 function loadRun(){ var s=L('stelle-save',null); if(!s||!s.sp) return false; ST=s; START_UNL.forEach(function(u){ if(ST.unl.indexOf(u)<0) ST.unl.push(u); }); if(ST.L>4) ST.L=4; SP=prep({name:s.sp.name,col:s.sp.col,col2:s.sp.col2,shape:s.sp.shape,pat:s.sp.pat,size:s.sp.size,parts:s.sp.parts}); return true; }
-function cont(){ ac(); if(!loadRun()) return; hinted={}; startPlay(); mode='play'; paused=false; $('menu').hidden=true; showUI(true); layout(); if(ST.ph==='cellDone'){ showCellDone(); return; } toast('Bentornata, specie '+SP.name+'!'); }
+function cont(){ ac(); if(!loadRun()) return; hinted={}; startPlay(); mode='play'; paused=false; $('menu').hidden=true; showUI(true); layout(); if(ST.ph==='cellDone'){ showCellDone(); return; } if(ST.ph==='landDone'){ showLandDone(); return; } toast('Bentornata, specie '+SP.name+'!'); }
 function newSpecies(d){ $('newOv').hidden=true; hinted={}; var mouth=d==='carn'?'mascella':'filtro';
   SP=prep({name:'Tommini',col:d==='carn'?'#e85f7a':'#7ad36a',shape:'tonda',pat:'punti',size:'media',parts:[{t:mouth,a:0},{t:'flagello',a:Math.PI},{t:'occhio',a:.6}]});
   ST={dna:16,tot:0,unl:START_UNL.slice(),L:0,gr:0,ph:'cell'}; startPlay(); save(); layout(); openEditor('cell'); }
@@ -602,11 +689,11 @@ $('askYes').onclick=function(){ $('askOv').hidden=true; askNew(); };
 $('askNo').onclick=function(){ $('askOv').hidden=true; };
 $('chErb').onclick=function(){ newSpecies('erb'); }; $('chCarn').onclick=function(){ newSpecies('carn'); }; $('chNo').onclick=function(){ $('newOv').hidden=true; };
 function renderMenu(){ var s=L('stelle-save',null), cb=$('bCont');
-  if(s&&s.sp){ cb.hidden=false; var fase=s.ph==='land'||s.ph==='landDone'?'Fase Terra'+(s.ph==='landDone'?' · completata!':''):'Fase Cellula · Livello '+(Math.min(4,s.L)+1)+'/5'+(s.ph==='cellDone'?' · completata!':''); cb.innerHTML='▶ Continua con '+esc(s.sp.name)+'<small>'+fase+' · '+s.dna+' DNA</small>'; cb.onclick=cont; } else cb.hidden=true;
+  if(s&&s.sp){ cb.hidden=false; var fase=s.ph==='tribe'||s.ph==='tribeDone'?'Fase Tribù'+(s.ph==='tribeDone'?' · gioco finito!':''):s.ph==='land'||s.ph==='landDone'?'Fase Terra'+(s.ph==='landDone'?' · completata!':''):'Fase Cellula · Livello '+(Math.min(4,s.L)+1)+'/5'+(s.ph==='cellDone'?' · completata!':''); cb.innerHTML='▶ Continua con '+esc(s.sp.name)+'<small>'+fase+' · '+s.dna+' DNA</small>'; cb.onclick=cont; } else cb.hidden=true;
   var b=(L('sala-board',{}).stelle)||{}, rec=[]; for(var n in b) rec.push([n,b[n].pts||0]); rec.sort(function(a,c){ return c[1]-a[1]; }); $('recs').innerHTML=rec.length?'🏆 Record DNA: '+rec.slice(0,5).map(function(r){ return esc(r[0])+' '+r[1]; }).join(' · '):'';
   $('bSnd').textContent=SND?'🔊 Suono sì':'🔇 Suono no'; }
 $('bSnd').onclick=function(){ SND=!SND; S('stelle-snd',SND); renderMenu(); };
-function toMenu(){ if(ST&&SP) save(); mode='menu'; paused=false; touch=null; keys={}; ['pauseOv','doneOv','ed'].forEach(function(id){ $(id).hidden=true; }); showUI(false); $('menu').hidden=false; renderMenu(); }
+function toMenu(){ if(ST&&SP) save(); mode='menu'; paused=false; touch=null; keys={}; ['pauseOv','doneOv','ed','shopOv'].forEach(function(id){ $(id).hidden=true; }); showUI(false); $('menu').hidden=false; renderMenu(); }
 $('bBack').onclick=toMenu; $('bExit').onclick=toMenu; $('bDoneMenu').onclick=toMenu;
 $('bPause').onclick=function(){ paused=true; touch=null; keys={}; save(); $('pauseOv').hidden=false; };
 $('bResume').onclick=function(){ paused=false; $('pauseOv').hidden=true; lastT=0; };
@@ -615,7 +702,7 @@ function loop(ts){ requestAnimationFrame(loop); var dt=lastT?Math.min(1/20,(ts-l
   if(mode==='play'){ if(!paused) update(dt); if(isLand()){ drawLand(); mmT-=dt; if(mmT<=0){ mmT=.25; drawMM(); } } else drawCell(); info(); } else if(mode==='ed') drawEditor(); }
 window.addEventListener('resize',function(){ setTimeout(layout,60); }); window.addEventListener('orientationchange',function(){ setTimeout(layout,300); });
 layout(); renderMenu(); requestAnimationFrame(loop);
-window.__ST={get ST(){ return ST; },get SP(){ return SP; },get pl(){ return pl; },get npcs(){ return npcs; },get foods(){ return foods; },get stars(){ return stars; },get lm(){ return lm; },get allies(){ return allies; },get enc(){ return enc; },get critters(){ return critters; },update:update,newSpecies:newSpecies,closeEditor:closeEditor,addPart:addPart,openEditor:openEditor,stats:stats,get STT(){ return STT; },toLand:toLand,social:social,attack:attack,NESTS:NESTS,phaseDone:phaseDone};
+window.__ST={get ST(){ return ST; },get SP(){ return SP; },get pl(){ return pl; },get npcs(){ return npcs; },get foods(){ return foods; },get stars(){ return stars; },get lm(){ return lm; },get allies(){ return allies; },get enc(){ return enc; },get critters(){ return critters; },update:update,newSpecies:newSpecies,closeEditor:closeEditor,addPart:addPart,openEditor:openEditor,stats:stats,get STT(){ return STT; },toLand:toLand,toTribe:toTribe,gift:gift,buy:buy,toggleMode:toggleMode,get TRIBES(){ return TRIBES; },social:social,attack:attack,NESTS:NESTS,phaseDone:phaseDone};
 })();
 </script>
 <script>/*stay-in-app*/(function(){ if(!window.navigator.standalone) return; document.addEventListener("click",function(e){ var a=e.target; while(a&&a.nodeName!=="A") a=a.parentNode; if(!a||!a.href||a.target==="_blank") return; var h=a.getAttribute("href")||""; if(h.charAt(0)==="#"||h.indexOf("mailto:")===0) return; if(a.host!==location.host) return; e.preventDefault(); location.href=a.href; },true); })();</script>
