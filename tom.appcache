@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v83 2a2f13b0a1
+# v84 7d1bddf8d0
 
 CACHE:
 ./
@@ -30,6 +30,7 @@ giochi/sasso.html
 giochi/seisette.html
 giochi/sixseven.html
 giochi/sparabolle.html
+giochi/stelle.html
 giochi/tavolo.html
 giochi/vichinghi.html
 manifest.webmanifest
