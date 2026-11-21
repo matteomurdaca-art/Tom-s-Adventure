@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v82 ee2b642557
+# v83 2a2f13b0a1
 
 CACHE:
 ./
@@ -7,6 +7,7 @@ index.html
 giochi/blocchi.html
 giochi/bolidi.html
 giochi/bollegiganti.html
+giochi/botti.html
 giochi/bruco.html
 giochi/calcio.html
 giochi/casa.html
