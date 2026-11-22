@@ -91,7 +91,7 @@ img{image-rendering:-webkit-optimize-contrast;image-rendering:pixelated;-webkit-
 </section>
 <button class="blk hud" id="bBack" type="button" hidden>◀ Indietro</button>
 <button class="blk hud" id="bPause" type="button" hidden>❚❚ Pausa</button>
-<div class="ov" id="colOv" hidden><div class="box"><h2>Scegli il colore</h2><button class="blk g colb" data-c="g" type="button">ERBA</button><button class="blk b colb" data-c="b" type="button">ACQUA</button><br><button class="blk r colb" data-c="r" type="button">LAVA</button><button class="blk y colb" data-c="y" type="button">ORO</button></div></div>
+<div class="ov" id="colOv" hidden><div class="box"><h2>Scegli il colore</h2><button class="blk g colb" data-c="g" type="button">ERBA</button><button class="blk b colb" data-c="b" type="button">ACQUA</button><br><button class="blk r colb" data-c="r" type="button">LAVA</button><button class="blk y colb" data-c="y" type="button">ORO</button><br><button class="blk big" id="colNo" type="button" style="margin-top:14px">◀ Ho sbagliato: scelgo un'altra carta</button></div></div>
 <div class="ov" id="pauseOv" hidden><div class="box"><h2>PAUSA</h2><button class="blk g big" id="bResume" type="button">▶ Continua</button><button class="blk big" id="bExit" type="button">◀ Esci (la partita resta salvata)</button></div></div>
 <div class="ov" id="endOv" hidden><div class="box"><h2 id="endH"></h2><div id="endT" style="font-size:17px;line-height:1.6"></div><button class="blk g big" id="bAgain" type="button">🔁 Un'altra mano</button><button class="blk big" id="bMenu" type="button">Menu</button></div></div>
 <script>
@@ -207,7 +207,9 @@ function humanDraw(){ if(busy||!playing||paused||G.cur!==0) return; if(G.drew){ 
   else { say('Hai pescato. Non puoi giocare: passa il turno.'); busy=true; later(function(){ endTurn(false); },900); } }
 $('bPass').onclick=function(){ if(busy||G.cur!==0) return; $('bPass').hidden=true; busy=true; endTurn(false); };
 $('bUlt').onclick=function(){ if(!G) return; var me=G.players[0]; if(me.hand.length<=2){ me.said=true; say('ULTIMA! Bravo, l\'hai detto!'); jingle([784,988,1175]); render(); } };
-(function(){ var bs=$('colOv').getElementsByTagName('button'); for(var i=0;i<bs.length;i++) bs[i].onclick=function(){ var c=this.getAttribute('data-c'); $('colOv').hidden=true; if(pendingWild){ var w=pendingWild; pendingWild=null; busy=true; playCard(0,w,c); } }; })();
+function colCancel(){ $('colOv').hidden=true; pendingWild=null; say('Va bene, scegli un\'altra carta.'); render(); }
+$('colOv').addEventListener('click',function(e){ if(e.target===this) colCancel(); });
+(function(){ var bs=$('colOv').getElementsByTagName('button'); for(var i=0;i<bs.length;i++) bs[i].onclick=function(){ if(this.id==='colNo'){ colCancel(); return; } var c=this.getAttribute('data-c'); $('colOv').hidden=true; if(pendingWild){ var w=pendingWild; pendingWild=null; busy=true; playCard(0,w,c); } }; })();
 function endRound(wi){ playing=false; var w=G.players[wi], pts=0; G.players.forEach(function(p){ p.hand.forEach(function(c){ pts+=points(c); }); });
   S('ultima-run',null); var me=G.players[0], board=L('sala-board',{}); if(!board.ultima) board.ultima={}; var r=board.ultima[me.name]||{pts:0,partite:0,max:{}}; r.partite=(r.partite||0)+1; if(!r.max) r.max={};
   if(wi===0){ r.pts=(r.pts||0)+pts; r.max.vittorie=(r.max.vittorie||0)+1; jingle([523,659,784,1047,1319,1568],.1); } else { tone(220,.4,'sawtooth',.04); }
