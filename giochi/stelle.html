@@ -40,7 +40,7 @@ input{font:inherit;-webkit-user-select:text;user-select:text}
 @-webkit-keyframes pul{from{-webkit-transform:scale(1)}to{-webkit-transform:scale(1.1)}}
 @keyframes pul{from{transform:scale(1)}to{transform:scale(1.1)}}
 #mm{position:absolute;z-index:6;top:58px;right:8px;width:140px;height:112px;border:2px solid #0a1a2a;border-radius:12px;pointer-events:none}
-#toast{position:absolute;z-index:9;left:50%;top:70px;-webkit-transform:translateX(-50%);transform:translateX(-50%);max-width:92%;text-align:center;background:rgba(255,255,255,.95);color:#0a1a2a;font-weight:800;font-size:17px;padding:9px 16px;border-radius:14px;border:3px solid #0a1a2a;pointer-events:none;-webkit-transition:opacity .4s;transition:opacity .4s}
+#toast{position:absolute;z-index:40;left:50%;top:70px;-webkit-transform:translateX(-50%);transform:translateX(-50%);max-width:92%;text-align:center;background:rgba(255,255,255,.95);color:#0a1a2a;font-weight:800;font-size:17px;padding:9px 16px;border-radius:14px;border:3px solid #0a1a2a;pointer-events:none;-webkit-transition:opacity .4s;transition:opacity .4s}
 .ov{position:absolute;top:0;left:0;right:0;bottom:0;z-index:30;background:rgba(2,10,24,.8);text-align:center;padding:30px 12px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .ov .box{display:inline-block;background:#0a2a44;border:3px solid #7af0c8;border-radius:20px;padding:16px 18px;max-width:560px;width:100%}
 .ov h2{margin:4px 0 10px;color:#7af0c8}
@@ -131,40 +131,65 @@ var PARTS={
   getto:{n:'Getto',cat:'moto',cost:25,ph:'c',d:'Tasto SCATTO a razzo'},
   zampa:{n:'Zampe',cat:'moto',cost:10,ph:'t',d:'Cammini più veloce'},
   coda:{n:'Coda',cat:'moto',cost:8,ph:'t',d:'Più agile nelle curve'},
-  ala:{n:'Ali',cat:'moto',cost:20,ph:'t',d:'Tasto VOLA: planata'},
+  ala:{n:'Ali',cat:'moto',cost:20,ph:'t',un:'nido',d:'Tasto VOLA: planata'},
   spina:{n:'Spina',cat:'arma',cost:12,ph:'ct',d:'Chi ti morde si punge'},
   veleno:{n:'Veleno',cat:'arma',cost:25,ph:'c',d:'Nuvola che allontana i nemici'},
   artiglio:{n:'Artigli',cat:'arma',cost:12,ph:'t',d:'Attacco più forte'},
-  corno:{n:'Corno',cat:'arma',cost:15,ph:'t',d:'Attacco molto forte'},
+  corno:{n:'Corno',cat:'arma',cost:15,ph:'t',un:'nido',d:'Attacco molto forte'},
   voce:{n:'Sacca canora',cat:'social',cost:10,ph:'t',d:'Canti meglio ♪'},
   cresta:{n:'Cresta',cat:'social',cost:10,ph:'t',d:'Balli meglio ★'},
-  piume:{n:'Piume buffe',cat:'social',cost:10,ph:'t',d:'Sei più buffo ☺'},
+  piume:{n:'Piume buffe',cat:'social',cost:10,ph:'t',un:'nido',d:'Sei più buffo ☺'},
   occhio:{n:'Occhio',cat:'senso',cost:8,ph:'ct',d:'Vedi più lontano'},
+  occhione:{n:'Occhione',cat:'senso',cost:8,ph:'t',d:'Un occhio enorme'},
+  zampalunga:{n:'Zampe lunghe',cat:'moto',cost:16,ph:'t',un:30,d:'Corri molto veloce'},
+  ruote:{n:'Ruote aliene',cat:'moto',cost:22,ph:'t',un:60,d:'Velocissima!'},
+  zanne:{n:'Zanne',cat:'arma',cost:12,ph:'t',un:25,d:'Attacco più forte'},
+  pungiglione:{n:'Pungiglione',cat:'arma',cost:15,ph:'t',un:'vil',d:'Attacco forte'},
+  mazza:{n:'Coda a mazza',cat:'arma',cost:18,ph:'t',un:'vil',d:'Attacco fortissimo'},
+  corazza:{n:'Corazza',cat:'arma',cost:15,ph:'t',un:35,d:'+2 cuori di vita'},
+  guscio:{n:'Guscio',cat:'arma',cost:20,ph:'t',un:'vil',d:'+3 cuori, un po\' più lenta'},
+  scudo:{n:'Scudo tribale',cat:'arma',cost:15,ph:'t',un:'vil',d:'+2 cuori di vita'},
+  sonagli:{n:'Sonagli',cat:'social',cost:12,ph:'t',un:30,d:'Canti meglio ♪'},
+  ventaglio:{n:'Ventaglio',cat:'social',cost:12,ph:'t',un:30,d:'Balli meglio ★'},
+  nasone:{n:'Nasone buffo',cat:'social',cost:12,ph:'t',un:30,d:'Sei più buffo ☺'},
+  maschera:{n:'Maschera tribale',cat:'social',cost:16,ph:'t',un:'vil',d:'Balli e fai ridere meglio'},
+  orecchie:{n:'Orecchie',cat:'look',cost:4,ph:'t',d:'Per essere bellissimi'},
+  cornaricce:{n:'Corna ricce',cat:'look',cost:4,ph:'t',d:'Per essere bellissimi'},
+  fiore:{n:'Fiore',cat:'look',cost:4,ph:'t',d:'Per essere bellissimi'},
+  cappello:{n:'Cappello di foglie',cat:'look',cost:4,ph:'t',d:'Per essere bellissimi'},
+  pinna:{n:'Pinna sulla schiena',cat:'look',cost:4,ph:'t',d:'Per essere bellissimi'},
+  lucine:{n:'Lucine',cat:'look',cost:5,ph:'t',un:20,d:'Brillano al buio'},
+  alifarfalla:{n:'Ali di farfalla',cat:'look',cost:6,ph:'t',un:40,d:'Colorate e svolazzanti'},
+  collana:{n:'Collana di denti',cat:'look',cost:6,ph:'t',un:'vil',d:'Da vero capo tribù'},
+  piumecapo:{n:'Piume da capo',cat:'look',cost:8,ph:'t',un:'vil',d:'Da vero capo tribù'},
   antenna:{n:'Antenne',cat:'look',cost:3,ph:'ct',d:'Per essere bellissimi'},
   ciuffo:{n:'Ciuffo',cat:'look',cost:3,ph:'ct',d:'Per essere bellissimi'},
   baffi:{n:'Baffi',cat:'look',cost:3,ph:'ct',d:'Per essere bellissimi'},
   tentacolo:{n:'Tentacolo',cat:'look',cost:3,ph:'ct',d:'Per essere bellissimi'}
 };
 var START_UNL=['filtro','mascella','flagello','occhio','antenna','ciuffo','baffi','tentacolo'];
-var LAND_UNL=['zampa','coda','artiglio','cresta','voce'];
+var VIL_UNL=['pungiglione','collana','mazza','guscio','piumecapo','maschera','scudo'];
+var TOP={occhio:1,occhione:1,corazza:1,guscio:1,scudo:1,nasone:1,maschera:1,fiore:1,lucine:1,collana:1,cappello:1};
+function landFree(){ for(var t in PARTS){ if(PARTS[t].ph.indexOf('t')>=0&&PARTS[t].un==null&&ST.unl.indexOf(t)<0) ST.unl.push(t); } }
+function unlockVil(n){ var got=[]; for(var i=0;i<VIL_UNL.length&&got.length<n;i++){ if(ST.unl.indexOf(VIL_UNL[i])<0){ ST.unl.push(VIL_UNL[i]); got.push(PARTS[VIL_UNL[i]].n); } } return got; }
 var UNLOCK=['ciglia','spina','proboscide','getto','veleno'];
-var CATS=[['bocca','Bocca (una sola)'],['moto','Movimento'],['arma','Difesa e armi'],['social','Amicizia'],['senso','Sensi'],['look','Decorazioni']];
-var COLORS=['#7ad36a','#2e9a5a','#5fb8e8','#3a5ab0','#b07ae8','#f28ad0','#e85f7a','#c83a3a','#f2a33a','#f2d94a','#8a5a3a','#f4ecd8','#5fe0c8','#3a3a4a'];
+var CATS=[['bocca','Bocca (una sola)'],['moto','Movimento'],['arma','Attacco e difesa'],['social','Amicizia'],['senso','Sensi'],['look','Decorazioni']];
+var COLORS=['#ff6a1a','#00a0a0','#ffffff','#7a2a8a','#7ad36a','#2e9a5a','#5fb8e8','#3a5ab0','#b07ae8','#f28ad0','#e85f7a','#c83a3a','#f2a33a','#f2d94a','#8a5a3a','#f4ecd8','#5fe0c8','#3a3a4a'];
 var SHAPES={tonda:[1,1],ovale:[1.25,.85],lunga:[1.5,.7],larga:[.85,1.2]};
 var SHAPE_N={tonda:'Tonda',ovale:'Ovale',lunga:'Lunga',larga:'Larga'};
-var PAT_N={no:'Liscia',punti:'Puntini',strisce:'Strisce',macchie:'Macchie',stelle:'Stelline'};
+var PAT_N={no:'Liscia',punti:'Puntini',strisce:'Strisce',macchie:'Macchie',stelle:'Stelline',tigre:'Tigre',cuori:'Cuori',pancia:'Pancia chiara'};
 var SIZES={piccola:{k:.85,spd:1.12,hp:-1,n:'Piccola'},media:{k:1,spd:1,hp:0,n:'Media'},grande:{k:1.2,spd:.88,hp:2,n:'Grande'}};
 var PSIZE=[[.75,'Piccolo'],[1,'Medio'],[1.3,'Grande']];
-var MAXP=12, NEED=[12,16,20,24,28];
+var MAXP=12, MAXPL=16, NEED=[12,16,20,24,28];
 var ACT={canta:{ic:'♪',n:'Canta'},balla:{ic:'★',n:'Balla'},buffo:{ic:'☺',n:'Fai il buffo'}};
 function prep(sp){ sp.dk=shade(sp.col,-.4); sp.lt=shade(sp.col,.35); sp.c2v=sp.col2||sp.dk; if(!sp.size) sp.size='media'; if(!sp.pat) sp.pat='no'; return sp; }
 function cnt(sp,t){ var n=0; for(var i=0;i<sp.parts.length;i++) if(sp.parts[i].t===t) n++; return n; }
 function mouthOf(sp){ for(var i=0;i<sp.parts.length;i++) if(PARTS[sp.parts[i].t].cat==='bocca') return sp.parts[i].t; return null; }
 function diet(sp){ var m=mouthOf(sp); return m==='mascella'?'carn':(m==='proboscide'?'onn':(m==='filtro'?'erb':'none')); }
-function stats(sp){ var f=cnt(sp,'flagello'), c=cnt(sp,'ciglia'), d=diet(sp), z=SIZES[sp.size]||SIZES.media, legs=cnt(sp,'zampa'), tail=cnt(sp,'coda');
-  return {spd:(50+26*Math.min(3,f)+8*Math.min(2,c))*z.spd, agi:2.2+1.6*Math.min(3,c), atk:d==='carn'?1:(d==='onn'?.6:0), spi:Math.min(3,cnt(sp,'spina')), eye:Math.min(3,cnt(sp,'occhio')), dash:cnt(sp,'getto')>0, poison:cnt(sp,'veleno')>0, d:d, f:f, c:c, k:z.k, hpb:z.hp,
-    lspd:((legs?72+18*Math.min(2,legs-1):30)+6*Math.min(2,tail))*z.spd, lagi:3+1.5*Math.min(2,tail), latk:(d==='carn'?1.2:(d==='onn'?.9:.5))+.6*Math.min(2,cnt(sp,'artiglio'))+.9*Math.min(2,cnt(sp,'corno')), fly:cnt(sp,'ala')>0, legs:legs, tail:tail,
-    soc:{canta:Math.min(3,cnt(sp,'voce')),balla:Math.min(3,cnt(sp,'cresta')),buffo:Math.min(3,cnt(sp,'piume'))}}; }
+function stats(sp){ var f=cnt(sp,'flagello'), c=cnt(sp,'ciglia'), d=diet(sp), z=SIZES[sp.size]||SIZES.media, legs=cnt(sp,'zampa')+1.5*cnt(sp,'zampalunga')+2*cnt(sp,'ruote'), tail=cnt(sp,'coda'), arm=2*Math.min(2,cnt(sp,'corazza'))+3*Math.min(1,cnt(sp,'guscio'))+2*Math.min(1,cnt(sp,'scudo'));
+  return {spd:(50+26*Math.min(3,f)+8*Math.min(2,c))*z.spd, agi:2.2+1.6*Math.min(3,c), atk:d==='carn'?1:(d==='onn'?.6:0), spi:Math.min(3,cnt(sp,'spina')), eye:Math.min(3,cnt(sp,'occhio')+cnt(sp,'occhione')), arm:arm, dash:cnt(sp,'getto')>0, poison:cnt(sp,'veleno')>0, d:d, f:f, c:c, k:z.k, hpb:z.hp,
+    lspd:((legs?72+16*Math.min(3.5,legs-1):30)+6*Math.min(2,tail))*z.spd*(cnt(sp,'guscio')?.9:1), lagi:3+1.5*Math.min(2,tail), latk:(d==='carn'?1.2:(d==='onn'?.9:.5))+.6*Math.min(2,cnt(sp,'artiglio'))+.9*Math.min(2,cnt(sp,'corno'))+.6*Math.min(2,cnt(sp,'zanne'))+.8*Math.min(2,cnt(sp,'pungiglione'))+1*Math.min(1,cnt(sp,'mazza')), fly:cnt(sp,'ala')>0, legs:legs, tail:tail,
+    soc:{canta:Math.min(3,cnt(sp,'voce')+cnt(sp,'sonagli')),balla:Math.min(3,cnt(sp,'cresta')+cnt(sp,'ventaglio')+cnt(sp,'maschera')),buffo:Math.min(3,cnt(sp,'piume')+cnt(sp,'nasone')+cnt(sp,'maschera'))}}; }
 var DIET_N={erb:'🌿 Erbivora',carn:'🍖 Carnivora',onn:'🌿🍖 Onnivora',none:'senza bocca!'};
 
 /* ================= DISEGNO CREATURE ================= */
@@ -195,12 +220,34 @@ function drawPart(c,sp,t,r,tm,o,ph){ var k, i, w;
   else if(t==='antenna'){ var wb=Math.sin(tm*4+ph)*.2; c.save(); c.rotate(wb); c.strokeStyle=sp.dk; c.lineWidth=r*.05; c.beginPath(); c.moveTo(0,0); c.quadraticCurveTo(r*.35,-r*.1,r*.65,0); c.stroke(); c.fillStyle='#f2d94a'; c.beginPath(); c.arc(r*.68,0,r*.1,0,TAU); c.fill(); c.restore(); }
   else if(t==='ciuffo'){ c.strokeStyle=sp.c2v; c.lineWidth=r*.07; c.beginPath(); for(k=-2;k<=2;k++){ var ca=k*.3+Math.sin(tm*3+k)*.08; c.moveTo(-r*.02,k*r*.05); c.quadraticCurveTo(Math.cos(ca)*r*.3,Math.sin(ca)*r*.3-r*.1,Math.cos(ca)*r*.48,Math.sin(ca)*r*.48); } c.stroke(); }
   else if(t==='baffi'){ c.strokeStyle='#1d1f2b'; c.lineWidth=r*.025; c.beginPath(); for(k=-1;k<=1;k++){ c.moveTo(0,k*r*.05); c.quadraticCurveTo(r*.35,k*r*.15,r*.65,k*r*.3+Math.sin(tm*2+k)*r*.03); } c.stroke(); }
+  else if(t==='occhione'){ var e2=r*.42; c.fillStyle='#fff'; c.beginPath(); c.arc(0,0,e2,0,TAU); c.fill(); c.strokeStyle=sp.dk; c.lineWidth=r*.06; c.stroke(); c.fillStyle='#14151d'; c.beginPath(); c.arc(e2*.3,0,e2*.55,0,TAU); c.fill(); c.fillStyle='#fff'; c.beginPath(); c.arc(e2*.45,-e2*.25,e2*.2,0,TAU); c.fill(); }
+  else if(t==='zampalunga'){ var sw2=o&&o.walk!=null?Math.sin(o.walk+ph)*.5:0; c.save(); c.rotate(sw2); c.strokeStyle=sp.dk; c.lineWidth=r*.13; c.beginPath(); c.moveTo(-r*.05,0); c.lineTo(r*.45,-r*.12); c.lineTo(r*.8,r*.08); c.stroke(); c.fillStyle=sp.dk; c.beginPath(); c.save(); c.translate(r*.84,r*.1); c.scale(1.2,.7); c.arc(0,0,r*.12,0,TAU); c.restore(); c.fill(); c.fillStyle=sp.lt; c.beginPath(); c.arc(r*.45,-r*.12,r*.07,0,TAU); c.fill(); c.restore(); }
+  else if(t==='ruote'){ var rot=o&&o.walk!=null?o.walk:tm*2; c.save(); c.translate(r*.22,0); c.fillStyle='#2a2a32'; rrect(c,-r*.16,-r*.3,r*.32,r*.6,r*.1); c.fill(); c.strokeStyle='#8a8a92'; c.lineWidth=r*.04; c.beginPath(); for(k=0;k<4;k++){ var yy=((rot*r*.2+k*r*.15)%(r*.6)+r*.6)%(r*.6)-r*.3; c.moveTo(-r*.14,yy); c.lineTo(r*.14,yy); } c.stroke(); c.fillStyle='#f2d94a'; c.beginPath(); c.arc(0,0,r*.07,0,TAU); c.fill(); c.restore(); }
+  else if(t==='zanne'){ c.fillStyle='#fffaf0'; c.strokeStyle=sp.dk; c.lineWidth=r*.035; c.beginPath(); c.moveTo(-r*.05,-r*.1); c.quadraticCurveTo(r*.45,-r*.15,r*.55,r*.12); c.quadraticCurveTo(r*.35,-r*.02,-r*.05,r*.08); c.closePath(); c.fill(); c.stroke(); }
+  else if(t==='pungiglione'){ c.fillStyle=sp.dk; for(k=0;k<3;k++){ c.beginPath(); c.arc(r*(.12+k*.2),Math.sin(tm*3+k)*r*.03,r*(.15-k*.03),0,TAU); c.fill(); } c.fillStyle='#1d1f2b'; c.beginPath(); c.moveTo(r*.6,-r*.07); c.lineTo(r*.92,0); c.lineTo(r*.6,r*.07); c.closePath(); c.fill(); }
+  else if(t==='mazza'){ c.save(); c.rotate(Math.sin(tm*3+ph)*.15); c.strokeStyle=sp.col; c.lineWidth=r*.16; c.beginPath(); c.moveTo(0,0); c.lineTo(r*.6,0); c.stroke(); c.fillStyle='#f4ecd8'; for(k=0;k<6;k++){ var aa=k*TAU/6; c.beginPath(); c.moveTo(r*.72+Math.cos(aa-.3)*r*.18,Math.sin(aa-.3)*r*.18); c.lineTo(r*.72+Math.cos(aa)*r*.34,Math.sin(aa)*r*.34); c.lineTo(r*.72+Math.cos(aa+.3)*r*.18,Math.sin(aa+.3)*r*.18); c.fill(); } c.fillStyle='#8a8a92'; c.beginPath(); c.arc(r*.72,0,r*.2,0,TAU); c.fill(); c.restore(); }
+  else if(t==='corazza'){ c.fillStyle='#6a7a8a'; c.strokeStyle='#3a4a5a'; c.lineWidth=r*.04; rrect(c,-r*.3,-r*.32,r*.36,r*.64,r*.1); c.fill(); c.stroke(); c.fillStyle='#c8d0d8'; c.beginPath(); c.arc(-r*.2,-r*.2,r*.04,0,TAU); c.arc(-r*.2,r*.2,r*.04,0,TAU); c.arc(-r*.03,0,r*.04,0,TAU); c.fill(); }
+  else if(t==='guscio'){ c.fillStyle='#c89a5a'; c.strokeStyle='#7a5a2a'; c.lineWidth=r*.05; c.beginPath(); c.arc(-r*.35,0,r*.5,0,TAU); c.fill(); c.stroke(); c.beginPath(); for(k=0;k<30;k++){ var sa=k*.45, sr=r*.45*(1-k/32); c.lineTo(-r*.35+Math.cos(sa)*sr,Math.sin(sa)*sr); } c.stroke(); }
+  else if(t==='scudo'){ c.fillStyle='#a0703a'; c.strokeStyle='#5a3a1a'; c.lineWidth=r*.05; c.beginPath(); c.arc(r*.05,0,r*.3,0,TAU); c.fill(); c.stroke(); c.strokeStyle='#e8404a'; c.lineWidth=r*.06; c.beginPath(); c.moveTo(r*.05,-r*.22); c.lineTo(r*.05,r*.22); c.moveTo(-r*.17,0); c.lineTo(r*.27,0); c.stroke(); }
+  else if(t==='sonagli'){ var jg=o&&o.act==='canta'?Math.sin(tm*30)*r*.05:0; c.fillStyle='#f2d94a'; c.strokeStyle='#a07a1a'; c.lineWidth=r*.03; for(k=-1;k<=1;k++){ var bx=r*.2+Math.abs(k)*r*.05+jg; c.beginPath(); c.arc(bx,k*r*.17,r*.1,0,TAU); c.fill(); c.stroke(); c.beginPath(); c.moveTo(bx-r*.05,k*r*.17); c.lineTo(bx+r*.05,k*r*.17); c.stroke(); } }
+  else if(t==='ventaglio'){ var op2=o&&o.act==='balla'?1:.6+Math.sin(tm*2)*.05, fc=['#e85f7a','#f2d94a','#5fb8e8','#7ad36a','#b07ae8']; for(k=0;k<5;k++){ var fa3=(k-2)*.3*op2; c.fillStyle=fc[k]; c.beginPath(); c.moveTo(0,0); c.arc(0,0,r*.6,fa3-.15*op2,fa3+.15*op2); c.closePath(); c.fill(); } }
+  else if(t==='nasone'){ c.fillStyle='#ff5a6a'; c.beginPath(); c.arc(r*.12,0,r*.2*(o&&o.act==='buffo'?1.2:1),0,TAU); c.fill(); c.fillStyle='rgba(255,255,255,.6)'; c.beginPath(); c.arc(r*.06,-r*.07,r*.06,0,TAU); c.fill(); }
+  else if(t==='maschera'){ c.save(); c.translate(-r*.1,0); c.scale(.7,1); c.fillStyle='#f4ecd8'; c.strokeStyle='#5a3a1a'; c.lineWidth=r*.05; c.beginPath(); c.arc(0,0,r*.38,0,TAU); c.fill(); c.stroke(); c.restore(); c.fillStyle='#e8404a'; c.fillRect(-r*.3,-r*.28,r*.06,r*.56); c.fillStyle='#1d1f2b'; c.beginPath(); c.arc(-r*.04,-r*.14,r*.06,0,TAU); c.arc(-r*.04,r*.14,r*.06,0,TAU); c.fill(); c.fillStyle='#3a5ab0'; c.fillRect(-r*.18,-r*.04,r*.07,r*.08); }
+  else if(t==='orecchie'){ c.save(); c.rotate(Math.sin(tm*2+ph)*.08); c.fillStyle=sp.col; c.strokeStyle=sp.dk; c.lineWidth=r*.04; c.beginPath(); c.moveTo(-r*.05,-r*.15); c.quadraticCurveTo(r*.5,-r*.3,r*.65,0); c.quadraticCurveTo(r*.5,r*.3,-r*.05,r*.15); c.closePath(); c.fill(); c.stroke(); c.fillStyle='#f6a8c0'; c.beginPath(); c.moveTo(r*.05,-r*.08); c.quadraticCurveTo(r*.4,-r*.15,r*.5,0); c.quadraticCurveTo(r*.4,r*.15,r*.05,r*.08); c.closePath(); c.fill(); c.restore(); }
+  else if(t==='cornaricce'){ c.strokeStyle='#d8c8a8'; c.lineWidth=r*.09; c.beginPath(); c.moveTo(0,0); for(k=0;k<20;k++){ var ca2=k*.4, cr=r*.3*(1-k/24); c.lineTo(r*.3+Math.cos(ca2)*cr,Math.sin(ca2)*cr); } c.stroke(); }
+  else if(t==='fiore'){ c.fillStyle='#f28ad0'; for(k=0;k<5;k++){ var pa=k*TAU/5+tm*.5; c.beginPath(); c.arc(Math.cos(pa)*r*.12,Math.sin(pa)*r*.12,r*.09,0,TAU); c.fill(); } c.fillStyle='#f2d94a'; c.beginPath(); c.arc(0,0,r*.08,0,TAU); c.fill(); }
+  else if(t==='lucine'){ var gl=.5+.5*Math.sin(tm*4+ph); for(k=-1;k<=1;k++){ c.fillStyle='rgba(140,255,230,'+(.3*gl)+')'; c.beginPath(); c.arc(-r*.1,k*r*.2,r*.13,0,TAU); c.fill(); c.fillStyle='rgba(210,255,245,'+(.6+.4*gl)+')'; c.beginPath(); c.arc(-r*.1,k*r*.2,r*.055,0,TAU); c.fill(); } }
+  else if(t==='collana'){ c.strokeStyle='#5a3a1a'; c.lineWidth=r*.03; c.beginPath(); c.moveTo(-r*.1,-r*.35); c.quadraticCurveTo(r*.02,0,-r*.1,r*.35); c.stroke(); c.fillStyle='#fffaf0'; for(k=-2;k<=2;k++){ var ty=k*r*.14, tx=-r*.07+(1-Math.abs(k)/3)*r*.06; c.beginPath(); c.moveTo(tx,ty-r*.04); c.lineTo(tx+r*.14,ty); c.lineTo(tx,ty+r*.04); c.closePath(); c.fill(); } }
+  else if(t==='piumecapo'){ var pc2=['#e8404a','#f2d94a','#3a5ab0','#f2d94a','#e8404a']; for(k=0;k<5;k++){ c.save(); c.rotate((k-2)*.28+Math.sin(tm*2+k)*.04); c.fillStyle=pc2[k]; c.beginPath(); c.save(); c.translate(r*.45,0); c.scale(1,.25); c.arc(0,0,r*.45,0,TAU); c.restore(); c.fill(); c.restore(); } }
+  else if(t==='alifarfalla'){ var ff=.85+Math.sin(tm*8+ph)*.15; c.save(); c.scale(ff,1); c.strokeStyle='#3a2a1a'; c.lineWidth=r*.04; c.fillStyle='#f2a33a'; c.beginPath(); c.arc(r*.4,-r*.2,r*.32,0,TAU); c.fill(); c.stroke(); c.fillStyle='#b07ae8'; c.beginPath(); c.arc(r*.35,r*.25,r*.24,0,TAU); c.fill(); c.stroke(); c.fillStyle='#fff'; c.beginPath(); c.arc(r*.45,-r*.25,r*.08,0,TAU); c.arc(r*.38,r*.27,r*.06,0,TAU); c.fill(); c.restore(); }
+  else if(t==='cappello'){ c.fillStyle='#3e963a'; c.strokeStyle='#2a6a2a'; c.lineWidth=r*.03; for(k=-1;k<=1;k++){ c.save(); c.rotate(k*.6); c.beginPath(); c.save(); c.translate(-r*.05,0); c.scale(1,.45); c.arc(0,0,r*.3,0,TAU); c.restore(); c.fill(); c.stroke(); c.restore(); } c.fillStyle='#e8404a'; c.beginPath(); c.arc(-r*.1,0,r*.07,0,TAU); c.fill(); }
+  else if(t==='pinna'){ c.fillStyle=sp.c2v; c.strokeStyle=sp.dk; c.lineWidth=r*.04; c.beginPath(); c.moveTo(-r*.05,-r*.25); c.quadraticCurveTo(r*.3,-r*.2,r*.5,r*.15); c.lineTo(-r*.05,r*.2); c.closePath(); c.fill(); c.stroke(); }
 }
 function drawBody(c,sp,r,sh){ c.beginPath(); c.save(); c.scale(sh[0],sh[1]); c.arc(0,0,r,0,TAU); c.restore(); }
 function drawCreature(c,sp,r,tm,o){ var sh=SHAPES[sp.shape]||SHAPES.tonda, i, j, cp, p, pp, ps; o=o||{};
   if(o.act==='balla') c.rotate(Math.sin(tm*14)*.25);
   if(o.act==='buffo'){ var sq=Math.sin(tm*20)*.15; c.scale(1+sq,1-sq); }
-  for(i=0;i<sp.parts.length;i++){ p=sp.parts[i]; if(p.t==='occhio') continue; ps=p.s||1; cp=copies(p); for(j=0;j<cp.length;j++){ pp=partPos(sp,r,cp[j]); c.save(); c.translate(pp.x,pp.y); c.rotate(pp.n); if(cp[j]<0) c.scale(1,-1); drawPart(c,sp,p.t,r*ps,tm+i*.7,o,(cp[j]<0?Math.PI:0)+i*1.7); c.restore(); } }
+  for(i=0;i<sp.parts.length;i++){ p=sp.parts[i]; if(TOP[p.t]) continue; ps=p.s||1; cp=copies(p); for(j=0;j<cp.length;j++){ pp=partPos(sp,r,cp[j]); c.save(); c.translate(pp.x,pp.y); c.rotate(pp.n); if(cp[j]<0) c.scale(1,-1); drawPart(c,sp,p.t,r*ps,tm+i*.7,o,(cp[j]<0?Math.PI:0)+i*1.7); c.restore(); } }
   drawBody(c,sp,r,sh); c.fillStyle=sp.col; c.fill(); c.lineWidth=r*.09; c.strokeStyle=sp.dk; c.stroke();
   var c2=sp.c2v;
   if(sp.pat==='punti'){ c.fillStyle=c2; c.globalAlpha=.55; var pts=[[.35,-.35,.16],[-.3,-.45,.12],[-.5,.25,.14],[.25,.4,.11],[.0,.05,.09]]; c.beginPath(); for(i=0;i<pts.length;i++){ c.moveTo(pts[i][0]*r*sh[0]+pts[i][2]*r,pts[i][1]*r*sh[1]); c.arc(pts[i][0]*r*sh[0],pts[i][1]*r*sh[1],pts[i][2]*r,0,TAU); } c.fill(); c.globalAlpha=1; }
@@ -208,10 +255,13 @@ function drawCreature(c,sp,r,tm,o){ var sh=SHAPES[sp.shape]||SHAPES.tonda, i, j,
     if(sp.pat==='strisce'){ for(i=-2;i<=2;i++) c.fillRect(i*r*.42*sh[0]-r*.09,-r*1.2,r*.18,r*2.4); }
     else { c.beginPath(); c.arc(r*.45*sh[0],-r*.5*sh[1],r*.42,0,TAU); c.moveTo(0,0); c.arc(-r*.55*sh[0],r*.35*sh[1],r*.38,0,TAU); c.moveTo(0,0); c.arc(r*.2*sh[0],r*.75*sh[1],r*.25,0,TAU); c.fill(); }
     c.restore(); c.globalAlpha=1; }
+  else if(sp.pat==='tigre'){ c.save(); drawBody(c,sp,r*.95,sh); c.clip(); c.strokeStyle=c2; c.globalAlpha=.6; c.lineWidth=r*.1; for(i=-3;i<=3;i++){ var tx=i*r*.3*sh[0]; c.beginPath(); c.moveTo(tx,-r*1.1); c.quadraticCurveTo(tx+r*.2,-r*.3,tx-r*.05,0); c.quadraticCurveTo(tx-r*.2,r*.4,tx+r*.05,r*1.1); c.stroke(); } c.restore(); c.globalAlpha=1; }
+  else if(sp.pat==='cuori'){ c.fillStyle=c2; c.globalAlpha=.75; var hs=[[.35,-.35,.13],[-.35,-.3,.11],[-.4,.35,.12],[.3,.4,.1]]; for(i=0;i<hs.length;i++){ var hx=hs[i][0]*r*sh[0], hy=hs[i][1]*r*sh[1], hr=hs[i][2]*r; c.beginPath(); c.arc(hx-hr*.5,hy,hr*.55,0,TAU); c.arc(hx+hr*.5,hy,hr*.55,0,TAU); c.fill(); c.beginPath(); c.moveTo(hx-hr*1.02,hy+hr*.15); c.lineTo(hx,hy+hr*1.2); c.lineTo(hx+hr*1.02,hy+hr*.15); c.closePath(); c.fill(); } c.globalAlpha=1; }
+  else if(sp.pat==='pancia'){ c.fillStyle=c2; c.globalAlpha=.55; c.beginPath(); c.save(); c.scale(sh[0]*.62,sh[1]*.5); c.arc(0,0,r,0,TAU); c.restore(); c.fill(); c.globalAlpha=1; }
   else if(sp.pat==='stelle'){ c.fillStyle=c2; c.globalAlpha=.75; var sts=[[.35,-.35,.17],[-.35,-.3,.13],[-.4,.35,.15],[.3,.4,.12]]; for(i=0;i<sts.length;i++){ star5(c,sts[i][0]*r*sh[0],sts[i][1]*r*sh[1],sts[i][2]*r); c.fill(); } c.globalAlpha=1; }
   c.fillStyle='rgba(255,255,255,.22)'; c.beginPath(); c.arc(-r*.15*sh[0],-r*.32*sh[1],r*.38,0,TAU); c.fill();
   c.fillStyle=sp.dk; c.globalAlpha=.3; c.beginPath(); c.arc(-r*.3*sh[0],r*.18*sh[1],r*.26,0,TAU); c.fill(); c.globalAlpha=1;
-  for(i=0;i<sp.parts.length;i++){ p=sp.parts[i]; if(p.t!=='occhio') continue; ps=p.s||1; cp=copies(p); for(j=0;j<cp.length;j++){ pp=partPos(sp,r,cp[j]); c.save(); c.translate(pp.x-Math.cos(pp.n)*r*.12,pp.y-Math.sin(pp.n)*r*.12); c.rotate(pp.n*.5); drawPart(c,sp,'occhio',r*ps,tm,o); c.restore(); } }
+  for(i=0;i<sp.parts.length;i++){ p=sp.parts[i]; if(!TOP[p.t]) continue; ps=p.s||1; cp=copies(p); for(j=0;j<cp.length;j++){ pp=partPos(sp,r,cp[j]); var ey=p.t==='occhio'||p.t==='occhione', ins=ey?.12:.18; c.save(); c.translate(pp.x-Math.cos(pp.n)*r*ins,pp.y-Math.sin(pp.n)*r*ins); c.rotate(ey?pp.n*.5:pp.n); if(cp[j]<0) c.scale(1,-1); drawPart(c,sp,p.t,r*ps,tm+i*.7,o,(cp[j]<0?Math.PI:0)+i*1.7); c.restore(); } }
   if(o.hurt){ c.fillStyle='rgba(255,40,40,.45)'; drawBody(c,sp,r,sh); c.fill(); }
   if(o.sel!=null&&o.sel>=0&&sp.parts[o.sel]){ cp=copies(sp.parts[o.sel]); c.strokeStyle=o.trash?'#ff4a4a':'#f2d94a'; c.lineWidth=r*.06; if(c.setLineDash) c.setLineDash([r*.12,r*.08]); for(j=0;j<cp.length;j++){ pp=partPos(sp,r,cp[j]); c.beginPath(); c.arc(pp.x+Math.cos(pp.n)*r*.2,pp.y+Math.sin(pp.n)*r*.2,r*.36,0,TAU); c.stroke(); } if(c.setLineDash) c.setLineDash([]); }
 }
@@ -258,7 +308,7 @@ function isLand(){ return !!ST&&(ST.ph==='land'||ST.ph==='landDone'||ST.ph==='tr
 function isTribe(){ return !!ST&&(ST.ph==='tribe'||ST.ph==='tribeDone'); }
 function scl(){ return Math.pow(1.35,ST.L); }
 function plR(){ return isLand()?22*STT.k:16*scl()*STT.k; }
-function maxHp(){ return Math.max(2,(isLand()?6+STT.spi:4+ST.L)+STT.hpb); }
+function maxHp(){ return Math.max(2,(isLand()?6+STT.spi+STT.arm:4+ST.L)+STT.hpb); }
 function newPl(){ return {x:0,y:0,vx:0,vy:0,h:0,hp:0,inv:1.5,biteCd:0,hurtT:0,dash:0,dashCd:0,open:0,regen:0,cloudT:0,walk:0,act:null,actT:0,actCd:0,atkCd:0,eatCd:0,restT:0,warned:0}; }
 function viewR(){ return Math.sqrt(W*W+H*H)/2/(BASE/Sd); }
 function save(){ if(!ST||!SP) return; ST.sp={name:SP.name,col:SP.col,col2:SP.col2,shape:SP.shape,pat:SP.pat,size:SP.size,parts:SP.parts}; S('stelle-save',ST); }
@@ -361,7 +411,7 @@ function landStart(){ if(!WD) WD=genWorld(); if(!ST.land) ST.land={nests:NESTS.m
 function toLand(){ $('doneOv').hidden=true; paused=false;
   SP.parts=SP.parts.filter(function(p){ return PARTS[p.t].ph.indexOf('t')>=0; });
   if(!cnt(SP,'zampa')) SP.parts.push({t:'zampa',a:1.6}); if(!mouthOf(SP)) SP.parts.unshift({t:'filtro',a:0});
-  LAND_UNL.forEach(function(u){ if(ST.unl.indexOf(u)<0) ST.unl.push(u); });
+  landFree();
   ST.ph='land'; ST.dna+=20; ST.land=null; STT=stats(SP); landStart(); save(); openEditor('land'); }
 function toTribe(){ $('doneOv').hidden=true; paused=false; ST.ph='tribe'; ST.tribe={food:6,mem:3,tools:{},t:TRIBES.map(function(){ return {st:'free',bar:0}; }),mode:'segui'}; ST.dna+=20; ST.tot+=20; STT=stats(SP); landStart(); save(); showUI(true); posBtns(); lastT=0;
   toast('Hai fondato la tua tribù! Manda i membri a raccogliere cibo, compra strumenti al villaggio e fai amicizia (o guerra) con le 4 tribù rivali. Ne servono 3.',7); jingle([392,523,659,784,1047],.12); }
@@ -369,14 +419,14 @@ function doneCount(){ var n=0; GSL().forEach(function(s){ if(s.st==='amici'||s.s
 function groupDone(i,how){ if(isTribe()) tribeGroupDone(i,how); else nestDone(i,how); }
 function nestDone(i,how){ var ns=ST.land.nests[i], n=NESTS[i]; ns.st=how; ns.seq=null; enc=-1;
   var bonus=how==='amici'?25:20; ST.dna+=bonus; ST.tot+=bonus; var msg=(how==='amici'?'Ora i '+n.n+' sono tuoi amici!':'Hai sconfitto i '+n.n+'!')+' +'+bonus+' DNA';
-  if(n.rw&&ST.unl.indexOf(n.rw)<0){ ST.unl.push(n.rw); msg+='. Nuova parte: '+PARTS[n.rw].n+'!'; }
+  var gotP=[]; if(n.rw&&ST.unl.indexOf(n.rw)<0){ ST.unl.push(n.rw); gotP.push(PARTS[n.rw].n); } gotP=gotP.concat(unlockVil(1)); if(gotP.length) msg+='. Nuove parti: '+gotP.join(', ')+'!';
   if(how==='amici'&&ST.land.allies.length<3){ ST.land.allies.push(i); var lead=null; lm.forEach(function(m){ if(m.ni===i&&!m.lead&&!lead) lead=m; }); if(lead){ lead.dead=1; allies.push(mkAlly(lead.sp,lead.x,lead.y,20,99)); msg+=' Uno di loro viene con te!'; } }
   toast(msg,4.5); jingle([523,659,784,1047,1319],.1); boardUp(2); save();
   if(doneCount()>=NEST_NEED&&ST.ph==='land'){ ST.ph='landDone'; save(); setTimeout(showLandDone,1800); } }
 function tribeGroupDone(i,how){ var ns=ST.tribe.t[i], n=TRIBES[i]; ns.st=how; ns.seq=null; enc=-1; var msg;
   if(how==='amici'){ ST.tribe.food+=10; msg='La tribù dei '+n.n+' è vostra alleata! +10 cibo, e ogni tanto vi porterà dei regali.'; }
   else { ST.tribe.food+=12; ST.dna+=20; ST.tot+=20; msg='Avete conquistato il villaggio dei '+n.n+'! +12 cibo. Lì adesso potete anche riposare.'; lm.forEach(function(m){ if(m.raid&&m.ni===i) m.dead=1; }); }
-  toast(msg,5); jingle([523,659,784,1047,1319],.1); boardUp(3); save();
+  var gotV=unlockVil(2); if(gotV.length) msg+=' Nuove parti nell\'editor: '+gotV.join(', ')+'!'; toast(msg,6); jingle([523,659,784,1047,1319],.1); boardUp(3); save();
   if(doneCount()>=TRIBE_NEED&&ST.ph==='tribe'){ ST.ph='tribeDone'; save(); setTimeout(showTribeDone,1800); } }
 function showLandDone(){ paused=true; touch=null; $('doneH').textContent='Regina dell\'isola! 🌟'; boardUp(3);
   var f=0, d=0; ST.land.nests.forEach(function(s){ if(s.st==='amici') f++; if(s.st==='sconfitti') d++; });
@@ -610,10 +660,14 @@ function edUp(){ if(edDrag&&edTrash){ removePart(edDrag.i); } edDrag=null; edTra
 ec.addEventListener('touchstart',edDown,{passive:false}); ec.addEventListener('touchmove',edMv,{passive:false}); ec.addEventListener('touchend',edUp); ec.addEventListener('touchcancel',edUp);
 ec.addEventListener('mousedown',function(e){ edDown(e); var mm=function(ev){ edMv(ev); }, mu=function(){ window.removeEventListener('mousemove',mm); window.removeEventListener('mouseup',mu); edUp(); }; window.addEventListener('mousemove',mm); window.addEventListener('mouseup',mu); });
 function freeAngle(t){ var cand=t==='flagello'||t==='getto'||t==='coda'||t==='tentacolo'?[Math.PI,2.6,2.2]:(t==='occhio'||t==='antenna'||t==='corno'||t==='baffi'?[.6,.35,1,0.01]:[1.6,2.2,1.1,2.7,.8,Math.PI,1.35,1.9,2.45,.95,2.95,1.2,1.75,2.05,.55]); for(var k=0;k<cand.length;k++){ var ok=true; for(var i=0;i<SP.parts.length;i++){ if(Math.abs(angDiff(Math.abs(SP.parts[i].a),cand[k]))<.22) ok=false; } if(ok) return cand[k]; } return rnd(.5,2.8); }
-function addPart(t){ var P=PARTS[t]; if(ST.unl.indexOf(t)<0){ toast(isLand()?'Parte bloccata: completa un nido dell\'isola per averla!':'Parte bloccata: trova un frammento di stella nella pozza!'); return; }
+var edUnl=null;
+function addPart(t){ var P=PARTS[t]; if(ST.unl.indexOf(t)<0){ var un=P.un;
+    if(typeof un==='number'){ if(edUnl!==t){ edUnl=t; toast('Vuoi sbloccare '+P.n+' per '+un+' DNA? Tocca di nuovo per confermare.',3.5); return; } edUnl=null; if(ST.dna<un){ toast('Per sbloccare '+P.n+' servono '+un+' DNA (ne hai '+ST.dna+').'); tone(200,.15,'square',.04); return; } ST.dna-=un; ST.unl.push(t); jingle([659,880,1175],.08); toast('Sbloccato: '+P.n+'! Ora toccalo per aggiungerlo.',3); renderPanel(); return; }
+    toast(un==='vil'?'Questa parte arriva quando completi un nido o un villaggio!':(un==='nido'?'Parte bloccata: completa un nido dell\'isola per averla!':'Parte bloccata: trova un frammento di stella nella pozza!'),3.5); return; }
+  edUnl=null;
   var old=-1; if(P.cat==='bocca'){ for(var i=0;i<SP.parts.length;i++) if(PARTS[SP.parts[i].t].cat==='bocca') old=i; if(old>=0&&SP.parts[old].t===t){ toast('Hai già questa bocca!'); return; } }
   var refund=old>=0?PARTS[SP.parts[old].t].cost:0;
-  if(old<0&&SP.parts.length>=MAXP){ toast('Massimo '+MAXP+' pezzi: togline uno prima.'); return; }
+  var mxp=isLand()?MAXPL:MAXP; if(old<0&&SP.parts.length>=mxp){ toast('Massimo '+mxp+' pezzi: togline uno prima.'); return; }
   if(ST.dna+refund<P.cost){ toast('Ti servono '+P.cost+' DNA (ne hai '+ST.dna+'). Mangia ancora!'); tone(200,.15,'square',.04); return; }
   ST.dna+=refund-P.cost;
   if(old>=0){ SP.parts[old].t=t; edSel=old; } else { SP.parts.push({t:t,a:P.cat==='bocca'?0:freeAngle(t)}); edSel=SP.parts.length-1; }
@@ -625,14 +679,14 @@ function renderPanel(){ var st=stats(SP), h='', land=isLand(), pl2=phL();
   h+='<input class="nm" id="spName" maxlength="16" value="'+esc(SP.name)+'" placeholder="Nome della specie">';
   h+='<div class="dna">DNA da spendere: '+ST.dna+'</div>';
   h+='<div class="stat"><span>Dieta</span><b>'+DIET_N[st.d]+'</b></div>';
-  if(land){ h+='<div class="stat"><span>Velocità</span>'+bars(st.legs?Math.min(5,1+st.legs+(st.tail?1:0)):0)+'</div><div class="stat"><span>Attacco</span>'+bars(Math.round(st.latk*1.6))+'</div><div class="stat"><span>Difesa</span>'+bars(1+st.spi+(st.hpb>0?1:0))+'</div><div class="stat"><span>Canto ♪</span>'+bars(1+st.soc.canta)+'</div><div class="stat"><span>Ballo ★</span>'+bars(1+st.soc.balla)+'</div><div class="stat"><span>Buffo ☺</span>'+bars(1+st.soc.buffo)+'</div>';
+  if(land){ h+='<div class="stat"><span>Velocità</span>'+bars(st.legs?Math.min(5,1+st.legs+(st.tail?1:0)):0)+'</div><div class="stat"><span>Attacco</span>'+bars(Math.round(st.latk*1.6))+'</div><div class="stat"><span>Difesa</span>'+bars(1+st.spi+(st.hpb>0?1:0)+Math.ceil(st.arm/2))+'</div><div class="stat"><span>Canto ♪</span>'+bars(1+st.soc.canta)+'</div><div class="stat"><span>Ballo ★</span>'+bars(1+st.soc.balla)+'</div><div class="stat"><span>Buffo ☺</span>'+bars(1+st.soc.buffo)+'</div>';
     if(!st.legs) h+='<div class="hint" style="color:#ffb0b0"><b>Senza zampe</b> la creatura striscia lentissima!</div>'; }
   else h+='<div class="stat"><span>Velocità</span>'+bars(1+Math.min(3,st.f)+(st.c?1:0))+'</div><div class="stat"><span>Agilità</span>'+bars(1+Math.min(3,st.c)+(st.dash?1:0))+'</div><div class="stat"><span>Attacco</span>'+bars((st.d==='carn'?2:(st.d==='onn'?1:0))+st.spi)+'</div><div class="stat"><span>Difesa</span>'+bars(1+st.spi+(st.poison?1:0))+'</div><div class="stat"><span>Vista</span>'+bars(1+st.eye)+'</div>';
   if(st.d==='none') h+='<div class="hint" style="color:#ffb0b0"><b>Attenzione:</b> senza bocca la creatura non può mangiare!</div>';
   if(edSel>=0&&SP.parts[edSel]){ var sp=SP.parts[edSel], cs=sp.s||1; h+='<div class="selbox">Pezzo scelto: <b>'+PARTS[sp.t].n+'</b><br>'; for(var q=0;q<PSIZE.length;q++) h+='<button class="sm opt'+(cs===PSIZE[q][0]?' on':'')+'" data-act="psize" data-v="'+PSIZE[q][0]+'" type="button">'+PSIZE[q][1]+'</button>'; h+='<button class="sm" data-act="del" type="button">✖ Togli (+'+PARTS[sp.t].cost+')</button></div>'; }
-  else h+='<div class="hint">Tocca un pezzo qui sotto per aggiungerlo, poi trascinalo sul corpo. Tocca un pezzo sul corpo per cambiarne la grandezza. Pezzi: '+SP.parts.length+'/'+MAXP+'</div>';
+  else h+='<div class="hint">Tocca un pezzo qui sotto per aggiungerlo, poi trascinalo sul corpo. Tocca un pezzo sul corpo per cambiarne la grandezza. Pezzi: '+SP.parts.length+'/'+(land?MAXPL:MAXP)+'</div>';
   for(var ci=0;ci<CATS.length;ci++){ var row=''; for(var t in PARTS){ if(PARTS[t].cat!==CATS[ci][0]||PARTS[t].ph.indexOf(pl2)<0) continue; var lk=ST.unl.indexOf(t)<0, has=cnt(SP,t);
-      row+='<button class="pb'+(lk?' lock':'')+(has?' has':'')+'" data-act="add" data-t="'+t+'" type="button"><canvas data-th="'+t+'" width="120" height="92"></canvas><b>'+(lk?'🔒 ':'')+PARTS[t].n+(has?' ×'+has:'')+'</b>'+(lk?(land?'da un nido':'trova una ⭐'):PARTS[t].cost+' DNA · '+PARTS[t].d)+'</button>'; }
+      row+='<button class="pb'+(lk?' lock':'')+(has?' has':'')+'" data-act="add" data-t="'+t+'" type="button"><canvas data-th="'+t+'" width="120" height="92"></canvas><b>'+(lk?'🔒 ':'')+PARTS[t].n+(has?' ×'+has:'')+'</b>'+(lk?(typeof PARTS[t].un==='number'?'Sblocca: '+PARTS[t].un+' DNA':(PARTS[t].un==='vil'?'da nido o villaggio':(land?'da un nido':'trova una ⭐'))):PARTS[t].cost+' DNA · '+PARTS[t].d)+'</button>'; }
     if(row) h+='<h3>'+CATS[ci][1]+'</h3>'+row; }
   h+='<h3>Taglia</h3>'; for(var z in SIZES) h+='<button class="sm opt'+(SP.size===z?' on':'')+'" data-act="size" data-v="'+z+'" type="button">'+SIZES[z].n+'</button>';
   h+='<div class="hint">Grande = più vita ma più lenta. Piccola = più veloce ma più fragile.</div>';
@@ -640,7 +694,7 @@ function renderPanel(){ var st=stats(SP), h='', land=isLand(), pl2=phL();
   h+='<h3>Colore della pelle</h3>'; for(var c=0;c<COLORS.length;c++) h+='<button class="sw'+(SP.col===COLORS[c]?' on':'')+'" data-act="col" data-v="'+COLORS[c]+'" type="button" style="background:'+COLORS[c]+'"></button>';
   h+='<h3>Disegni sulla pelle</h3>'; for(var pk in PAT_N) h+='<button class="sm opt'+(SP.pat===pk?' on':'')+'" data-act="pat" data-v="'+pk+'" type="button">'+PAT_N[pk]+'</button>';
   if(SP.pat!=='no'){ h+='<h3>Colore dei disegni</h3>'; for(c=0;c<COLORS.length;c++) h+='<button class="sw'+(SP.c2v===COLORS[c]?' on':'')+'" data-act="col2" data-v="'+COLORS[c]+'" type="button" style="background:'+COLORS[c]+'"></button>'; }
-  h+='<div class="hint" style="margin-top:14px">'+(land?'Le parti con 🔒 si ottengono completando i <b>nidi</b> dell\'isola (amici o sconfitti).':'Le parti con 🔒 si sbloccano raccogliendo i <b>frammenti di stella</b> che cadono nella pozza.')+'</div>';
+  h+='<div class="hint" style="margin-top:14px">'+(land?'Le parti con 🔒 si sbloccano con il <b>DNA</b> (tocca due volte) oppure completando <b>nidi e villaggi</b> (amici o conquistati).':'Le parti con 🔒 si sbloccano raccogliendo i <b>frammenti di stella</b> che cadono nella pozza.')+'</div>';
   var p=$('edp'), sc=p.scrollTop; p.innerHTML=h; p.scrollTop=sc;
   var cvs=p.getElementsByTagName('canvas'); for(var qq=0;qq<cvs.length;qq++){ var x=cvs[qq].getContext('2d'), tt=cvs[qq].getAttribute('data-th'); x.setTransform(2,0,0,2,0,0); x.save(); x.translate(16,23); x.beginPath(); x.arc(0,0,13,0,TAU); x.fillStyle=SP.col; x.fill(); x.lineWidth=2; x.strokeStyle=SP.dk; x.stroke(); x.translate(tt==='occhio'?8:12,0); drawPart(x,SP,tt,15,1,{walk:0},0); x.restore(); }
   var nm=$('spName'); nm.oninput=function(){ var v=String(nm.value||'').replace(/\s+/g,' ').slice(0,16); SP.name=v.trim()||'Senza nome'; }; }
@@ -655,8 +709,9 @@ $('edp').addEventListener('click',function(e){ var el=e.target; while(el&&el!==t
   else if(a==='pat'){ SP.pat=v; renderPanel(); }
   else if(a==='done') closeEditor();
   else if(a==='back'){ save(); toMenu(); } });
-function openEditor(first){ mode='ed'; edFirst=first||null; edSel=-1; touch=null; keys={}; $('ed').hidden=false; showUI(false); $('menu').hidden=true; edLayout(); renderPanel(); }
-function closeEditor(){ if(diet(SP)==='none'){ toast('Metti una bocca, altrimenti la creatura non può mangiare!'); return; } $('ed').hidden=true; STT=stats(SP); if(pl) pl.hp=Math.min(Math.max(pl.hp,1),maxHp()); darkKey=''; save(); mode='play'; paused=false; lastT=0; showUI(true); posBtns();
+var edOldMax=0;
+function openEditor(first){ edOldMax=(pl&&STT)?maxHp():0; mode='ed'; edFirst=first||null; edSel=-1; touch=null; keys={}; $('ed').hidden=false; showUI(false); $('menu').hidden=true; edLayout(); renderPanel(); }
+function closeEditor(){ if(diet(SP)==='none'){ toast('Metti una bocca, altrimenti la creatura non può mangiare!'); return; } $('ed').hidden=true; STT=stats(SP); if(pl){ var nm2=maxHp(); if(edOldMax&&nm2>edOldMax) pl.hp+=nm2-edOldMax; pl.hp=Math.min(Math.max(pl.hp,1),nm2); } darkKey=''; save(); mode='play'; paused=false; lastT=0; showUI(true); posBtns();
   if(edFirst==='cell') toast(STT.d==='carn'?'Tocca lo schermo e tieni premuto per nuotare. Mordi le cellule più piccole, scappa da quelle col punto esclamativo!':'Tocca lo schermo e tieni premuto per nuotare. Mangia le alghe verdi e scappa dalle cellule col punto esclamativo!',6);
   else if(edFirst==='land') toast('Sei sulla terraferma! Segui la freccia bianca per trovare i nidi delle altre specie. Servono 4 nidi (amici o sconfitti).',6);
   edFirst=null; }
@@ -677,7 +732,7 @@ bindBtn($('bDash'),dash);
 $('bEvo').onclick=function(){ save(); openEditor(null); };
 function showUI(on){ var land=isLand(); ['bBack','bPause','info','bEvo'].forEach(function(id){ $(id).hidden=!on; }); $('bDash').hidden=!(on&&canDash()); $('bDash').textContent=land?'VOLA':'SCATTO'; $('soc').hidden=!(on&&land); $('mm').hidden=!(on&&land); lastSoc=''; lastTUI=''; if(on&&land) tribeUI(); else { $('bMode').hidden=true; $('bShop').hidden=true; } }
 function startPlay(){ STT=stats(SP); if(isLand()){ landStart(); return; } pl=newPl(); pl.hp=maxHp(); npcs=[]; foods=[]; stars=[]; clouds=[]; fx=[]; Sd=scl(); starT=ST.unl.indexOf('veleno')<0?10:30; fillWorld(true); }
-function loadRun(){ var s=L('stelle-save',null); if(!s||!s.sp) return false; ST=s; START_UNL.forEach(function(u){ if(ST.unl.indexOf(u)<0) ST.unl.push(u); }); if(ST.L>4) ST.L=4; SP=prep({name:s.sp.name,col:s.sp.col,col2:s.sp.col2,shape:s.sp.shape,pat:s.sp.pat,size:s.sp.size,parts:s.sp.parts}); return true; }
+function loadRun(){ var s=L('stelle-save',null); if(!s||!s.sp) return false; ST=s; START_UNL.forEach(function(u){ if(ST.unl.indexOf(u)<0) ST.unl.push(u); }); if(ST.ph!=='cell'&&ST.ph!=='cellDone') landFree(); if(ST.L>4) ST.L=4; SP=prep({name:s.sp.name,col:s.sp.col,col2:s.sp.col2,shape:s.sp.shape,pat:s.sp.pat,size:s.sp.size,parts:s.sp.parts}); return true; }
 function cont(){ ac(); if(!loadRun()) return; hinted={}; startPlay(); mode='play'; paused=false; $('menu').hidden=true; showUI(true); layout(); if(ST.ph==='cellDone'){ showCellDone(); return; } if(ST.ph==='landDone'){ showLandDone(); return; } toast('Bentornata, specie '+SP.name+'!'); }
 function newSpecies(d){ $('newOv').hidden=true; hinted={}; var mouth=d==='carn'?'mascella':'filtro';
   SP=prep({name:'Tommini',col:d==='carn'?'#e85f7a':'#7ad36a',shape:'tonda',pat:'punti',size:'media',parts:[{t:mouth,a:0},{t:'flagello',a:Math.PI},{t:'occhio',a:.6}]});
