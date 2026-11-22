@@ -28,7 +28,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
 #side button.on{background:#f2c230}
 #needs{position:absolute;z-index:6;left:0;right:0;bottom:0;background:rgba(255,253,245,.94);border-top:3px solid #14151d;padding:6px 8px;white-space:nowrap;text-align:center}
 #needs .face{display:inline-block;vertical-align:middle;font-size:34px;margin-right:6px}
-#needs .nd{display:inline-block;vertical-align:middle;width:13%;min-width:96px;margin:0 3px;text-align:left;font-size:13px;font-weight:700}
+#needs .nd{display:inline-block;vertical-align:middle;width:11.6%;min-width:84px;margin:0 3px;text-align:left;font-size:13px;font-weight:700}
 #needs .bar{height:12px;border:2px solid #14151d;border-radius:7px;background:#e3e6ee;overflow:hidden;margin-top:2px}
 #needs .bar i{display:block;height:100%}
 #doing{font-size:14px;font-weight:700;color:#3a6ac0;margin-top:3px;min-height:18px}
@@ -128,8 +128,8 @@ function walkable(x,y){ var r=room(x,y); return r!==null&&r!=='R'&&r!=='n'&&r!==
 
 /* ================= OGGETTI ================= */
 /* azioni: n=nome, need=bisogno, r=quanto al minuto, dur=minuti, pose, ev=evento obiettivi */
-var NEEDS=['fame','sonno','diver','pulizia','bagno','amici'];
-var NEEDINFO={fame:['🍔','Fame'],sonno:['💤','Sonno'],diver:['🎮','Divertimento'],pulizia:['🛁','Pulizia'],bagno:['🚽','Bagno'],amici:['💬','Amici']};
+var NEEDS=['fame','sete','sonno','diver','pulizia','bagno','amici'];
+var NEEDINFO={fame:['🍔','Fame'],sete:['💧','Sete'],sonno:['💤','Sonno'],diver:['🎮','Gioco'],pulizia:['🛁','Pulizia'],bagno:['🚽','Bagno'],amici:['💬','Amici']};
 var T={
  lettoT:{name:'Letto di Tommy',w:1,d:2,acts:[{n:'Dormi',need:'sonno',r:.22,dur:600,pose:'sleep',on:1,ev:'dormi'}]},
  lettoG:{name:'Letto grande',w:2,d:2,acts:[{n:'Dormi',need:'sonno',r:.22,dur:600,pose:'sleep',on:1,adult:1}],noTommy:1},
@@ -138,8 +138,8 @@ var T={
  armadio:{name:'Armadio',w:1,d:1,acts:[{n:'👕 Scegli i vestiti',need:'pulizia',r:.8,dur:5,pose:'stand',ev:'vestiti',when:[5,20]},{n:'Metti il pigiama',need:'pulizia',r:.5,dur:5,pose:'stand',ev:'pigiama',when:[18,24]}]},
  doccia:{name:'Doccia',w:1,d:1,acts:[{n:'Fai la doccia',need:'pulizia',r:4,dur:20,pose:'stand',on:1,ev:'doccia'}]},
  wc:{name:'Gabinetto',w:1,d:1,acts:[{n:'Vai in bagno',need:'bagno',r:9,dur:8,pose:'stand',ev:'bagno'}]},
- lavandino:{name:'Lavandino',w:1,d:1,acts:[{n:'Lavati la faccia',need:'pulizia',r:2,dur:4,pose:'stand',ev:'faccia'},{n:'Lavati i denti',need:'pulizia',r:2.5,dur:5,pose:'stand',ev:'denti'},{n:'Lavati le mani',need:'pulizia',r:2,dur:4,pose:'stand',ev:'mani'}]},
- frigo:{name:'Frigorifero',w:1,d:1,acts:[{n:'Fai merenda',menu:'mer',need:'fame',r:1.6,dur:15,pose:'stand',ev:'merenda'},{n:'Bevi un succo',need:'fame',r:.8,dur:5,pose:'stand'}]},
+ lavandino:{name:'Lavandino',w:1,d:1,acts:[{n:'Lavati la faccia',need:'pulizia',r:2,dur:4,pose:'stand',ev:'faccia'},{n:'Lavati i denti',need:'pulizia',r:2.5,dur:5,pose:'stand',ev:'denti'},{n:'Lavati le mani',need:'pulizia',r:2,dur:4,pose:'stand',ev:'mani'},{n:'Bevi un bicchiere d\'acqua',need:'sete',r:14,dur:5,pose:'stand',ev:'acqua'}]},
+ frigo:{name:'Frigorifero',w:1,d:1,acts:[{n:'Fai merenda',menu:'mer',need:'fame',r:1.6,dur:15,pose:'stand',ev:'merenda'},{n:'Bevi un succo',need:'sete',r:11,dur:5,pose:'stand',ev:'bevi'},{n:'Bevi un bicchiere di latte',need:'sete',r:10,dur:5,pose:'stand',ev:'bevi'},{n:'Bevi l\'acqua fresca',need:'sete',r:15,dur:4,pose:'stand',ev:'acqua'}]},
  fornelli:{name:'Fornelli',w:1,d:1,acts:[{n:'Cucina la pasta con papà',need:'fame',r:2.2,dur:35,pose:'stand',ev:'cucina'}]},
  lavello:{name:'Lavello',w:1,d:1,acts:[{n:'Lava i piatti (+5 monete)',need:'diver',r:-.2,dur:15,pose:'stand',money:5,ev:'aiuto'}]},
  tavolo:{name:'Tavolo da pranzo',w:2,d:1,acts:[{n:'Colazione',menu:'col',need:'fame',r:2.4,dur:20,pose:'stand',ev:'colazione',when:[5,11]},{n:'Pranzo',menu:'pra',need:'fame',r:2.6,dur:25,pose:'stand',ev:'tavola',when:[11.5,15]},{n:'Cena',menu:'cen',need:'fame',r:2.6,dur:25,pose:'stand',ev:'tavola',when:[18,21.5]},{n:'Apparecchia la tavola (+5 monete)',need:'diver',r:-.1,dur:8,pose:'stand',money:5,ev:'aiuto'}]},
@@ -180,7 +180,7 @@ var T={
  peluche:{name:'Orsetto di peluche gigante',w:1,d:1,price:60,toy:1,acts:[{n:'Coccola l\'orsetto',need:'amici',r:1.5,dur:10,pose:'stand',ev:'peluche'}]},
  tenda:{name:'Tenda per giocare',w:2,d:2,price:150,hm:3.6,toy:1,acts:[{n:'Gioca nella tenda',act:1,need:'diver',r:2,dur:25,pose:'stand',on:1,ev:'tenda'}]},
  ombrellone:{name:'Ombrellone',w:2,d:2,fixed:1,hm:3.4,acts:[{n:'☀️ Metti la crema solare',dur:3,pose:'stand',crema:1,ev:'crema'},{n:'Riposati sotto l\'ombrellone',need:'sonno',r:.4,dur:20,pose:'sit',on:1}]},
- chiringuito:{name:'Chiosco della spiaggia',w:3,d:2,fixed:1,hm:4.2,acts:[{n:'Compra un ghiacciolo (3 monete)',need:'fame',r:1.5,dur:8,pose:'stand',cost:3,ev:'gelato'},{n:'Bevi una bibita fresca (2 monete)',need:'fame',r:1,dur:5,pose:'stand',cost:2}]},
+ chiringuito:{name:'Chiosco della spiaggia',w:3,d:2,fixed:1,hm:4.2,acts:[{n:'Compra un ghiacciolo (3 monete)',need:'fame',r:1.5,dur:8,pose:'stand',cost:3,ev:'gelato'},{n:'Bevi una bibita fresca (2 monete)',need:'sete',r:12,dur:5,pose:'stand',cost:2,ev:'bevi'},{n:'Bevi una bottiglietta d\'acqua (1 moneta)',need:'sete',r:16,dur:4,pose:'stand',cost:1,ev:'acqua'}]},
  torretta:{name:'Torretta del bagnino',w:1,d:1,fixed:1,hm:5.2,acts:[]},
  castelloS:{name:'Castello di sabbia',w:1,d:1,fixed:1,hm:1.8,acts:[{n:'Costruisci un castello di sabbia',act:1,need:'diver',r:1.6,dur:25,pose:'stand',ev:'castellosabbia'}]},
  barca:{name:'Barca a vela',w:2,d:1,fixed:1,hm:4.5,acts:[]},
@@ -197,7 +197,7 @@ var T={
  lampione:{name:'Lampione',w:1,d:1,fixed:1,hm:5,acts:[]},
  scivolo:{name:'Scivolo',w:2,d:1,fixed:1,hm:3.5,acts:[{n:'Scivola giù dallo scivolo',act:1,need:'diver',r:2,dur:15,pose:'stand',ev:'scivolo'}]},
  giostra:{name:'Giostra',w:2,d:2,fixed:1,hm:3.5,acts:[{n:'Gira sulla giostra',act:1,need:'diver',r:2.2,dur:15,pose:'stand',on:1,ev:'giostra'}]},
- fontana:{name:'Fontanella',w:1,d:1,fixed:1,acts:[{n:'Bevi alla fontanella',need:'fame',r:.6,dur:4,pose:'stand'}]},
+ fontana:{name:'Fontanella',w:1,d:1,fixed:1,acts:[{n:'Bevi alla fontanella',need:'sete',r:16,dur:4,pose:'stand',ev:'acqua'}]},
  gelati:{name:'Chiosco dei gelati',w:2,d:1,fixed:1,hm:4,acts:[{n:'Compra un gelato (5 monete)',need:'fame',r:2,dur:10,pose:'stand',cost:5,ev:'gelato'}]},
  panchinaP:{name:'Panchina del parco',w:2,d:1,fixed:1,acts:[{n:'Siediti sulla panchina',need:'sonno',r:.3,dur:15,pose:'sit',on:1}]},
  alberoP:{name:'Albero',w:1,d:1,fixed:1,hm:4.6,acts:[]}
@@ -231,9 +231,9 @@ var WORLD2=[['halfpipe',1,31],['rampa',8,31],['rampa',14,33],['rail',14,31],['bi
 var ST=null;
 function newState(){ var objs=START.concat(WORLD).concat(WORLD2).map(function(s,i){ return {id:i+1,type:s[0],x:s[1],y:s[2]}; });
   return {v:2,day:1,min:7*60+30,money:300,stars:0,carrots:2,nextId:200,objs:objs,goals:{},carOut:false,chars:{
-    tommy:{x:12,y:3,needs:{fame:70,sonno:85,diver:60,pulizia:80,bagno:70,amici:70}},
-    milly:{x:19,y:8,needs:{fame:70,sonno:80,diver:70,pulizia:80,bagno:80,amici:80}},
-    papone:{x:14,y:8,needs:{fame:70,sonno:80,diver:70,pulizia:80,bagno:80,amici:80}},
+    tommy:{x:12,y:3,needs:{fame:70,sete:75,sonno:85,diver:60,pulizia:80,bagno:70,amici:70}},
+    milly:{x:19,y:8,needs:{fame:70,sete:80,sonno:80,diver:70,pulizia:80,bagno:80,amici:80}},
+    papone:{x:14,y:8,needs:{fame:70,sete:80,sonno:80,diver:70,pulizia:80,bagno:80,amici:80}},
     carotino:{x:15,y:11,needs:{fame:70,coccole:70}}},paid:{}}; }
 /* le case salvate con la versione senza quartiere vengono spostate dentro la mappa nuova */
 function occList(arr){ var o={}; arr.forEach(function(ob){ var t=T[ob.type]; if(t.flat) return; var D=odims(ob); for(var i=0;i<D[0];i++) for(var j=0;j<D[1];j++) o[(ob.x+i)+','+(ob.y+j)]=ob; }); return o; }
@@ -249,6 +249,7 @@ function initChars(){ CH={};
     leo:{name:'Leo',kid:1,npc:1,hair:'#2b1d14',shirt:'#5fd06a',pants:'#3a3a4a',skin:'#c88a5a'},sofia:{name:'Sofia',kid:1,npc:1,long:1,hair:'#e8b030',shirt:'#ff6a9a',pants:'#3f86d4',skin:'#f6d2b0'}};
   for(var k in defs){ var s=ST.chars[k]||{x:10,y:26,needs:{}}, c=defs[k]; if(s.away&&s.away.driving){ s.away.driving=false; s.away.back=0; }
     c.id=k; c.x=s.x; c.y=s.y; c.path=[]; c.act=null; c.state=s.away?'away':'idle'; c.away=s.away||null; c.face=1; c.bob=0; c.think=0; c.say=null; c.needs=s.needs;
+    if(c.needs&&k!=='carotino'&&c.needs.fame!=null&&c.needs.sete==null) c.needs.sete=75;
     if(c.npc){ c.state='away'; c.away={where:'casa',back:1e15}; }
     else if(c.state!=='away'&&!passable(Math.round(c.x),Math.round(c.y))){ c.x=22; c.y=11; }
     CH[k]=c; }
@@ -576,7 +577,7 @@ function carReturn(cb){ ST.carOut=true; CARS.push({x:GW+4,y:20.5,axis:'x',dir:-1
 /* ================= LOGICA ================= */
 var speed=1, paused=false, playing=false, lastT=0, autoSleep=false;
 function clamp(v){ return v<0?0:v>100?100:v; }
-var DECAY={fame:5,sonno:3.5,diver:6,pulizia:3,bagno:7,amici:3.5};
+var DECAY={fame:5,sete:6,sonno:3.5,diver:6,pulizia:3,bagno:7,amici:3.5};
 var TQ=[], tBusy=false;
 function toast(s,ms,now){ if(now){ TQ=[]; tBusy=false; } if(tBusy){ if(TQ.length<3) TQ.push([s,ms]); return; } var t=$('toast'); t.textContent=s; t.hidden=false; tBusy=true; clearTimeout(toast.t); toast.t=setTimeout(function(){ t.hidden=true; tBusy=false; if(TQ.length){ var n=TQ.shift(); toast(n[0],n[1]); } },ms||2400); }
 var GIB=['Blimba!','Zuzù!','Nabbo nabbo!','Tirì tà!','Ohhh!','Bimbù!','Splaff!','Yuppi!','Mmm!'];
@@ -592,7 +593,7 @@ function beginAct(c){ var a=c.act.a, ob=c.act.ob; c.state='act'; c.act.t=0;
     if(a.need==='fame'&&a.r>0&&inHouse(Math.round(c.x),Math.round(c.y))){ if(ST.min-ST.handsT<120) {} else { toast('💧 Ricordati: prima di mangiare si lavano le mani!',3000); ST.needHands=true; } }
     if(a.pose==='sleep'&&(ob.type==='lettoT'||ob.type==='castello')) goToBed(); } }
 function endAction(c,completed){ var a=c.act&&c.act.a; if((c.onObj||c.trickOn)&&c.prevPos){ c.x=c.prevPos[0]; c.y=c.prevPos[1]; } c.onObj=false; c.prevPos=null; c.trickOn=false; c.lift=0; c.swimming=false; if(a&&a.sea&&c.prevOutfit){ applyOutfit(c,c.prevOutfit); c.prevOutfit=null; }
-  if(completed&&a){ if(a.money){ ST.money+=a.money; toast('+'+a.money+' monete!'); } if(a.carrots){ ST.carrots+=a.carrots; toast('Hai raccolto '+a.carrots+' carote! Ora ne hai '+ST.carrots); } if(a.ev&&c.id==='tommy') goalEvent(a.ev); if(c.id==='tommy'){ tone(660,.1,'triangle',.05);
+  if(completed&&a){ if(a.money){ ST.money+=a.money; toast('+'+a.money+' monete!'); } if(a.carrots){ ST.carrots+=a.carrots; toast('Hai raccolto '+a.carrots+' carote! Ora ne hai '+ST.carrots); } if(a.ev&&c.id==='tommy') goalEvent(a.ev); if(a.ev==='acqua'&&c.id==='tommy'&&Math.random()<.5) parentSay(pick(['Bravo! Bere acqua fa bene e ti dà energia!','L\'acqua è la bibita migliore!','Così il corpo è contento: bevi spesso!'])); if(c.id==='tommy'){ tone(660,.1,'triangle',.05);
     if(a.act){ ST.money+=2; addHab('attivo'); if(Math.random()<.35) parentSay(pick(['Che bello giocare così!','Bravo, così gli occhi si riposano!','Muoversi fa bene!'])); }
     if(a.dish&&a.dish.v){ addHab('sano'); goalEvent('verdure'); if(Math.random()<.7) parentSay(['Bravo! Frutta e verdura ti fanno diventare forte!','Che bravo, mangi tutto!','Così cresci sano e forte!'][Math.floor(Math.random()*3)]); }
     if(a.outfit){ applyOutfit(c,a.outfit); ST.outfit=a.outfit; if(!ST.looks) ST.looks={}; if(!ST.looks[a.outfit]){ ST.looks[a.outfit]=1; addHab('look'); } goalEvent('look_'+a.outfit); toast('👕 Che stile! Tommy ora è vestito da '+OUTFITS[a.outfit].n.toLowerCase(),3000); }
@@ -615,7 +616,7 @@ function comeBack(c){ var w=c.away.where;
   else { c.x=22; c.y=18; if(w==='lavoro'){ ST.money+=120; toast(c.name+(c.id==='milly'?' è tornata':' è tornato')+' dal lavoro: +120 monete',3000); say(c,'Ciao Tommy!',3); } } }
 function goalEvent(ev){ if(ev!=='_') habit(ev); GOALS.forEach(function(g){ if(ST.goals[g.id]) return; if(g.check?(ev==='_'&&g.check()):g.ev===ev){ ST.goals[g.id]=1; ST.money+=g.prize; jingle([523,659,784,1047]); toast('🎯 Obiettivo: '+g.n+'  (+'+g.prize+' monete)',3500); } }); }
 var GOALS=[
- {id:'g1',n:'Fai merenda dal frigorifero',ev:'merenda',prize:20},{id:'g2',n:'Gioca ai videogiochi',ev:'consolle',prize:20},{id:'g3',n:'Raccogli le carote nell\'orto',ev:'orto',prize:20},
+ {id:'g1',n:'Fai merenda dal frigorifero',ev:'merenda',prize:20},{id:'gw',n:'Bevi un bicchiere d\'acqua',ev:'acqua',prize:15},{id:'g2',n:'Gioca ai videogiochi',ev:'consolle',prize:20},{id:'g3',n:'Raccogli le carote nell\'orto',ev:'orto',prize:20},
  {id:'g4',n:'Dai una carota a Carotino',ev:'carota',prize:30},{id:'g5',n:'Fai la doccia',ev:'doccia',prize:20},{id:'g6',n:'Abbraccia la mamma',ev:'abbraccio',prize:30},
  {id:'g7',n:'Vai a scuola',ev:'scuola',prize:40},{id:'g8',n:'Compra qualcosa nel catalogo',ev:'compra',prize:40},{id:'g9',n:'Dormi nel tuo letto',ev:'dormi',prize:30},
  {id:'g10',n:'Fai i compiti alla scrivania',ev:'compiti',prize:30},{id:'g11',n:'Mangia a tavola',ev:'tavola',prize:20},{id:'g12',n:'Gioca con papà',ev:'giocapapa',prize:30},
@@ -805,7 +806,7 @@ $('bAlb').onclick=function(){ var h=''; MEDALS.forEach(function(m){ var n=ST.hab
 $('bAlbClose').onclick=function(){ $('albOv').hidden=true; };
 
 /* --- persone che vivono da sole (Milly e Papone) --- */
-var ADULT_PREF={fame:['fornelli','frigo','tavolo'],sonno:['lettoG','divano','poltrona'],diver:['tv','libreria','divano','acquario','consolle'],pulizia:['doccia','lavandino'],bagno:['wc'],amici:['telefono']};
+var ADULT_PREF={fame:['fornelli','frigo','tavolo'],sete:['frigo','lavandino'],sonno:['lettoG','divano','poltrona'],diver:['tv','libreria','divano','acquario','consolle'],pulizia:['doccia','lavandino'],bagno:['wc'],amici:['telefono']};
 function adultThink(c){ var h=ST.min/60%24, day=Math.floor(ST.min/1440), work=(day%7)<5&&h>=8&&h<(c.id==='milly'?12:17);
   if(work&&!ST.paid[c.id+day]){ ST.paid[c.id+day]=1;
     if(c.id==='papone'){ var car=find('auto'); if(car&&!ST.carOut){ c.act={ob:car,a:{n:'Va al lavoro',work:1},t:0}; if(goToObj(c,car)){ say(c,'Vado al lavoro, ciao!',3); if(!c.path.length) goAway(c,'lavoro'); return; } } }
@@ -833,7 +834,7 @@ function update(dt){ if(!ST) return;
   ST.min+=dmin; var h=ST.min/60%24;
   // bisogni
   for(var id in CH){ var c=CH[id]; if(c.bunny){ c.needs.fame=clamp(c.needs.fame-dmin/60*4); c.needs.coccole=clamp(c.needs.coccole-dmin/60*3); continue; } if(c.npc) continue;
-    if(c.state==='away') continue; NEEDS.forEach(function(n){ var dec=DECAY[n]; if(n==='sonno'&&c.state==='act'&&c.act.pose==='sleep') dec=0; if(n==='sonno'&&isNight()) dec*=1.8; c.needs[n]=clamp(c.needs[n]-dmin/60*dec); }); }
+    if(c.state==='away') continue; NEEDS.forEach(function(n){ var dec=DECAY[n]; if(n==='sonno'&&c.state==='act'&&c.act.pose==='sleep') dec=0; if(n==='sonno'&&isNight()) dec*=1.8; if(n==='sete'&&c.state==='act'&&c.act&&c.act.a&&(c.act.a.trick||c.act.a.sea)) dec*=2.5; c.needs[n]=clamp(c.needs[n]-dmin/60*dec); }); }
   if(!(tm.state==='act'&&tm.act&&tm.act.a.scr)) ST.scrUsed=Math.max(0,ST.scrUsed-dmin*.25);
   // persone
   for(var id2 in CH){ var c2=CH[id2];
@@ -856,7 +857,7 @@ function update(dt){ if(!ST) return;
     // idle
     c2.think-=dt; if(c2.think<=0){ c2.think=c2.bunny?2+Math.random()*4:2+Math.random()*3;
       if(c2.bunny) bunnyThink(c2); else if(c2.kind==='skater') skaterThink(c2); else if(c2.kind==='guest') guestThink(c2); else if(c2.npc) kidThink(c2); else if(c2.id!=='tommy') adultThink(c2);
-      else if(Math.random()<.25){ var lowN=null,lv=101; NEEDS.forEach(function(n){ if(c2.needs[n]<lv){ lv=c2.needs[n]; lowN=n; } }); say(c2,lv<35?(NEEDINFO[lowN][0]+' '+{fame:'Ho fame!',sonno:'Che sonno…',diver:'Mi annoio!',pulizia:'Mi serve un bagnetto!',bagno:'Devo andare in bagno!',amici:'Mi sento solo…'}[lowN]):GIB[Math.floor(Math.random()*GIB.length)],2.5); } } }
+      else if(Math.random()<.25){ var lowN=null,lv=101; NEEDS.forEach(function(n){ if(c2.needs[n]<lv){ lv=c2.needs[n]; lowN=n; } }); say(c2,lv<35?(NEEDINFO[lowN][0]+' '+{fame:'Ho fame!',sete:'Ho sete!',sonno:'Che sonno…',diver:'Mi annoio!',pulizia:'Mi serve un bagnetto!',bagno:'Devo andare in bagno!',amici:'Mi sento solo…'}[lowN]):GIB[Math.floor(Math.random()*GIB.length)],2.5); } } }
   if(Math.floor(ST.min/1440)!==ST.day-1){ ST.day=Math.floor(ST.min/1440)+1; toast('☀️ Buongiorno! Giorno '+ST.day+((ST.day-1)%7>=5?' · è il weekend!':''),3000); }
   var dn=Math.floor(ST.min/1440); if(h>=9&&schoolPending()&&ST.schoolRem!==dn&&tm.state!=='away'){ ST.schoolRem=dn; toast('⏰ Sono le 9: Tommy, la scuola inizia! Tocca la porta di casa',4000,true); parentSay('Tommy, è tardi! Corri a scuola!'); }
   if(h>=21&&h<23&&ST.nanna!==dn&&tm.state!=='away'&&!sleeping){ ST.nanna=dn; toast('🌙 Sono le 9 di sera: è ora di mettere Tommy a letto!',3500); say(CH.milly.state!=='away'?CH.milly:tm,'A nanna, Tommy!',3); }
@@ -869,6 +870,7 @@ var needsBuilt=false;
 function updateNeeds(){ var c=CH.tommy, m=moodOf(c);
   if(!needsBuilt){ var html='<span class="face" id="nface"></span>'; NEEDS.forEach(function(n){ html+='<span class="nd">'+NEEDINFO[n][0]+' '+NEEDINFO[n][1]+'<div class="bar"><i id="nb_'+n+'"></i></div></span>'; }); html+='<div id="doing"></div>'; $('needs').innerHTML=html; needsBuilt=true; lastDoing=''; }
   $('nface').textContent=m>75?'😄':m>55?'🙂':m>35?'😐':'😕';
+  if(c.needs.sete<28&&!ST.seteWarn){ ST.seteWarn=1; toast('💧 Tommy ha sete! Vai al frigorifero, al lavandino o alla fontanella a bere un po\' d\'acqua.',4500,true); } if(c.needs.sete>60) ST.seteWarn=0;
   NEEDS.forEach(function(n){ var v=c.needs[n], el=$('nb_'+n); el.style.width=Math.round(v)+'%'; el.style.background=v>60?'#5fd06a':v>30?'#f2c230':'#ff6a6a'; });
   updateDoing(); }
 var lastDoing='';
