@@ -49,6 +49,10 @@ input{font:inherit;-webkit-user-select:text;user-select:text}
 .rec{font-size:15px;color:#d8f6ff;margin:8px auto;max-width:560px}
 #ed{position:absolute;top:0;left:0;right:0;bottom:0;z-index:25;background:#062a3e}
 #edc{position:absolute;touch-action:none}
+#edTools{position:absolute;z-index:3;background:rgba(10,31,51,.95);border:3px solid #f2d94a;border-radius:16px;padding:8px 10px;text-align:center;font-size:16px;font-weight:800}
+#edTools button{margin:6px 3px 0;border:3px solid #0a1a2a;border-radius:12px;padding:8px 10px;font-size:15px;font-weight:800;background:#0a2a44;color:#fff}
+#edTools button.on{background:#7af0c8;color:#0a1a2a}
+#edTools button.del{background:#e85f7a;font-size:18px;padding:10px 16px}
 #edp{position:absolute;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0a1f33;padding:10px 10px 30px}
 #edp h3{margin:14px 0 6px;font-size:16px;color:#7af0c8;text-align:left}
 .edtop{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center}
@@ -93,7 +97,7 @@ input{font:inherit;-webkit-user-select:text;user-select:text}
 <div id="soc" hidden><button type="button" data-a="canta">♪<small>Canta</small></button><button type="button" data-a="balla">★<small>Balla</small></button><button type="button" data-a="buffo">☺<small>Buffo</small></button><button type="button" class="att" data-a="att">⚔<small>Attacca</small></button><button type="button" class="gift" data-a="gift" hidden>🎁<small>Regalo</small></button></div>
 <button id="bMode" type="button" hidden></button><button id="bShop" type="button" hidden>🏠 Villaggio<small>compra strumenti e membri</small></button>
 <div id="toast" style="opacity:0"></div>
-<section id="ed" hidden><canvas id="edc"></canvas><div id="edp"></div></section>
+<section id="ed" hidden><canvas id="edc"></canvas><div id="edTools" hidden></div><div id="edp"></div></section>
 <div class="ov" id="newOv" hidden><div class="box"><h2>Come mangia la tua creatura?</h2>
   <button class="choice" type="button" id="chErb"><canvas id="thErb" width="160" height="110" style="width:160px;height:110px"></canvas><b>🌿 Erbivora</b>Mangia le alghe. Tranquilla, ma deve scappare dai predatori.</button>
   <button class="choice" type="button" id="chCarn"><canvas id="thCarn" width="160" height="110" style="width:160px;height:110px"></canvas><b>🍖 Carnivora</b>Caccia le cellule più piccole di lei e mangia la carne.</button>
@@ -647,12 +651,13 @@ function edR(){ return ER*(SIZES[SP.size]||SIZES.media).k; }
 function edCenter(){ return {x:EW/2,y:EH/2+10}; }
 function drawEditor(){ var tm=Date.now()/1000, c=edCenter(), land=isLand(); ex.setTransform(DPR,0,0,DPR,0,0);
   var g=ex.createRadialGradient(c.x,c.y,10,c.x,c.y,Math.max(EW,EH)*.7); g.addColorStop(0,land?'#7ac85a':'#1a6a8a'); g.addColorStop(1,land?'#2a5a2a':'#062a3e'); ex.fillStyle=g; ex.fillRect(0,0,EW,EH);
-  ex.strokeStyle='rgba(255,255,255,.15)'; ex.lineWidth=2; ex.beginPath(); ex.arc(c.x,c.y,ER*2.75,0,TAU); ex.stroke();
+  ex.strokeStyle='rgba(255,255,255,.15)'; ex.lineWidth=2; ex.beginPath(); ex.arc(c.x,c.y,ER*2.15,0,TAU); ex.stroke(); if(edDrag){ ex.fillStyle=edTrash?'rgba(232,95,122,.35)':'rgba(255,255,255,.06)'; ex.beginPath(); ex.rect(0,0,EW,EH); ex.arc(c.x,c.y,ER*2.15,0,TAU,true); ex.fill(); if(edTrash){ ex.fillStyle='#fff'; ex.font='900 20px -apple-system,sans-serif'; ex.textAlign='center'; ex.fillText('Lascia qui per togliere ✖',c.x,EH-56); } }
   ex.fillStyle='rgba(255,255,255,.7)'; ex.font='700 14px -apple-system,sans-serif'; ex.textAlign='right'; ex.fillText('davanti ➜',EW-12,c.y+4); ex.textAlign='left'; ex.fillText('Trascina i pezzi sul corpo',12,EH-30); ex.fillText('Trascinali fuori dal cerchio per toglierli',12,EH-12);
   ex.save(); ex.translate(c.x,c.y); drawCreature(ex,SP,edR(),tm,{sel:edSel,trash:edTrash,walk:land?tm*6:null}); ex.restore();
   ex.fillStyle='#fff'; ex.font='900 20px -apple-system,sans-serif'; ex.textAlign='center'; ex.fillText(SP.name,c.x,32); }
-function edHit(px,py){ var c=edCenter(), r=edR(), best=-1, bd=ER*.5; edDrag=null; for(var i=0;i<SP.parts.length;i++){ var cp=copies(SP.parts[i]); for(var j=0;j<cp.length;j++){ var pp=partPos(SP,r,cp[j]), hx=c.x+pp.x+Math.cos(pp.n)*r*.22, hy=c.y+pp.y+Math.sin(pp.n)*r*.22, d=Math.sqrt((px-hx)*(px-hx)+(py-hy)*(py-hy)); if(d<bd){ bd=d; best=i; edDrag={i:i,m:cp[j]<0}; } } } return best; }
-function edMove(px,py){ if(!edDrag) return; var c=edCenter(), sh=SHAPES[SP.shape], dx=px-c.x, dy=py-c.y, a=Math.atan2(dy/sh[1],dx/sh[0]); if(edDrag.m) a=-a; SP.parts[edDrag.i].a=a; edTrash=Math.sqrt(dx*dx+dy*dy)>ER*2.75; }
+var edMoved=false;
+function edHit(px,py){ var c=edCenter(), r=edR(), best=-1, bd=ER*.6; edDrag=null; edMoved=false; for(var i=0;i<SP.parts.length;i++){ var cp=copies(SP.parts[i]), off=TOP[SP.parts[i].t]?-.15:.25; for(var j=0;j<cp.length;j++){ var pp=partPos(SP,r,cp[j]), hx=c.x+pp.x+Math.cos(pp.n)*r*off, hy=c.y+pp.y+Math.sin(pp.n)*r*off, d=Math.sqrt((px-hx)*(px-hx)+(py-hy)*(py-hy)); if(d<bd){ bd=d; best=i; edDrag={i:i,m:cp[j]<0}; } } } return best; }
+function edMove(px,py){ if(!edDrag) return; var c=edCenter(), sh=SHAPES[SP.shape], dx=px-c.x, dy=py-c.y, a=Math.atan2(dy/sh[1],dx/sh[0]); if(edDrag.m) a=-a; SP.parts[edDrag.i].a=a; edTrash=Math.sqrt(dx*dx+dy*dy)>ER*2.15; edMoved=true; }
 function edPt(e){ var t=e.changedTouches?e.changedTouches[0]:e, r=ec.getBoundingClientRect(); return {x:t.clientX-r.left,y:t.clientY-r.top}; }
 function edDown(e){ if(e.cancelable) e.preventDefault(); var p=edPt(e); edSel=edHit(p.x,p.y); edTrash=false; renderPanel(); }
 function edMv(e){ if(!edDrag) return; if(e.cancelable) e.preventDefault(); var p=edPt(e); edMove(p.x,p.y); }
@@ -673,6 +678,8 @@ function addPart(t){ var P=PARTS[t]; if(ST.unl.indexOf(t)<0){ var un=P.un;
   if(old>=0){ SP.parts[old].t=t; edSel=old; } else { SP.parts.push({t:t,a:P.cat==='bocca'?0:freeAngle(t)}); edSel=SP.parts.length-1; }
   tone(880,.1,'triangle',.05); tone(1175,.1,'triangle',.04,.07); renderPanel(); }
 function removePart(i){ var p=SP.parts[i]; if(!p) return; ST.dna+=PARTS[p.t].cost; SP.parts.splice(i,1); edSel=-1; tone(330,.12,'triangle',.05); renderPanel(); }
+function edToolsUpd(){ var t=$('edTools'), p=edSel>=0?SP.parts[edSel]:null; if(!p){ t.hidden=true; return; } var cs=p.s||1, h='<b>'+PARTS[p.t].n+'</b> '; for(var q=0;q<PSIZE.length;q++) h+='<button type="button" data-ts="'+PSIZE[q][0]+'"'+(cs===PSIZE[q][0]?' class="on"':'')+'>'+PSIZE[q][1]+'</button>'; h+='<button type="button" class="del" data-ts="del">✖ Togli (+'+PARTS[p.t].cost+' DNA)</button>'; t.innerHTML=h; t.hidden=false; t.style.left='8px'; t.style.width=(EW-16)+'px'; t.style.top=(EH-t.offsetHeight-8)+'px'; }
+$('edTools').addEventListener('click',function(e){ var el=e.target; while(el&&el!==this&&!el.getAttribute('data-ts')) el=el.parentNode; if(!el||el===this) return; var v=el.getAttribute('data-ts'); if(v==='del') removePart(edSel); else { if(SP.parts[edSel]) SP.parts[edSel].s=parseFloat(v); renderPanel(); } });
 function bars(n){ var s=''; for(var i=0;i<5;i++) s+='<i'+(i<n?' class="on"':'')+'></i>'; return s; }
 function renderPanel(){ var st=stats(SP), h='', land=isLand(), pl2=phL();
   h+='<div class="edtop"><button class="sm" data-act="back" type="button">◀ Indietro</button><button class="done" data-act="done" type="button" style="-webkit-box-flex:1;-webkit-flex:1;flex:1">✔ Fatto, '+(land?'cammina!':'nuota!')+'</button></div>';
@@ -684,7 +691,7 @@ function renderPanel(){ var st=stats(SP), h='', land=isLand(), pl2=phL();
   else h+='<div class="stat"><span>Velocità</span>'+bars(1+Math.min(3,st.f)+(st.c?1:0))+'</div><div class="stat"><span>Agilità</span>'+bars(1+Math.min(3,st.c)+(st.dash?1:0))+'</div><div class="stat"><span>Attacco</span>'+bars((st.d==='carn'?2:(st.d==='onn'?1:0))+st.spi)+'</div><div class="stat"><span>Difesa</span>'+bars(1+st.spi+(st.poison?1:0))+'</div><div class="stat"><span>Vista</span>'+bars(1+st.eye)+'</div>';
   if(st.d==='none') h+='<div class="hint" style="color:#ffb0b0"><b>Attenzione:</b> senza bocca la creatura non può mangiare!</div>';
   if(edSel>=0&&SP.parts[edSel]){ var sp=SP.parts[edSel], cs=sp.s||1; h+='<div class="selbox">Pezzo scelto: <b>'+PARTS[sp.t].n+'</b><br>'; for(var q=0;q<PSIZE.length;q++) h+='<button class="sm opt'+(cs===PSIZE[q][0]?' on':'')+'" data-act="psize" data-v="'+PSIZE[q][0]+'" type="button">'+PSIZE[q][1]+'</button>'; h+='<button class="sm" data-act="del" type="button">✖ Togli (+'+PARTS[sp.t].cost+')</button></div>'; }
-  else h+='<div class="hint">Tocca un pezzo qui sotto per aggiungerlo, poi trascinalo sul corpo. Tocca un pezzo sul corpo per cambiarne la grandezza. Pezzi: '+SP.parts.length+'/'+(land?MAXPL:MAXP)+'</div>';
+  else h+='<div class="hint">Tocca un pezzo qui sotto per aggiungerlo, poi trascinalo sul corpo. Per <b>togliere</b> un pezzo: toccalo sul corpo e premi ✖ Togli (oppure trascinalo fuori dal cerchio). Pezzi: '+SP.parts.length+'/'+(land?MAXPL:MAXP)+'</div>';
   for(var ci=0;ci<CATS.length;ci++){ var row=''; for(var t in PARTS){ if(PARTS[t].cat!==CATS[ci][0]||PARTS[t].ph.indexOf(pl2)<0) continue; var lk=ST.unl.indexOf(t)<0, has=cnt(SP,t);
       row+='<button class="pb'+(lk?' lock':'')+(has?' has':'')+'" data-act="add" data-t="'+t+'" type="button"><canvas data-th="'+t+'" width="120" height="92"></canvas><b>'+(lk?'🔒 ':'')+PARTS[t].n+(has?' ×'+has:'')+'</b>'+(lk?(typeof PARTS[t].un==='number'?'Sblocca: '+PARTS[t].un+' DNA':(PARTS[t].un==='vil'?'da nido o villaggio':(land?'da un nido':'trova una ⭐'))):PARTS[t].cost+' DNA · '+PARTS[t].d)+'</button>'; }
     if(row) h+='<h3>'+CATS[ci][1]+'</h3>'+row; }
@@ -697,6 +704,7 @@ function renderPanel(){ var st=stats(SP), h='', land=isLand(), pl2=phL();
   h+='<div class="hint" style="margin-top:14px">'+(land?'Le parti con 🔒 si sbloccano con il <b>DNA</b> (tocca due volte) oppure completando <b>nidi e villaggi</b> (amici o conquistati).':'Le parti con 🔒 si sbloccano raccogliendo i <b>frammenti di stella</b> che cadono nella pozza.')+'</div>';
   var p=$('edp'), sc=p.scrollTop; p.innerHTML=h; p.scrollTop=sc;
   var cvs=p.getElementsByTagName('canvas'); for(var qq=0;qq<cvs.length;qq++){ var x=cvs[qq].getContext('2d'), tt=cvs[qq].getAttribute('data-th'); x.setTransform(2,0,0,2,0,0); x.save(); x.translate(16,23); x.beginPath(); x.arc(0,0,13,0,TAU); x.fillStyle=SP.col; x.fill(); x.lineWidth=2; x.strokeStyle=SP.dk; x.stroke(); x.translate(tt==='occhio'?8:12,0); drawPart(x,SP,tt,15,1,{walk:0},0); x.restore(); }
+  edToolsUpd();
   var nm=$('spName'); nm.oninput=function(){ var v=String(nm.value||'').replace(/\s+/g,' ').slice(0,16); SP.name=v.trim()||'Senza nome'; }; }
 $('edp').addEventListener('click',function(e){ var el=e.target; while(el&&el!==this&&!el.getAttribute('data-act')) el=el.parentNode; if(!el||el===this) return; var a=el.getAttribute('data-act'), v=el.getAttribute('data-v');
   if(a==='add') addPart(el.getAttribute('data-t'));
@@ -710,7 +718,7 @@ $('edp').addEventListener('click',function(e){ var el=e.target; while(el&&el!==t
   else if(a==='done') closeEditor();
   else if(a==='back'){ save(); toMenu(); } });
 var edOldMax=0;
-function openEditor(first){ edOldMax=(pl&&STT)?maxHp():0; mode='ed'; edFirst=first||null; edSel=-1; touch=null; keys={}; $('ed').hidden=false; showUI(false); $('menu').hidden=true; edLayout(); renderPanel(); }
+function openEditor(first){ $('edTools').hidden=true; edOldMax=(pl&&STT)?maxHp():0; mode='ed'; edFirst=first||null; edSel=-1; touch=null; keys={}; $('ed').hidden=false; showUI(false); $('menu').hidden=true; edLayout(); renderPanel(); }
 function closeEditor(){ if(diet(SP)==='none'){ toast('Metti una bocca, altrimenti la creatura non può mangiare!'); return; } $('ed').hidden=true; STT=stats(SP); if(pl){ var nm2=maxHp(); if(edOldMax&&nm2>edOldMax) pl.hp+=nm2-edOldMax; pl.hp=Math.min(Math.max(pl.hp,1),nm2); } darkKey=''; save(); mode='play'; paused=false; lastT=0; showUI(true); posBtns();
   if(edFirst==='cell') toast(STT.d==='carn'?'Tocca lo schermo e tieni premuto per nuotare. Mordi le cellule più piccole, scappa da quelle col punto esclamativo!':'Tocca lo schermo e tieni premuto per nuotare. Mangia le alghe verdi e scappa dalle cellule col punto esclamativo!',6);
   else if(edFirst==='land') toast('Sei sulla terraferma! Segui la freccia bianca per trovare i nidi delle altre specie. Servono 4 nidi (amici o sconfitti).',6);
