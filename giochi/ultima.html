@@ -41,7 +41,11 @@ img{image-rendering:-webkit-optimize-contrast;image-rendering:pixelated;-webkit-
 .say{position:absolute;top:-16px;right:-14px;background:#ffe14a;color:#3a2a00;border:3px solid #1d1d1d;padding:2px 6px;font-size:13px;-webkit-transform:rotate(8deg);transform:rotate(8deg)}
 #deck,#disc{position:absolute}
 #deck img,#disc img{display:block;width:100%;height:100%}
-#deckN{position:absolute;left:0;right:0;bottom:-24px;text-align:center;font-size:14px;text-shadow:2px 2px 0 #000}
+#deckN{position:absolute;left:50%;bottom:-50px;-webkit-transform:translateX(-50%);transform:translateX(-50%);white-space:nowrap;padding:6px 12px;font-size:17px}
+#deck.pulse img{-webkit-animation:dp .6s infinite alternate;animation:dp .6s infinite alternate;outline:5px solid #ffe14a}
+#deck.pulse #deckN{-webkit-animation:dq .6s infinite alternate;animation:dq .6s infinite alternate}
+@-webkit-keyframes dp{from{-webkit-transform:scale(1)}to{-webkit-transform:scale(1.07)}}@keyframes dp{from{transform:scale(1)}to{transform:scale(1.07)}}
+@-webkit-keyframes dq{from{-webkit-transform:translateX(-50%) scale(1)}to{-webkit-transform:translateX(-50%) scale(1.12)}}@keyframes dq{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.12)}}
 #colBadge{position:absolute;padding:6px 10px;font-size:16px;text-align:center}
 #dirB{position:absolute;font-size:34px;text-shadow:3px 3px 0 #000;color:#fff}
 #msg{position:absolute;left:8px;right:8px;text-align:center;font-size:18px;text-shadow:2px 2px 0 #000;pointer-events:none}
@@ -75,7 +79,7 @@ img{image-rendering:-webkit-optimize-contrast;image-rendering:pixelated;-webkit-
 </section>
 <section id="game" hidden>
   <div id="opps"></div>
-  <div id="deck"><img id="deckImg" alt=""><div id="deckN"></div></div>
+  <div id="deck"><img id="deckImg" alt=""><div id="deckN" class="blk y"></div></div>
   <div id="disc"><img id="discImg" alt=""></div>
   <div id="colBadge" class="blk"></div>
   <div id="dirB">↻</div>
@@ -168,7 +172,7 @@ function points(c){ if(c.c==='w') return 50; if(isNaN(+c.v)) return 20; return +
 function say(s){ $('msg').textContent=s; }
 function startTurn(){ if(!playing) return; G.drew=false; render(); save(); var p=G.players[G.cur];
   if(p.ai){ busy=true; say('Tocca a '+p.name+'...'); later(aiMove,900+Math.random()*500); }
-  else { busy=false; var any=p.hand.some(canPlay); say(any?'Tocca a te! Scegli una carta.':'Nessuna carta va bene: tocca il mazzo per pescare.'); render(); } }
+  else { busy=false; var any=p.hand.some(canPlay); say(any?'Tocca a te! Scegli una carta (o pesca dal mazzo viola).':'Nessuna carta va bene: tocca il mazzo viola che lampeggia per PESCARE!'); render(); } }
 function endTurn(skip){ G.cur=nextIdx(skip?2:1); startTurn(); }
 function playCard(pi,card,chosen){ var p=G.players[pi], idx=p.hand.indexOf(card); if(idx<0) return; p.hand.splice(idx,1); G.disc.push(card); G.col=card.c==='w'?chosen:card.c;
   tone(card.c==='w'?660:520,.08); flyCard(pi,card);
@@ -194,7 +198,7 @@ function aiChoose(p,ok){ if(G.diff!=='furbo') { var nw=ok.filter(function(c){ re
 function aiColor(p){ var cnt={g:0,b:0,r:0,y:0}; p.hand.forEach(function(c){ if(c.c!=='w') cnt[c.c]++; }); var b='g'; for(var k in cnt) if(cnt[k]>cnt[b]) b=k; if(G.diff!=='furbo'&&Math.random()<.4) b=['g','b','r','y'][Math.floor(Math.random()*4)]; return b; }
 function aiPlay(p,c){ playCard(G.cur,c,c.c==='w'?aiColor(p):null); }
 var pendingWild=null;
-function humanTap(card){ if(busy||!playing||paused) return; if(G.cur!==0) { say('Aspetta il tuo turno!'); return; } if(!canPlay(card)){ say('Questa carta non va bene: serve '+COL[G.col].n+' o '+(top().c==='w'?'un Jolly':valName(top().v))+'.'); tone(180,.12,'sawtooth',.03); return; }
+function humanTap(card){ if(busy||!playing||paused) return; if(G.cur!==0) { say('Aspetta il tuo turno!'); return; } if(!canPlay(card)){ var anyOk=G.players[0].hand.some(canPlay); say('Questa carta non va bene: serve '+COL[G.col].n+' o '+(top().c==='w'?'un Jolly':valName(top().v))+'.'+(anyOk||G.drew?'':' Tocca il mazzo viola per PESCARE!')); tone(180,.12,'sawtooth',.03); return; }
   if(card.c==='w'){ pendingWild=card; $('colOv').hidden=false; return; } busy=true; playCard(0,card,null); }
 function valName(v){ return v==='skip'?'un Salta':(v==='rev'?'un Inverti':(v==='+2'?'un +2':'il numero '+v)); }
 function humanDraw(){ if(busy||!playing||paused||G.cur!==0) return; if(G.drew){ say('Hai già pescato: gioca la carta o premi Passa.'); return; }
@@ -217,11 +221,11 @@ var W=0, H=0, cw=70, ch=105, cards={};
 function layout(){ W=window.innerWidth; H=window.innerHeight; var land=W>H;
   cw=Math.round(Math.max(54,Math.min(110,Math.min(W/8.2,(H*(land?.24:.18))/1.5)))); ch=Math.round(cw*1.5);
   var bc=Math.round(cw*1.2), bh=Math.round(bc*1.5), oppH=land?120:130, midY=Math.round(56+oppH+(H-56-oppH-ch-60-bh)/2);
-  var dk=$('deck'), ds=$('disc'); dk.style.width=bc+'px'; dk.style.height=bh+'px'; ds.style.width=bc+'px'; ds.style.height=bh+'px';
+  var dk=$('deck'), ds=$('disc'); midY=Math.min(midY,H-ch-60-bh-80); dk.style.width=bc+'px'; dk.style.height=bh+'px'; ds.style.width=bc+'px'; ds.style.height=bh+'px';
   dk.style.left=Math.round(W/2-bc-14)+'px'; dk.style.top=midY+'px'; ds.style.left=Math.round(W/2+14)+'px'; ds.style.top=midY+'px';
   var cb=$('colBadge'); cb.style.left=Math.round(W/2+bc+30)+'px'; cb.style.top=Math.round(midY+bh/2-40)+'px';
   var db=$('dirB'); db.style.left=Math.round(W/2-bc-70)+'px'; db.style.top=Math.round(midY+bh/2-24)+'px';
-  $('msg').style.top=Math.round(midY+bh+30)+'px';
+  $('msg').style.top=Math.round(midY+bh+62)+'px';
   var hy=H-ch-18; $('hand').style.top=hy+'px'; $('hand').style.height=(ch+18)+'px';
   var me=$('me'); me.style.left='6px'; me.style.top=(hy-62)+'px';
   var bu=$('bUlt'); bu.style.right='10px'; bu.style.top=(hy-66)+'px'; var bp=$('bPass'); bp.style.right='170px'; bp.style.top=(hy-60)+'px';
@@ -235,7 +239,7 @@ function render(){ if(!G) return; var i, p;
     var bk=el.getElementsByClassName('backs')[0], k=Math.min(10,p.hand.length), h=''; for(var q=0;q<k;q++) h+='<img src="'+backImg()+'" style="left:'+Math.round(ow/2-((k-1)*10+20)/2+q*10)+'px" alt="">'; bk.innerHTML=h;
     var sy=el.getElementsByClassName('say')[0]; if(p.hand.length===1&&p.said){ if(!sy){ sy=document.createElement('div'); sy.className='say'; sy.textContent='ULTIMA!'; el.appendChild(sy); } } else if(sy) el.removeChild(sy); }
   // centro
-  $('deckImg').src=backImg(); $('deckN').textContent='Pesca ('+G.deck.length+')'; var t=top(); $('discImg').src=cardImg(t.c,t.v);
+  $('deckImg').src=backImg(); $('deckN').textContent='▲ PESCA ▲'; var mt=G.cur===0&&!busy&&playing&&!G.drew&&!G.players[0].hand.some(canPlay); $('deck').className=mt?'pulse':''; var t=top(); $('discImg').src=cardImg(t.c,t.v);
   var cb=$('colBadge'); cb.className='blk '+G.col; cb.innerHTML='Colore<br>'+COL[G.col].n.toUpperCase(); $('dirB').textContent=G.dir>0?'↻':'↺';
   var me=G.players[0]; $('meN').textContent=me.name+' · '+me.hand.length; $('me').className=G.cur===0&&playing?'turn':'';
   // mano
