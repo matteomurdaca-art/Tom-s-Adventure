@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v88 4aae596ef3
+# v89 04c90f219b
 
 CACHE:
 ./
@@ -32,6 +32,7 @@ giochi/sixseven.html
 giochi/sparabolle.html
 giochi/stelle.html
 giochi/tavolo.html
+giochi/ultima.html
 giochi/vichinghi.html
 manifest.webmanifest
 three.min.js?v=18

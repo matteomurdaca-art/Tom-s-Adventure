@@ -65,7 +65,8 @@ input{font:inherit;-webkit-user-select:text;user-select:text}
 .stat span{width:84px}
 .stat i{display:inline-block;width:16px;height:12px;margin-right:3px;border-radius:3px;background:#22465a;margin-top:3px}
 .stat i.on{background:#7af0c8}
-.pb{display:inline-block;vertical-align:top;width:31%;min-width:92px;margin:0 1% 8px 0;border:2px solid #2a6a8a;background:#0e3550;border-radius:12px;padding:4px 2px 6px;font-size:13px;line-height:1.2}
+.pb .px{position:absolute;top:-8px;right:-6px;width:30px;height:30px;line-height:26px;border-radius:15px;background:#e8404a;color:#fff;border:2px solid #fff;font-size:16px;font-weight:900;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.4)}
+.pb{position:relative;display:inline-block;vertical-align:top;width:31%;min-width:92px;margin:0 1% 8px 0;border:2px solid #2a6a8a;background:#0e3550;border-radius:12px;padding:4px 2px 6px;font-size:13px;line-height:1.2}
 .pb canvas{display:block;margin:0 auto;width:60px;height:46px}
 .pb b{display:block;font-size:14px}
 .pb.lock{opacity:.5}
@@ -675,11 +676,11 @@ function addPart(t){ var P=PARTS[t]; if(ST.unl.indexOf(t)<0){ var un=P.un;
   var mxp=isLand()?MAXPL:MAXP; if(old<0&&SP.parts.length>=mxp){ toast('Massimo '+mxp+' pezzi: togline uno prima.'); return; }
   if(ST.dna+refund<P.cost){ toast('Ti servono '+P.cost+' DNA (ne hai '+ST.dna+'). Mangia ancora!'); tone(200,.15,'square',.04); return; }
   ST.dna+=refund-P.cost;
-  if(old>=0){ SP.parts[old].t=t; edSel=old; } else { SP.parts.push({t:t,a:P.cat==='bocca'?0:freeAngle(t)}); edSel=SP.parts.length-1; }
+  if(old>=0){ SP.parts[old].t=t; } else { SP.parts.push({t:t,a:P.cat==='bocca'?0:freeAngle(t)}); } edSel=-1;
   tone(880,.1,'triangle',.05); tone(1175,.1,'triangle',.04,.07); renderPanel(); }
 function removePart(i){ var p=SP.parts[i]; if(!p) return; ST.dna+=PARTS[p.t].cost; SP.parts.splice(i,1); edSel=-1; tone(330,.12,'triangle',.05); renderPanel(); }
-function edToolsUpd(){ var t=$('edTools'), p=edSel>=0?SP.parts[edSel]:null; if(!p){ t.hidden=true; return; } var cs=p.s||1, h='<b>'+PARTS[p.t].n+'</b> '; for(var q=0;q<PSIZE.length;q++) h+='<button type="button" data-ts="'+PSIZE[q][0]+'"'+(cs===PSIZE[q][0]?' class="on"':'')+'>'+PSIZE[q][1]+'</button>'; h+='<button type="button" class="del" data-ts="del">✖ Togli (+'+PARTS[p.t].cost+' DNA)</button>'; t.innerHTML=h; t.hidden=false; t.style.left='8px'; t.style.width=(EW-16)+'px'; t.style.top=(EH-t.offsetHeight-8)+'px'; }
-$('edTools').addEventListener('click',function(e){ var el=e.target; while(el&&el!==this&&!el.getAttribute('data-ts')) el=el.parentNode; if(!el||el===this) return; var v=el.getAttribute('data-ts'); if(v==='del') removePart(edSel); else { if(SP.parts[edSel]) SP.parts[edSel].s=parseFloat(v); renderPanel(); } });
+function edToolsUpd(){ var t=$('edTools'), p=edSel>=0?SP.parts[edSel]:null; if(!p){ t.hidden=true; return; } var cs=p.s||1, h='<b>'+PARTS[p.t].n+'</b> '; for(var q=0;q<PSIZE.length;q++) h+='<button type="button" data-ts="'+PSIZE[q][0]+'"'+(cs===PSIZE[q][0]?' class="on"':'')+'>'+PSIZE[q][1]+'</button>'; h+='<button type="button" class="del" data-ts="del">✖ Togli</button><button type="button" data-ts="ok">✔ OK</button>'; t.innerHTML=h; t.hidden=false; t.style.left='8px'; t.style.width=(EW-16)+'px'; t.style.top=(EH-t.offsetHeight-8)+'px'; }
+$('edTools').addEventListener('click',function(e){ var el=e.target; while(el&&el!==this&&!el.getAttribute('data-ts')) el=el.parentNode; if(!el||el===this) return; var v=el.getAttribute('data-ts'); if(v==='del') removePart(edSel); else if(v==='ok'){ edSel=-1; renderPanel(); } else { if(SP.parts[edSel]) SP.parts[edSel].s=parseFloat(v); edSel=-1; tone(880,.08,'triangle',.04); renderPanel(); } });
 function bars(n){ var s=''; for(var i=0;i<5;i++) s+='<i'+(i<n?' class="on"':'')+'></i>'; return s; }
 function renderPanel(){ var st=stats(SP), h='', land=isLand(), pl2=phL();
   h+='<div class="edtop"><button class="sm" data-act="back" type="button">◀ Indietro</button><button class="done" data-act="done" type="button" style="-webkit-box-flex:1;-webkit-flex:1;flex:1">✔ Fatto, '+(land?'cammina!':'nuota!')+'</button></div>';
@@ -690,10 +691,9 @@ function renderPanel(){ var st=stats(SP), h='', land=isLand(), pl2=phL();
     if(!st.legs) h+='<div class="hint" style="color:#ffb0b0"><b>Senza zampe</b> la creatura striscia lentissima!</div>'; }
   else h+='<div class="stat"><span>Velocità</span>'+bars(1+Math.min(3,st.f)+(st.c?1:0))+'</div><div class="stat"><span>Agilità</span>'+bars(1+Math.min(3,st.c)+(st.dash?1:0))+'</div><div class="stat"><span>Attacco</span>'+bars((st.d==='carn'?2:(st.d==='onn'?1:0))+st.spi)+'</div><div class="stat"><span>Difesa</span>'+bars(1+st.spi+(st.poison?1:0))+'</div><div class="stat"><span>Vista</span>'+bars(1+st.eye)+'</div>';
   if(st.d==='none') h+='<div class="hint" style="color:#ffb0b0"><b>Attenzione:</b> senza bocca la creatura non può mangiare!</div>';
-  if(edSel>=0&&SP.parts[edSel]){ var sp=SP.parts[edSel], cs=sp.s||1; h+='<div class="selbox">Pezzo scelto: <b>'+PARTS[sp.t].n+'</b><br>'; for(var q=0;q<PSIZE.length;q++) h+='<button class="sm opt'+(cs===PSIZE[q][0]?' on':'')+'" data-act="psize" data-v="'+PSIZE[q][0]+'" type="button">'+PSIZE[q][1]+'</button>'; h+='<button class="sm" data-act="del" type="button">✖ Togli (+'+PARTS[sp.t].cost+')</button></div>'; }
-  else h+='<div class="hint">Tocca un pezzo qui sotto per aggiungerlo, poi trascinalo sul corpo. Per <b>togliere</b> un pezzo: toccalo sul corpo e premi ✖ Togli (oppure trascinalo fuori dal cerchio). Pezzi: '+SP.parts.length+'/'+(land?MAXPL:MAXP)+'</div>';
+  h+='<div class="hint">Tocca un pezzo qui sotto per aggiungerlo, poi trascinalo sul corpo. Per <b>togliere</b> un pezzo premi la <b>✕ rossa</b> sul suo riquadro qui sotto (oppure trascinalo fuori dal cerchio). Toccando un pezzo sul corpo puoi cambiarne la grandezza. Pezzi: '+SP.parts.length+'/'+(land?MAXPL:MAXP)+'</div>';
   for(var ci=0;ci<CATS.length;ci++){ var row=''; for(var t in PARTS){ if(PARTS[t].cat!==CATS[ci][0]||PARTS[t].ph.indexOf(pl2)<0) continue; var lk=ST.unl.indexOf(t)<0, has=cnt(SP,t);
-      row+='<button class="pb'+(lk?' lock':'')+(has?' has':'')+'" data-act="add" data-t="'+t+'" type="button"><canvas data-th="'+t+'" width="120" height="92"></canvas><b>'+(lk?'🔒 ':'')+PARTS[t].n+(has?' ×'+has:'')+'</b>'+(lk?(typeof PARTS[t].un==='number'?'Sblocca: '+PARTS[t].un+' DNA':(PARTS[t].un==='vil'?'da nido o villaggio':(land?'da un nido':'trova una ⭐'))):PARTS[t].cost+' DNA · '+PARTS[t].d)+'</button>'; }
+      row+='<button class="pb'+(lk?' lock':'')+(has?' has':'')+'" data-act="add" data-t="'+t+'" type="button"><canvas data-th="'+t+'" width="120" height="92"></canvas><b>'+(lk?'🔒 ':'')+PARTS[t].n+(has?' ×'+has:'')+'</b>'+(has?'<span class="px" data-act="rm" data-t="'+t+'">✕</span>':'')+(lk?(typeof PARTS[t].un==='number'?'Sblocca: '+PARTS[t].un+' DNA':(PARTS[t].un==='vil'?'da nido o villaggio':(land?'da un nido':'trova una ⭐'))):PARTS[t].cost+' DNA · '+PARTS[t].d)+'</button>'; }
     if(row) h+='<h3>'+CATS[ci][1]+'</h3>'+row; }
   h+='<h3>Taglia</h3>'; for(var z in SIZES) h+='<button class="sm opt'+(SP.size===z?' on':'')+'" data-act="size" data-v="'+z+'" type="button">'+SIZES[z].n+'</button>';
   h+='<div class="hint">Grande = più vita ma più lenta. Piccola = più veloce ma più fragile.</div>';
@@ -709,6 +709,7 @@ function renderPanel(){ var st=stats(SP), h='', land=isLand(), pl2=phL();
 $('edp').addEventListener('click',function(e){ var el=e.target; while(el&&el!==this&&!el.getAttribute('data-act')) el=el.parentNode; if(!el||el===this) return; var a=el.getAttribute('data-act'), v=el.getAttribute('data-v');
   if(a==='add') addPart(el.getAttribute('data-t'));
   else if(a==='del') removePart(edSel);
+  else if(a==='rm'){ var tt=el.getAttribute('data-t'); for(var ri=SP.parts.length-1;ri>=0;ri--){ if(SP.parts[ri].t===tt){ removePart(ri); toast(PARTS[tt].n+' tolto: +'+PARTS[tt].cost+' DNA',2); break; } } }
   else if(a==='psize'){ if(SP.parts[edSel]) SP.parts[edSel].s=parseFloat(v); renderPanel(); }
   else if(a==='shape'){ SP.shape=v; renderPanel(); }
   else if(a==='size'){ SP.size=v; renderPanel(); }

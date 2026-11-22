@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="it" manifest="../tom.appcache"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sala di Tom">
+<title>Ultima Carta</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#3a2a1a}
+body{color:#fff;font-family:"Courier New",Courier,monospace;font-weight:700;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%;-webkit-touch-callout:none;background-size:64px 64px;image-rendering:-webkit-optimize-contrast;image-rendering:pixelated}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none}
+[hidden]{display:none!important}
+img{image-rendering:-webkit-optimize-contrast;image-rendering:pixelated;-webkit-user-drag:none}
+.blk{border:4px solid #1d1d1d;border-radius:0;background:#8a8a8a;color:#fff;font-weight:900;text-shadow:2px 2px 0 #3a3a3a;box-shadow:inset -4px -4px 0 #5a5a5a,inset 4px 4px 0 #c8c8c8}
+.blk.g{background:#5aa832;box-shadow:inset -4px -4px 0 #3f7f22,inset 4px 4px 0 #7acc48}
+.blk.y{background:#e8b828;color:#3a2a00;text-shadow:2px 2px 0 #fff08a;box-shadow:inset -4px -4px 0 #b88a18,inset 4px 4px 0 #fff08a}
+.blk.r{background:#d8452a;box-shadow:inset -4px -4px 0 #a82e18,inset 4px 4px 0 #ffb03a}
+.blk.b{background:#2f6fd8;box-shadow:inset -4px -4px 0 #2050a8,inset 4px 4px 0 #6aa0f0}
+.blk:active{box-shadow:inset 4px 4px 0 #5a5a5a}
+#menu{position:absolute;top:0;left:0;right:0;bottom:0;z-index:20;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 12px 40px;text-align:center;background:rgba(20,14,8,.55)}
+#menu h1{font-size:44px;margin:6px 0;color:#fff;text-shadow:4px 4px 0 #1d1d1d,-2px -2px 0 #5aa832;letter-spacing:2px}
+.sub{max-width:620px;margin:0 auto 12px;font-size:16px;line-height:1.45;background:rgba(0,0,0,.5);padding:10px;border:4px solid #1d1d1d}
+.big{display:block;margin:10px auto 6px;min-width:260px;padding:12px 18px;font-size:22px}
+.big small{display:block;font-size:14px}
+.opts{margin:8px auto;max-width:620px;background:rgba(0,0,0,.5);border:4px solid #1d1d1d;padding:8px}
+.opts .lab{font-size:16px;margin:6px 0 4px}
+.opt{display:inline-block;margin:4px;padding:8px 14px;font-size:17px}
+.opt.on{background:#5aa832;box-shadow:inset -4px -4px 0 #3f7f22,inset 4px 4px 0 #7acc48}
+.rec{font-size:15px;margin:8px auto;max-width:620px;background:rgba(0,0,0,.45);padding:6px}
+.ghost{display:inline-block;margin:6px;padding:10px 16px;font-size:17px;color:#fff;text-decoration:none}
+.hud{position:absolute;z-index:8;top:8px;padding:8px 12px;font-size:16px}
+#bBack{left:8px}#bPause{right:8px}
+#game{position:absolute;top:0;left:0;right:0;bottom:0}
+.opp{position:absolute;text-align:center;padding:6px 8px 8px;background:rgba(0,0,0,.5);border:4px solid #1d1d1d;min-width:120px}
+.opp.turn{border-color:#ffe14a;background:rgba(80,60,0,.6)}
+.opp canvas{display:block;margin:0 auto 4px;width:48px;height:48px;image-rendering:pixelated}
+.opp .nm{font-size:15px}
+.opp .cnt{font-size:14px;color:#ffe14a}
+.opp .backs{height:28px;position:relative;margin-top:4px}
+.opp .backs img{position:absolute;top:0;width:20px;height:28px}
+.say{position:absolute;top:-16px;right:-14px;background:#ffe14a;color:#3a2a00;border:3px solid #1d1d1d;padding:2px 6px;font-size:13px;-webkit-transform:rotate(8deg);transform:rotate(8deg)}
+#deck,#disc{position:absolute}
+#deck img,#disc img{display:block;width:100%;height:100%}
+#deckN{position:absolute;left:0;right:0;bottom:-24px;text-align:center;font-size:14px;text-shadow:2px 2px 0 #000}
+#colBadge{position:absolute;padding:6px 10px;font-size:16px;text-align:center}
+#dirB{position:absolute;font-size:34px;text-shadow:3px 3px 0 #000;color:#fff}
+#msg{position:absolute;left:8px;right:8px;text-align:center;font-size:18px;text-shadow:2px 2px 0 #000;pointer-events:none}
+#hand{position:absolute;left:0;right:0}
+#hand img{position:absolute;-webkit-transition:-webkit-transform .15s,top .15s;transition:transform .15s,top .15s}
+#hand img.no{-webkit-filter:brightness(.55);filter:brightness(.55)}
+#hand img.ok{box-shadow:0 0 0 4px #ffe14a}
+#me{position:absolute;padding:4px 8px;background:rgba(0,0,0,.5);border:4px solid #1d1d1d;font-size:14px;text-align:center}
+#me.turn{border-color:#ffe14a}
+#me canvas{width:40px;height:40px;display:block;margin:0 auto;image-rendering:pixelated}
+#bUlt{position:absolute;z-index:6;padding:12px 16px;font-size:22px}
+#bPass{position:absolute;z-index:6;padding:10px 14px;font-size:18px}
+.fly{position:absolute;z-index:12;pointer-events:none;-webkit-transition:all .35s ease-out;transition:all .35s ease-out}
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;z-index:30;background:rgba(0,0,0,.65);text-align:center;padding:30px 12px;overflow-y:auto}
+.ov .box{display:inline-block;background:#5a5a5a;border:4px solid #1d1d1d;box-shadow:inset -6px -6px 0 #3a3a3a,inset 6px 6px 0 #9a9a9a;padding:16px 18px;max-width:560px;width:100%}
+.ov h2{margin:4px 0 12px;text-shadow:3px 3px 0 #1d1d1d}
+.colb{display:inline-block;width:120px;height:110px;margin:8px;font-size:20px}
+</style></head><body>
+<section id="menu">
+  <canvas id="logo" width="160" height="64" style="width:160px;height:64px;image-rendering:pixelated"></canvas>
+  <h1>ULTIMA CARTA</h1>
+  <p class="sub">Il gioco di carte a blocchi! Gioca una carta dello stesso <b>colore</b> o dello stesso <b>numero</b>. Usa Salta, Inverti, +2 e i Jolly per mettere in difficoltà gli avversari. Quando ti resta una carta premi <b>ULTIMA!</b> se no ti scoprono e peschi 2 carte. Vince chi finisce per primo le carte!</p>
+  <button class="blk g big" id="bCont" type="button" hidden></button>
+  <div class="opts">
+    <div class="lab">Avversari</div><div id="oN"></div>
+    <div class="lab">Bravura degli avversari</div><div id="oD"></div>
+  </div>
+  <button class="blk big" id="bNew" type="button">▶ NUOVA PARTITA</button>
+  <div class="rec" id="recs"></div>
+  <div><a class="blk ghost" href="index.html">🏠 Sala giochi</a><button class="blk ghost" id="bSnd" type="button"></button></div>
+</section>
+<section id="game" hidden>
+  <div id="opps"></div>
+  <div id="deck"><img id="deckImg" alt=""><div id="deckN"></div></div>
+  <div id="disc"><img id="discImg" alt=""></div>
+  <div id="colBadge" class="blk"></div>
+  <div id="dirB">↻</div>
+  <div id="msg"></div>
+  <div id="me"><canvas id="meAv" width="8" height="8"></canvas><span id="meN"></span></div>
+  <div id="hand"></div>
+  <button class="blk y" id="bUlt" type="button" hidden>ULTIMA!</button>
+  <button class="blk" id="bPass" type="button" hidden>Passa ▶</button>
+</section>
+<button class="blk hud" id="bBack" type="button" hidden>◀ Indietro</button>
+<button class="blk hud" id="bPause" type="button" hidden>❚❚ Pausa</button>
+<div class="ov" id="colOv" hidden><div class="box"><h2>Scegli il colore</h2><button class="blk g colb" data-c="g" type="button">ERBA</button><button class="blk b colb" data-c="b" type="button">ACQUA</button><br><button class="blk r colb" data-c="r" type="button">LAVA</button><button class="blk y colb" data-c="y" type="button">ORO</button></div></div>
+<div class="ov" id="pauseOv" hidden><div class="box"><h2>PAUSA</h2><button class="blk g big" id="bResume" type="button">▶ Continua</button><button class="blk big" id="bExit" type="button">◀ Esci (la partita resta salvata)</button></div></div>
+<div class="ov" id="endOv" hidden><div class="box"><h2 id="endH"></h2><div id="endT" style="font-size:17px;line-height:1.6"></div><button class="blk g big" id="bAgain" type="button">🔁 Un'altra mano</button><button class="blk big" id="bMenu" type="button">Menu</button></div></div>
+<script>
+(function(){
+"use strict";
+var $=function(id){ return document.getElementById(id); };
+function L(k,d){ try{ var v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }
+function S(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+var SND=L('ultima-snd',true), AC=null;
+function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC; }
+function tone(f,d,type,vol,when){ if(!SND) return; var a=ac(); if(!a) return; try{ var o=a.createOscillator(), g=a.createGain(), t=a.currentTime+(when||0); o.type=type||'square'; o.frequency.setValueAtTime(f,t); g.gain.setValueAtTime(vol||.03,t); g.gain.exponentialRampToValueAtTime(.0005,t+d); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+d+.02); }catch(e){} }
+function jingle(n,st){ for(var i=0;i<n.length;i++) tone(n[i],.12,'square',.03,i*(st||.08)); }
+
+/* ================= GRAFICA A PIXEL ================= */
+var GL={'0':["01110","10001","10001","10001","10001","10001","01110"],'1':["00100","01100","00100","00100","00100","00100","01110"],'2':["01110","10001","00001","00010","00100","01000","11111"],'3':["11110","00001","00001","01110","00001","00001","11110"],'4':["00010","00110","01010","10010","11111","00010","00010"],'5':["11111","10000","11110","00001","00001","10001","01110"],'6':["00110","01000","10000","11110","10001","10001","01110"],'7':["11111","00001","00010","00100","01000","01000","01000"],'8':["01110","10001","10001","01110","10001","10001","01110"],'9':["01110","10001","10001","01111","00001","00010","01100"],'+':["00000","00100","00100","11111","00100","00100","00000"],
+  skip:["0011100","0100010","1000101","1001001","1010001","0100010","0011100"], rev:["0100000","1110010","0100010","0100010","0100010","0100111","0000010"]};
+var COL={g:{n:'Erba',b:'#5aa832',s:['#4a9028','#6cbc3c','#3f7f22','#7acc48']},b:{n:'Acqua',b:'#2f6fd8',s:['#2a5fc0','#4a86ea','#2050a8','#6aa0f0']},r:{n:'Lava',b:'#d8452a',s:['#c03a20','#ec6a2a','#a82e18','#ffb03a']},y:{n:'Oro',b:'#e8b828',s:['#d0a020','#f6d050','#b88a18','#fff08a']},w:{n:'Jolly',b:'#2a1f3a',s:['#221830','#3a2a50','#160f22','#5a3a7a']}};
+var U=4, CW=40, CH=60, cache={};
+function seeded(seed){ var s=seed; return function(){ s=(s*16807)%2147483647; return (s-1)/2147483646; }; }
+function px(x,X,Y,c){ x.fillStyle=c; x.fillRect(X*U,Y*U,U,U); }
+function rectP(x,X,Y,w,h,c){ x.fillStyle=c; x.fillRect(X*U,Y*U,w*U,h*U); }
+function texture(x,ck,X,Y,w,h,seed){ var C=COL[ck], R=seeded(seed); rectP(x,X,Y,w,h,C.b); for(var j=Y;j<Y+h;j++) for(var i=X;i<X+w;i++){ var r=R(); if(r<.38) px(x,i,j,C.s[Math.floor(R()*4)]); }
+  if(ck==='g'){ R=seeded(seed+5); for(var k=0;k<6;k++) px(x,X+Math.floor(R()*w),Y+Math.floor(R()*h),'#a0e070'); }
+  if(ck==='r'){ R=seeded(seed+9); for(var q=0;q<8;q++) px(x,X+Math.floor(R()*w),Y+Math.floor(R()*h),'#ffe14a'); }
+  if(ck==='b'){ R=seeded(seed+3); for(var m=0;m<5;m++){ var wx=X+Math.floor(R()*(w-3)), wy=Y+Math.floor(R()*h); rectP(x,wx,wy,3,1,'#9ac8ff'); } }
+  if(ck==='y'){ R=seeded(seed+7); for(var n=0;n<6;n++) px(x,X+Math.floor(R()*w),Y+Math.floor(R()*h),'#ffffff'); } }
+function glyph(x,rows,X,Y,sc,col,sh){ for(var j=0;j<rows.length;j++) for(var i=0;i<rows[j].length;i++) if(rows[j].charAt(i)==='1'){ if(sh) rectP(x,X+i*sc+1,Y+j*sc+1,sc,sc,sh); } for(j=0;j<rows.length;j++) for(i=0;i<rows[j].length;i++) if(rows[j].charAt(i)==='1') rectP(x,X+i*sc,Y+j*sc,sc,sc,col); }
+function glyphsOf(v){ if(v==='skip') return [GL.skip]; if(v==='rev') return [GL.rev]; if(v==='+2') return [GL['+'],GL['2']]; if(v==='+4') return [GL['+'],GL['4']]; if(v==='wild') return []; return [GL[v]]; }
+function drawGlyphs(x,gs,cx,cy,sc,col,sh){ var w=0, h=0; gs.forEach(function(g){ w+=g[0].length*sc; h=Math.max(h,g.length*sc); }); w+=(gs.length-1)*sc; var X=Math.round(cx-w/2), Y=Math.round(cy-h/2); gs.forEach(function(g){ glyph(x,g,X,Y,sc,col,sh); X+=g[0].length*sc+sc; }); }
+function frame(x){ rectP(x,0,0,CW,CH,'#1d1d1d'); }
+function cardImg(c,v){ var key=c+v; if(cache[key]) return cache[key]; var cv=document.createElement('canvas'); cv.width=CW*U; cv.height=CH*U; var x=cv.getContext('2d');
+  frame(x); texture(x,c,2,2,CW-4,CH-4,c.charCodeAt(0)*7+3);
+  rectP(x,2,2,CW-4,1,'rgba(255,255,255,.35)'); rectP(x,2,2,1,CH-4,'rgba(255,255,255,.35)'); rectP(x,2,CH-3,CW-4,1,'rgba(0,0,0,.35)'); rectP(x,CW-3,2,1,CH-4,'rgba(0,0,0,.35)');
+  rectP(x,7,13,CW-14,CH-26,'rgba(0,0,0,.28)'); rectP(x,7,13,CW-14,1,'rgba(255,255,255,.25)');
+  if(c==='w'){ var cs=['r','b','y','g'], sz=v==='+4'?8:10, ox=CW/2-sz, oy=v==='+4'?CH/2-sz+4:CH/2-sz; for(var q=0;q<4;q++){ texture(x,cs[q],ox+(q%2)*sz,oy+Math.floor(q/2)*sz,sz,sz,q*31+5); } rectP(x,ox-1,oy-1,sz*2+2,1,'#000'); rectP(x,ox-1,oy+sz*2,sz*2+2,1,'#000'); rectP(x,ox-1,oy-1,1,sz*2+2,'#000'); rectP(x,ox+sz*2,oy-1,1,sz*2+2,'#000');
+    if(v==='+4') drawGlyphs(x,glyphsOf('+4'),CW/2,CH/2-12,2,'#fff','#000'); }
+  else { var gs=glyphsOf(v), sc=(v==='+2')?2:3; drawGlyphs(x,gs,CW/2,CH/2,sc,'#ffffff','#1d1d1d'); }
+  var sm=v==='wild'?[]:glyphsOf(v); if(sm.length){ var gw=-1; sm.forEach(function(g){ gw+=g[0].length+1; }); drawGlyphs(x,sm,3+gw/2,3+3.5,1,'#fff','#000'); drawGlyphs(x,sm,CW-3-gw/2,CH-3-3.5,1,'#fff','#000'); }
+  cache[key]=cv.toDataURL(); return cache[key]; }
+function backImg(){ if(cache.back) return cache.back; var cv=document.createElement('canvas'); cv.width=CW*U; cv.height=CH*U; var x=cv.getContext('2d'); frame(x); texture(x,'w',2,2,CW-4,CH-4,77);
+  var gem=["0001111000","0011111100","0111111110","1111111111","0111111110","0011111100","0001111000"]; var gc=['#2ad0e0','#8af0ff','#1a98b0'];
+  for(var j=0;j<gem.length;j++) for(var i=0;i<gem[j].length;i++) if(gem[j].charAt(i)==='1') rectP(x,15+i*1,22+j*2,1,2,gc[(i+j)%3]);
+  rectP(x,3,40,34,9,'rgba(0,0,0,.35)');
+  var txt=[["10001","10001","10001","10001","01110"],["10000","10000","10000","10000","11111"],["11111","00100","00100","00100","00100"],["11111","00100","00100","00100","11111"],["10001","11011","10101","10001","10001"],["01110","10001","11111","10001","10001"]];
+  var X=3; txt.forEach(function(g){ glyph(x,g,X,42,1,'#ffe14a'); X+=6; });
+  cache.back=cv.toDataURL(); return cache.back; }
+var FACES={
+  tom:{p:["00111100","01111110","11222211","12322321","12222221","12244221","01222210","00222200"],c:{1:'#6a3a1a',2:'#f2c59a',3:'#2a4ab0',4:'#c8505a'}},
+  robot:{p:["00011000","11111111","12222221","12322321","12222221","12444421","12222221","11111111"],c:{1:'#5a6070',2:'#a0a8b8',3:'#2ad0e0',4:'#1d1d1d'}},
+  gatto:{p:["10000001","11000011","12222221","12322321","12222221","12242221","12222221","01111110"],c:{1:'#c87a2a',2:'#f2a33a',3:'#1d6a1d',4:'#f28ad0'}},
+  drago:{p:["10011001","11111111","12222221","13222231","12222221","12555521","12444421","01222210"],c:{1:'#2e7a2e',2:'#5aa832',3:'#ffe14a',4:'#ffffff',5:'#1d1d1d'}}};
+function drawFace(cv,k){ var f=FACES[k], x=cv.getContext('2d'); cv.width=8; cv.height=8; for(var j=0;j<8;j++) for(var i=0;i<8;i++){ var ch=f.p[j].charAt(i); x.fillStyle=ch==='0'?'rgba(0,0,0,0)':f.c[ch]; if(ch!=='0') x.fillRect(i,j,1,1); } }
+(function(){ var cv=document.createElement('canvas'); cv.width=cv.height=16; var x=cv.getContext('2d'), R=seeded(42);
+  for(var j=0;j<16;j++) for(var i=0;i<16;i++){ var top=j<4, c; if(top) c=['#5aa832','#4a9028','#6cbc3c'][Math.floor(R()*3)]; else c=['#8a5a32','#7a4a28','#9a6a3a','#6a4020'][Math.floor(R()*4)]; if(j===4&&R()<.5) c='#4a9028'; x.fillStyle=c; x.fillRect(i,j,1,1); }
+  document.body.style.backgroundImage='url('+cv.toDataURL()+')';
+  var lg=$('logo'), lx=lg.getContext('2d'); ['g','b','r','y'].forEach(function(k,q){ var c2=document.createElement('canvas'); c2.width=CW*U; c2.height=CH*U; var im=new Image(); im.onload=function(){ lx.save(); lx.translate(30+q*34,34); lx.rotate((q-1.5)*.18); lx.drawImage(im,-15,-28,30,45); lx.restore(); }; im.src=cardImg(k,String(q*3)); }); })();
+
+/* ================= LOGICA ================= */
+var NAMES=[['Robottino','robot'],['Gattoblocco','gatto'],['Draghetto','drago']];
+var G=null, nOpp=L('ultima-nopp',2), diff=L('ultima-diff','facile'), paused=false, gen=0, busy=false, playing=false;
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function newDeck(){ var d=[], id=0; ['g','b','r','y'].forEach(function(c){ d.push({c:c,v:'0',id:id++}); for(var k=0;k<2;k++){ for(var n=1;n<=9;n++) d.push({c:c,v:String(n),id:id++}); d.push({c:c,v:'skip',id:id++}); d.push({c:c,v:'rev',id:id++}); d.push({c:c,v:'+2',id:id++}); } }); for(var w=0;w<4;w++){ d.push({c:'w',v:'wild',id:id++}); d.push({c:'w',v:'+4',id:id++}); } return shuffle(d); }
+function later(fn,ms){ var g=gen; setTimeout(function tick(){ if(g!==gen) return; if(paused){ setTimeout(tick,200); return; } fn(); },ms); }
+function newGame(){ var me=L('sala-player','Tommy'); G={players:[{name:me,hand:[],ai:false,said:false,av:'tom'}],deck:newDeck(),disc:[],cur:0,dir:1,col:null,diff:diff,drew:false};
+  for(var i=0;i<nOpp;i++) G.players.push({name:NAMES[i][0],hand:[],ai:true,said:false,av:NAMES[i][1]});
+  for(var k=0;k<7;k++) G.players.forEach(function(p){ p.hand.push(G.deck.pop()); });
+  var top; do{ top=G.deck.pop(); if(top.c==='w'||isNaN(+top.v)){ G.deck.unshift(top); top=null; } }while(!top);
+  G.disc.push(top); G.col=top.c; G.cur=0; sortHand(); }
+function top(){ return G.disc[G.disc.length-1]; }
+function canPlay(c){ var t=top(); return c.c==='w'||c.c===G.col||c.v===t.v; }
+function sortHand(){ var o={g:0,b:1,r:2,y:3,w:4}, vo=function(v){ return isNaN(+v)?({skip:10,rev:11,'+2':12,wild:13,'+4':14})[v]:+v; }; G.players[0].hand.sort(function(a,b){ return o[a.c]-o[b.c]||vo(a.v)-vo(b.v); }); }
+function drawN(p,n){ var got=[]; for(var i=0;i<n;i++){ if(!G.deck.length){ var t=G.disc.pop(); G.deck=shuffle(G.disc.map(function(c){ return c.c==='w'?{c:'w',v:c.v,id:c.id}:c; })); G.disc=[t]; if(!G.deck.length) break; } var c=G.deck.pop(); p.hand.push(c); got.push(c); } p.said=false; if(p===G.players[0]) sortHand(); return got; }
+function nextIdx(k){ return (G.cur+G.dir*(k||1)+G.players.length*4)%G.players.length; }
+function save(){ if(G&&playing) S('ultima-run',G); }
+function points(c){ if(c.c==='w') return 50; if(isNaN(+c.v)) return 20; return +c.v; }
+
+/* ================= TURNI ================= */
+function say(s){ $('msg').textContent=s; }
+function startTurn(){ if(!playing) return; G.drew=false; render(); save(); var p=G.players[G.cur];
+  if(p.ai){ busy=true; say('Tocca a '+p.name+'...'); later(aiMove,900+Math.random()*500); }
+  else { busy=false; var any=p.hand.some(canPlay); say(any?'Tocca a te! Scegli una carta.':'Nessuna carta va bene: tocca il mazzo per pescare.'); render(); } }
+function endTurn(skip){ G.cur=nextIdx(skip?2:1); startTurn(); }
+function playCard(pi,card,chosen){ var p=G.players[pi], idx=p.hand.indexOf(card); if(idx<0) return; p.hand.splice(idx,1); G.disc.push(card); G.col=card.c==='w'?chosen:card.c;
+  tone(card.c==='w'?660:520,.08); flyCard(pi,card);
+  var wasHuman=!p.ai, forgot=wasHuman&&p.hand.length===1&&!p.said;
+  if(p.ai&&p.hand.length===1){ var rem=Math.random()<(G.diff==='furbo'?.95:.7); p.said=rem; if(rem){ tone(880,.1); tone(1175,.12,'square',.03,.08); } }
+  if(p.hand.length===0){ later(function(){ endRound(pi); },700); render(); return; }
+  var msg='', N=G.players.length, nx=G.players[nextIdx(1)], skip=false;
+  if(card.v==='skip'){ msg=(pi===0?'Hai':p.name+' ha')+' giocato SALTA: '+(nx.ai?nx.name+' salta il turno!':'salti il turno!'); skip=true; }
+  else if(card.v==='rev'){ G.dir*=-1; if(N===2){ skip=true; msg='INVERTI: con 2 giocatori vale come Salta!'; } else msg='INVERTI: si gira dall\'altra parte!'; }
+  else if(card.v==='+2'){ drawN(nx,2); skip=true; msg=(nx.ai?nx.name+' pesca':'Peschi')+' 2 carte e salta il turno!'; }
+  else if(card.v==='+4'){ drawN(nx,4); skip=true; msg=(nx.ai?nx.name+' pesca':'Peschi')+' 4 carte! Colore: '+COL[G.col].n; }
+  else if(card.c==='w') msg='Nuovo colore: '+COL[G.col].n+'!';
+  render(); if(msg) say(msg);
+  if(forgot){ busy=true; later(function(){ var catcher=null; G.players.forEach(function(q){ if(q.ai&&!catcher&&Math.random()<(G.diff==='furbo'?.9:.55)) catcher=q; }); if(catcher&&G.players[0].hand.length===1&&!G.players[0].said){ drawN(G.players[0],2); say(catcher.name+' ti ha scoperto! Non hai detto ULTIMA: peschi 2 carte.'); tone(200,.3,'sawtooth',.04); render(); } later(function(){ endTurn(skip); },1200); },700); return; }
+  busy=true; later(function(){ endTurn(skip); },msg?1300:500); }
+function aiMove(){ var p=G.players[G.cur], ok=p.hand.filter(canPlay);
+  if(!ok.length){ var got=drawN(p,1); render(); say(p.name+' pesca una carta.'); tone(300,.06);
+    if(got.length&&canPlay(got[0])){ later(function(){ aiPlay(p,got[0]); },700); } else later(function(){ endTurn(false); },800); return; }
+  aiPlay(p,aiChoose(p,ok)); }
+function aiChoose(p,ok){ if(G.diff!=='furbo') { var nw=ok.filter(function(c){ return c.c!=='w'; }); return (nw.length?nw:ok)[Math.floor(Math.random()*(nw.length?nw.length:ok.length))]; }
+  var nx=G.players[nextIdx(1)], danger=nx.hand.length<=2, cnt={g:0,b:0,r:0,y:0}; p.hand.forEach(function(c){ if(c.c!=='w') cnt[c.c]++; });
+  var best=null, bs=-1e9; ok.forEach(function(c){ var s=0; if(c.c==='w') s=-20+(danger&&c.v==='+4'?60:0)+(p.hand.length<=2?30:0); else { s=cnt[c.c]*3+(isNaN(+c.v)?(danger?40:-2):+c.v*.3); if(c.v==='+2'&&danger) s+=20; } if(s>bs){ bs=s; best=c; } }); return best; }
+function aiColor(p){ var cnt={g:0,b:0,r:0,y:0}; p.hand.forEach(function(c){ if(c.c!=='w') cnt[c.c]++; }); var b='g'; for(var k in cnt) if(cnt[k]>cnt[b]) b=k; if(G.diff!=='furbo'&&Math.random()<.4) b=['g','b','r','y'][Math.floor(Math.random()*4)]; return b; }
+function aiPlay(p,c){ playCard(G.cur,c,c.c==='w'?aiColor(p):null); }
+var pendingWild=null;
+function humanTap(card){ if(busy||!playing||paused) return; if(G.cur!==0) { say('Aspetta il tuo turno!'); return; } if(!canPlay(card)){ say('Questa carta non va bene: serve '+COL[G.col].n+' o '+(top().c==='w'?'un Jolly':valName(top().v))+'.'); tone(180,.12,'sawtooth',.03); return; }
+  if(card.c==='w'){ pendingWild=card; $('colOv').hidden=false; return; } busy=true; playCard(0,card,null); }
+function valName(v){ return v==='skip'?'un Salta':(v==='rev'?'un Inverti':(v==='+2'?'un +2':'il numero '+v)); }
+function humanDraw(){ if(busy||!playing||paused||G.cur!==0) return; if(G.drew){ say('Hai già pescato: gioca la carta o premi Passa.'); return; }
+  var got=drawN(G.players[0],1); tone(300,.06); G.drew=true; render();
+  if(got.length&&canPlay(got[0])){ say('Hai pescato una carta che va bene! Giocala o premi Passa.'); $('bPass').hidden=false; }
+  else { say('Hai pescato. Non puoi giocare: passa il turno.'); busy=true; later(function(){ endTurn(false); },900); } }
+$('bPass').onclick=function(){ if(busy||G.cur!==0) return; $('bPass').hidden=true; busy=true; endTurn(false); };
+$('bUlt').onclick=function(){ if(!G) return; var me=G.players[0]; if(me.hand.length<=2){ me.said=true; say('ULTIMA! Bravo, l\'hai detto!'); jingle([784,988,1175]); render(); } };
+(function(){ var bs=$('colOv').getElementsByTagName('button'); for(var i=0;i<bs.length;i++) bs[i].onclick=function(){ var c=this.getAttribute('data-c'); $('colOv').hidden=true; if(pendingWild){ var w=pendingWild; pendingWild=null; busy=true; playCard(0,w,c); } }; })();
+function endRound(wi){ playing=false; var w=G.players[wi], pts=0; G.players.forEach(function(p){ p.hand.forEach(function(c){ pts+=points(c); }); });
+  S('ultima-run',null); var me=G.players[0], board=L('sala-board',{}); if(!board.ultima) board.ultima={}; var r=board.ultima[me.name]||{pts:0,partite:0,max:{}}; r.partite=(r.partite||0)+1; if(!r.max) r.max={};
+  if(wi===0){ r.pts=(r.pts||0)+pts; r.max.vittorie=(r.max.vittorie||0)+1; jingle([523,659,784,1047,1319,1568],.1); } else { tone(220,.4,'sawtooth',.04); }
+  board.ultima[me.name]=r; S('sala-board',board);
+  var t=wi===0?'Hai finito tutte le carte! Prendi <b>'+pts+' punti</b> dalle carte rimaste agli avversari.':w.name+' ha finito le carte per primo. Riprova, la prossima è tua!';
+  t+='<br><br>'; G.players.forEach(function(p){ t+=p.name+': '+p.hand.length+' carte<br>'; }); t+='<br>Vittorie totali: '+(r.max.vittorie||0)+' · Punti totali: '+(r.pts||0);
+  $('endH').textContent=wi===0?'HAI VINTO! 🏆':'HA VINTO '+w.name.toUpperCase(); $('endT').innerHTML=t; $('endOv').hidden=false; }
+
+/* ================= DISEGNO DOM ================= */
+var W=0, H=0, cw=70, ch=105, cards={};
+function layout(){ W=window.innerWidth; H=window.innerHeight; var land=W>H;
+  cw=Math.round(Math.max(54,Math.min(110,Math.min(W/8.2,(H*(land?.24:.18))/1.5)))); ch=Math.round(cw*1.5);
+  var bc=Math.round(cw*1.2), bh=Math.round(bc*1.5), oppH=land?120:130, midY=Math.round(56+oppH+(H-56-oppH-ch-60-bh)/2);
+  var dk=$('deck'), ds=$('disc'); dk.style.width=bc+'px'; dk.style.height=bh+'px'; ds.style.width=bc+'px'; ds.style.height=bh+'px';
+  dk.style.left=Math.round(W/2-bc-14)+'px'; dk.style.top=midY+'px'; ds.style.left=Math.round(W/2+14)+'px'; ds.style.top=midY+'px';
+  var cb=$('colBadge'); cb.style.left=Math.round(W/2+bc+30)+'px'; cb.style.top=Math.round(midY+bh/2-40)+'px';
+  var db=$('dirB'); db.style.left=Math.round(W/2-bc-70)+'px'; db.style.top=Math.round(midY+bh/2-24)+'px';
+  $('msg').style.top=Math.round(midY+bh+30)+'px';
+  var hy=H-ch-18; $('hand').style.top=hy+'px'; $('hand').style.height=(ch+18)+'px';
+  var me=$('me'); me.style.left='6px'; me.style.top=(hy-62)+'px';
+  var bu=$('bUlt'); bu.style.right='10px'; bu.style.top=(hy-66)+'px'; var bp=$('bPass'); bp.style.right='170px'; bp.style.top=(hy-60)+'px';
+  render(); }
+function render(){ if(!G) return; var i, p;
+  // avversari
+  var box=$('opps'), n=G.players.length-1, ow=Math.min(190,(W-20)/n-10);
+  if(box.childNodes.length!==n){ box.innerHTML=''; for(i=1;i<=n;i++){ var d=document.createElement('div'); d.className='opp'; d.innerHTML='<canvas width="8" height="8"></canvas><div class="nm"></div><div class="cnt"></div><div class="backs"></div>'; box.appendChild(d); drawFace(d.getElementsByTagName('canvas')[0],G.players[i].av); } }
+  for(i=1;i<=n;i++){ p=G.players[i]; var el=box.childNodes[i-1]; el.style.width=ow+'px'; el.style.left=Math.round(W/2-(n*(ow+10))/2+(i-1)*(ow+10)+5)+'px'; el.style.top='56px';
+    el.className='opp'+(G.cur===i&&playing?' turn':''); el.getElementsByClassName('nm')[0].textContent=p.name; el.getElementsByClassName('cnt')[0].textContent=p.hand.length+(p.hand.length===1?' carta':' carte');
+    var bk=el.getElementsByClassName('backs')[0], k=Math.min(10,p.hand.length), h=''; for(var q=0;q<k;q++) h+='<img src="'+backImg()+'" style="left:'+Math.round(ow/2-((k-1)*10+20)/2+q*10)+'px" alt="">'; bk.innerHTML=h;
+    var sy=el.getElementsByClassName('say')[0]; if(p.hand.length===1&&p.said){ if(!sy){ sy=document.createElement('div'); sy.className='say'; sy.textContent='ULTIMA!'; el.appendChild(sy); } } else if(sy) el.removeChild(sy); }
+  // centro
+  $('deckImg').src=backImg(); $('deckN').textContent='Pesca ('+G.deck.length+')'; var t=top(); $('discImg').src=cardImg(t.c,t.v);
+  var cb=$('colBadge'); cb.className='blk '+G.col; cb.innerHTML='Colore<br>'+COL[G.col].n.toUpperCase(); $('dirB').textContent=G.dir>0?'↻':'↺';
+  var me=G.players[0]; $('meN').textContent=me.name+' · '+me.hand.length; $('me').className=G.cur===0&&playing?'turn':'';
+  // mano
+  var hd=$('hand'), hand=me.hand, avail=W-20, step=hand.length>1?Math.min(cw+6,(avail-cw)/(hand.length-1)):0, x0=Math.round(W/2-((hand.length-1)*step+cw)/2), myTurn=G.cur===0&&!busy&&playing;
+  var seen={};
+  for(i=0;i<hand.length;i++){ var c=hand[i], im=cards[c.id]; if(!im){ im=document.createElement('img'); im.alt=''; (function(cc,ii){ ii.addEventListener('touchstart',function(e){ if(e.cancelable) e.preventDefault(); ac(); humanTap(cc); },{passive:false}); ii.addEventListener('mousedown',function(){ ac(); humanTap(cc); }); })(c,im); cards[c.id]=im; hd.appendChild(im); }
+    im.src=cardImg(c.c,c.v); im.style.width=cw+'px'; im.style.height=ch+'px'; im.style.left=Math.round(x0+i*step)+'px'; im.style.zIndex=i+1; var okc=myTurn&&canPlay(c); im.style.top=(okc?0:14)+'px'; im.className=myTurn?(okc?'ok':'no'):''; seen[c.id]=1; }
+  for(var id in cards){ if(!seen[id]){ if(cards[id].parentNode) cards[id].parentNode.removeChild(cards[id]); delete cards[id]; } }
+  $('bUlt').hidden=!(playing&&hand.length<=2&&hand.length>0&&!me.said&&G.cur===0);
+  if(!(G.cur===0&&G.drew&&playing)) $('bPass').hidden=true; }
+function rectOf(el){ var r=el.getBoundingClientRect(); return {x:r.left,y:r.top,w:r.width,h:r.height}; }
+function flyCard(pi,card){ var from; if(pi===0&&cards[card.id]) from=rectOf(cards[card.id]); else { var o=$('opps').childNodes[pi-1]; from=o?rectOf(o):{x:W/2,y:0,w:cw,h:ch}; from={x:from.x+from.w/2-cw/2,y:from.y+20,w:cw,h:ch}; }
+  var to=rectOf($('disc')), f=document.createElement('img'); f.className='fly'; f.src=cardImg(card.c,card.v); f.style.left=from.x+'px'; f.style.top=from.y+'px'; f.style.width=from.w+'px'; f.style.height=from.h+'px'; document.body.appendChild(f);
+  setTimeout(function(){ f.style.left=to.x+'px'; f.style.top=to.y+'px'; f.style.width=to.w+'px'; f.style.height=to.h+'px'; },20); setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f); },420); }
+$('deck').addEventListener('touchstart',function(e){ if(e.cancelable) e.preventDefault(); ac(); humanDraw(); },{passive:false}); $('deck').addEventListener('mousedown',function(){ ac(); humanDraw(); });
+
+/* ================= MENU ================= */
+function renderMenu(){ var h=''; for(var i=1;i<=3;i++) h+='<button class="blk opt'+(nOpp===i?' on':'')+'" data-n="'+i+'" type="button">'+i+'</button>'; $('oN').innerHTML=h;
+  $('oD').innerHTML='<button class="blk opt'+(diff==='facile'?' on':'')+'" data-d="facile" type="button">Facile</button><button class="blk opt'+(diff==='furbo'?' on':'')+'" data-d="furbo" type="button">Furbo</button>';
+  var bs=$('oN').getElementsByTagName('button'); for(i=0;i<bs.length;i++) bs[i].onclick=function(){ nOpp=+this.getAttribute('data-n'); S('ultima-nopp',nOpp); renderMenu(); };
+  bs=$('oD').getElementsByTagName('button'); for(i=0;i<bs.length;i++) bs[i].onclick=function(){ diff=this.getAttribute('data-d'); S('ultima-diff',diff); renderMenu(); };
+  var run=L('ultima-run',null), cb=$('bCont'); if(run&&run.players){ cb.hidden=false; cb.innerHTML='▶ CONTINUA<small>'+run.players.length+' giocatori · hai '+run.players[0].hand.length+' carte</small>'; cb.onclick=function(){ G=L('ultima-run',null); start(); }; } else cb.hidden=true;
+  var b=(L('sala-board',{}).ultima)||{}, rec=[]; for(var n in b) rec.push([n,(b[n].max&&b[n].max.vittorie)||0,b[n].pts||0]); rec.sort(function(a,c){ return c[1]-a[1]||c[2]-a[2]; });
+  $('recs').innerHTML=rec.length?'🏆 Vittorie: '+rec.slice(0,5).map(function(r){ return r[0]+' '+r[1]+' ('+r[2]+' punti)'; }).join(' · '):'';
+  $('bSnd').textContent=SND?'🔊 Suono sì':'🔇 Suono no'; }
+$('bSnd').onclick=function(){ SND=!SND; S('ultima-snd',SND); renderMenu(); };
+function start(){ ac(); gen++; playing=true; paused=false; busy=false; cards={}; $('hand').innerHTML=''; $('opps').innerHTML=''; $('menu').hidden=true; $('game').hidden=false; $('bBack').hidden=false; $('bPause').hidden=false; drawFace($('meAv'),'tom'); layout(); startTurn(); }
+$('bNew').onclick=function(){ newGame(); start(); };
+function toMenu(){ if(playing) save(); gen++; playing=false; paused=false; ['pauseOv','endOv','colOv'].forEach(function(id){ $(id).hidden=true; }); pendingWild=null; $('game').hidden=true; $('bBack').hidden=true; $('bPause').hidden=true; $('menu').hidden=false; renderMenu(); }
+$('bBack').onclick=toMenu; $('bExit').onclick=toMenu; $('bMenu').onclick=toMenu;
+$('bPause').onclick=function(){ paused=true; $('pauseOv').hidden=false; };
+$('bResume').onclick=function(){ paused=false; $('pauseOv').hidden=true; };
+$('bAgain').onclick=function(){ $('endOv').hidden=true; newGame(); start(); };
+window.addEventListener('resize',function(){ setTimeout(layout,60); }); window.addEventListener('orientationchange',function(){ setTimeout(layout,300); });
+renderMenu();
+window.__UC={get G(){ return G; },humanTap:humanTap,humanDraw:humanDraw,canPlay:canPlay,get busy(){ return busy; },newGame:newGame,start:start,cardImg:cardImg};
+})();
+</script>
+<script>/*stay-in-app*/(function(){ if(!window.navigator.standalone) return; document.addEventListener("click",function(e){ var a=e.target; while(a&&a.nodeName!=="A") a=a.parentNode; if(!a||!a.href||a.target==="_blank") return; var h=a.getAttribute("href")||""; if(h.charAt(0)==="#"||h.indexOf("mailto:")===0) return; if(a.host!==location.host) return; e.preventDefault(); location.href=a.href; },true); })();</script>
+</body></html>

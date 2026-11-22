@@ -1,5 +1,5 @@
-const VERSION='tom-v88';
-const SHELL=['./','index.html','manifest.webmanifest','three.min.js?v=18','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-180.png'].concat(['index','kart','pianeti','corsa','robot','vichinghi','tavolo','sparabolle','bollegiganti','ember','outrun','blocchi','labirinto','folla','bruco','gessetto','chalk','pittura','sasso','bolidi','calcio','draghetto','sixseven','mattoncini','casa','flipper','botti','stelle'].map(n=>'giochi/'+n+'.html'));
+const VERSION='tom-v89';
+const SHELL=['./','index.html','manifest.webmanifest','three.min.js?v=18','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-180.png'].concat(['index','kart','pianeti','corsa','robot','vichinghi','tavolo','sparabolle','bollegiganti','ember','outrun','blocchi','labirinto','folla','bruco','gessetto','chalk','pittura','sasso','bolidi','calcio','draghetto','sixseven','mattoncini','casa','flipper','botti','stelle','ultima'].map(n=>'giochi/'+n+'.html'));
 /* tutti i giochi della Sala vengono salvati subito, così funzionano anche senza internet */
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
