@@ -844,11 +844,21 @@ function carLeave(){ ST.carOut=true; CARS.push({x:25,y:8.5,axis:'y',dir:1,col:'#
 function carReturn(cb){ ST.carOut=true; CARS.push({x:GW+4,y:20.5,axis:'x',dir:-1,col:'#e0373f',own:1,path:[[25,20.5],[25,8.5]],sp:2.4,done:function(){ ST.carOut=false; OCC=occ(); cb(); }}); }
 
 /* ================= LOGICA ================= */
-var speed=1, paused=false, playing=false, lastT=0, autoSleep=false;
+var speed=1, paused=false, playing=false, lastT=0, autoSleep=false, NIGHT=null;
+function startNight(){ var tt=$('toast'), msg=getR().eDone?'🌟 Routine della sera perfetta! Domani Tommy sarà riposatissimo.':''; NIGHT={t:4.5}; TQ=[]; tBusy=false; clearTimeout(toast.t); tt.hidden=true; $('pop').hidden=true; if(typeof crsStop==='function'&&CRS) crsStop();
+  var d=$('dark'); d.hidden=false; d.style.background='#000'; d.style.opacity='1'; d.innerHTML='<div style="font-size:64px;line-height:1.2">🌙</div><div>Buonanotte Tommy…</div><div id="zzz" style="font-size:34px;color:#9aa8ff;margin-top:10px">z</div>'+(msg?'<div style="font-size:18px;font-weight:700;color:#c8d0ff;margin:22px auto 0;max-width:80%">'+msg+'</div>':''); }
+function nightTick(dt){ NIGHT.t-=dt; var z=$('zzz'); if(z) z.textContent=['z','z Z','z Z z','z Z z Z'][Math.floor(NIGHT.t*1.5)%4];
+  if(NIGHT.t>0) return;
+  var day=Math.floor(ST.min/1440), h=hNow(), target=(h>=6?day+1:day)*1440+360, el=Math.max(0,target-ST.min);
+  ST.min=target; farmTick(.01,el); petTick(.01,el);
+  for(var id in CH){ var c=CH[id]; c.say=null; if(c.state==='away'||c.npc||!c.needs) continue; if(c.id==='tommy'){ c.needs.sonno=100; ['fame','sete','bagno'].forEach(function(n){ if(c.needs[n]!=null) c.needs[n]=Math.max(35,c.needs[n]-20); }); if(c.needs.pulizia!=null) c.needs.pulizia=Math.max(40,c.needs.pulizia-10); } else if(c.needs.sonno!=null) c.needs.sonno=Math.max(c.needs.sonno,95); }
+  NIGHT=null; var d=$('dark'); d.hidden=true; d.style.background=''; d.style.opacity=''; d.textContent='';
+  var t=CH.tommy; if(t.state==='act'&&t.act&&t.act.pose==='sleep') endAction(t,true); else wake(false);
+  updateNeeds(); updateClock(); updateRoutine(); save(); }
 function clamp(v){ return v<0?0:v>100?100:v; }
 var DECAY={fame:5,sete:6,sonno:3.5,diver:6,pulizia:3,bagno:7,amici:3.5};
 var TQ=[], tBusy=false;
-function toast(s,ms,now){ if(now){ TQ=[]; tBusy=false; } if(tBusy){ if(TQ.length<3) TQ.push([s,ms]); return; } var t=$('toast'); t.textContent=s; t.hidden=false; tBusy=true; clearTimeout(toast.t); toast.t=setTimeout(function(){ t.hidden=true; tBusy=false; if(TQ.length){ var n=TQ.shift(); toast(n[0],n[1]); } },ms||2400); }
+function toast(s,ms,now){ if(NIGHT) return; if(now){ TQ=[]; tBusy=false; } if(tBusy){ if(TQ.length<3) TQ.push([s,ms]); return; } var t=$('toast'); t.textContent=s; t.hidden=false; tBusy=true; clearTimeout(toast.t); toast.t=setTimeout(function(){ t.hidden=true; tBusy=false; if(TQ.length){ var n=TQ.shift(); toast(n[0],n[1]); } },ms||2400); }
 var GIB=['Blimba!','Zuzù!','Nabbo nabbo!','Tirì tà!','Ohhh!','Bimbù!','Splaff!','Yuppi!','Mmm!'];
 function say(c,s,dur){ c.say={s:s,t:dur||2.5}; }
 function startAction(c,ob,a){ c.act={ob:ob,a:a,t:0,pose:a.pose||'stand'}; if(a.school||a.park){ return goToObj(c,ob)?(c.state='walk',true):false; }
@@ -860,7 +870,7 @@ function beginAct(c){ var a=c.act.a, ob=c.act.ob; c.state='act'; c.act.t=0;
   if(a.bun){ var b=CH.carotino; b.path=[]; }
   if(c.id==='tommy'){ blip(); updateDoing();
     if(a.need==='fame'&&a.r>0&&inHouse(Math.round(c.x),Math.round(c.y))){ if(ST.min-ST.handsT<120) {} else { toast('💧 Ricordati: prima di mangiare si lavano le mani!',3000); ST.needHands=true; } }
-    if(a.pose==='sleep'&&(ob.type==='lettoT'||ob.type==='castello')) goToBed(); } }
+    if(a.pose==='sleep'&&(ob.type==='lettoT'||ob.type==='castello')){ goToBed(); var hb2=hNow(); if(hb2>=19||hb2<5) startNight(); } } }
 function endAction(c,completed){ var a=c.act&&c.act.a; if((c.onObj||c.trickOn)&&c.prevPos){ c.x=c.prevPos[0]; c.y=c.prevPos[1]; } c.onObj=false; c.prevPos=null; c.trickOn=false; c.lift=0; c.swimming=false; if(a&&a.sea&&c.prevOutfit){ applyOutfit(c,c.prevOutfit); c.prevOutfit=null; }
   if(completed&&a){ if(a.money){ ST.money+=a.money; toast('+'+a.money+' monete!'); } if(a.carrots){ ST.carrots+=a.carrots; toast('Hai raccolto '+a.carrots+' carote! Ora ne hai '+ST.carrots); } if(a.ev&&c.id==='tommy') goalEvent(a.ev); if(a.farm&&c.id==='tommy') farmDo(a.farm,a); if(a.farmA&&c.id==='tommy') farmAnimalDo(a.farmA,a); if(a.petA&&c.id==='tommy') petDo(a.petA); if(a.ev==='acqua'&&c.id==='tommy'&&Math.random()<.5) parentSay(pick(['Bravo! Bere acqua fa bene e ti dà energia!','L\'acqua è la bibita migliore!','Così il corpo è contento: bevi spesso!'])); if(c.id==='tommy'){ tone(660,.1,'triangle',.05);
     if(a.act){ ST.money+=2; addHab('attivo'); if(Math.random()<.35) parentSay(pick(['Che bello giocare così!','Bravo, così gli occhi si riposano!','Muoversi fa bene!'])); }
@@ -1097,7 +1107,7 @@ function randPark(){ for(var i=0;i<30;i++){ var x=Math.floor(Math.random()*21), 
 function kidsTick(){ var on=parkHours(); ['leo','sofia'].forEach(function(id){ var c=CH[id]; if(!c) return; if(on&&c.state==='away'){ var p=randPark(); c.x=p[0]; c.y=p[1]; c.state='idle'; c.away=null; c.path=[]; c.act=null; c.think=1; } else if(!on&&c.state!=='away'){ c.state='away'; c.away={where:'casa',back:1e15}; c.path=[]; c.act=null; } }); }
 function kidThink(c){ var t=CH.tommy; if(t.state!=='away'&&zone(room(Math.round(t.x),Math.round(t.y)))==='P'&&Math.random()<.35){ if(goTo(c,Math.round(t.x)+1,Math.round(t.y))||goTo(c,Math.round(t.x),Math.round(t.y)+1)){ say(c,['Ciao Tommy!','Giochiamo?','Ehi, campione!'][Math.floor(Math.random()*3)],2.5); return; } }
   var p=randPark(); goTo(c,p[0],p[1]); }
-function update(dt){ if(!ST) return;
+function update(dt){ if(!ST) return; if(NIGHT){ nightTick(dt); return; }
   var tm=CH.tommy, sleeping=tm.state==='act'&&tm.act&&tm.act.a.need==='sonno'&&tm.act.pose==='sleep', away=tm.state==='away';
   carsTick(dt); kidsTick();
   var spd=away?40:(sleeping&&isNight()?18:speed); var dmin=dt*spd;
@@ -1163,7 +1173,7 @@ function showPop(px,py,title,items){ var p=$('pop'); var h='<h3>'+title+'</h3>';
   var w=p.offsetWidth, hh=p.offsetHeight; p.style.left=Math.max(6,Math.min(W-w-6,px-w/2))+'px'; p.style.top=Math.max(50,Math.min(H-hh-6,py-hh-20))+'px';
   var bs=p.getElementsByTagName('button'); for(var j=0;j<bs.length;j++) bs[j].onclick=function(){ var i=this.getAttribute('data-i'); p.hidden=true; if(i==='x') return; var it=items[+i]; if(it.no){ if(it.why) toast(it.why,3500,true); return; } it.f(); }; }
 function tommyDo(ob,a){ var c=CH.tommy; if(c.state==='act') endAction(c,false); c.act=null; if(!startAction(c,ob,a)){ toast('Tommy non riesce ad arrivarci!'); c.act=null; } selTarget=null; updateDoing(); }
-function onTap(px,py){ if(CRS){ if(CRS.run) crsPress(); return; } var p=$('pop'); if(!p.hidden){ p.hidden=true; return; } if(!ST||CH.tommy.state==='away') return;
+function onTap(px,py){ if(NIGHT) return; if(CRS){ if(CRS.run) crsPress(); return; } var p=$('pop'); if(!p.hidden){ p.hidden=true; return; } if(!ST||CH.tommy.state==='away') return;
   if(placing){ var tt=screenToTile(px,py); if(canPlace(placing.type,tt[0],tt[1],placing.move,placing.rot)){ if(!placeOk(placing.type,tt[0],tt[1],placing.move,placing.rot)){ toast('Così bloccheresti il passaggio! Scegli un altro posto',3000,true); return; }
       if(placing.move){ for(var id in CH){ var cc=CH[id]; if(cc.act&&cc.act.ob===placing.move&&cc.state==='act') endAction(cc,false); } placing.move.x=tt[0]; placing.move.y=tt[1]; placing.move.r=placing.rot; toast('Spostato!'); tone(660,.1,'triangle',.05); }
       else { ST.objs.push({id:ST.nextId++,type:placing.type,x:tt[0],y:tt[1],r:placing.rot||0}); ST.money-=T[placing.type].price; toast('Comprato: '+T[placing.type].name+'!'); goalEvent('compra'); goalEvent('buy_'+placing.type); if(TOYOBJ.indexOf(placing.type)>=0) goalEvent('buytoy'); jingle([660,880,1047]); }
@@ -1330,14 +1340,14 @@ function save(){ if(!ST) return; if(CH.tommy) ST.outfit=CH.tommy.outfit; for(var
 function showGame(on){ $('menu').hidden=on; if(!on) $('routine').hidden=true; ['bBack','bPause','clock','side','needs','zoomb'].forEach(function(id){ $(id).hidden=!on; }); }
 function ensureWorld(){ ST.objs=ST.objs.filter(function(o){ return !(o.type==='alberoP'&&o.x>=23&&o.x<=33&&o.y>=30&&o.y<=35); }); OCC=occ(); WORLD2.forEach(function(w){ for(var i=0;i<ST.objs.length;i++){ var o=ST.objs[i]; if(o.type===w[0]&&o.x===w[1]&&o.y===w[2]) return; } var t=T[w[0]], free=true; for(var a=0;a<t.w;a++) for(var b=0;b<t.d;b++) if(OCC[(w[1]+a)+','+(w[2]+b)]) free=false; if(free){ ST.objs.push({id:ST.nextId++,type:w[0],x:w[1],y:w[2]}); OCC=occ(); } });
   if(!find('lego')){ var sp=[[13,2],[12,2],[14,3],[13,4],[12,5]]; for(var k=0;k<sp.length;k++){ if(canPlace('lego',sp[k][0],sp[k][1],null)&&placeOk('lego',sp[k][0],sp[k][1],null)){ ST.objs.push({id:ST.nextId++,type:'lego',x:sp[k][0],y:sp[k][1]}); break; } } OCC=occ(); } }
-function start(st){ setTimeout(function(){ if(ST&&!ST.tipSelf){ ST.tipSelf=1; toast('Novità: tocca Tommy per fare sport, far volare l\'aquilone e guardare nello zaino!',4500); } },5000); CARS=[]; st=migrate(st); ST=st; ensureEdu(); if(!ST.chars.papone.away) ST.carOut=false; OCC=occ(); initChars(); ensureWorld(); ensureFarm(); ensurePets(); ensureMan(); CRS=null; CRSP=0; if(!ST.man.tip){ ST.man.tip=1; setTimeout(function(){ toast('🐎 Novità: accanto alla fattoria c\'è il MANEGGIO! Compra un pony o un cavallo, sali in sella e fai il percorso. Gli attrezzi sono nel Negozio.',6000); },9000); } kidsTick(); if(ST.farmGift===1){ ST.farmGift=2; setTimeout(function(){ toast('🐔 Novità: vicino al parco c\'è la FATTORIA! In regalo due galline: dagli cibo, acqua e pulizia. Altri animali nel Negozio.',6000,true); },6500); } playing=true; paused=false; showGame(true); updateNeeds(); updateClock(); layout();
+function start(st){ setTimeout(function(){ if(ST&&!ST.tipSelf){ ST.tipSelf=1; toast('Novità: tocca Tommy per fare sport, far volare l\'aquilone e guardare nello zaino!',4500); } },5000); CARS=[]; st=migrate(st); ST=st; ensureEdu(); if(!ST.chars.papone.away) ST.carOut=false; OCC=occ(); initChars(); ensureWorld(); ensureFarm(); ensurePets(); ensureMan(); CRS=null; CRSP=0; NIGHT=null; if(!ST.man.tip){ ST.man.tip=1; setTimeout(function(){ toast('🐎 Novità: accanto alla fattoria c\'è il MANEGGIO! Compra un pony o un cavallo, sali in sella e fai il percorso. Gli attrezzi sono nel Negozio.',6000); },9000); } kidsTick(); if(ST.farmGift===1){ ST.farmGift=2; setTimeout(function(){ toast('🐔 Novità: vicino al parco c\'è la FATTORIA! In regalo due galline: dagli cibo, acqua e pulizia. Altri animali nel Negozio.',6000,true); },6500); } playing=true; paused=false; showGame(true); updateNeeds(); updateClock(); layout();
   var t=CH.tommy; if(t.state!=='away') focusOn(t.x+.5,t.y+.5,false); else focusOn(17,7,false);
   if(t.state==='away'){ $('dark').hidden=false; $('dark').textContent='Tommy è fuori casa…'; } }
 function renderMenu(){ var sv=L(SAVEKEY,null), cb=$('bCont'); if(sv&&(sv.v===1||sv.v===2)){ cb.hidden=false; var d=Math.floor(sv.min/1440); cb.innerHTML='▶ Continua<small>Giorno '+(d+1)+' · 💰 '+sv.money+' monete · ⭐ '+sv.stars+'</small>'; cb.onclick=function(){ start(L(SAVEKEY,null)); }; } else cb.hidden=true; $('bSnd').textContent=SND?'🔊 Suono sì':'🔇 Suono no'; }
 $('bNew').onclick=function(){ var sv=L(SAVEKEY,null); if(sv&&(sv.v===1||sv.v===2)&&!confirmNew()) return; ac(); var st=newState(); S(SAVEKEY,st); start(st); updateRoutine(); wake(true); toast('Benvenuto nella casa di Tommy! Segui la lista in alto a sinistra 👆',4000); toast('Trascina con un dito per guardarti intorno, usa due dita o + e − per lo zoom',4500); };
 var confirmT=0; function confirmNew(){ if(Date.now()-confirmT<4000) return true; confirmT=Date.now(); $('bNew').innerHTML='Sicuro? Tocca di nuovo<small>la casa vecchia verrà cancellata</small>'; setTimeout(function(){ $('bNew').textContent='🏡 Nuova casa'; },4000); return false; }
 $('bSnd').onclick=function(){ SND=!SND; S('casa-snd',SND); renderMenu(); };
-function toMenu(){ crsStop(); save(); $('bRot').hidden=true; playing=false; paused=false; $('pauseOv').hidden=true; $('pop').hidden=true; $('quoteOv').hidden=true; $('albOv').hidden=true; $('outfitOv').hidden=true; $('dark').hidden=true; setBuild(false); showGame(false); renderMenu(); }
+function toMenu(){ crsStop(); if(NIGHT){ NIGHT.t=0; nightTick(0); $('quoteOv').hidden=true; } save(); $('bRot').hidden=true; playing=false; paused=false; $('pauseOv').hidden=true; $('pop').hidden=true; $('quoteOv').hidden=true; $('albOv').hidden=true; $('outfitOv').hidden=true; $('dark').hidden=true; setBuild(false); showGame(false); renderMenu(); }
 $('bBack').onclick=toMenu; $('bExit').onclick=toMenu;
 $('bPause').onclick=function(){ paused=true; $('pauseOv').hidden=false; };
 $('bResume').onclick=function(){ paused=false; $('pauseOv').hidden=true; lastT=0; };
