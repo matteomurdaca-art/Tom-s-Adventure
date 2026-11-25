@@ -1067,6 +1067,14 @@ $('bQuote').onclick=function(){ $('quoteOv').hidden=true; paused=false; lastT=0;
 function isFun(a){ return !!(a.park||a.scr||(a.need==='diver'&&a.r>0)||a.play); }
 var TOYEV={giochi:1,lego:1,trenino:1,robot:1,pista:1,tenda:1};
 function bedMissing(){ var r=getR(), m=[]; if(!r.e.denti) m.push('lavare i denti'); if(!r.e.pigiama) m.push('mettere il pigiama'); if(r.played&&!r.tidy) m.push('mettere a posto i giochi'); return m; }
+function schoolNote(dn){ ST.noteDay=dn; ST.note=(ST.note||0)+1; var lost=Math.min(20,ST.money); ST.money-=lost; save(); updateClock&&updateClock();
+  tone(220,.3,'sawtooth',.05); setTimeout(function(){ tone(175,.4,'sawtooth',.05); },300); parentSay('Tommy! Oggi non sei andato a scuola: la maestra ha scritto una nota!');
+  var o=$('noteOv'); if(!o){ o=document.createElement('div'); o.className='ov'; o.id='noteOv'; document.body.appendChild(o); }
+  o.innerHTML='<div class="box" style="text-align:center;max-width:460px"><div style="font-size:60px;line-height:1.1">📒</div><h2 style="margin:6px 0">Una nota sul diario!</h2>'+
+    '<div style="background:#fffbe6;border:3px dashed #e0373f;border-radius:12px;padding:12px;margin:8px 0;font-size:18px;font-style:italic;color:#c0392b;text-align:left">«Tommy oggi non è venuto a scuola senza un motivo. I genitori sono pregati di firmare.»<br><span style="float:right">— La maestra</span><div style="clear:both"></div></div>'+
+    '<p style="font-size:19px;font-weight:800;margin:6px">💰 −'+lost+' monete</p><p style="color:#555;margin:4px">Note sul diario: '+ST.note+'. Domani tra le 7 e le 10 tocca la porta di casa per andare a scuola!</p>'+
+    '<button class="big" id="bNoteOk" type="button">✍️ Ho capito, domani vado!</button></div>';
+  o.hidden=false; paused=true; $('bNoteOk').onclick=function(){ o.hidden=true; paused=false; lastT=0; }; }
 function weekday(){ return (Math.floor(ST.min/1440)%7)<5; }
 function schoolPending(){ var h=hNow(), day=Math.floor(ST.min/1440); return weekday()&&h>=5&&h<10&&ST.schoolDay!==day; }
 function blockWhy(a){ if(!a) return null;
@@ -1142,6 +1150,9 @@ function update(dt){ if(!ST) return; if(NIGHT){ nightTick(dt); return; }
       else if(Math.random()<.25){ var lowN=null,lv=101; NEEDS.forEach(function(n){ if(c2.needs[n]<lv){ lv=c2.needs[n]; lowN=n; } }); say(c2,lv<35?(NEEDINFO[lowN][0]+' '+{fame:'Ho fame!',sete:'Ho sete!',sonno:'Che sonno…',diver:'Mi annoio!',pulizia:'Mi serve un bagnetto!',bagno:'Devo andare in bagno!',amici:'Mi sento solo…'}[lowN]):GIB[Math.floor(Math.random()*GIB.length)],2.5); } } }
   if(Math.floor(ST.min/1440)!==ST.day-1){ ST.day=Math.floor(ST.min/1440)+1; toast('☀️ Buongiorno! Giorno '+ST.day+((ST.day-1)%7>=5?' · è il weekend!':''),3000); }
   var dn=Math.floor(ST.min/1440); if(h>=9&&schoolPending()&&ST.schoolRem!==dn&&tm.state!=='away'){ ST.schoolRem=dn; toast('⏰ Sono le 9: Tommy, la scuola inizia! Tocca la porta di casa',4000,true); parentSay('Tommy, è tardi! Corri a scuola!'); }
+  if(h<10&&weekday()) ST.sawMorn=dn;
+  if(h>=9.5&&h<10&&schoolPending()&&ST.schoolRem2!==dn&&tm.state!=='away'&&!(tm.act&&tm.act.a&&tm.act.a.school)){ ST.schoolRem2=dn; toast('⏰ Sono le 9 e mezza! Se Tommy non va a scuola entro le 10, la maestra scrive una NOTA sul diario e si perdono 20 monete!',5000,true); parentSay('Tommy, corri a scuola o prendi una nota!'); }
+  if(h>=10&&h<13&&weekday()&&ST.sawMorn===dn&&ST.schoolDay!==dn&&ST.noteDay!==dn&&!(tm.act&&tm.act.a&&tm.act.a.school)) schoolNote(dn);
   if(h>=21&&h<23&&ST.nanna!==dn&&tm.state!=='away'&&!sleeping){ ST.nanna=dn; toast('🌙 Sono le 9 di sera: è ora di mettere Tommy a letto!',3500); say(CH.milly.state!=='away'?CH.milly:tm,'A nanna, Tommy!',3); }
   guestsTick(); skatersTick(); fallTick(dmin);
   var dsh=Math.floor(ST.min/1440); if(ST.shellDay!==dsh){ ST.shellDay=dsh; ST.objs=ST.objs.filter(function(o){ return o.type!=='conchiglia'; }); OCC=occ(); for(var ns=0,tries=0;ns<5&&tries<60;tries++){ var sx2=Math.floor(Math.random()*GW), sy2=37+Math.floor(Math.random()*6); if(passable(sx2,sy2)){ ST.objs.push({id:ST.nextId++,type:'conchiglia',x:sx2,y:sy2}); ns++; } } }
@@ -1347,7 +1358,7 @@ function renderMenu(){ var sv=L(SAVEKEY,null), cb=$('bCont'); if(sv&&(sv.v===1||
 $('bNew').onclick=function(){ var sv=L(SAVEKEY,null); if(sv&&(sv.v===1||sv.v===2)&&!confirmNew()) return; ac(); var st=newState(); S(SAVEKEY,st); start(st); updateRoutine(); wake(true); toast('Benvenuto nella casa di Tommy! Segui la lista in alto a sinistra 👆',4000); toast('Trascina con un dito per guardarti intorno, usa due dita o + e − per lo zoom',4500); };
 var confirmT=0; function confirmNew(){ if(Date.now()-confirmT<4000) return true; confirmT=Date.now(); $('bNew').innerHTML='Sicuro? Tocca di nuovo<small>la casa vecchia verrà cancellata</small>'; setTimeout(function(){ $('bNew').textContent='🏡 Nuova casa'; },4000); return false; }
 $('bSnd').onclick=function(){ SND=!SND; S('casa-snd',SND); renderMenu(); };
-function toMenu(){ crsStop(); if(NIGHT){ NIGHT.t=0; nightTick(0); $('quoteOv').hidden=true; } save(); $('bRot').hidden=true; playing=false; paused=false; $('pauseOv').hidden=true; $('pop').hidden=true; $('quoteOv').hidden=true; $('albOv').hidden=true; $('outfitOv').hidden=true; $('dark').hidden=true; setBuild(false); showGame(false); renderMenu(); }
+function toMenu(){ crsStop(); if($('noteOv')) $('noteOv').hidden=true; if(NIGHT){ NIGHT.t=0; nightTick(0); $('quoteOv').hidden=true; } save(); $('bRot').hidden=true; playing=false; paused=false; $('pauseOv').hidden=true; $('pop').hidden=true; $('quoteOv').hidden=true; $('albOv').hidden=true; $('outfitOv').hidden=true; $('dark').hidden=true; setBuild(false); showGame(false); renderMenu(); }
 $('bBack').onclick=toMenu; $('bExit').onclick=toMenu;
 $('bPause').onclick=function(){ paused=true; $('pauseOv').hidden=false; };
 $('bResume').onclick=function(){ paused=false; $('pauseOv').hidden=true; lastT=0; };
