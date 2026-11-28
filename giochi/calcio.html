@@ -4758,17 +4758,17 @@ function openParents(){ closeGate(); load();
   render(); ['touchstart','touchmove','mousedown'].forEach(function(ev){ gate.addEventListener(ev,function(e){ e.stopPropagation(); },false); });
   document.body.appendChild(gate); }
 var chip=null;
-function hubChip(){ if(!/\/giochi\/(index\.html)?$/.test(location.pathname)) return; chip=el('div','position:fixed;z-index:2147483000;left:8px;bottom:8px;background:#fff;border:3px solid #14151d;border-radius:14px;padding:6px 10px;font:800 14px -apple-system,Helvetica,Arial,sans-serif;color:#14151d;box-shadow:0 3px 0 #14151d;cursor:pointer','⏱'); tap(chip,openGate); document.body.appendChild(chip); }
+function hubChip(){ if(!/\/giochi\/(index\.html)?$/.test(location.pathname)) return; chip=el('div','position:fixed;z-index:2147483000;left:8px;bottom:8px;background:#fff;border:3px solid #14151d;border-radius:14px;padding:6px 10px;font:800 14px -apple-system,Helvetica,Arial,sans-serif;color:#14151d;box-shadow:0 3px 0 #14151d;cursor:pointer','🔒 Genitori'); tap(chip,openGate); document.body.appendChild(chip); }
 function tick(){ var now=Date.now(), dt=Math.min(now-prev,3000); prev=now; load();
-  var sb=schedBlock(now); if(sb){ hideLock(); showSched(sb); if(chip) chip.textContent='⏱ dalle '+st.from; return; } hideSched();
-  if(!st.on){ hideLock(); if(chip) chip.textContent='⏱ timer spento'; return; }
-  if(st.lock){ if(now>=st.lock){ st.lock=0; st.used=0; st.warn={}; S(); hideLock(); } else { showLock(); updLock(); if(chip) chip.textContent='⏱ spenta'; return; } }
+  var sb=schedBlock(now); if(sb){ hideLock(); showSched(sb); if(chip) chip.textContent='🔒 Genitori · ⏱ dalle '+st.from; return; } hideSched();
+  if(!st.on){ hideLock(); if(chip) chip.textContent='🔒 Genitori · ⏱ timer spento'; return; }
+  if(st.lock){ if(now>=st.lock){ st.lock=0; st.used=0; st.warn={}; S(); hideLock(); } else { showLock(); updLock(); if(chip) chip.textContent='🔒 Genitori · ⏱ spenta'; return; } }
   if(st.last&&now-st.last>pauseMs(now)){ st.used=0; st.warn={}; }
   if(!document.hidden){ st.used+=dt; }
   st.last=now; var left=st.lim*60000-st.used;
   [5,2,1].forEach(function(m){ if(left<=m*60000&&left>(m-1)*60000&&!st.warn[m]&&st.lim>m){ st.warn[m]=1; showPop(m); } });
   if(left<=0){ st.lock=now+pauseMs(now); st.used=0; st.warn={}; S(); showLock(); return; }
-  if(chip) chip.textContent='⏱ '+Math.ceil(left/60000)+' min';
+  if(chip) chip.textContent='🔒 Genitori · ⏱ '+Math.ceil(left/60000)+' min';
   S(); }
 function init(){ load(); hubChip(); tick(); setInterval(tick,1000); document.addEventListener('visibilitychange',function(){ prev=Date.now(); }); }
 window.SalaTimer={parents:openGate};
